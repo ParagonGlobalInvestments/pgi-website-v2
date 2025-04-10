@@ -25,6 +25,32 @@ const Header = () => {
     }
   };
 
+  const mainNav = [
+    { name: "Home", url: "/" },
+    { name: "Who We Are", url: "/who-we-are" },
+    {
+      name: "National Committee",
+      subItems: [
+        { name: "Officers", url: "/national-committee/officers" },
+        { name: "Executive Board", url: "/national-committee/executive-board" },
+        {
+          name: "Development Committee",
+          url: "/national-committee/development-committee",
+        },
+      ],
+    },
+    {
+      name: "Members",
+      subItems: [
+        { name: "Value Team", url: "/members/value-team" },
+        { name: "Quant Team", url: "/members/quant-team" },
+      ],
+    },
+    { name: "Placements", url: "/placements" },
+    { name: "Apply", url: "/apply" },
+    { name: "Contact", url: "/contact" },
+  ];
+
   return (
     <header className="bg-navy font-semibold shadow-md z-50">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
@@ -80,24 +106,83 @@ const Header = () => {
             </div>
           </div>
 
-          <Link
-            href="/education"
-            className="text-white hover:text-secondary transition-colors"
-          >
-            Education
-          </Link>
-          <Link
-            href="/investment-funds"
-            className="text-white hover:text-secondary transition-colors"
-          >
-            Investment Funds
-          </Link>
+          {/* National Committee dropdown container */}
+          <div className="relative group">
+            <Link
+              href="/national-committee"
+              className="text-white hover:text-secondary transition-colors"
+            >
+              National Committee
+            </Link>
+
+            {/* Dropdown menu */}
+            <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
+              {/* Dropdown content */}
+              <div className="bg-navy-light border border-gray-700 rounded-md shadow-xl overflow-hidden">
+                <Link
+                  href="/national-committee/officers"
+                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Officers
+                </Link>
+                <Link
+                  href="/national-committee/founders"
+                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Founders
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Members dropdown container */}
+          <div className="relative group">
+            <Link
+              href="/members"
+              className="text-white hover:text-secondary transition-colors"
+            >
+              Members
+            </Link>
+
+            {/* Dropdown menu */}
+            <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
+              {/* Dropdown content */}
+              <div className="bg-navy-light border border-gray-700 rounded-md shadow-xl overflow-hidden">
+                <Link
+                  href="/members/value-team"
+                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Value Team
+                </Link>
+                <Link
+                  href="/members/quant-team"
+                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Quant Team
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <Link
             href="/placements"
             className="text-white hover:text-secondary transition-colors"
           >
             Placements
           </Link>
+          <Link
+            href="/apply"
+            className="text-white hover:text-secondary transition-colors"
+          >
+            Apply
+          </Link>
+          <Link
+            href="/contact"
+            className="text-white hover:text-secondary transition-colors"
+          >
+            Contact
+          </Link>
+
           <SignedIn>
             <Link
               href="/dashboard"
@@ -172,6 +257,39 @@ const Header = () => {
               </Link>
               <Link href="/placements" className="block py-2 text-white">
                 Placements
+              </Link>
+              <Link
+                href="/national-committee"
+                className="block py-2 text-white"
+              >
+                National Committee
+              </Link>
+              <Link
+                href="/national-committee/officers"
+                className="block py-2 pl-4 text-white"
+              >
+                - Officers
+              </Link>
+              <Link
+                href="/national-committee/founders"
+                className="block py-2 pl-4 text-white"
+              >
+                - Founders
+              </Link>
+              <Link href="/members" className="block py-2 text-white">
+                Members
+              </Link>
+              <Link
+                href="/members/value-team"
+                className="block py-2 pl-4 text-white"
+              >
+                - Value Team
+              </Link>
+              <Link
+                href="/members/quant-team"
+                className="block py-2 pl-4 text-white"
+              >
+                - Quant Team
               </Link>
               <SignedIn>
                 <Link

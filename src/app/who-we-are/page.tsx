@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { FaBook, FaChartLine, FaLaptopCode } from "react-icons/fa";
 
 // Animation variants
 const fadeIn = {
@@ -38,10 +40,19 @@ const logoAnimation = {
   },
 };
 
+const curricularItems = [
+  { topic: "Accounting", link: "#", week: "Week 1" },
+  { topic: "Valuation", link: "#", week: "Week 2" },
+  { topic: "Investment Theory", link: "#", week: "Week 3" },
+  { topic: "Quantitative Analysis with Python", link: "#", week: "Week 4" },
+  { topic: "Quantitative Portfolio Management", link: "#", week: "Week 5" },
+  { topic: "Algo Trading Strategy Design", link: "#", week: "Week 6" },
+];
+
 export default function WhoWeAre() {
   return (
     <div className="bg-navy text-white min-h-screen">
-      <div className="container mx-auto py-16 px-4">
+      <div className="container mx-auto py-36 px-4">
         <motion.h1
           className="text-4xl font-bold mb-8 text-center"
           initial="hidden"
@@ -58,12 +69,13 @@ export default function WhoWeAre() {
           variants={staggerContainer}
         >
           <motion.p className="text-lg mb-8" variants={fadeIn}>
-            Paragon Global Investments (formerly PGI) is a student-led
-            investment fund with chapters at Brown University, Columbia
-            University, Cornell University, New York University, Princeton
-            University, the University of Chicago, and the University of
-            Pennsylvania. The organization is dedicated to the development of
-            students in value investing and algorithmic trading.
+            Paragon Global Investments (formerly PNG) is a student-led
+            intercollegiate investment fund with chapters at Brown University,
+            Columbia University, Cornell University, New York University,
+            Princeton University, Yale University, the University of Chicago,
+            and the University of Pennsylvania. The organization is dedicated to
+            the development of students in value investing and algorithmic
+            trading.
           </motion.p>
 
           <motion.p className="text-lg mb-8" variants={fadeIn}>
@@ -85,7 +97,7 @@ export default function WhoWeAre() {
 
         {/* University Logos Section */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto mt-16"
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto mt-16 mb-24"
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
@@ -189,6 +201,210 @@ export default function WhoWeAre() {
               className="object-contain"
             />
           </motion.div>
+        </motion.div>
+
+        {/* Curriculum Section */}
+        <motion.div
+          className="max-w-5xl mx-auto pt-16 border-t border-gray-800"
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+        >
+          <motion.h2
+            className="text-3xl font-bold mb-12 text-center"
+            variants={fadeIn}
+          >
+            Curriculum
+          </motion.h2>
+
+          {/* Curriculum Table */}
+          <motion.div className="overflow-x-auto mb-16" variants={fadeIn}>
+            <table className="min-w-full bg-navy-light rounded-lg overflow-hidden">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-secondary">
+                    Topic
+                  </th>
+                  <th className="px-6 py-4 text-left text-lg font-semibold text-secondary">
+                    Link to Materials
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {curricularItems.map((item, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-700 hover:bg-navy transition-colors"
+                  >
+                    <td className="px-6 py-4 text-white">{item.topic}</td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={item.link}
+                        className="text-secondary hover:text-white transition-colors"
+                      >
+                        {item.week}
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
+
+          {/* Value Investing Section */}
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16"
+            variants={staggerContainer}
+          >
+            <motion.div
+              className="bg-navy-light p-8 rounded-lg border border-gray-700"
+              variants={fadeIn}
+            >
+              <div className="flex items-center mb-6">
+                <div className="bg-secondary p-3 rounded-full mr-4">
+                  <FaChartLine className="text-navy text-xl" />
+                </div>
+                <h3 className="text-2xl font-bold text-secondary">
+                  Value Investing
+                </h3>
+              </div>
+
+              <p className="text-gray-300 mb-4">
+                Part 1 of the curriculum will help students gain a basic
+                understanding behind the theory and strategies of value
+                investing. Students will gain a fundamental understanding of
+                accounting, competitive analysis, and valuation.
+              </p>
+
+              <p className="text-gray-300 mb-4">
+                General modeling, including operating models and discounted cash
+                flows models, will be explored as well as general investment
+                theory related to these models.
+              </p>
+
+              <p className="text-gray-300">
+                By the end of the curriculum, students will be able to
+                accurately value companies and understand complex business
+                models.
+              </p>
+            </motion.div>
+
+            {/* Algorithmic Trading Section */}
+            <motion.div
+              className="bg-navy-light p-8 rounded-lg border border-gray-700"
+              variants={fadeIn}
+            >
+              <div className="flex items-center mb-6">
+                <div className="bg-secondary p-3 rounded-full mr-4">
+                  <FaLaptopCode className="text-navy text-xl" />
+                </div>
+                <h3 className="text-2xl font-bold text-secondary">
+                  Algorithmic Trading
+                </h3>
+              </div>
+
+              <p className="text-gray-300 mb-4">
+                Part 2 of the curriculum aims to educate students on how to
+                research, design, test, and implement systematic algorithmic
+                trading strategies. Students will first learn about statistical
+                analysis and introductory machine learning with Python.
+              </p>
+
+              <p className="text-gray-300 mb-4">
+                They will also learn about modern portfolio theory and linear
+                factor pricing models, and how to analyze assets and portfolio
+                to optimize risk-adjusted returns.
+              </p>
+
+              <p className="text-gray-300">
+                By the end of the curriculum, students will have a toolset to
+                quantitatively analyze companies and design systematic trading
+                strategies.
+              </p>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div
+          className="container mx-auto px-4 py-10 border-t border-gray-800 mt-16"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/images/pgiLogoTransparent.png"
+              alt="Paragon Global Investments Logo"
+              width={80}
+              height={80}
+              className="opacity-80"
+            />
+          </div>
+          <p className="text-center text-gray-400 mb-8 max-w-3xl mx-auto">
+            Paragon Global Investments is a registered 501(c)(3) nonprofit.
+            Paragon Global Investments was previously known as Paragon National
+            Group (PNG).
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
+            <Link href="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <Link
+              href="/who-we-are"
+              className="hover:text-white transition-colors"
+            >
+              Who We Are
+            </Link>
+            <Link
+              href="/investment-strategy"
+              className="hover:text-white transition-colors"
+            >
+              Investment Strategy
+            </Link>
+            <Link
+              href="/publications"
+              className="hover:text-white transition-colors"
+            >
+              Publications
+            </Link>
+            <Link
+              href="/sponsors"
+              className="hover:text-white transition-colors"
+            >
+              Sponsors
+            </Link>
+            <Link
+              href="/national-committee/founders"
+              className="hover:text-white transition-colors"
+            >
+              Founders
+            </Link>
+            <Link
+              href="/national-committee"
+              className="hover:text-white transition-colors"
+            >
+              National Committee
+            </Link>
+            <Link
+              href="/placements"
+              className="hover:text-white transition-colors"
+            >
+              Placements
+            </Link>
+            <Link href="/apply" className="hover:text-white transition-colors">
+              Apply
+            </Link>
+            <Link
+              href="/contact"
+              className="hover:text-white transition-colors"
+            >
+              Contact
+            </Link>
+          </div>
+          <p className="text-center text-gray-500 mt-4 text-sm">
+            Paragon Global Investments | {new Date().getFullYear()}
+          </p>
         </motion.div>
       </div>
     </div>
