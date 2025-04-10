@@ -15,8 +15,8 @@ export default function Home() {
             Intersecting Value Investing and Quantitative Finance
           </h2>
           <p className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide text-gray-500">
-            Student-run intercollegiate investment fund focused on value
-            investing and algorithmic trading
+            We are a student-run intercollegiate investment fund focused on
+            value investing and algorithmic trading
           </p>
         </div>
         <div className="absolute bottom-12 text-center">
