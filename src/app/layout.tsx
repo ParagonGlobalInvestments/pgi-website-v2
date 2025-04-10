@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { AnimationProvider } from "@/lib/context/AnimationContext";
+import PageTransition from "@/components/ui/PageTransition";
 import "../tailwind.css";
 import "./globals.css";
 
@@ -33,15 +35,19 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-navy text-white`}
-        >
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </body>
-      </html>
+      <AnimationProvider>
+        <html lang="en">
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-navy text-white`}
+          >
+            <PageTransition>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </PageTransition>
+          </body>
+        </html>
+      </AnimationProvider>
     </ClerkProvider>
   );
 }

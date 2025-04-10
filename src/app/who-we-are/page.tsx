@@ -63,7 +63,7 @@ export default function WhoWeAre() {
         </motion.h1>
 
         <motion.div
-          className="max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto text-center"
           initial="hidden"
           animate="visible"
           variants={staggerContainer}

@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import AnimatedSection from "@/components/ui/AnimatedSection";
+import AnimatedText from "@/components/ui/AnimatedText";
 
 type FormData = {
   name: string;
@@ -44,20 +46,28 @@ export default function Contact() {
     <div className="bg-navy min-h-screen">
       <div className="container mx-auto py-36 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Let's Get in Touch
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            We would love to hear from you. If you're interested or have any
-            questions, send us a message through the form below.
-          </p>
-        </div>
+        <AnimatedSection className="text-center mb-16">
+          <AnimatedText
+            text="Let's Get in Touch"
+            className="text-4xl font-bold text-white mb-4"
+            type="words"
+          />
+          <AnimatedText
+            text="We would love to hear from you. If you're interested or have any questions, send us a message through the form below."
+            className="text-xl text-gray-300 max-w-3xl mx-auto"
+            type="full"
+            delay={0.3}
+          />
+        </AnimatedSection>
 
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left column - Contact form */}
-            <div className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700">
+            <AnimatedSection
+              delay={0.4}
+              direction="left"
+              className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700"
+            >
               {/* Form type selector */}
               <div className="mb-6">
                 <div className="flex space-x-4">
@@ -259,12 +269,16 @@ export default function Contact() {
                   </div>
                 </div>
               </form>
-            </div>
+            </AnimatedSection>
 
             {/* Right column - Contact info */}
             <div>
               {/* Chapter info card */}
-              <div className="bg-navy-light p-8 rounded-lg shadow-xl mb-8 border border-gray-700">
+              <AnimatedSection
+                delay={0.5}
+                direction="right"
+                className="bg-navy-light p-8 rounded-lg shadow-xl mb-8 border border-gray-700"
+              >
                 <h2 className="text-2xl font-semibold text-white mb-4">
                   Start a Chapter
                 </h2>
@@ -279,10 +293,14 @@ export default function Contact() {
                 >
                   Start a Chapter
                 </button>
-              </div>
+              </AnimatedSection>
 
               {/* Contact info card */}
-              <div className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700">
+              <AnimatedSection
+                delay={0.6}
+                direction="right"
+                className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700"
+              >
                 <h2 className="text-2xl font-semibold text-white mb-4">
                   Other Contacts
                 </h2>
@@ -343,7 +361,7 @@ export default function Contact() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </AnimatedSection>
             </div>
           </div>
         </div>

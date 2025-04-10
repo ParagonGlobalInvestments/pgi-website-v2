@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import ScrollButton from "@/components/ScrollButton";
+import ScrollButton from "@/components/ui/ScrollButton";
 import { motion } from "framer-motion";
 
 // Animation variants
@@ -265,10 +265,10 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/princeton.svg"
+                src="/images/universities/princeton.png"
                 alt="Princeton University"
-                width={100}
-                height={100}
+                width={250}
+                height={250}
                 className="object-contain"
               />
             </motion.div>
