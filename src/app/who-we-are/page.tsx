@@ -108,7 +108,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/brown.png"
+              src="/images/universities/brown.png"
               alt="Brown University"
               width={150}
               height={150}
@@ -120,7 +120,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/columbia.png"
+              src="/images/universities/columbia.png"
               alt="Columbia University"
               width={150}
               height={150}
@@ -132,7 +132,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/cornell.png"
+              src="/images/universities/cornell.png"
               alt="Cornell University"
               width={150}
               height={150}
@@ -144,7 +144,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/nyu.png"
+              src="/images/universities/nyu.png"
               alt="New York University"
               width={150}
               height={150}
@@ -158,7 +158,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/princeton.png"
+              src="/images/universities/princeton.png"
               alt="Princeton University"
               width={150}
               height={150}
@@ -170,7 +170,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/uchicago.png"
+              src="/images/universities/uchicago.png"
               alt="University of Chicago"
               width={150}
               height={150}
@@ -182,7 +182,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/upenn.png"
+              src="/images/universities/upenn.png"
               alt="University of Pennsylvania"
               width={150}
               height={150}
@@ -194,7 +194,7 @@ export default function WhoWeAre() {
             variants={logoAnimation}
           >
             <Image
-              src="/images/yale.png"
+              src="/images/universities/yale.png"
               alt="Yale University"
               width={150}
               height={150}
