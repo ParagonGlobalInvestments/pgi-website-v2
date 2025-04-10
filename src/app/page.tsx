@@ -71,14 +71,14 @@ export default function Home() {
           <motion.h2
             variants={fadeIn}
             transition={{ delay: 0.2 }}
-            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-200 font-normal tracking-wide text-gray-400"
+            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-200 font-normal tracking-wide"
           >
             Intersecting Value Investing and Quantitative Finance
           </motion.h2>
           <motion.p
             variants={fadeIn}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide text-gray-500"
+            className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide"
           >
             We are a student-run intercollegiate investment fund focused on
             value investing and algorithmic trading
