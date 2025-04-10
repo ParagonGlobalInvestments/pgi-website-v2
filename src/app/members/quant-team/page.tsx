@@ -115,7 +115,7 @@ export default function QuantTeamPage() {
       <section className="py-36 px-4">
         <div className="container mx-auto">
           <motion.div
-            className="text-center mb-20"
+            className="text-center"
             initial="hidden"
             animate="visible"
             variants={fadeIn}

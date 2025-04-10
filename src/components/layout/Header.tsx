@@ -5,6 +5,58 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+
+// Animation variants
+const navbarAnimation = {
+  hidden: {
+    opacity: 0,
+    y: -10,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+};
+
+const staggerNavItems = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const navItemAnimation = {
+  hidden: { opacity: 0, y: -10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  },
+};
+
+const logoAnimation = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
 
 const Header = () => {
   // State to manage dropdown visibility for mobile
@@ -107,20 +159,31 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-navy font-semibold shadow-md z-50">
+    <motion.header
+      className="bg-navy font-semibold z-50"
+      initial="hidden"
+      animate="visible"
+      variants={navbarAnimation}
+    >
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
-        <Link href="/" className="">
-          <Image
-            src="/images/pgiLogoTransparent.png"
-            alt="Paragon Global Investments Logo"
-            width={40}
-            height={40}
-          />
-        </Link>
+        <motion.div variants={logoAnimation}>
+          <Link href="/" className="">
+            <Image
+              src="/logos/pgiLogoTransparent.png"
+              alt="Paragon Global Investments"
+              width={200}
+              height={36}
+              className="h-9 w-auto"
+            />
+          </Link>
+        </motion.div>
 
-        <nav className="hidden md:flex items-center space-x-8 font-semibold">
+        <motion.nav
+          className="hidden md:flex items-center space-x-8 font-semibold"
+          variants={staggerNavItems}
+        >
           {/* About dropdown container */}
-          <div className="relative group">
+          <motion.div className="relative group" variants={navItemAnimation}>
             <a
               href="#"
               onClick={handleAboutClick}
@@ -159,10 +222,10 @@ const Header = () => {
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* National Committee dropdown container */}
-          <div className="relative group">
+          <motion.div className="relative group" variants={navItemAnimation}>
             <Link
               href="/national-committee"
               className="text-white hover:text-secondary transition-colors"
@@ -188,10 +251,10 @@ const Header = () => {
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Members dropdown container */}
-          <div className="relative group">
+          <motion.div className="relative group" variants={navItemAnimation}>
             <Link
               href="/members"
               className="text-white hover:text-secondary transition-colors"
@@ -217,48 +280,58 @@ const Header = () => {
                 </Link>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <Link
-            href="/placements"
-            className="text-white hover:text-secondary transition-colors"
-          >
-            Placements
-          </Link>
-          <Link
-            href="/apply"
-            className="text-white hover:text-secondary transition-colors"
-          >
-            Apply
-          </Link>
-          <Link
-            href="/contact"
-            className="text-white hover:text-secondary transition-colors"
-          >
-            Contact
-          </Link>
+          <motion.div variants={navItemAnimation}>
+            <Link
+              href="/placements"
+              className="text-white hover:text-secondary transition-colors"
+            >
+              Placements
+            </Link>
+          </motion.div>
 
-          <SignedIn>
+          <motion.div variants={navItemAnimation}>
             <Link
-              href="/dashboard"
-              className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors text-white font-bold"
+              href="/apply"
+              className="text-white hover:text-secondary transition-colors"
             >
-              Dashboard
+              Apply
             </Link>
-            <UserButton />
-          </SignedIn>
-          <SignedOut>
+          </motion.div>
+
+          <motion.div variants={navItemAnimation}>
             <Link
-              href="/portal"
-              className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+              href="/contact"
+              className="text-white hover:text-secondary transition-colors"
             >
-              Portal
+              Contact
             </Link>
-          </SignedOut>
-        </nav>
+          </motion.div>
+
+          <motion.div variants={navItemAnimation}>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors text-white font-bold"
+              >
+                Dashboard
+              </Link>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <Link
+                href="/portal"
+                className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+              >
+                Portal
+              </Link>
+            </SignedOut>
+          </motion.div>
+        </motion.nav>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <motion.div className="md:hidden" variants={navItemAnimation}>
           <button
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             className="focus:outline-none text-white p-1.5 rounded-md hover:bg-navy-light transition-colors"
@@ -296,7 +369,7 @@ const Header = () => {
               </svg>
             )}
           </button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Mobile dropdown menu - Non-fixed, flows with the page */}
@@ -466,7 +539,7 @@ const Header = () => {
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

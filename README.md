@@ -1,3 +1,31 @@
+# Paragon Global Investments
+
+Student-run intercollegiate investment fund focused on value investing and algorithmic trading.
+
+## Folder Structure
+
+```
+pgi/
+├── public/               # Static assets
+│   ├── icons/            # SVG and other icon files
+│   ├── logos/            # Logo files
+│   └── images/           # General images
+│       └── universities/ # University logos
+│
+├── src/                  # Source code
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # React components
+│   │   ├── layout/       # Layout components (Header, Footer)
+│   │   ├── ui/           # UI components (buttons, cards, etc.)
+│   │   └── shared/       # Shared components
+│   │
+│   └── lib/              # Utility functions and shared code
+│       ├── database/     # Database connections and operations
+│       ├── utils/        # Utility functions
+│       ├── hooks/        # Custom React hooks
+│       └── types/        # TypeScript types and interfaces
+```
+
 # Paragon Global Investments Website
 
 This is a modern remake of the Paragon Global Investments website, built with Next.js, TypeScript, and Tailwind CSS. It features authentication via Clerk and uses MongoDB for data storage.
