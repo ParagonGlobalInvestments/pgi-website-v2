@@ -1,25 +1,94 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import ScrollButton from "@/components/ScrollButton";
+import { motion } from "framer-motion";
+
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const itemFadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
+
+const logoAnimation = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+    },
+  },
+};
 
 export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-navy to-primary text-white min-h-[90vh] flex flex-col justify-center items-center relative">
+      <motion.section
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="bg-gradient-to-r from-navy to-primary text-white min-h-[90vh] flex flex-col justify-center items-center relative"
+      >
         <div className="container mx-auto px-4 text-center py-20">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-light tracking-wide mb-8">
+          <motion.h1
+            variants={fadeIn}
+            className="text-5xl md:text-6xl lg:text-7xl font-light tracking-wide mb-8"
+          >
             Paragon Global Investments
-          </h1>
-          <h2 className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-200 font-normal tracking-wide text-gray-400">
+          </motion.h1>
+          <motion.h2
+            variants={fadeIn}
+            transition={{ delay: 0.2 }}
+            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-200 font-normal tracking-wide text-gray-400"
+          >
             Intersecting Value Investing and Quantitative Finance
-          </h2>
-          <p className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide text-gray-500">
+          </motion.h2>
+          <motion.p
+            variants={fadeIn}
+            transition={{ delay: 0.4 }}
+            className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide text-gray-500"
+          >
             We are a student-run intercollegiate investment fund focused on
             value investing and algorithmic trading
-          </p>
+          </motion.p>
         </div>
-        <div className="absolute bottom-12 text-center">
+        <motion.div
+          variants={fadeIn}
+          transition={{ delay: 0.6 }}
+          className="absolute bottom-12 text-center"
+        >
           <ScrollButton targetId="about-section">
             <span className="mb-2 font-light">Learn More</span>
             <svg
@@ -37,17 +106,31 @@ export default function Home() {
               />
             </svg>
           </ScrollButton>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* About Section */}
-      <section id="about-section" className="py-16 px-4">
+      <motion.section
+        id="about-section"
+        className="py-16 px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-light mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-light mb-10 text-center text-white"
+          >
             About Us
-          </h2>
+          </motion.h2>
           <div className="max-w-4xl mx-auto">
-            <p className="text-lg mb-6 text-gray-300 text-center font-light">
+            <motion.p
+              variants={fadeIn}
+              transition={{ delay: 0.2 }}
+              className="text-lg mb-6 text-gray-300 text-center font-light"
+            >
               Paragon Global Investments (formerly PNG) is a student-run
               intercollegiate investment fund with 8 chapters at the top
               universities in the United States. We utilize both fundamental and
@@ -55,35 +138,62 @@ export default function Home() {
               investment fund. Since our inception, we have grown to 300+ active
               students and every year we receive close to 2,000 students
               interested in joining organization nationally.
-            </p>
+            </motion.p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-center">
-              <div className="p-6 bg-navy border border-gray-700 rounded-lg">
+            <motion.div
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-center"
+            >
+              <motion.div
+                variants={itemFadeIn}
+                className="p-6 bg-navy border border-gray-700 rounded-lg"
+              >
                 <p className="text-3xl font-normal mb-2 text-primary">$40K</p>
                 <p className="text-gray-300 font-light">AUM</p>
-              </div>
-              <div className="p-6 bg-navy border border-gray-700 rounded-lg">
+              </motion.div>
+              <motion.div
+                variants={itemFadeIn}
+                className="p-6 bg-navy border border-gray-700 rounded-lg"
+              >
                 <p className="text-3xl font-normal mb-2 text-primary">21</p>
                 <p className="text-gray-300 font-light">Sponsors & Partners</p>
-              </div>
-              <div className="p-6 bg-navy border border-gray-700 rounded-lg">
+              </motion.div>
+              <motion.div
+                variants={itemFadeIn}
+                className="p-6 bg-navy border border-gray-700 rounded-lg"
+              >
                 <p className="text-3xl font-normal mb-2 text-primary">8</p>
                 <p className="text-gray-300 font-light">Chapters</p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Chapters Section */}
-      <section className="py-4 bg-navy px-4 ">
+      <motion.section
+        className="py-4 bg-navy px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-light mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-light mb-10 text-center text-white"
+          >
             Our Chapters
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
             {/* Brown University */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/brown.png"
                 alt="Brown University"
@@ -91,10 +201,13 @@ export default function Home() {
                 height={148}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* Columbia University */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/columbia.png"
                 alt="Columbia University"
@@ -102,10 +215,13 @@ export default function Home() {
                 height={156}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* Cornell University */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/cornell.png"
                 alt="Cornell University"
@@ -113,10 +229,13 @@ export default function Home() {
                 height={128}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* University of Pennsylvania */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/upenn.png"
                 alt="University of Pennsylvania"
@@ -124,10 +243,13 @@ export default function Home() {
                 height={216}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* University of Chicago */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/uchicago.png"
                 alt="University of Chicago"
@@ -135,10 +257,13 @@ export default function Home() {
                 height={100}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* Princeton University */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/princeton.svg"
                 alt="Princeton University"
@@ -146,10 +271,13 @@ export default function Home() {
                 height={100}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* NYU */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/nyu.png"
                 alt="NYU"
@@ -157,10 +285,13 @@ export default function Home() {
                 height={128}
                 className="object-contain"
               />
-            </div>
+            </motion.div>
 
             {/* Yale University */}
-            <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center">
+            <motion.div
+              variants={logoAnimation}
+              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+            >
               <Image
                 src="/images/yale.png"
                 alt="Yale University"
@@ -168,67 +299,108 @@ export default function Home() {
                 height={128}
                 className="object-contain"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Sponsors Section */}
-      <section className="py-16 px-4">
+      <motion.section
+        className="py-16 px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-light mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-light mb-10 text-center text-white"
+          >
             Sponsors
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
             {/* Placeholder for sponsor logos */}
             {Array(8)
               .fill(0)
               .map((_, index) => (
-                <div
+                <motion.div
                   key={index}
+                  variants={logoAnimation}
                   className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
                 >
                   <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
                     Sponsor Logo
                   </div>
-                </div>
+                </motion.div>
               ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Partners Section */}
-      <section className="py-16 bg-navy px-4 border-t border-b border-gray-800">
+      <motion.section
+        className="py-16 bg-navy px-4 border-t border-b border-gray-800"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-bold mb-10 text-center text-white"
+          >
             Partners
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
             {/* Placeholder for partner logos */}
             {Array(8)
               .fill(0)
               .map((_, index) => (
-                <div
+                <motion.div
                   key={index}
+                  variants={logoAnimation}
                   className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
                 >
                   <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
                     Partner Logo
                   </div>
-                </div>
+                </motion.div>
               ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Education Section */}
-      <section className="py-16 px-4">
+      <motion.section
+        className="py-16 px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-bold mb-10 text-center text-white"
+          >
             Education
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-8 bg-navy border border-gray-700 rounded-lg">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
+            <motion.div
+              variants={itemFadeIn}
+              className="p-8 bg-navy border border-gray-700 rounded-lg"
+            >
               <h3 className="text-2xl font-bold mb-4 text-primary">
                 Value Investment
               </h3>
@@ -237,8 +409,11 @@ export default function Home() {
                 bottom-up analysis of companies. Students will learn to develop
                 value-based investment research on publicly traded companies.
               </p>
-            </div>
-            <div className="p-8 bg-navy border border-gray-700 rounded-lg">
+            </motion.div>
+            <motion.div
+              variants={itemFadeIn}
+              className="p-8 bg-navy border border-gray-700 rounded-lg"
+            >
               <h3 className="text-2xl font-bold mb-4 text-primary">
                 Algorithmic Trading
               </h3>
@@ -248,19 +423,34 @@ export default function Home() {
                 and how to research, design, and implement systematic
                 algorithmic trading strategies.
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Investment Funds Section */}
-      <section className="py-16 bg-navy px-4 border-t border-b border-gray-800">
+      <motion.section
+        className="py-16 bg-navy px-4 border-t border-b border-gray-800"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-bold mb-10 text-center text-white"
+          >
             Investment Funds
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-8 bg-navy border border-gray-700 rounded-lg">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
+            <motion.div
+              variants={itemFadeIn}
+              className="p-8 bg-navy border border-gray-700 rounded-lg"
+            >
               <h3 className="text-2xl font-bold mb-4 text-primary">
                 Paragon Value
               </h3>
@@ -270,8 +460,11 @@ export default function Home() {
                 value-based approach. Total portfolio risk and return are
                 optimized through quantitative portfolio allocation measures.
               </p>
-            </div>
-            <div className="p-8 bg-navy border border-gray-700 rounded-lg">
+            </motion.div>
+            <motion.div
+              variants={itemFadeIn}
+              className="p-8 bg-navy border border-gray-700 rounded-lg"
+            >
               <h3 className="text-2xl font-bold mb-4 text-primary">
                 Paragon Systematic
               </h3>
@@ -282,34 +475,47 @@ export default function Home() {
                 mathematical analysis to identify strategies with uncorrelated
                 returns.
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Placements Section */}
-      <section className="py-16 px-4">
+      <motion.section
+        className="py-16 px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center text-white">
+          <motion.h2
+            variants={fadeIn}
+            className="text-3xl font-bold mb-10 text-center text-white"
+          >
             Select Placements
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
             {/* Placeholder for placement logos */}
             {Array(8)
               .fill(0)
               .map((_, index) => (
-                <div
+                <motion.div
                   key={index}
+                  variants={logoAnimation}
                   className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
                 >
                   <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
                     Placement Logo
                   </div>
-                </div>
+                </motion.div>
               ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
