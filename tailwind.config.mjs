@@ -10,6 +10,7 @@ export default {
         light: "#f5f5f5",
         gray: "#6c757d",
         navy: "#00172B",
+        "navy-light": "#001e38",
         lightNavy: "#002642",
         darkNavy: "#000F1D",
         lightGray: "#E5E5E5",

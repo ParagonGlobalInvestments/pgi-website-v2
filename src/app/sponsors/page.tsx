@@ -2,6 +2,13 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  FaHandshake,
+  FaAward,
+  FaChartLine,
+  FaLaptopCode,
+} from "react-icons/fa";
 
 // Animation variants
 const fadeIn = {
@@ -52,74 +59,105 @@ const sponsorAnimation = {
 };
 
 export default function Sponsors() {
-  // Sample sponsors data
+  // Sponsors data
   const sponsors = [
+    { name: "Citadel", logo: "/images/pgiLogoTransparent.png" },
+    { name: "CitSec", logo: "/images/pgiLogoTransparent.png" },
+    { name: "Kershner", logo: "/images/pgiLogoTransparent.png" },
+    { name: "JS", logo: "/images/pgiLogoTransparent.png" },
+    { name: "IMC", logo: "/images/pgiLogoTransparent.png" },
+    { name: "DRW", logo: "/images/pgiLogoTransparent.png" },
+    { name: "Kershner", logo: "/images/pgiLogoTransparent.png" },
+    { name: "Adams Street", logo: "/images/pgiLogoTransparent.png" },
+    { name: "Arena Investors LP", logo: "/images/pgiLogoTransparent.png" },
+  ];
+
+  // Partners data
+  const partners = [
     {
-      id: 1,
-      name: "Investment Bank Alpha",
-      tier: "Platinum",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "CloudQuant",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "A leading global investment bank providing comprehensive financial services to corporations, governments, and institutions worldwide.",
+        "The exclusive partnership between Paragon and CloudQuant gives Paragon quantitative analysts access to over 15,000 private alternative data sets for building models and developing signals, enabling PNG students to perform real quantitative research.",
     },
     {
-      id: 2,
-      name: "Beta Asset Management",
-      tier: "Gold",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "Databento",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "One of the world's largest asset managers specializing in equities, fixed income, alternatives, and multi-asset strategies.",
+        "Databento is a leading provider of real-time and historical market data to leading institutional investors. Paragon and Databento are partnered to provide Paragon students with access to real-time and exclusive market data across equities, options, and forex data!",
     },
     {
-      id: 3,
-      name: "Gamma Hedge Fund",
-      tier: "Gold",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "Kirkland & Ellis",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "A premier hedge fund firm with a diverse range of investment strategies across global markets.",
+        "Kirkland & Ellis, one of the largest law firms in the United States, is Paragon's official legal advisor, actively helping spread the organization's mission to as many students as possible.",
     },
     {
-      id: 4,
-      name: "Delta Financial Solutions",
-      tier: "Silver",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "Visible Alpha",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "A technology-driven financial services company offering innovative solutions for trading and investment management.",
+        "Visible Alpha is a leading provider of market data, sell-side information, financial information, and other company analysis software. All Paragon investment analysts will have access to visible alpha software through their PMs, which will assist them in developing deeper insights into the companies Paragon researches.",
     },
     {
-      id: 5,
-      name: "Epsilon Ventures",
-      tier: "Silver",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "Tegus",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "A venture capital firm focusing on early-stage fintech and financial services companies with disruptive potential.",
+        "Tegus, a leading investment research platform, is a partner of Paragon's Value Fund.",
     },
     {
-      id: 6,
-      name: "Zeta Consulting Group",
-      tier: "Bronze",
-      logo: "/images/pgiLogoTransparent.png", // Placeholder - replace with actual sponsor logo
+      name: "BamSEC",
+      logo: "/images/pgiLogoTransparent.png",
       description:
-        "A global management consulting firm specializing in financial services strategy and operations.",
+        "BamSEC is a leading online platform that allows users to more efficiently perform financial research when working with Securities and Exchange Commission (SEC) filings and earnings transcripts. BamSEC helps Paragon students analyze companies and build financial models for our investment pitches.",
+    },
+    {
+      name: "EdmundSEC",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "EdmundSEC is a leading provider of software that helps users efficiently perform financial research when working with SEC documents. The company leverages unique AI software to accelerate financial research. EdmundSEC helps students with their financial research and building financial models.",
+    },
+    {
+      name: "Wall Street Oasis",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "Wall Street Oasis provides Paragon Global Investments members exclusive resources to prepare them for professional recruitment.",
+    },
+    {
+      name: "Elevate",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "Paragon partnered with Elevate Career Network—the largest Private Equity, Investment Banking, Venture Capital, Hedge Fund Network in North America and Europe—to provide our members with exclusive access to recruiting opportunities in finance.",
+    },
+    {
+      name: "Breaking Into Wall Street",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "Breaking Into Wall Street is the premier financial modeling training platform for investment banking and private equity interviews.",
+    },
+    {
+      name: "Hireflix",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "Hireflix is a leading one-way video interview software platform. Hireflix has partnered with PGI to support our national recruitment efforts.",
+    },
+    {
+      name: "Portfolio123",
+      logo: "/images/pgiLogoTransparent.png",
+      description:
+        "Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.",
     },
   ];
 
-  // Group sponsors by tier
-  const platinumSponsors = sponsors.filter((s) => s.tier === "Platinum");
-  const goldSponsors = sponsors.filter((s) => s.tier === "Gold");
-  const silverSponsors = sponsors.filter((s) => s.tier === "Silver");
-  const bronzeSponsors = sponsors.filter((s) => s.tier === "Bronze");
-
   return (
     <div className="bg-navy text-white min-h-screen">
-      <div className="container mx-auto py-16 px-4">
+      <div className="container mx-auto py-36 px-4">
         <motion.h1
           className="text-4xl font-bold mb-8 text-center"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
         >
-          Our Sponsors
+          Sponsors and Partners
         </motion.h1>
 
         <motion.div
@@ -128,202 +166,181 @@ export default function Sponsors() {
           animate="visible"
           variants={fadeIn}
         >
-          <p className="text-lg text-center">
-            Paragon Global Investments is proud to be supported by leading
-            financial institutions and companies that share our commitment to
-            excellence in financial education and innovation. Our sponsors
-            provide not only financial support but also invaluable mentorship,
-            resources, and career opportunities for our students.
+          <p className="text-lg text-center text-gray-300">
+            Paragon Global Investments is partnered with top firms and
+            organizations to provide our students the best access to the top
+            firms in finance, tech, and quant across the United States. Sponsors
+            contribute to Paragon's investment fund, operations, and the growth
+            of our members.
           </p>
         </motion.div>
 
-        {/* Platinum Sponsors */}
-        {platinumSponsors.length > 0 && (
+        {/* Sponsors Section */}
+        <motion.div
+          className="mb-24"
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
           <motion.div
-            className="mb-16"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
+            className="flex items-center justify-center mb-12"
+            variants={fadeIn}
           >
-            <motion.h2
-              className="text-2xl font-bold mb-8 text-center text-secondary"
-              variants={fadeIn}
-            >
-              Platinum Sponsors
-            </motion.h2>
-            <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
-              {platinumSponsors.map((sponsor) => (
-                <motion.div
-                  key={sponsor.id}
-                  className="bg-navy-light p-8 rounded-lg border border-gray-700 flex flex-col md:flex-row items-center"
-                  variants={sponsorAnimation}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center p-4 mb-6 md:mb-0 md:mr-8">
-                    <Image
-                      src={sponsor.logo}
-                      alt={sponsor.name}
-                      width={150}
-                      height={150}
-                      className="object-contain"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">
-                      {sponsor.name}
-                    </h3>
-                    <p>{sponsor.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <FaAward className="text-secondary text-2xl mr-3" />
+            <h2 className="text-3xl font-bold text-secondary">Sponsors</h2>
           </motion.div>
-        )}
 
-        {/* Gold Sponsors */}
-        {goldSponsors.length > 0 && (
           <motion.div
-            className="mb-16"
-            initial="hidden"
-            animate="visible"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 max-w-6xl mx-auto"
             variants={staggerContainer}
           >
-            <motion.h2
-              className="text-2xl font-bold mb-8 text-center text-secondary"
-              variants={fadeIn}
-            >
-              Gold Sponsors
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {goldSponsors.map((sponsor) => (
-                <motion.div
-                  key={sponsor.id}
-                  className="bg-navy-light p-6 rounded-lg border border-gray-700"
-                  variants={cardAnimation}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center p-4 mx-auto mb-4">
+            {sponsors.map((sponsor, index) => (
+              <motion.div
+                key={index}
+                className="bg-navy-light p-6 rounded-lg border border-gray-700 flex flex-col items-center justify-center"
+                variants={sponsorAnimation}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              >
+                <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center p-3 mb-4">
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    width={80}
+                    height={80}
+                    className="object-contain"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-center">
+                  {sponsor.name}
+                </h3>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Partners Section */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
+          <motion.div
+            className="flex items-center justify-center mb-12"
+            variants={fadeIn}
+          >
+            <FaHandshake className="text-secondary text-2xl mr-3" />
+            <h2 className="text-3xl font-bold text-secondary">Partners</h2>
+          </motion.div>
+
+          <div className="max-w-6xl mx-auto">
+            {partners.map((partner, index) => (
+              <motion.div
+                key={index}
+                className="bg-navy-light p-6 mb-8 rounded-lg border border-gray-700 hover:border-secondary transition-duration-300"
+                variants={cardAnimation}
+              >
+                <div className="flex flex-col md:flex-row items-center md:items-start">
+                  <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center p-4 mb-6 md:mb-0 md:mr-8 shrink-0">
                     <Image
-                      src={sponsor.logo}
-                      alt={sponsor.name}
+                      src={partner.logo}
+                      alt={partner.name}
                       width={100}
                       height={100}
                       className="object-contain"
                     />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-center">
-                    {sponsor.name}
-                  </h3>
-                  <p className="text-sm text-center">{sponsor.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Silver Sponsors */}
-        {silverSponsors.length > 0 && (
-          <motion.div
-            className="mb-16"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.h2
-              className="text-2xl font-bold mb-8 text-center text-secondary"
-              variants={fadeIn}
-            >
-              Silver Sponsors
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {silverSponsors.map((sponsor) => (
-                <motion.div
-                  key={sponsor.id}
-                  className="bg-navy-light p-6 rounded-lg border border-gray-700"
-                  variants={cardAnimation}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center p-3 mx-auto mb-4">
-                    <Image
-                      src={sponsor.logo}
-                      alt={sponsor.name}
-                      width={80}
-                      height={80}
-                      className="object-contain"
-                    />
+                  <div>
+                    <h3 className="text-xl font-bold mb-4 text-secondary">
+                      {partner.name}
+                    </h3>
+                    <p className="text-gray-300">{partner.description}</p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-center">
-                    {sponsor.name}
-                  </h3>
-                  <p className="text-sm text-center">{sponsor.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-        {/* Bronze Sponsors */}
-        {bronzeSponsors.length > 0 && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.h2
-              className="text-2xl font-bold mb-8 text-center text-secondary"
-              variants={fadeIn}
-            >
-              Bronze Sponsors
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {bronzeSponsors.map((sponsor) => (
-                <motion.div
-                  key={sponsor.id}
-                  className="bg-navy-light p-4 rounded-lg border border-gray-700"
-                  variants={cardAnimation}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <div className="w-20 h-20 bg-white rounded-lg flex items-center justify-center p-2 mx-auto mb-3">
-                    <Image
-                      src={sponsor.logo}
-                      alt={sponsor.name}
-                      width={60}
-                      height={60}
-                      className="object-contain"
-                    />
-                  </div>
-                  <h3 className="text-base font-semibold mb-1 text-center">
-                    {sponsor.name}
-                  </h3>
-                  <p className="text-xs text-center">{sponsor.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
+        {/* Footer */}
         <motion.div
-          className="max-w-4xl mx-auto mt-20 text-center"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          transition={{ delay: 0.6 }}
+          className="container mx-auto px-4 py-10 border-t border-gray-800 mt-24"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
         >
-          <h3 className="text-xl font-semibold mb-4">Become a Sponsor</h3>
-          <p className="mb-6">
-            Interested in supporting the next generation of finance
-            professionals? Partner with Paragon Global Investments to connect
-            with talented students from top universities and showcase your
-            organization's commitment to excellence in financial education.
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/images/pgiLogoTransparent.png"
+              alt="Paragon Global Investments Logo"
+              width={80}
+              height={80}
+              className="opacity-80"
+            />
+          </div>
+          <p className="text-center text-gray-400 mb-8 max-w-3xl mx-auto">
+            Paragon Global Investments is a registered 501(c)(3) nonprofit.
+            Paragon Global Investments was previously known as Paragon National
+            Group (PNG).
           </p>
-          <motion.a
-            href="#"
-            className="inline-block px-6 py-3 bg-white text-navy font-bold rounded hover:bg-gray-200 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Sponsorship Opportunities
-          </motion.a>
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
+            <Link href="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <Link
+              href="/who-we-are"
+              className="hover:text-white transition-colors"
+            >
+              Who We Are
+            </Link>
+            <Link
+              href="/investment-strategy"
+              className="hover:text-white transition-colors"
+            >
+              Investment Strategy
+            </Link>
+            <Link
+              href="/publications"
+              className="hover:text-white transition-colors"
+            >
+              Publications
+            </Link>
+            <Link
+              href="/sponsors"
+              className="hover:text-white transition-colors"
+            >
+              Sponsors
+            </Link>
+            <Link
+              href="/national-committee/founders"
+              className="hover:text-white transition-colors"
+            >
+              Founders
+            </Link>
+            <Link
+              href="/national-committee"
+              className="hover:text-white transition-colors"
+            >
+              National Committee
+            </Link>
+            <Link
+              href="/placements"
+              className="hover:text-white transition-colors"
+            >
+              Placements
+            </Link>
+            <Link href="/apply" className="hover:text-white transition-colors">
+              Apply
+            </Link>
+            <Link
+              href="/contact"
+              className="hover:text-white transition-colors"
+            >
+              Contact
+            </Link>
+          </div>
+          <p className="text-center text-gray-500 mt-4 text-sm">
+            Paragon Global Investments | {new Date().getFullYear()}
+          </p>
         </motion.div>
       </div>
     </div>
