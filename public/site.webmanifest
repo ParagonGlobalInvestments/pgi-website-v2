@@ -1,0 +1,16 @@
+{
+  "name": "Paragon Global Investments",
+  "short_name": "Paragon",
+  "description": "Student-run intercollegiate investment fund focused on value investing and algorithmic trading",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ]
+}
