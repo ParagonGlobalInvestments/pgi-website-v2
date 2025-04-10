@@ -195,7 +195,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/brown.png"
+                src="/images/universities/brown.png"
                 alt="Brown University"
                 width={148}
                 height={148}
@@ -209,7 +209,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/columbia.png"
+                src="/images/universities/columbia.png"
                 alt="Columbia University"
                 width={156}
                 height={156}
@@ -223,7 +223,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/cornell.png"
+                src="/images/universities/cornell.png"
                 alt="Cornell University"
                 width={128}
                 height={128}
@@ -237,7 +237,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/upenn.png"
+                src="/images/universities/upenn.png"
                 alt="University of Pennsylvania"
                 width={216}
                 height={216}
@@ -251,7 +251,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/uchicago.png"
+                src="/images/universities/uchicago.png"
                 alt="University of Chicago"
                 width={100}
                 height={100}
@@ -279,7 +279,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/nyu.png"
+                src="/images/universities/nyu.png"
                 alt="NYU"
                 width={128}
                 height={128}
@@ -293,7 +293,7 @@ export default function Home() {
               className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
-                src="/images/yale.png"
+                src="/images/universities/yale.png"
                 alt="Yale University"
                 width={128}
                 height={128}
