@@ -231,62 +231,6 @@ export default function OfficersPage() {
           </motion.div>
         </div>
       </section>
-
-      {/* Footer Navigation */}
-      <motion.div
-        className="container mx-auto px-4 py-10 border-t border-gray-800"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
-          <Link href="/" className="hover:text-white transition-colors">
-            Home
-          </Link>
-          <Link
-            href="/who-we-are"
-            className="hover:text-white transition-colors"
-          >
-            Who We Are
-          </Link>
-          <Link
-            href="/investment-strategy"
-            className="hover:text-white transition-colors"
-          >
-            Investment Strategy
-          </Link>
-          <Link
-            href="/publications"
-            className="hover:text-white transition-colors"
-          >
-            Publications
-          </Link>
-          <Link href="/sponsors" className="hover:text-white transition-colors">
-            Sponsors
-          </Link>
-          <Link
-            href="/national-committee/founders"
-            className="hover:text-white transition-colors"
-          >
-            Founders
-          </Link>
-          <Link
-            href="/placements"
-            className="hover:text-white transition-colors"
-          >
-            Placements
-          </Link>
-          <Link href="/apply" className="hover:text-white transition-colors">
-            Apply
-          </Link>
-          <Link href="/contact" className="hover:text-white transition-colors">
-            Contact
-          </Link>
-        </div>
-        <p className="text-center text-gray-500 mt-4 text-sm">
-          Paragon Global Investments | {new Date().getFullYear()}
-        </p>
-      </motion.div>
     </div>
   );
 }
