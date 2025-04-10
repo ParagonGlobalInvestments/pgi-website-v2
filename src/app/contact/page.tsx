@@ -42,7 +42,7 @@ export default function Contact() {
 
   return (
     <div className="bg-navy min-h-screen">
-      <div className="container mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto py-36 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-white mb-4">

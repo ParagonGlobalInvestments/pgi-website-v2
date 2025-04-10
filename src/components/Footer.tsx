@@ -27,6 +27,7 @@ const Footer = () => {
       links: [
         { name: "Value Team", url: "/members/value-team" },
         { name: "Quant Team", url: "/members/quant-team" },
+        { name: "Portal", url: "/portal" },
       ],
     },
     {
@@ -34,33 +35,33 @@ const Footer = () => {
       links: [
         { name: "Placements", url: "/placements" },
         { name: "Apply", url: "/apply" },
-        { name: "Portal", url: "/portal" },
+        { name: "Contact", url: "/contact" },
       ],
     },
   ];
 
   return (
     <footer className="bg-navy text-white border-t border-gray-800">
-      <div className="container mx-auto py-12 px-4">
+      <div className="container mx-auto py-4 lg:py-8 px-4">
         {/* Top section with logo and columns */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="flex flex-wrap lg:flex-nowrap gap-8">
           {/* Logo and info column */}
-          <div className="md:col-span-2">
-            <Link href="/" className="inline-block mb-6">
+          <div className="w-full lg:w-1/3 lg:pr-8">
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src="/images/pgiLogoFull.jpg"
                 alt="Paragon Global Investments"
-                width={220}
-                height={80}
+                width={180}
+                height={65}
                 className="rounded"
               />
             </Link>
-            <p className="text-gray-300 mb-4">
+            <p className="text-gray-300 text-sm mb-4">
               Paragon Global Investments is a registered 501(c)(3) nonprofit.
               Paragon Global Investments was previously known as Paragon
               National Group (PNG).
             </p>
-            <div className="flex space-x-4 mt-4">
+            <div className="flex space-x-4 mt-2">
               <a
                 href="https://www.linkedin.com/company/paragon-global-investments"
                 target="_blank"
@@ -69,7 +70,7 @@ const Footer = () => {
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -89,7 +90,7 @@ const Footer = () => {
                 className="text-gray-300 hover:text-white transition-colors"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -104,76 +105,34 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Navigation columns */}
-          {footerNavigation.map((section, index) => (
-            <div key={index}>
-              <h3 className="text-lg font-semibold mb-4">{section.title}</h3>
-              <ul className="space-y-2">
-                {section.links.map((link, linkIndex) => (
-                  <li key={linkIndex}>
-                    <Link
-                      href={link.url}
-                      className="text-gray-300 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Navigation columns wrapper */}
+          <div className="w-full lg:w-2/3 flex flex-wrap gap-y-6">
+            {/* Navigation columns */}
+            {footerNavigation.map((section, index) => (
+              <div key={index} className="w-1/2 sm:w-1/4 pr-4">
+                <h3 className="text-sm lg:text-md font-semibold mb-3">
+                  {section.title}
+                </h3>
+                <ul className="space-y-1.5">
+                  {section.links.map((link, linkIndex) => (
+                    <li key={linkIndex}>
+                      <Link
+                        href={link.url}
+                        className="text-gray-300 hover:text-white transition-colors text-xs lg:text-sm"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Horizontal links */}
-        <div className="mt-12 pt-6 border-t border-gray-800">
-          <nav className="flex flex-wrap justify-center gap-6 mb-6">
-            <Link
-              href="/"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/who-we-are"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Who We Are
-            </Link>
-            <Link
-              href="/national-committee"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              National Committee
-            </Link>
-            <Link
-              href="/members"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Members
-            </Link>
-            <Link
-              href="/placements"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Placements
-            </Link>
-            <Link
-              href="/apply"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Apply
-            </Link>
-            <Link
-              href="/contact"
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Contact
-            </Link>
-          </nav>
-        </div>
-
+        {/* Horizontal links - simplified */}
         {/* Copyright */}
-        <div className="text-center text-sm text-gray-400 mt-6">
+        <div className="text-center mt-4 text-xs text-gray-400">
           <p>Paragon Global Investments | {currentYear}</p>
         </div>
       </div>

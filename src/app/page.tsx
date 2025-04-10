@@ -64,21 +64,21 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-20">
           <motion.h1
             variants={fadeIn}
-            className="text-5xl md:text-6xl lg:text-7xl font-light tracking-wide mb-8"
+            className="text-5xl md:text-6xl lg:text-7xl font-light tracking-widest mb-8"
           >
             Paragon Global Investments
           </motion.h1>
           <motion.h2
             variants={fadeIn}
             transition={{ delay: 0.2 }}
-            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-200 font-normal tracking-wide"
+            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-300 font-normal tracking-wide"
           >
             Intersecting Value Investing and Quantitative Finance
           </motion.h2>
           <motion.p
             variants={fadeIn}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl mb-16 mx-auto text-gray-200 font-light tracking-wide"
+            className="text-lg md:text-xl mb-16 mx-auto text-gray-400 font-light tracking-wide"
           >
             We are a student-run intercollegiate investment fund focused on
             value investing and algorithmic trading
