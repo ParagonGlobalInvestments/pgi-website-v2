@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const Header = () => {
   // State to manage dropdown visibility for mobile
@@ -14,12 +15,16 @@ const Header = () => {
     useState(false);
   const [expandedMembers, setExpandedMembers] = useState(false);
 
-  // Close mobile menu when navigating or clicking outside
-  useEffect(() => {
-    const handleRouteChange = () => {
-      setMobileMenuOpen(false);
-    };
+  // Get current pathname for navigation events
+  const pathname = usePathname();
 
+  // Close mobile menu when navigating to a new page
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const header = document.querySelector("header");
       if (header && !header.contains(event.target as Node) && mobileMenuOpen) {
@@ -49,6 +54,9 @@ const Header = () => {
       // If we're on another page, navigate to home and then scroll
       window.location.href = "/#about-section";
     }
+
+    // Close mobile menu
+    setMobileMenuOpen(false);
   };
 
   // Toggle section expansion for mobile
