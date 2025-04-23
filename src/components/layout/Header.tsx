@@ -130,11 +130,7 @@ const Header = () => {
       url: "/national-committee",
       subItems: [
         { name: "Officers", url: "/national-committee/officers" },
-        { name: "Executive Board", url: "/national-committee/executive-board" },
-        {
-          name: "Development Committee",
-          url: "/national-committee/development-committee",
-        },
+        { name: "Founders", url: "/national-committee/founders" },
       ],
     },
     {
@@ -165,7 +161,7 @@ const Header = () => {
       animate="visible"
       variants={navbarAnimation}
     >
-      <div className="container mx-auto flex items-center justify-between px-4 py-3">
+      <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <motion.div variants={logoAnimation}>
           <Link href="/" className="">
             <Image
@@ -313,16 +309,16 @@ const Header = () => {
             <SignedIn>
               <Link
                 href="/dashboard"
-                className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors text-white font-bold"
+                className="bg-white text-black py-2 px-4 rounded hover:bg-opacity-90 transition-colors  font-bold"
               >
                 Dashboard
               </Link>
-              <UserButton />
+              {/* <UserButton /> */}
             </SignedIn>
             <SignedOut>
               <Link
                 href="/portal"
-                className="bg-primary py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                className=" py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
               >
                 Portal
               </Link>

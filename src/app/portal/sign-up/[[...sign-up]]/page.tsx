@@ -15,7 +15,10 @@ export default function SignUpPage() {
             dashboard.
           </p>
           <div className="flex justify-center">
-            <SignUp path="/portal/sign-up" routing="path" signInUrl="/portal" />
+            <SignUp
+              signInUrl="/portal/signin/[[...sign-in]]"
+              afterSignUpUrl="/portal/dashboard"
+            />
           </div>
         </div>
       </div>
