@@ -316,7 +316,7 @@ export default function InternshipsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <div className="flex justify-between items-center">
           <motion.h1

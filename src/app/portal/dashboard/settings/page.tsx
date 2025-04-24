@@ -178,7 +178,7 @@ export default function SettingsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
