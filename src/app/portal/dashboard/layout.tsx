@@ -20,7 +20,7 @@ import {
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMongoUser } from "@/hooks/useMongoUser";
-
+import { MdDashboard } from "react-icons/md";
 // Import shadcn components
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -86,7 +86,7 @@ const NavItem = ({
             variant={isActive ? "navy-accent" : "ghost"}
             className={`w-full ${
               isCollapsed ? "justify-center px-2" : "justify-start px-3"
-            } transition-all duration-200 relative`}
+            } transition-all duration-200 relative text-gray-300 hover:text-white`}
           >
             <span className={`text-lg ${isCollapsed ? "mx-0" : "mr-3"}`}>
               {icon}
@@ -117,6 +117,31 @@ interface Chapter {
   logoUrl: string;
 }
 
+// Add these animation variants near the top with other animation definitions
+const mobileNavVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const mobileNavItemVariants = {
+  hidden: { opacity: 0, y: -5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  },
+};
+
 export default function DashboardLayout({
   children,
 }: {
@@ -126,6 +151,7 @@ export default function DashboardLayout({
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [internships, setInternships] = useState([]);
+  const [userCount, setUserCount] = useState(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, isLoaded } = useUser();
   const {
@@ -252,6 +278,25 @@ export default function DashboardLayout({
     };
   }, [isMobileMenuOpen]);
 
+  // Add new useEffect for fetching user count
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const response = await fetch("/api/users/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setUserCount(data.activeMembers); // Using activeMembers count (non-alumni)
+        }
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+    };
+
+    if (isLoaded) {
+      fetchUserStats();
+    }
+  }, [isLoaded]);
+
   if (!isLoaded) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
@@ -282,18 +327,27 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-white">
       {/* Mobile Navigation Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-[#00172B] border-b border-[#003E6B]">
+      <motion.div
+        className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-[#00172B] border-b shadow-lg border-[#003E6B]"
+        variants={mobileNavVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
+          <motion.div
+            className="flex items-center space-x-3"
+            variants={mobileNavItemVariants}
+          >
             <Image
-              src="/logos/pgiLogoTransparent.png"
+              src="/logos/pgiLogoFull.jpg"
               alt="Paragon Global Investments"
               width={120}
               height={24}
-              className="h-6 w-auto"
+              className="h-8 w-auto"
             />
-          </div>
-          <button
+          </motion.div>
+          <motion.button
+            variants={mobileNavItemVariants}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-white p-2 hover:bg-[#003E6B] rounded-md transition-colors relative z-50"
           >
@@ -328,9 +382,9 @@ export default function DashboardLayout({
                 />
               </svg>
             )}
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Menu Overlay */}
       <div
@@ -338,7 +392,7 @@ export default function DashboardLayout({
           isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"
         } pt-16`}
       >
-        <div className="px-4 py-2">
+        <div className="p-4">
           {/* User Profile Section */}
           <div className="flex items-center space-x-3 mb-6 p-3 bg-[#002C4D] rounded-lg">
             <Avatar className="h-10 w-10">
@@ -365,7 +419,7 @@ export default function DashboardLayout({
                 setIsMobileMenuOpen(false);
               }}
             >
-              <FaChartLine className="h-5 w-5" />
+              <MdDashboard className="h-5 w-5" />
               <span>Dashboard</span>
             </Link>
             <Link
@@ -402,6 +456,11 @@ export default function DashboardLayout({
             >
               <FaUsers className="h-5 w-5" />
               <span>Directory</span>
+              {userCount > 0 && (
+                <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
+                  {userCount}
+                </span>
+              )}
             </Link>
             <Link
               href="/portal/dashboard/news"
@@ -624,7 +683,7 @@ export default function DashboardLayout({
           <nav className="space-y-1">
             <NavItem
               href="/portal/dashboard"
-              icon={<FaChartLine />}
+              icon={<MdDashboard />}
               label="Dashboard"
               isActive={activeLink === "dashboard"}
               onClick={() => setActiveLink("dashboard")}
@@ -647,6 +706,7 @@ export default function DashboardLayout({
               label="Directory"
               isActive={activeLink === "directory"}
               onClick={() => setActiveLink("directory")}
+              count={userCount}
               isCollapsed={isCollapsed}
             />
 

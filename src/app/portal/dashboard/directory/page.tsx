@@ -214,7 +214,7 @@ export default function DirectoryPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <motion.div
           initial={{ opacity: 0, y: -10 }}

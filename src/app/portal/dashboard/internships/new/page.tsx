@@ -188,7 +188,7 @@ export default function NewInternshipPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <div className="flex items-center mb-2">
           <Button
@@ -215,7 +215,7 @@ export default function NewInternshipPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-gray-500"
+          className="text-gray-500 text-sm lg:text-base text-center lg:text-left px-4 lg:px-0"
         >
           Fill out the form below to create a new internship opportunity for
           your chapter.

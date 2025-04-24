@@ -40,6 +40,7 @@ const itemVariants = {
 interface NewsSource {
   id: string;
   name: string;
+  shortName: string;
   icon: React.ReactNode;
   component: React.ReactNode;
   description: string;
@@ -54,6 +55,7 @@ export default function NewsPage() {
     {
       id: "marketwatch",
       name: "MarketWatch",
+      shortName: "MW",
       icon: <FaNewspaper className="text-green-500" />,
       component: <MarketWatchNews />,
       description: "Top financial stories from MarketWatch",
@@ -61,6 +63,7 @@ export default function NewsPage() {
     {
       id: "seekingalpha",
       name: "Seeking Alpha",
+      shortName: "SA",
       icon: <FaGlobeAmericas className="text-orange-500" />,
       component: <SeekingAlphaNews />,
       description: "Investment insights from Seeking Alpha",
@@ -68,6 +71,7 @@ export default function NewsPage() {
     {
       id: "nasdaq",
       name: "NASDAQ",
+      shortName: "NASDAQ",
       icon: <FaChartLine className="text-blue-500" />,
       component: <NasdaqNews />,
       description: "Latest news from NASDAQ",
@@ -87,7 +91,7 @@ export default function NewsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <div>
           <motion.h1
@@ -104,7 +108,7 @@ export default function NewsPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="text-gray-500 mt-1"
           >
-            Latest financial news aggregated from multiple sources
+            Latest financial news from multiple sources
           </motion.p>
         </div>
 
@@ -131,7 +135,8 @@ export default function NewsPage() {
                   className="flex items-center gap-2"
                 >
                   {source.icon}
-                  {source.name}
+                  <span className="hidden sm:inline">{source.name}</span>
+                  <span className="sm:hidden">{source.shortName}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
