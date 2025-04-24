@@ -340,7 +340,8 @@ export default function InternshipsPage() {
                 icon={<FaPlus />}
                 showPulse={!internships.length}
               >
-                Add Internship
+                <span className="hidden lg:block">Post Internship</span>
+                <span className="block lg:hidden">Post</span>
               </ActionButton>
             </motion.div>
           )}

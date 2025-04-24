@@ -250,11 +250,63 @@ export default function Dashboard() {
           </motion.p>
         </div>
 
+        {/* Quick Actions - Shown at top on mobile */}
+        <div className="lg:hidden">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="text-xl font-semibold text-gray-800 mb-4"
+          >
+            Quick Actions
+          </motion.h2>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 gap-4"
+          >
+            <ActionCard
+              title="Browse Internships"
+              description="View all available internship opportunities"
+              icon={<FaBriefcase className="text-white text-xl" />}
+              href="/portal/dashboard/internships"
+              color="border-blue-100"
+              bgColor="bg-blue-500"
+              delay={0.5}
+            />
+
+            {(userRole === "admin" || userRole === "lead") && (
+              <ActionCard
+                title="Add New Internship"
+                description="Post a new internship opportunity"
+                icon={<FaBriefcase className="text-white text-xl" />}
+                href="/portal/dashboard/internships/new"
+                color="border-green-100"
+                bgColor="bg-green-500"
+                delay={0.6}
+              />
+            )}
+
+            <ActionCard
+              title="View Members"
+              description="See all members in the chapter"
+              icon={<FaUsers className="text-white text-xl" />}
+              href="/portal/dashboard/members"
+              color="border-purple-100"
+              bgColor="bg-purple-500"
+              delay={0.7}
+            />
+          </motion.div>
+        </div>
+
+        {/* Stats Cards - Hidden on mobile */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="hidden lg:grid lg:grid-cols-3 gap-6"
         >
           <StatCard
             title="Available Internships"
@@ -303,7 +355,7 @@ export default function Dashboard() {
           )}
         </motion.div>
 
-        {/* Market Watch News and Quick Actions */}
+        {/* News and Quick Actions Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Market Watch News Feed */}
           <div className="lg:col-span-2">
@@ -334,8 +386,9 @@ export default function Dashboard() {
               </motion.div>
             </div>
           </div>
-          {/* Quick Actions */}
-          <div className="lg:col-span-1">
+
+          {/* Quick Actions - Only shown on desktop */}
+          <div className="hidden lg:block lg:col-span-1">
             <motion.h2
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -349,7 +402,7 @@ export default function Dashboard() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6"
+              className="grid grid-cols-1 gap-6"
             >
               <ActionCard
                 title="Browse Internships"
