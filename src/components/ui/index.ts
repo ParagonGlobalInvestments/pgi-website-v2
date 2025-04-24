@@ -1,19 +1,21 @@
 // Re-export all UI components for easier imports
 export * from "./badge";
 export * from "./button";
-export * from "./avatar";
-export * from "./dropdown-menu";
-export * from "./navigation-menu";
-export * from "./tooltip";
-export * from "./action-button";
-export * from "./SmoothTransition";
-export * from "./PageTransition";
-export * from "./AnimatedText";
-export * from "./AnimatedSection";
-export * from "./ScrollButton";
-export * from "./input";
 export * from "./card";
+export * from "./input";
 export * from "./select";
-export * from "./switch";
-export * from "./textarea";
 export * from "./radio-group";
+export * from "./tabs";
+export * from "./textarea";
+export * from "./switch";
+export * from "./avatar";
+export * from "./popover";
+export * from "./command";
+export * from "./dialog";
+export * from "./combobox";
+
+export { SmoothTransition } from "./SmoothTransition";
+export { default as PageTransition } from "./PageTransition";
+export { default as AnimatedText } from "./AnimatedText";
+export { default as AnimatedSection } from "./AnimatedSection";
+export { default as ScrollButton } from "./ScrollButton";

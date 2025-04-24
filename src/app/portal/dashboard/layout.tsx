@@ -237,6 +237,21 @@ export default function DashboardLayout({
     }
   }, []);
 
+  // Add mobile menu state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Add useEffect to handle mobile menu
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
+
   if (!isLoaded) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
@@ -266,9 +281,191 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Collapsible Sidebar with smoother animations */}
+      {/* Mobile Navigation Bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-[#00172B] border-b border-[#003E6B]">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-3">
+            <Image
+              src="/logos/pgiLogoTransparent.png"
+              alt="Paragon Global Investments"
+              width={120}
+              height={24}
+              className="h-6 w-auto"
+            />
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-white p-2 hover:bg-[#003E6B] rounded-md transition-colors relative z-50"
+          >
+            {isMobileMenuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`fixed inset-0 bg-[#00172B] transition-transform duration-300 ease-in-out z-[55] ${
+          isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"
+        } pt-16`}
+      >
+        <div className="px-4 py-2">
+          {/* User Profile Section */}
+          <div className="flex items-center space-x-3 mb-6 p-3 bg-[#002C4D] rounded-lg">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={displayAvatar} alt={displayName} />
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-white font-medium">{displayName}</div>
+              <div className="text-sm text-gray-400">{displayChapter}</div>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-1">
+            <Link
+              href="/portal/dashboard"
+              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                activeLink === "dashboard"
+                  ? "bg-[#003E6B]"
+                  : "hover:bg-[#002C4D]"
+              }`}
+              onClick={() => {
+                setActiveLink("dashboard");
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              <FaChartLine className="h-5 w-5" />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              href="/portal/dashboard/internships"
+              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                activeLink === "internships"
+                  ? "bg-[#003E6B]"
+                  : "hover:bg-[#002C4D]"
+              }`}
+              onClick={() => {
+                setActiveLink("internships");
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              <FaBriefcase className="h-5 w-5" />
+              <span>Internships</span>
+              {internships.length > 0 && (
+                <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
+                  {internships.length}
+                </span>
+              )}
+            </Link>
+            <Link
+              href="/portal/dashboard/directory"
+              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                activeLink === "directory"
+                  ? "bg-[#003E6B]"
+                  : "hover:bg-[#002C4D]"
+              }`}
+              onClick={() => {
+                setActiveLink("directory");
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              <FaUsers className="h-5 w-5" />
+              <span>Directory</span>
+            </Link>
+            <Link
+              href="/portal/dashboard/news"
+              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                activeLink === "news" ? "bg-[#003E6B]" : "hover:bg-[#002C4D]"
+              }`}
+              onClick={() => {
+                setActiveLink("news");
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              <FaNewspaper className="h-5 w-5" />
+              <span>News</span>
+            </Link>
+            <Link
+              href="/portal/dashboard/settings"
+              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                activeLink === "settings"
+                  ? "bg-[#003E6B]"
+                  : "hover:bg-[#002C4D]"
+              }`}
+              onClick={() => {
+                setActiveLink("settings");
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              <FaCog className="h-5 w-5" />
+              <span>Settings</span>
+            </Link>
+          </nav>
+
+          {/* User Metadata */}
+          <div className="mt-6 p-4 bg-[#002C4D] rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              {getRoleIcon(displayRole)}
+              <span className="text-sm font-medium text-white capitalize">
+                {displayRole}
+              </span>
+            </div>
+            <div className="text-sm text-gray-400">
+              Track:{" "}
+              <span className={`font-medium ${getTrackColor(displayTrack)}`}>
+                {displayTrack}
+              </span>
+            </div>
+          </div>
+
+          {/* Back to Website Link */}
+          <div className="mt-6">
+            <Link
+              href="/"
+              className="flex items-center space-x-3 px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D]"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <FaHome className="h-5 w-5" />
+              <span>Back to Website</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Sidebar - Hide on mobile */}
       <motion.aside
-        className="bg-[#00172B] flex-shrink-0 flex flex-col h-screen sticky top-0 shadow-xl overflow-hidden z-10"
+        className="hidden lg:flex bg-[#00172B] flex-shrink-0 flex-col h-screen sticky top-0 shadow-xl overflow-hidden z-10"
         variants={sidebarVariants}
         animate={isCollapsed ? "collapsed" : "expanded"}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -608,15 +805,10 @@ export default function DashboardLayout({
         </div>
       </motion.aside>
 
-      {/* Main content with page transition */}
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="flex-1 bg-white p-8 overflow-auto"
-      >
-        {children}
-      </motion.main>
+      {/* Main Content - Add padding top on mobile */}
+      <div className="flex-1 min-w-0 bg-white lg:ml-0">
+        <div className="lg:p-8 p-4 pt-16 lg:pt-8">{children}</div>
+      </div>
     </div>
   );
 }

@@ -221,7 +221,7 @@ export default function Dashboard() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8"
+        className="space-y-8 pt-4 lg:pt-0"
       >
         <div>
           <motion.h1

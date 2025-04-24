@@ -171,7 +171,30 @@ export function useMongoUser() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to sync user data");
+
+        // Check if error is a duplicate key error for email
+        if (
+          errorData.error &&
+          errorData.error.includes("duplicate key error") &&
+          errorData.error.includes("email")
+        ) {
+          console.warn(
+            "Found duplicate email in database. Attempting to resolve..."
+          );
+
+          // Try to resolve the conflict
+          await handleDuplicateEmail();
+
+          // Retry the sync
+          const retryResponse = await fetch("/api/users/sync");
+          if (!retryResponse.ok) {
+            throw new Error(
+              "Failed to sync user data after resolving duplicate email"
+            );
+          }
+        } else {
+          throw new Error(errorData.error || "Failed to sync user data");
+        }
       }
 
       // Fetch updated user data
@@ -199,4 +222,29 @@ export function useMongoUser() {
     updateUser,
     syncUser,
   };
+}
+
+// Standalone function to handle duplicate email issues
+export async function handleDuplicateEmail() {
+  try {
+    const resolveResponse = await fetch("/api/auth/resolve-duplicate-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!resolveResponse.ok) {
+      console.error(
+        "Failed to resolve duplicate email:",
+        await resolveResponse.json()
+      );
+      throw new Error("Failed to resolve duplicate email conflict");
+    }
+
+    return await resolveResponse.json();
+  } catch (err: any) {
+    console.error("Error handling duplicate email:", err);
+    throw err;
+  }
 }
