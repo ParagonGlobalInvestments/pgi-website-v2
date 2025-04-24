@@ -17,7 +17,11 @@ import {
   RadioGroup,
   RadioGroupItem,
   SmoothTransition,
+  Tabs,
+  TabsList,
+  TabsTrigger,
 } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 // Animation variants
 const cardVariants = {
@@ -43,6 +47,7 @@ const staggerContainerVariants = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { user, isLoaded } = useUser();
 
   // Profile settings state
@@ -175,16 +180,29 @@ export default function SettingsPage() {
         direction="vertical"
         className="space-y-6"
       >
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-gray-800">Account Settings</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
           <p className="text-gray-600 mt-1">
-            Manage your profile, notifications, and preferences.
+            Manage your account, profile, and preferences
           </p>
-        </motion.div>
+        </div>
+
+        <Tabs defaultValue="account" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="account" className="flex items-center gap-2">
+              <FaDesktop className="h-4 w-4" />
+              Account
+            </TabsTrigger>
+            <TabsTrigger
+              value="profile"
+              className="flex items-center gap-2"
+              onClick={() => router.push("/portal/dashboard/settings/profile")}
+            >
+              <FaUser className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {saveMessage.message && (
           <motion.div
@@ -207,109 +225,6 @@ export default function SettingsPage() {
           animate="visible"
           className="grid grid-cols-1 gap-8"
         >
-          {/* Profile Settings Section */}
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader className="bg-gray-50 border-b border-gray-200">
-                <div className="flex items-center space-x-2 px-2">
-                  <FaUser className="text-gray-500" />
-                  <h2 className="text-lg font-medium text-gray-800">
-                    Profile Settings
-                  </h2>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <form onSubmit={handleProfileSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label
-                        htmlFor="fullName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Full Name
-                      </label>
-                      <Input
-                        type="text"
-                        id="fullName"
-                        value={profileSettings.name}
-                        onChange={(e) =>
-                          setProfileSettings({
-                            ...profileSettings,
-                            name: e.target.value,
-                          })
-                        }
-                        className="w-full border-gray-300"
-                        disabled
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Name is managed by Clerk authentication.
-                      </p>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Email Address
-                      </label>
-                      <Input
-                        type="email"
-                        id="email"
-                        value={profileSettings.email}
-                        onChange={(e) =>
-                          setProfileSettings({
-                            ...profileSettings,
-                            email: e.target.value,
-                          })
-                        }
-                        className="w-full border-gray-300"
-                        disabled
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Email is managed by Clerk authentication.
-                      </p>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label
-                        htmlFor="bio"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Professional Bio
-                      </label>
-                      <Textarea
-                        id="bio"
-                        rows={4}
-                        value={profileSettings.bio}
-                        onChange={(e) =>
-                          setProfileSettings({
-                            ...profileSettings,
-                            bio: e.target.value,
-                          })
-                        }
-                        placeholder="Tell us about your professional interests and background..."
-                        className="w-full border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex justify-end">
-                    <Button
-                      type="submit"
-                      disabled={saving}
-                      variant="navy"
-                      className="flex items-center gap-2"
-                    >
-                      <FaSave />
-                      {saving ? "Saving..." : "Save Profile"}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Notification Preferences Section */}
           <motion.div variants={cardVariants}>
             <Card>
@@ -431,7 +346,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader className="bg-gray-50 border-b border-gray-200">
                 <div className="flex items-center space-x-2 px-2">
-                  <FaDesktop className="text-gray-500" />
+                  <FaPalette className="text-gray-500" />
                   <h2 className="text-lg font-medium text-gray-800">
                     Display Preferences
                   </h2>

@@ -389,6 +389,11 @@ export default function DirectoryPage() {
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-sm font-medium text-gray-900 truncate">
                           {user.name}
+                          {user.isManager && (
+                            <Badge variant="outline" className="ml-2">
+                              Portfolio Manager
+                            </Badge>
+                          )}
                           {user.isAlumni && (
                             <Badge variant="outline" className="ml-2">
                               Alumni
@@ -415,12 +420,6 @@ export default function DirectoryPage() {
                         <span className="font-medium">Chapter:</span>{" "}
                         {user.chapter}
                       </p>
-                      {user.isManager && (
-                        <p className="flex items-center gap-1">
-                          <FaBriefcase className="text-gray-400" size={14} />
-                          <span className="font-medium">Manager</span>
-                        </p>
-                      )}
                       {user.gradYear && (
                         <p className="flex items-center gap-1">
                           <FaGraduationCap
@@ -440,13 +439,16 @@ export default function DirectoryPage() {
                             <Badge
                               key={i}
                               variant="outline"
-                              className="text-xs"
+                              className="text-xs bg-gray-100 text-gray-500"
                             >
                               {skill}
                             </Badge>
                           ))}
                           {user.skills.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-gray-100 text-gray-500"
+                            >
                               +{user.skills.length - 3} more
                             </Badge>
                           )}

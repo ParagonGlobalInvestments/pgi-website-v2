@@ -15,17 +15,17 @@ const nextConfig = {
     ],
     unoptimized: process.env.NODE_ENV === "development",
   },
-  // Configure domain routing for nip.io subdomains
+  // Configure domain routing for portal
   async rewrites() {
     return {
       beforeFiles: [
-        // Handle nip.io domain for portal subdomain
+        // Handle portal subdomain routing
         {
           source: "/:path*",
           has: [
             {
               type: "host",
-              value: "portal.localhost.nip.io:3000",
+              value: "portal.paragon-global.org",
             },
           ],
           destination: "/portal/:path*",
