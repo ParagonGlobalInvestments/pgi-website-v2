@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import { ClerkProvider } from "@clerk/nextjs";
-import { Geist } from "next/font/google";
-import "@/tailwind.css";
-import "@/app/globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+import { ClerkProvider } from '@clerk/nextjs';
+import { GeistSans } from 'geist/font/sans';
+import '@/tailwind.css';
+import '@/app/globals.css';
 
 export default function PortalLayout({
   children,
@@ -18,7 +12,7 @@ export default function PortalLayout({
 }) {
   return (
     <ClerkProvider>
-      <div className={`${geistSans.variable} antialiased`}>{children}</div>
+      <div className={`${GeistSans.variable} antialiased`}>{children}</div>
     </ClerkProvider>
   );
 }
