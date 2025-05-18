@@ -7,19 +7,14 @@ import Link from 'next/link';
 import {
   FaBriefcase,
   FaUsers,
-  FaNewspaper,
   FaArrowRight,
-  FaChartLine,
   FaBuilding,
-  FaGlobe,
   FaGraduationCap,
   FaUniversity,
   FaChartPie,
 } from 'react-icons/fa';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { motion } from 'framer-motion';
-import { ActionButton, ActionIconButton } from '@/components/ui/action-button';
-import { Button } from '@/components/ui/button';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import MarketWatchNews from '@/components/dashboard/MarketWatchNews';
 import SeekingAlphaNews from '@/components/dashboard/SeekingAlphaNews';

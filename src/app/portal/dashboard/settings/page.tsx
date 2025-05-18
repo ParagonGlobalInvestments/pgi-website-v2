@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { FaSave, FaBell, FaUser, FaPalette, FaDesktop } from 'react-icons/fa';
 import ProtectedPage from '@/components/auth/ProtectedPage';
@@ -11,7 +11,6 @@ import {
   Card,
   CardHeader,
   CardContent,
-  CardFooter,
   RadioGroup,
   RadioGroupItem,
   SmoothTransition,

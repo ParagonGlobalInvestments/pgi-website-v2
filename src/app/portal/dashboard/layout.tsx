@@ -1,17 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
   FaBriefcase,
   FaUsers,
   FaCog,
-  FaSignOutAlt,
   FaHome,
-  FaChevronDown,
   FaChevronLeft,
-  FaChevronRight,
   FaGraduationCap,
   FaRocket,
   FaNewspaper,
