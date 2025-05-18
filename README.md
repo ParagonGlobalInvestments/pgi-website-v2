@@ -24,115 +24,126 @@ Built with Next.js (App Router), TypeScript, Tailwind CSS, Clerk for authenticat
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **UI Components**: Shadcn/ui (typically, given the structure)
+- **UI Components**: Radix UI primitives with custom styling
 - **Authentication**: Clerk
 - **Database**: MongoDB with Mongoose ODM
+- **State Management**: SWR for data fetching
+- **Form Handling**: React Hook Form with Zod validation
+- **Real-time Updates**: Socket.IO
 - **Linting/Formatting**: ESLint, Prettier
 
 ## Key Features
 
-- Secure user authentication (sign-in, sign-up, profile management) via Clerk.
-- Role-based access control (Admin, Lead, Member).
-- Internship board with search and filtering.
-- Member portal/dashboard with protected resources.
-- Responsive design for all devices.
+- Secure user authentication (sign-in, sign-up, profile management) via Clerk
+- Role-based access control (Admin, Lead, Member)
+- Internship board with search and filtering
+- Member portal/dashboard with protected resources
+- Publications and investment strategies section
+- Member directory and profiles
+- Responsive design for all devices
 
 ## Project Structure
 
-The project follows a standard Next.js App Router structure, with some key conventions:
+The project follows the Next.js App Router structure, with routes defined by directory structure:
 
 ```
 pgi/
-├── .github/            # GitHub Actions, issue/PR templates
-├── .husky/             # Git hooks (e.g., pre-commit checks)
-├── docs/               # Project documentation (architecture, contributing, etc.)
-├── public/             # Static assets (images, icons, logos)
-├── scripts/            # Root-level utility/maintenance scripts (add new scripts here)
-├── src/                # Main source code
-│   ├── app/            # Next.js App Router (pages, layouts, API routes)
-│   │   ├── (auth)/     # Authentication-related pages (signin, signup)
-│   │   ├── (portal)/   # Member portal routes & layouts
-│   │   ├── api/        # Backend API route handlers
-│   │   └── ...         # Other public/app routes (e.g., landing page, about)
-│   ├── components/     # React components
-│   │   ├── ui/         # Core UI elements (Button, Card, Input - often from a library like Shadcn)
-│   │   ├── shared/     # Custom shared components used across multiple features
-│   │   └── features/   # (Recommended) Components specific to a feature/domain
-│   ├── hooks/          # Custom React hooks (e.g., useUserData, useForm)
-│   ├── lib/            # Core application modules and services
-│   │   ├── auth/       # Authentication helpers, user synchronization
-│   │   ├── database/   # MongoDB connection (Mongoose) and model definitions
-│   │   │   ├── connection.ts # Mongoose connection utility
-│   │   │   └── models/     # Mongoose schema definitions (User, Internship, etc.)
-│   │   ├── context/    # React Context API providers
-│   │   └── rss/        # RSS feed fetching library/utilities
-│   ├── server/         # Custom server logic (e.g., Socket.IO, cron jobs)
-│   │   ├── index.ts    # Custom Next.js server entry point
-│   │   └── rssFetcher.ts # Server-side RSS fetching scheduler & Socket.IO integration
-│   ├── types/          # Global TypeScript type definitions and interfaces
-│   │   ├── index.ts    # Main export for shared types
-│   │   └── jest.d.ts   # Jest specific type extensions
-│   ├── utils/          # General-purpose utility functions (e.g., cn, formatDate)
-│   ├── middleware.ts   # Next.js middleware (handles auth, redirects)
-│   └── tailwind.css    # Tailwind CSS global styles/directives
-├── .env.local.example  # Example environment variables file
-├── .eslintrc.json      # ESLint configuration
-├── .gitignore          # Files and directories ignored by Git
-├── .prettierrc         # Prettier code formatter configuration
-├── jest.config.js      # Jest testing configuration
-├── jest.setup.js       # Jest setup file
-├── next.config.mjs     # Next.js configuration
-├── package.json        # Project dependencies and scripts
-├── postcss.config.mjs  # PostCSS configuration
-├── tailwind.config.mjs # Tailwind CSS configuration
-└── tsconfig.json       # TypeScript configuration
+├── .github/                # GitHub Actions, issue/PR templates
+├── .husky.disabled/        # Git hooks (e.g., pre-commit checks)
+├── docs/                   # Project documentation
+├── public/                 # Static assets (images, icons, logos)
+├── scripts/                # Utility/maintenance scripts
+├── src/                    # Main source code
+│   ├── app/                # Next.js App Router (pages, layouts, API routes)
+│   │   ├── (main)/         # Main website routes
+│   │   ├── about/          # About page route
+│   │   ├── api/            # Backend API route handlers
+│   │   ├── apply/          # Application process page
+│   │   ├── contact/        # Contact page
+│   │   ├── dashboard/      # Member dashboard
+│   │   ├── globals.css     # Global CSS styles
+│   │   ├── investment-strategy/ # Investment strategy page
+│   │   ├── layout.tsx      # Root layout component
+│   │   ├── members/        # Member directory
+│   │   ├── national-committee/ # National committee page
+│   │   ├── placements/     # Placements/internship listings
+│   │   ├── portal/         # Member portal
+│   │   ├── publications/   # Publications page
+│   │   ├── sign-in/        # Authentication sign-in page
+│   │   ├── sign-up/        # Authentication sign-up page
+│   │   ├── sponsors/       # Sponsors page
+│   │   └── who-we-are/     # Who we are page
+│   ├── components/         # React components
+│   │   ├── auth/           # Authentication-related components
+│   │   ├── dashboard/      # Dashboard-specific components
+│   │   ├── layout/         # Layout components (header, footer, etc.)
+│   │   └── ui/             # Core UI elements based on Radix primitives
+│   ├── hooks/              # Custom React hooks
+│   ├── lib/                # Core application modules and services
+│   │   ├── auth/           # Authentication helpers, user synchronization
+│   │   ├── database/       # MongoDB connection and model definitions
+│   │   │   ├── models/     # Mongoose schema definitions:
+│   │   │   │   ├── User.ts         # User model
+│   │   │   │   ├── Internship.ts   # Internship listing model
+│   │   │   │   └── Chapter.ts      # Chapter organization model
+│   │   └── rss/            # RSS feed utilities
+│   ├── server/             # Custom server logic (Socket.IO, cron jobs)
+│   ├── types/              # TypeScript type definitions and interfaces
+│   ├── utils.ts            # General utility functions
+│   ├── middleware.ts       # Next.js middleware for auth and redirects
+│   └── tailwind.css        # Tailwind CSS directives
+├── .env.local.example      # Example environment variables
+├── .eslintrc.json          # ESLint configuration
+├── .gitignore              # Git ignore rules
+├── .prettierrc             # Prettier code formatter configuration
+├── jest.config.js          # Jest testing configuration
+├── jest.setup.js           # Jest testing setup
+├── next.config.mjs         # Next.js configuration
+├── package.json            # Project dependencies and scripts
+├── postcss.config.mjs      # PostCSS configuration
+├── tailwind.config.mjs     # Tailwind CSS configuration
+├── tsconfig.json           # TypeScript configuration
+└── vercel.json             # Vercel deployment configuration
 ```
-
-**Key Directory Explanations:**
-
-- **`src/app/`**: Follows Next.js App Router conventions. Group routes using parentheses `(groupName)` for organization without affecting URL paths (e.g., `(auth)`, `(portal)`).
-- **`src/components/ui/`**: Typically houses base UI components. If using a library like Shadcn/ui, these are often generated here.
-- **`src/components/shared/`**: For custom components reused in multiple parts of the application.
-- **`src/lib/`**: Contains foundational logic. `database/connection.ts` is the standard way to connect to MongoDB. Mongoose models are in `lib/database/models/`.
-- **`src/hooks/`**: For custom React hooks to encapsulate reusable stateful logic.
-- **`src/utils/`**: For small, stateless utility functions. `utils.ts` contains common helpers like `cn`.
-- **`src/server/`**: If you need a custom server (e.g., for WebSockets or specific background tasks), this is where it lives. `server/index.ts` starts this custom server.
-- **`scripts/` (root)**: Place any project-specific scripts here (e.g., database seeding, maintenance tasks).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (version specified in `.nvmrc` if present, or latest LTS)
+- Node.js (LTS version)
 - npm (comes with Node.js)
-- MongoDB database (local instance or a cloud service like MongoDB Atlas)
-- A Clerk account for authentication (see [Clerk Dashboard](https://dashboard.clerk.com/))
+- MongoDB database (local instance or MongoDB Atlas)
+- A Clerk account for authentication ([Clerk Dashboard](https://dashboard.clerk.com/))
 
 ### Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd pgi
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Set up environment variables:**
-    Copy the `.env.local.example` file to `.env.local` and fill in your credentials:
+1. **Clone the repository:**
 
-    ```bash
-    cp .env.local.example .env.local
-    ```
+   ```bash
+   git clone <repository-url>
+   cd pgi
+   ```
 
-    You'll need to provide:
+2. **Install dependencies:**
 
-    - Clerk keys (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`)
-    - MongoDB connection string (`MONGODB_URI`)
-    - Your application URL (`NEXT_PUBLIC_APP_URL`, e.g., `http://localhost:3000`)
+   ```bash
+   npm install
+   ```
 
-    _(Self-note: Consider if `CLERK_SETUP.md` is still relevant or if its contents should be merged here or into `docs/`)._
+3. **Set up environment variables:**
+   Create a `.env.local` file with the following variables:
+
+   ```
+   # Clerk Authentication
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+   CLERK_SECRET_KEY=sk_test_...
+
+   # MongoDB
+   MONGODB_URI=mongodb+srv://...
+
+   # Application
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
 
 ### Running Locally
 
@@ -146,24 +157,20 @@ The application will be available at `http://localhost:3000`.
 
 - Authentication is managed by [Clerk](https://clerk.com/).
 - Middleware in `src/middleware.ts` protects routes and handles public/private access.
-- User roles and permissions are typically managed via Clerk session claims and synchronized with the MongoDB user profile. Check `src/lib/auth/` for related logic.
+- User roles and permissions are synchronized between Clerk and MongoDB for consistent authorization.
 
 ## Deployment
 
-This application is configured for easy deployment on Vercel.
+This application is configured for deployment on Vercel:
 
-1.  Push your code to a Git repository (GitHub, GitLab, Bitbucket).
-2.  Import the project into Vercel.
-3.  Configure the environment variables in your Vercel project settings similar to your `.env.local` file.
-    Vercel will automatically build and deploy your Next.js application.
+1. Push your code to a Git repository.
+2. Import the project into Vercel.
+3. Configure environment variables in Vercel project settings.
+4. Deploy with automatic build and CI/CD integration.
 
 ## Contributing
 
-Please refer to `docs/CONTRIBUTING.md` for guidelines on how to contribute to this project. Key documents in the `docs/` folder include:
-
-- `ARCHITECTURE.md`: Overview of the project architecture.
-- `CODEBASE_CLEANUP.md`: Checklist and guide for codebase maintenance (which you're currently using!).
-- `DEVELOPMENT.md`: Notes on the development process and standards.
+Please see the documentation in the `docs/` directory for contribution guidelines and development standards.
 
 ## License
 
