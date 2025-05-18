@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 import {
   FaChartLine,
   FaRobot,
   FaMoneyBillWave,
   FaUniversity,
-} from "react-icons/fa";
-import Image from "next/image";
-import Link from "next/link";
+} from 'react-icons/fa';
+import Image from 'next/image';
+import Link from 'next/link';
 
 // Animation variants
 const fadeIn = {
@@ -18,7 +18,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -41,7 +41,7 @@ const cardItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };

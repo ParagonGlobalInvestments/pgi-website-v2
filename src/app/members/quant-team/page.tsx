@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { FaLinkedin } from "react-icons/fa";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { FaLinkedin } from 'react-icons/fa';
 
 // Animation variants
 const fadeIn = {
@@ -13,7 +13,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -35,7 +35,7 @@ const memberItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -43,100 +43,100 @@ const memberItem = {
 // Quantitative Research Committee data
 const researchCommittee = [
   {
-    name: "Soupy De",
-    university: "University of Chicago",
-    linkedin: "",
+    name: 'Soupy De',
+    university: 'University of Chicago',
+    linkedin: '',
   },
   {
-    name: "William Vietor",
-    university: "Columbia University",
-    linkedin: "",
+    name: 'William Vietor',
+    university: 'Columbia University',
+    linkedin: '',
   },
   {
-    name: "Samuel Henriques",
-    university: "Princeton University",
-    linkedin: "",
+    name: 'Samuel Henriques',
+    university: 'Princeton University',
+    linkedin: '',
   },
   {
-    name: "Ronak Datta",
-    university: "University of Chicago",
-    linkedin: "",
+    name: 'Ronak Datta',
+    university: 'University of Chicago',
+    linkedin: '',
   },
   {
-    name: "Anirudh Pottammal",
-    university: "New York University",
-    linkedin: "",
+    name: 'Anirudh Pottammal',
+    university: 'New York University',
+    linkedin: '',
   },
   {
-    name: "Sahishnu Hanumolu",
-    university: "University of Pennsylvania",
-    linkedin: "",
+    name: 'Sahishnu Hanumolu',
+    university: 'University of Pennsylvania',
+    linkedin: '',
   },
   {
-    name: "Dominic Olaguera-Delogu",
-    university: "University of Pennsylvania",
-    linkedin: "",
+    name: 'Dominic Olaguera-Delogu',
+    university: 'University of Pennsylvania',
+    linkedin: '',
   },
   {
-    name: "Matthew Neissen",
-    university: "Yale University",
-    linkedin: "",
+    name: 'Matthew Neissen',
+    university: 'Yale University',
+    linkedin: '',
   },
   {
-    name: "Daniel Siegel",
-    university: "Yale University",
-    linkedin: "",
+    name: 'Daniel Siegel',
+    university: 'Yale University',
+    linkedin: '',
   },
   {
-    name: "Ethan Chang",
-    university: "Columbia University",
-    linkedin: "",
+    name: 'Ethan Chang',
+    university: 'Columbia University',
+    linkedin: '',
   },
 ];
 
 // Analysts data
 const analysts = [
-  { name: "Aakshay Gupta", university: "Cornell University" },
-  { name: "Andrew Da", university: "Cornell University" },
-  { name: "Ann Li", university: "New York University" },
-  { name: "Anthony Wong", university: "Cornell University" },
-  { name: "Atishay Narayanan", university: "Princeton University" },
-  { name: "Aurora Wang", university: "Columbia University" },
-  { name: "Benjamin Weber", university: "Princeton University" },
-  { name: "Benjamin Zhou", university: "Princeton University" },
-  { name: "Brianna Wang", university: "Columbia University" },
-  { name: "Connor Brown", university: "Princeton University" },
-  { name: "Edward Stan", university: "Columbia University" },
-  { name: "Joonseok Jung", university: "Cornell University" },
-  { name: "Kayla Shan", university: "Cornell University" },
-  { name: "Linglong Dai", university: "Cornell University" },
-  { name: "Meghana Kesanapalli", university: "Cornell University" },
-  { name: "Mikul Saravanan", university: "Columbia University" },
-  { name: "Rohan Sabu", university: "New York University" },
-  { name: "Siddharth Shastry", university: "University of Chicago" },
-  { name: "Srirag Tavarti", university: "Columbia University" },
-  { name: "Robert Liu", university: "University of Chicago" },
-  { name: "Flynn Kelleher", university: "Cornell University" },
-  { name: "Anupam Bhakta", university: "Columbia University" },
-  { name: "Kaiji Uno", university: "Columbia University" },
-  { name: "Lucas Tucker", university: "University of Chicago" },
-  { name: "Sohini Banerjee", university: "University of Chicago" },
-  { name: "Pranav Mishra", university: "Cornell University" },
-  { name: "Helen Ho", university: "New York University" },
-  { name: "Ece Tumer", university: "University of Chicago" },
-  { name: "Aman Dhillon", university: "University of Chicago" },
-  { name: "Nico Roth", university: "University of Chicago" },
-  { name: "Nikhil Reddy", university: "University of Chicago" },
-  { name: "Anthony Luo", university: "University of Chicago" },
-  { name: "Farrell Wenardy", university: "University of Chicago" },
-  { name: "William Li", university: "University of Chicago" },
-  { name: "Kabir Buch", university: "University of Chicago" },
-  { name: "Ishaan Sareen", university: "University of Chicago" },
-  { name: "Koren Gila", university: "University of Chicago" },
-  { name: "Yoyo Zhang", university: "University of Chicago" },
-  { name: "Lars Barth", university: "University of Chicago" },
-  { name: "Benjamin Levi", university: "University of Chicago" },
-  { name: "Arav Saksena", university: "University of Chicago" },
+  { name: 'Aakshay Gupta', university: 'Cornell University' },
+  { name: 'Andrew Da', university: 'Cornell University' },
+  { name: 'Ann Li', university: 'New York University' },
+  { name: 'Anthony Wong', university: 'Cornell University' },
+  { name: 'Atishay Narayanan', university: 'Princeton University' },
+  { name: 'Aurora Wang', university: 'Columbia University' },
+  { name: 'Benjamin Weber', university: 'Princeton University' },
+  { name: 'Benjamin Zhou', university: 'Princeton University' },
+  { name: 'Brianna Wang', university: 'Columbia University' },
+  { name: 'Connor Brown', university: 'Princeton University' },
+  { name: 'Edward Stan', university: 'Columbia University' },
+  { name: 'Joonseok Jung', university: 'Cornell University' },
+  { name: 'Kayla Shan', university: 'Cornell University' },
+  { name: 'Linglong Dai', university: 'Cornell University' },
+  { name: 'Meghana Kesanapalli', university: 'Cornell University' },
+  { name: 'Mikul Saravanan', university: 'Columbia University' },
+  { name: 'Rohan Sabu', university: 'New York University' },
+  { name: 'Siddharth Shastry', university: 'University of Chicago' },
+  { name: 'Srirag Tavarti', university: 'Columbia University' },
+  { name: 'Robert Liu', university: 'University of Chicago' },
+  { name: 'Flynn Kelleher', university: 'Cornell University' },
+  { name: 'Anupam Bhakta', university: 'Columbia University' },
+  { name: 'Kaiji Uno', university: 'Columbia University' },
+  { name: 'Lucas Tucker', university: 'University of Chicago' },
+  { name: 'Sohini Banerjee', university: 'University of Chicago' },
+  { name: 'Pranav Mishra', university: 'Cornell University' },
+  { name: 'Helen Ho', university: 'New York University' },
+  { name: 'Ece Tumer', university: 'University of Chicago' },
+  { name: 'Aman Dhillon', university: 'University of Chicago' },
+  { name: 'Nico Roth', university: 'University of Chicago' },
+  { name: 'Nikhil Reddy', university: 'University of Chicago' },
+  { name: 'Anthony Luo', university: 'University of Chicago' },
+  { name: 'Farrell Wenardy', university: 'University of Chicago' },
+  { name: 'William Li', university: 'University of Chicago' },
+  { name: 'Kabir Buch', university: 'University of Chicago' },
+  { name: 'Ishaan Sareen', university: 'University of Chicago' },
+  { name: 'Koren Gila', university: 'University of Chicago' },
+  { name: 'Yoyo Zhang', university: 'University of Chicago' },
+  { name: 'Lars Barth', university: 'University of Chicago' },
+  { name: 'Benjamin Levi', university: 'University of Chicago' },
+  { name: 'Arav Saksena', university: 'University of Chicago' },
 ];
 
 export default function QuantTeamPage() {

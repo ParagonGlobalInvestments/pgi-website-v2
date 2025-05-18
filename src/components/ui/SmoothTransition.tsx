@@ -1,69 +1,79 @@
-import { ReactNode } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
+/**
+ * Direction options for the transition animation
+ */
+type TransitionDirection = 'vertical' | 'horizontal' | 'scale';
+
+/**
+ * Props for the SmoothTransition component
+ */
 interface SmoothTransitionProps {
-  children: ReactNode;
+  /** Whether the content should be visible */
   isVisible: boolean;
-  direction?: "vertical" | "horizontal" | "scale" | "fade";
-  durationIn?: number;
-  durationOut?: number;
-  delay?: number;
+  /** Direction of the transition animation */
+  direction?: TransitionDirection;
+  /** Additional CSS classes */
   className?: string;
+  /** React children to be rendered */
+  children: React.ReactNode;
 }
 
-export const SmoothTransition = ({
-  children,
+/**
+ * SmoothTransition component
+ *
+ * A wrapper component that provides smooth enter/exit animations for its children
+ * based on the isVisible prop. Useful for conditional rendering with animations.
+ *
+ * @example
+ * ```tsx
+ * <SmoothTransition isVisible={!isCollapsed} direction="vertical">
+ *   <YourContent />
+ * </SmoothTransition>
+ * ```
+ */
+export function SmoothTransition({
   isVisible,
-  direction = "fade",
-  durationIn = 0.2,
-  durationOut = 0.15,
-  delay = 0,
-  className = "",
-}: SmoothTransitionProps) => {
-  // Define variants for different directions
+  direction = 'vertical',
+  className = '',
+  children,
+}: SmoothTransitionProps) {
+  // Define animation variants based on direction
   const variants = {
     vertical: {
-      initial: { opacity: 0, y: -10 },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: -10 },
+      initial: { opacity: 0, height: 0, overflow: 'hidden' },
+      animate: { opacity: 1, height: 'auto', overflow: 'visible' },
+      exit: { opacity: 0, height: 0, overflow: 'hidden' },
     },
     horizontal: {
-      initial: { opacity: 0, x: -10 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -10 },
+      initial: { opacity: 0, width: 0, overflow: 'hidden' },
+      animate: { opacity: 1, width: 'auto', overflow: 'visible' },
+      exit: { opacity: 0, width: 0, overflow: 'hidden' },
     },
     scale: {
-      initial: { opacity: 0, scale: 0.9 },
+      initial: { opacity: 0, scale: 0.8 },
       animate: { opacity: 1, scale: 1 },
-      exit: { opacity: 0, scale: 0.9 },
-    },
-    fade: {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
+      exit: { opacity: 0, scale: 0.8 },
     },
   };
+
+  const selectedVariant = variants[direction];
 
   return (
     <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
           className={className}
-          initial={variants[direction].initial}
-          animate={variants[direction].animate}
-          exit={variants[direction].exit}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-            duration: durationIn,
-            exitDuration: durationOut,
-            delay,
-          }}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={selectedVariant}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
         >
           {children}
         </motion.div>
       )}
     </AnimatePresence>
   );
-};
+}

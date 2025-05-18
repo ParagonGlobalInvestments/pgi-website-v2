@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   FaArrowLeft,
   FaBriefcase,
@@ -17,15 +17,15 @@ import {
   FaCheckCircle,
   FaTimes,
   FaGraduationCap,
-} from "react-icons/fa";
-import { z } from "zod";
-import ProtectedPage from "@/components/auth/ProtectedPage";
-import type { UserRole } from "@/lib/auth";
-import { motion } from "framer-motion";
-import { ActionButton } from "@/components/ui/action-button";
-import { Button } from "@/components/ui/button";
-import { SmoothTransition } from "@/components/ui/SmoothTransition";
-import { Badge } from "@/components/ui/badge";
+} from 'react-icons/fa';
+import { z } from 'zod';
+import ProtectedPage from '@/components/auth/ProtectedPage';
+import type { UserRole } from '@/lib/auth';
+import { motion } from 'framer-motion';
+import { ActionButton } from '@/components/ui/action-button';
+import { Button } from '@/components/ui/button';
+import { SmoothTransition } from '@/components/ui/SmoothTransition';
+import { Badge } from '@/components/ui/badge';
 
 // Animation variants
 const fadeIn = {
@@ -34,7 +34,7 @@ const fadeIn = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: 'spring',
       damping: 25,
       stiffness: 100,
     },
@@ -53,16 +53,16 @@ const staggerFormItems = {
 
 // Zod schema for validation
 const internshipSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  company: z.string().min(1, "Company is required"),
-  location: z.string().min(1, "Location is required"),
-  description: z.string().min(1, "Description is required"),
+  title: z.string().min(1, 'Title is required'),
+  company: z.string().min(1, 'Company is required'),
+  location: z.string().min(1, 'Location is required'),
+  description: z.string().min(1, 'Description is required'),
   requirements: z.string().optional(),
-  applicationLink: z.string().url("Please enter a valid URL"),
-  applicationUrl: z.string().url("Please enter a valid URL").optional(),
-  deadline: z.string().min(1, "Deadline is required"),
-  track: z.enum(["quant", "value", "both"]),
-  chapter: z.string().min(1, "Chapter is required"),
+  applicationLink: z.string().url('Please enter a valid URL'),
+  applicationUrl: z.string().url('Please enter a valid URL').optional(),
+  deadline: z.string().min(1, 'Deadline is required'),
+  track: z.enum(['quant', 'value', 'both']),
+  chapter: z.string().min(1, 'Chapter is required'),
   schoolTargets: z.string().optional(),
   isPaid: z.boolean().optional(),
   isRemote: z.boolean().optional(),
@@ -74,7 +74,7 @@ export default function NewInternshipPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [chapters, setChapters] = useState<{ _id: string; name: string }[]>([]);
 
@@ -85,9 +85,9 @@ export default function NewInternshipPage() {
   } = useForm<InternshipFormValues>();
 
   // Get user metadata
-  const userRole = (user?.publicMetadata?.role as UserRole) || "member";
+  const userRole = (user?.publicMetadata?.role as UserRole) || 'member';
   const userChapter =
-    (user?.publicMetadata?.chapter as string) || "Yale University";
+    (user?.publicMetadata?.chapter as string) || 'Yale University';
 
   // Fetch chapters for the dropdown
   useEffect(() => {
@@ -95,13 +95,13 @@ export default function NewInternshipPage() {
 
     const fetchChapters = async () => {
       try {
-        const response = await fetch("/api/chapters");
+        const response = await fetch('/api/chapters');
         if (response.ok) {
           const data = await response.json();
           setChapters(data);
         }
       } catch (error) {
-        console.error("Error fetching chapters:", error);
+        console.error('Error fetching chapters:', error);
       }
     };
 
@@ -109,15 +109,15 @@ export default function NewInternshipPage() {
   }, [isLoaded]);
 
   // Check if user has permission
-  if (isLoaded && userRole !== "admin" && userRole !== "lead") {
-    router.push("/portal/dashboard/internships");
+  if (isLoaded && userRole !== 'admin' && userRole !== 'lead') {
+    router.push('/portal/dashboard/internships');
     return null;
   }
 
-  const onSubmit: SubmitHandler<InternshipFormValues> = async (data) => {
+  const onSubmit: SubmitHandler<InternshipFormValues> = async data => {
     try {
       setSubmitting(true);
-      setError("");
+      setError('');
 
       // Process the data
       const formattedData = {
@@ -125,15 +125,15 @@ export default function NewInternshipPage() {
         // Convert comma-separated requirements to array
         requirements: data.requirements
           ? data.requirements
-              .split(",")
-              .map((req) => req.trim())
+              .split(',')
+              .map(req => req.trim())
               .filter(Boolean)
           : [],
         // Convert comma-separated school targets to array
         schoolTargets: data.schoolTargets
           ? data.schoolTargets
-              .split(",")
-              .map((school) => school.trim())
+              .split(',')
+              .map(school => school.trim())
               .filter(Boolean)
           : [],
         // Ensure deadline is a valid date
@@ -143,29 +143,29 @@ export default function NewInternshipPage() {
       };
 
       // Submit to API
-      const response = await fetch("/api/internships", {
-        method: "POST",
+      const response = await fetch('/api/internships', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create internship");
+        throw new Error(errorData.error || 'Failed to create internship');
       }
 
       // Show success message then redirect
       setSuccess(true);
       setTimeout(() => {
-        router.push("/portal/dashboard/internships");
+        router.push('/portal/dashboard/internships');
       }, 1500);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("An unexpected error occurred");
+        setError('An unexpected error occurred');
       }
     } finally {
       setSubmitting(false);
@@ -182,13 +182,13 @@ export default function NewInternshipPage() {
 
   return (
     <ProtectedPage
-      requiredRole={["admin", "lead"]}
+      requiredRole={['admin', 'lead']}
       redirectTo="/portal/dashboard/internships"
     >
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0"
+        className="space-y-8 pt-4 lg:pt-0 text-navy"
       >
         <div className="flex items-center mb-2">
           <Button
@@ -276,7 +276,7 @@ export default function NewInternshipPage() {
                     <input
                       id="title"
                       type="text"
-                      {...register("title", { required: true })}
+                      {...register('title', { required: true })}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                       placeholder="e.g. Summer Analyst"
                     />
@@ -298,7 +298,7 @@ export default function NewInternshipPage() {
                     <input
                       id="company"
                       type="text"
-                      {...register("company", { required: true })}
+                      {...register('company', { required: true })}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                       placeholder="e.g. Goldman Sachs"
                     />
@@ -321,7 +321,7 @@ export default function NewInternshipPage() {
                     <input
                       id="location"
                       type="text"
-                      {...register("location", { required: true })}
+                      {...register('location', { required: true })}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                       placeholder="e.g. New York, NY"
                     />
@@ -345,11 +345,11 @@ export default function NewInternshipPage() {
                       <input
                         type="url"
                         id="applicationLink"
-                        {...register("applicationLink")}
+                        {...register('applicationLink')}
                         className={`w-full p-2 border ${
                           errors.applicationLink
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-[#003E6B]"
+                            ? 'border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:ring-[#003E6B]'
                         } rounded-md focus:outline-none focus:ring-2`}
                         placeholder="https://example.com/apply"
                       />
@@ -371,11 +371,11 @@ export default function NewInternshipPage() {
                       <input
                         type="url"
                         id="applicationUrl"
-                        {...register("applicationUrl")}
+                        {...register('applicationUrl')}
                         className={`w-full p-2 border ${
                           errors.applicationUrl
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-gray-300 focus:ring-[#003E6B]"
+                            ? 'border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 focus:ring-[#003E6B]'
                         } rounded-md focus:outline-none focus:ring-2`}
                         placeholder="https://example.com/direct-apply"
                       />
@@ -397,13 +397,13 @@ export default function NewInternshipPage() {
                       htmlFor="deadline"
                       className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
                     >
-                      <FaCalendarAlt className="mr-1 text-gray-400" />{" "}
+                      <FaCalendarAlt className="mr-1 text-gray-400" />{' '}
                       Application Deadline *
                     </label>
                     <input
                       id="deadline"
                       type="date"
-                      {...register("deadline", { required: true })}
+                      {...register('deadline', { required: true })}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                     />
                     {errors.deadline && (
@@ -434,7 +434,7 @@ export default function NewInternshipPage() {
                   </label>
                   <textarea
                     id="description"
-                    {...register("description", { required: true })}
+                    {...register('description', { required: true })}
                     rows={5}
                     className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                     placeholder="Enter a detailed description of the internship..."
@@ -456,7 +456,7 @@ export default function NewInternshipPage() {
                   </label>
                   <textarea
                     id="requirements"
-                    {...register("requirements")}
+                    {...register('requirements')}
                     rows={3}
                     className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                     placeholder="e.g. Strong analytical skills, Excel proficiency, Finance background"
@@ -479,7 +479,7 @@ export default function NewInternshipPage() {
                 <input
                   type="text"
                   id="schoolTargets"
-                  {...register("schoolTargets")}
+                  {...register('schoolTargets')}
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003E6B]"
                   placeholder="NYU, Columbia University, etc. (comma-separated)"
                 />
@@ -505,7 +505,7 @@ export default function NewInternshipPage() {
                     </label>
                     <select
                       id="track"
-                      {...register("track", { required: true })}
+                      {...register('track', { required: true })}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                     >
                       <option value="">Select a track</option>
@@ -515,7 +515,7 @@ export default function NewInternshipPage() {
                     </select>
                     {errors.track && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.track.message || "Track is required"}
+                        {errors.track.message || 'Track is required'}
                       </p>
                     )}
                   </div>
@@ -530,12 +530,12 @@ export default function NewInternshipPage() {
                     </label>
                     <select
                       id="chapter"
-                      {...register("chapter", { required: true })}
+                      {...register('chapter', { required: true })}
                       defaultValue={userChapter}
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                     >
                       <option value="">Select a chapter</option>
-                      {chapters.map((chapter) => (
+                      {chapters.map(chapter => (
                         <option key={chapter._id} value={chapter.name}>
                           {chapter.name}
                         </option>
@@ -543,7 +543,7 @@ export default function NewInternshipPage() {
                     </select>
                     {errors.chapter && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.chapter.message || "Chapter is required"}
+                        {errors.chapter.message || 'Chapter is required'}
                       </p>
                     )}
                   </div>
@@ -561,7 +561,7 @@ export default function NewInternshipPage() {
                     <input
                       id="isPaid"
                       type="checkbox"
-                      {...register("isPaid")}
+                      {...register('isPaid')}
                       className="h-4 w-4 text-[#003E6B] focus:ring-[#003E6B] border-gray-300 rounded"
                     />
                     <label
@@ -577,7 +577,7 @@ export default function NewInternshipPage() {
                     <input
                       id="isRemote"
                       type="checkbox"
-                      {...register("isRemote")}
+                      {...register('isRemote')}
                       className="h-4 w-4 text-[#003E6B] focus:ring-[#003E6B] border-gray-300 rounded"
                     />
                     <label
@@ -609,7 +609,7 @@ export default function NewInternshipPage() {
                       Creating...
                     </>
                   ) : (
-                    "Create Internship"
+                    'Create Internship'
                   )}
                 </Button>
               </motion.div>

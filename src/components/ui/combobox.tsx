@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import * as React from 'react';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/utils';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -12,14 +12,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from '@/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "./badge";
-import { motion, AnimatePresence } from "framer-motion";
+} from '@/components/ui/popover';
+import { Badge } from './badge';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ComboboxOption {
   value: string;
@@ -40,40 +40,40 @@ export function MultiSelect({
   options,
   selected,
   onChange,
-  placeholder = "Select items...",
-  emptyText = "No items found.",
+  placeholder = 'Select items...',
+  emptyText = 'No items found.',
   className,
   badgeClassName,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
+  const [inputValue, setInputValue] = React.useState('');
 
   const handleUnselect = (item: string) => {
-    onChange(selected.filter((i) => i !== item));
+    onChange(selected.filter(i => i !== item));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Backspace" && !inputValue && selected.length > 0) {
+    if (e.key === 'Backspace' && !inputValue && selected.length > 0) {
       onChange(selected.slice(0, -1));
     }
     // Allow for adding custom skills by pressing Enter
     if (
-      e.key === "Enter" &&
+      e.key === 'Enter' &&
       inputValue &&
-      !options.some((opt) => opt.value === inputValue)
+      !options.some(opt => opt.value === inputValue)
     ) {
       const newValue = inputValue.trim();
       if (newValue && !selected.includes(newValue)) {
         onChange([...selected, newValue]);
-        setInputValue("");
+        setInputValue('');
         e.preventDefault();
       }
     }
   };
 
-  const selectedItems = selected.map((s) => ({
+  const selectedItems = selected.map(s => ({
     value: s,
-    label: options.find((o) => o.value === s)?.label || s,
+    label: options.find(o => o.value === s)?.label || s,
   }));
 
   return (
@@ -84,8 +84,8 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between px-3 py-2 h-auto min-h-10 font-normal",
-            selected.length > 0 ? "h-auto" : "",
+            'w-full justify-between px-3 py-2 h-auto min-h-10 font-normal',
+            selected.length > 0 ? 'h-auto' : '',
             className
           )}
           onClick={() => setOpen(!open)}
@@ -93,7 +93,7 @@ export function MultiSelect({
           <div className="flex flex-wrap gap-1 w-full">
             {selectedItems.length > 0 ? (
               <AnimatePresence>
-                {selectedItems.map((item) => (
+                {selectedItems.map(item => (
                   <motion.div
                     key={item.value}
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -103,19 +103,19 @@ export function MultiSelect({
                   >
                     <Badge
                       variant="secondary"
-                      className={cn("mr-1 mb-1 pr-0.5 pl-2", badgeClassName)}
+                      className={cn('mr-1 mb-1 pr-0.5 pl-2', badgeClassName)}
                     >
                       {item.label}
                       <span
                         role="button"
                         tabIndex={0}
                         className="inline-flex h-5 w-5 items-center justify-center ml-1 hover:bg-secondary-foreground/20 rounded-full cursor-pointer"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleUnselect(item.value);
                         }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             handleUnselect(item.value);
                           }
@@ -134,7 +134,7 @@ export function MultiSelect({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[200px] p-0">
+      <PopoverContent className="w-full min-w-[200px] p-0 text-navy">
         <Command className="w-full" onKeyDown={handleKeyDown}>
           <CommandInput
             placeholder="Search..."
@@ -144,7 +144,7 @@ export function MultiSelect({
           />
           <CommandList>
             <CommandEmpty>
-              {emptyText}{" "}
+              {emptyText}{' '}
               {inputValue && (
                 <Button
                   variant="ghost"
@@ -154,7 +154,7 @@ export function MultiSelect({
                     const newValue = inputValue.trim();
                     if (newValue && !selected.includes(newValue)) {
                       onChange([...selected, newValue]);
-                      setInputValue("");
+                      setInputValue('');
                     }
                   }}
                 >
@@ -164,10 +164,10 @@ export function MultiSelect({
             </CommandEmpty>
             <CommandGroup>
               {options
-                .filter((option) =>
+                .filter(option =>
                   option.label.toLowerCase().includes(inputValue.toLowerCase())
                 )
-                .map((option) => {
+                .map(option => {
                   const isSelected = selected.includes(option.value);
                   return (
                     <CommandItem
@@ -176,18 +176,18 @@ export function MultiSelect({
                       onSelect={() => {
                         onChange(
                           isSelected
-                            ? selected.filter((value) => value !== option.value)
+                            ? selected.filter(value => value !== option.value)
                             : [...selected, option.value]
                         );
-                        setInputValue("");
+                        setInputValue('');
                       }}
                     >
                       <div
                         className={cn(
-                          "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                           isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "opacity-50"
+                            ? 'bg-primary text-primary-foreground'
+                            : 'opacity-50'
                         )}
                       >
                         {isSelected && <Check className="h-3 w-3" />}

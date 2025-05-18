@@ -175,7 +175,7 @@ const Header = () => {
         </motion.div>
 
         <motion.nav
-          className="hidden md:flex items-center space-x-8 font-semibold"
+          className="hidden md:flex items-center space-x-4 lg:space-x-8 font-semibold"
           variants={staggerNavItems}
         >
           {/* About dropdown container */}
@@ -224,9 +224,10 @@ const Header = () => {
           <motion.div className="relative group" variants={navItemAnimation}>
             <Link
               href="/national-committee"
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white whitespace-nowrap hover:text-secondary transition-colors"
             >
-              National Committee
+              <span className="hidden lg:inline">National Committee</span>
+              <span className="lg:hidden">Committee</span>
             </Link>
 
             {/* Dropdown menu */}

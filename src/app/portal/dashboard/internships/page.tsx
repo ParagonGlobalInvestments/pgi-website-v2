@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import Link from 'next/link';
 import {
   FaPlus,
   FaFilter,
@@ -16,36 +16,36 @@ import {
   FaCalendarAlt,
   FaGraduationCap,
   FaUniversity,
-} from "react-icons/fa";
-import { useRouter } from "next/navigation";
-import ProtectedPage from "@/components/auth/ProtectedPage";
-import { motion } from "framer-motion";
-import { ActionButton } from "@/components/ui/action-button";
-import { Button } from "@/components/ui/button";
-import { SmoothTransition } from "@/components/ui/SmoothTransition";
-import { Badge } from "@/components/ui";
+} from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import ProtectedPage from '@/components/auth/ProtectedPage';
+import { motion } from 'framer-motion';
+import { ActionButton } from '@/components/ui/action-button';
+import { Button } from '@/components/ui/button';
+import { SmoothTransition } from '@/components/ui/SmoothTransition';
+import { Badge } from '@/components/ui';
 
 // School abbreviations and official colors
 const SCHOOL_COLORS: Record<string, { abbr: string; color: string }> = {
-  NYU: { abbr: "NYU", color: "#57068c" }, // NYU Purple
-  "Columbia University": { abbr: "Columbia", color: "#0072CE" }, // Columbia Blue
-  "Brown University": { abbr: "Brown", color: "#4E3629" }, // Brown
-  "Yale University": { abbr: "Yale", color: "#00356B" }, // Yale Blue
-  "University of Chicago": { abbr: "UChicago", color: "#800000" }, // Maroon
-  "Cornell University": { abbr: "Cornell", color: "#B31B1B" }, // Cornell Red
-  "University of Pennsylvania": { abbr: "UPenn", color: "#011F5B" }, // Penn Blue
-  "Harvard University": { abbr: "Harvard", color: "#A51C30" }, // Harvard Crimson
-  "Princeton University": { abbr: "Princeton", color: "#F58025" }, // Princeton Orange
-  "Stanford University": { abbr: "Stanford", color: "#8C1515" }, // Stanford Cardinal
-  MIT: { abbr: "MIT", color: "#A31F34" }, // MIT Cardinal
-  "California Institute of Technology": { abbr: "Caltech", color: "#FF6C0C" }, // Caltech Orange
+  NYU: { abbr: 'NYU', color: '#57068c' }, // NYU Purple
+  'Columbia University': { abbr: 'Columbia', color: '#0072CE' }, // Columbia Blue
+  'Brown University': { abbr: 'Brown', color: '#4E3629' }, // Brown
+  'Yale University': { abbr: 'Yale', color: '#00356B' }, // Yale Blue
+  'University of Chicago': { abbr: 'UChicago', color: '#800000' }, // Maroon
+  'Cornell University': { abbr: 'Cornell', color: '#B31B1B' }, // Cornell Red
+  'University of Pennsylvania': { abbr: 'UPenn', color: '#011F5B' }, // Penn Blue
+  'Harvard University': { abbr: 'Harvard', color: '#A51C30' }, // Harvard Crimson
+  'Princeton University': { abbr: 'Princeton', color: '#F58025' }, // Princeton Orange
+  'Stanford University': { abbr: 'Stanford', color: '#8C1515' }, // Stanford Cardinal
+  MIT: { abbr: 'MIT', color: '#A31F34' }, // MIT Cardinal
+  'California Institute of Technology': { abbr: 'Caltech', color: '#FF6C0C' }, // Caltech Orange
 };
 
 // Function to get school abbreviation and color
 const getSchoolInfo = (schoolName: string) => {
   const schoolData = SCHOOL_COLORS[schoolName] || {
     abbr: schoolName,
-    color: "#003E6B",
+    color: '#003E6B',
   };
 
   // Function to determine if text should be white or black based on background color brightness
@@ -59,7 +59,7 @@ const getSchoolInfo = (schoolName: string) => {
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
     // Return white for dark backgrounds, black for light backgrounds
-    return brightness > 128 ? "#000000" : "#FFFFFF";
+    return brightness > 128 ? '#000000' : '#FFFFFF';
   };
 
   return {
@@ -85,7 +85,7 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 260,
       damping: 20,
     },
@@ -98,7 +98,7 @@ interface Internship {
   company: string;
   location: string;
   deadline: string;
-  track: "quant" | "value" | "both";
+  track: 'quant' | 'value' | 'both';
   chapter: string;
   isPaid: boolean;
   isRemote: boolean;
@@ -113,27 +113,27 @@ interface Internship {
 // Track color utility
 const getTrackColor = (track: string) => {
   switch (track) {
-    case "quant":
-      return "bg-blue-500 hover:bg-blue-600";
-    case "value":
-      return "bg-purple-500 hover:bg-purple-600";
-    case "both":
-      return "bg-teal-500 hover:bg-teal-600";
+    case 'quant':
+      return 'bg-blue-500 hover:bg-blue-600';
+    case 'value':
+      return 'bg-purple-500 hover:bg-purple-600';
+    case 'both':
+      return 'bg-teal-500 hover:bg-teal-600';
     default:
-      return "bg-gray-500 hover:bg-gray-600";
+      return 'bg-gray-500 hover:bg-gray-600';
   }
 };
 
 const getTrackBadgeVariant = (track: string) => {
   switch (track) {
-    case "quant":
-      return "blue";
-    case "value":
-      return "purple";
-    case "both":
-      return "teal";
+    case 'quant':
+      return 'blue';
+    case 'value':
+      return 'purple';
+    case 'both':
+      return 'teal';
     default:
-      return "secondary";
+      return 'secondary';
   }
 };
 
@@ -143,17 +143,17 @@ export default function InternshipsPage() {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [chapters, setChapters] = useState<{ _id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
-    track: "all",
-    chapter: "all",
+    track: 'all',
+    chapter: 'all',
     showClosed: false,
   });
   const [filterOpen, setFilterOpen] = useState(false);
 
   // Get user metadata
-  const userRole = (user?.publicMetadata?.role as string) || "member";
-  const userTrack = (user?.publicMetadata?.track as string) || "value";
+  const userRole = (user?.publicMetadata?.role as string) || 'member';
+  const userTrack = (user?.publicMetadata?.track as string) || 'value';
 
   // State for MongoDB user data
   const [mongoUser, setMongoUser] = useState<{
@@ -165,19 +165,19 @@ export default function InternshipsPage() {
   useEffect(() => {
     if (!isLoaded || !user) return;
 
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then((data) => {
+    fetch('/api/users/me')
+      .then(res => res.json())
+      .then(data => {
         if (data && !data.error) {
-          console.log("MongoDB user data:", data);
+          console.log('MongoDB user data:', data);
           setMongoUser({
-            role: data.role || "member",
-            track: data.track || "value",
+            role: data.role || 'member',
+            track: data.track || 'value',
           });
         }
       })
-      .catch((err) => {
-        console.error("Error fetching MongoDB user data:", err);
+      .catch(err => {
+        console.error('Error fetching MongoDB user data:', err);
       });
   }, [isLoaded, user]);
 
@@ -193,14 +193,14 @@ export default function InternshipsPage() {
       try {
         setLoading(true);
         console.log(
-          "Effective user role:",
+          'Effective user role:',
           effectiveRole,
-          "Effective track:",
+          'Effective track:',
           effectiveTrack
         );
 
         // Fetch chapters
-        const chaptersResponse = await fetch("/api/chapters");
+        const chaptersResponse = await fetch('/api/chapters');
         if (chaptersResponse.ok) {
           const chaptersData = await chaptersResponse.json();
           setChapters(chaptersData);
@@ -209,19 +209,19 @@ export default function InternshipsPage() {
         // Build query parameters for internships
         const queryParams = new URLSearchParams();
         // Always include track parameter, even if it's "all"
-        queryParams.set("track", filters.track);
-        if (filters.chapter !== "all") {
-          queryParams.set("chapter", filters.chapter);
+        queryParams.set('track', filters.track);
+        if (filters.chapter !== 'all') {
+          queryParams.set('chapter', filters.chapter);
         }
-        queryParams.set("isClosed", filters.showClosed.toString());
+        queryParams.set('isClosed', filters.showClosed.toString());
 
-        console.log("Fetching with params:", queryParams.toString());
+        console.log('Fetching with params:', queryParams.toString());
 
         // Fetch internships
         const response = await fetch(`/api/internships?${queryParams}`);
 
         if (!response.ok) {
-          throw new Error("Failed to fetch internships");
+          throw new Error('Failed to fetch internships');
         }
 
         const data = await response.json();
@@ -233,7 +233,7 @@ export default function InternshipsPage() {
         data.forEach((i: Internship) => {
           trackCounts[i.track] = (trackCounts[i.track] || 0) + 1;
         });
-        console.log("Client track distribution:", trackCounts);
+        console.log('Client track distribution:', trackCounts);
 
         // Log school targets for debugging
         const hasSchoolTargets = data.filter(
@@ -243,7 +243,7 @@ export default function InternshipsPage() {
           `Internships with school targets: ${hasSchoolTargets}/${data.length}`
         );
       } catch (err) {
-        setError("Failed to load data. Please try again.");
+        setError('Failed to load data. Please try again.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -256,37 +256,37 @@ export default function InternshipsPage() {
   // Function to force sync user data
   const forceUserSync = async () => {
     try {
-      console.log("Forcing user data sync...");
-      const response = await fetch("/api/users/sync", {
-        method: "POST",
+      console.log('Forcing user data sync...');
+      const response = await fetch('/api/users/sync', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({}), // Empty body is fine
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log("User sync result:", result);
-        alert("User data synced successfully! Please refresh the page.");
+        console.log('User sync result:', result);
+        alert('User data synced successfully! Please refresh the page.');
       } else {
-        console.error("Failed to sync user data");
-        alert("Failed to sync user data. Please try again.");
+        console.error('Failed to sync user data');
+        alert('Failed to sync user data. Please try again.');
       }
     } catch (error) {
-      console.error("Error syncing user data:", error);
-      alert("Error syncing user data. Please try again.");
+      console.error('Error syncing user data:', error);
+      alert('Error syncing user data. Please try again.');
     }
   };
 
   // Format date for display
   const formatDate = (dateString: string) => {
-    if (!dateString) return "No deadline";
+    if (!dateString) return 'No deadline';
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     }).format(date);
   };
 
@@ -316,7 +316,7 @@ export default function InternshipsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0"
+        className="space-y-8 pt-4 lg:pt-0 text-navy"
       >
         <div className="flex justify-between items-center">
           <motion.h1
@@ -328,7 +328,7 @@ export default function InternshipsPage() {
             Internship Board
           </motion.h1>
 
-          {(userRole === "admin" || userRole === "lead") && (
+          {(userRole === 'admin' || userRole === 'lead') && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -365,19 +365,19 @@ export default function InternshipsPage() {
               onClick={() => setFilterOpen(!filterOpen)}
               className="text-sm text-[#003E6B]"
             >
-              {filterOpen ? "Hide Filters" : "Show Filters"}
+              {filterOpen ? 'Hide Filters' : 'Show Filters'}
             </Button>
           </div>
 
           {filterOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               {/* Track Filter - Only shown to admins/leads */}
-              {(effectiveRole === "admin" || effectiveRole === "lead") && (
+              {(effectiveRole === 'admin' || effectiveRole === 'lead') && (
                 <div>
                   <label
                     htmlFor="track"
@@ -388,7 +388,7 @@ export default function InternshipsPage() {
                   <select
                     id="track"
                     value={filters.track}
-                    onChange={(e) =>
+                    onChange={e =>
                       setFilters({ ...filters, track: e.target.value })
                     }
                     className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
@@ -396,7 +396,6 @@ export default function InternshipsPage() {
                     <option value="all">All Tracks</option>
                     <option value="quant">Quantitative</option>
                     <option value="value">Value</option>
-                    <option value="both">Both Tracks</option>
                   </select>
                 </div>
               )}
@@ -412,13 +411,13 @@ export default function InternshipsPage() {
                 <select
                   id="chapter"
                   value={filters.chapter}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFilters({ ...filters, chapter: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-[#003E6B] focus:border-[#003E6B]"
                 >
                   <option value="all">All Chapters</option>
-                  {chapters.map((chapter) => (
+                  {chapters.map(chapter => (
                     <option key={chapter._id} value={chapter.name}>
                       {chapter.name}
                     </option>
@@ -432,7 +431,7 @@ export default function InternshipsPage() {
                   type="checkbox"
                   id="showClosed"
                   checked={filters.showClosed}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFilters({ ...filters, showClosed: e.target.checked })
                   }
                   className="h-4 w-4 text-[#003E6B] focus:ring-[#003E6B] border-gray-300 rounded"
@@ -491,8 +490,8 @@ export default function InternshipsPage() {
                 whileHover={{ y: -5 }}
                 className={`bg-white rounded-xl shadow-md overflow-hidden border h-full ${
                   internship.isClosed || isDeadlinePassed(internship.deadline)
-                    ? "border-gray-200 opacity-75"
-                    : "border-[#003E6B]/10"
+                    ? 'border-gray-200 opacity-75'
+                    : 'border-[#003E6B]/10'
                 }`}
               >
                 <div className="p-5 flex flex-col h-full">
@@ -555,16 +554,16 @@ export default function InternshipsPage() {
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      {internship.track === "both" ? (
+                      {internship.track === 'both' ? (
                         <>
                           <Badge
-                            variant={getTrackBadgeVariant("quant")}
+                            variant={getTrackBadgeVariant('quant')}
                             className="text-xs capitalize"
                           >
                             quant
                           </Badge>
                           <Badge
-                            variant={getTrackBadgeVariant("value")}
+                            variant={getTrackBadgeVariant('value')}
                             className="text-xs capitalize"
                           >
                             value

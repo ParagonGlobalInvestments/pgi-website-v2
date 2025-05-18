@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 import {
   FaCalendarAlt,
   FaUserGraduate,
@@ -10,7 +10,7 @@ import {
   FaClipboardList,
   FaCoffee,
   FaRegClock,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 // Animation variants
 const fadeIn = {
@@ -20,7 +20,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -42,7 +42,7 @@ const cardItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -50,7 +50,7 @@ const cardItem = {
 const buttonVariant = {
   hover: {
     scale: 1.05,
-    backgroundColor: "#1f4287",
+    backgroundColor: '#1f4287',
     transition: {
       duration: 0.2,
     },
@@ -59,81 +59,81 @@ const buttonVariant = {
 
 // Timeline data
 const timelineEvents = [
-  { date: "Jan 8, 2025", time: "8:00 PM ET", title: "Info Session I (Zoom)" },
-  { date: "Jan 9, 2025", time: "8:00 PM ET", title: "Diversity Event (Zoom)" },
-  { date: "Jan 10, 2025", time: "8:00 PM ET", title: "Info Session II (Zoom)" },
-  { date: "Jan 11-13, 2025", time: "9:00 AM ET", title: "Coffee Chats" },
-  { date: "Jan 13, 2025", time: "12:00 AM ET", title: "Applications Open" },
-  { date: "Jan 14, 2025", time: "8:00 PM ET", title: "Diversity Event (Zoom)" },
+  { date: 'Jan 8, 2025', time: '8:00 PM ET', title: 'Info Session I (Zoom)' },
+  { date: 'Jan 9, 2025', time: '8:00 PM ET', title: 'Diversity Event (Zoom)' },
+  { date: 'Jan 10, 2025', time: '8:00 PM ET', title: 'Info Session II (Zoom)' },
+  { date: 'Jan 11-13, 2025', time: '9:00 AM ET', title: 'Coffee Chats' },
+  { date: 'Jan 13, 2025', time: '12:00 AM ET', title: 'Applications Open' },
+  { date: 'Jan 14, 2025', time: '8:00 PM ET', title: 'Diversity Event (Zoom)' },
   {
-    date: "Jan 15, 2025",
-    time: "8:00 PM ET",
-    title: "PM and ICOMM Event (Zoom)",
+    date: 'Jan 15, 2025',
+    time: '8:00 PM ET',
+    title: 'PM and ICOMM Event (Zoom)',
   },
-  { date: "Jan 17, 2025", time: "11:59 PM ET", title: "Applications Close" },
+  { date: 'Jan 17, 2025', time: '11:59 PM ET', title: 'Applications Close' },
 ];
 
 // Recruitment team data
 const recruitmentTeam = [
   {
-    name: "Sohini Banerjee",
-    role: "Co-Head of Recruitment",
-    university: "University of Chicago",
+    name: 'Sohini Banerjee',
+    role: 'Co-Head of Recruitment',
+    university: 'University of Chicago',
   },
   {
-    name: "John Otto",
-    role: "Co-Head of Recruitment",
-    university: "University of Pennsylvania",
+    name: 'John Otto',
+    role: 'Co-Head of Recruitment',
+    university: 'University of Pennsylvania',
   },
   {
-    name: "Ann Li",
-    role: "Recruiter",
-    university: "New York University",
+    name: 'Ann Li',
+    role: 'Recruiter',
+    university: 'New York University',
   },
   {
-    name: "Aurora Wang",
-    role: "Recruiter",
-    university: "Columbia University",
+    name: 'Aurora Wang',
+    role: 'Recruiter',
+    university: 'Columbia University',
   },
   {
-    name: "David Chen",
-    role: "Recruiter",
-    university: "Columbia University",
+    name: 'David Chen',
+    role: 'Recruiter',
+    university: 'Columbia University',
   },
   {
-    name: "Lucas Lu",
-    role: "Recruiter",
-    university: "Cornell University",
+    name: 'Lucas Lu',
+    role: 'Recruiter',
+    university: 'Cornell University',
   },
   {
-    name: "Nana Agyeman",
-    role: "Recruiter",
-    university: "Princeton University",
+    name: 'Nana Agyeman',
+    role: 'Recruiter',
+    university: 'Princeton University',
   },
   {
-    name: "Daniel Kim",
-    role: "Recruiter",
-    university: "Princeton University",
+    name: 'Daniel Kim',
+    role: 'Recruiter',
+    university: 'Princeton University',
   },
   {
-    name: "Flynn Kelleher",
-    role: "Recruiter",
-    university: "Cornell University",
+    name: 'Flynn Kelleher',
+    role: 'Recruiter',
+    university: 'Cornell University',
   },
   {
-    name: "Jack Stemerman",
-    role: "Recruiter",
-    university: "Yale University",
+    name: 'Jack Stemerman',
+    role: 'Recruiter',
+    university: 'Yale University',
   },
   {
-    name: "John Yi",
-    role: "Recruiter",
-    university: "New York University",
+    name: 'John Yi',
+    role: 'Recruiter',
+    university: 'New York University',
   },
   {
-    name: "Joshua Donovan",
-    role: "Recruiter",
-    university: "Yale University",
+    name: 'Joshua Donovan',
+    role: 'Recruiter',
+    university: 'Yale University',
   },
 ];
 
@@ -350,14 +350,14 @@ export default function ApplyPage() {
               >
                 <div
                   className={`flex items-center ${
-                    index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                   }`}
                 >
                   <div
                     className={`w-full md:w-1/2 ${
                       index % 2 === 0
-                        ? "md:pr-12 text-right"
-                        : "md:pl-12 text-left"
+                        ? 'md:pr-12 text-right'
+                        : 'md:pl-12 text-left'
                     }`}
                   >
                     <div className="bg-navy p-6 rounded-lg border border-gray-700">

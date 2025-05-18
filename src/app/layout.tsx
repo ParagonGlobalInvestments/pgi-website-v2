@@ -3,7 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from '@/components/ui/toaster';
-import '../tailwind.css';
+// import '../tailwind.css'; // Removed this import
 import './globals.css';
 
 // TODO: Replace with the identified font from original Paragon website

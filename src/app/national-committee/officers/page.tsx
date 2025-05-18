@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { FaLinkedin } from "react-icons/fa";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FaLinkedin } from 'react-icons/fa';
 
 // Animation variants
 const fadeIn = {
@@ -12,7 +12,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -35,7 +35,7 @@ const cardAnimation = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -43,104 +43,104 @@ const cardAnimation = {
 // Officer data
 const officers = [
   {
-    name: "Philip Bardon",
-    title: "Chairman",
-    university: "Columbia University",
-    linkedin: "#",
+    name: 'Philip Bardon',
+    title: 'Chairman',
+    university: 'Columbia University',
+    linkedin: '#',
   },
   {
-    name: "Myles Spiess",
-    title: "Chief Executive Officer",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Myles Spiess',
+    title: 'Chief Executive Officer',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Sean Oh",
-    title: "Co-Chief Operating Officer",
-    university: "University of Pennsylvania",
-    linkedin: "#",
+    name: 'Sean Oh',
+    title: 'Co-Chief Operating Officer',
+    university: 'University of Pennsylvania',
+    linkedin: '#',
   },
   {
-    name: "Sohini Banerjee",
-    title: "Co-Chief Operating Officer",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Sohini Banerjee',
+    title: 'Co-Chief Operating Officer',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Souptik De",
-    title: "Co-Chief Operating Officer",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Souptik De',
+    title: 'Co-Chief Operating Officer',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Clara Ee",
-    title: "Co-Chief Investment Officer",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Clara Ee',
+    title: 'Co-Chief Investment Officer',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Jayanth Mammen",
-    title: "Co-Chief Investment Officer",
-    university: "University of Pennsylvania",
-    linkedin: "#",
+    name: 'Jayanth Mammen',
+    title: 'Co-Chief Investment Officer',
+    university: 'University of Pennsylvania',
+    linkedin: '#',
   },
   {
-    name: "Dominic Olaguera-Delogu",
-    title: "Co-Chief Quantitative Researcher",
-    university: "University of Pennsylvania",
-    linkedin: "#",
+    name: 'Dominic Olaguera-Delogu',
+    title: 'Co-Chief Quantitative Researcher',
+    university: 'University of Pennsylvania',
+    linkedin: '#',
   },
   {
-    name: "Samuel Henriques",
-    title: "Co-Chief Quantitative Researcher",
-    university: "Princeton University",
-    linkedin: "#",
+    name: 'Samuel Henriques',
+    title: 'Co-Chief Quantitative Researcher',
+    university: 'Princeton University',
+    linkedin: '#',
   },
   {
-    name: "Robert Liu",
-    title: "Co-Chief Technology Officer",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Robert Liu',
+    title: 'Co-Chief Technology Officer',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Harrison Du",
-    title: "Co-Chief Technology Officer",
-    university: "New York University",
-    linkedin: "#",
+    name: 'Harrison Du',
+    title: 'Co-Chief Technology Officer',
+    university: 'New York University',
+    linkedin: '#',
   },
 ];
 
 // Alumni Board
 const alumniBoard = [
   {
-    name: "Jay Sivadas",
-    company: "Morgan Stanley",
-    linkedin: "#",
+    name: 'Jay Sivadas',
+    company: 'Morgan Stanley',
+    linkedin: '#',
   },
   {
-    name: "Daniel Labrador-Plata",
-    company: "Bank of America",
-    linkedin: "#",
+    name: 'Daniel Labrador-Plata',
+    company: 'Bank of America',
+    linkedin: '#',
   },
   {
-    name: "Erin Ku",
-    company: "RBC Capital Markets",
-    linkedin: "#",
+    name: 'Erin Ku',
+    company: 'RBC Capital Markets',
+    linkedin: '#',
   },
   {
-    name: "Bradley Yu",
-    company: "Citadel",
-    linkedin: "#",
+    name: 'Bradley Yu',
+    company: 'Citadel',
+    linkedin: '#',
   },
   {
-    name: "Advay Mohindra",
-    company: "Citadel",
-    linkedin: "#",
+    name: 'Advay Mohindra',
+    company: 'Citadel',
+    linkedin: '#',
   },
   {
-    name: "Harrison Wang",
-    company: "Morgan Stanley",
-    linkedin: "#",
+    name: 'Harrison Wang',
+    company: 'Morgan Stanley',
+    linkedin: '#',
   },
 ];
 

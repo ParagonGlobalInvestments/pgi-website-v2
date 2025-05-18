@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useState, useEffect, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
 
 interface MongoUserChapter {
   id: string;
@@ -10,33 +10,142 @@ interface MongoUserChapter {
 
 interface MongoUser {
   id: string;
-  name: string;
-  email: string;
-  role: "admin" | "lead" | "member";
-  track: "quant" | "value" | "both";
-  chapter: MongoUserChapter | null;
-  isManager: boolean;
-  isAlumni: boolean;
-  gradYear: number;
-  skills: string[];
-  bio: string;
-  linkedin: string;
-  resumeUrl: string;
-  avatarUrl: string;
+  personal: {
+    name: string;
+    email: string;
+    bio?: string;
+    major?: string;
+    gradYear: number;
+    isAlumni: boolean;
+    phone?: string;
+  };
+  org: {
+    chapter?: MongoUserChapter;
+    permissionLevel: 'admin' | 'lead' | 'member';
+    track?: 'quant' | 'value';
+    trackRoles: string[];
+    execRoles: string[];
+    joinDate?: string;
+    status: 'active' | 'inactive' | 'pending';
+  };
+  profile: {
+    skills: string[];
+    projects?: Array<{
+      title: string;
+      description?: string;
+      link?: string;
+      githubLink?: string;
+      type: 'value' | 'quant' | 'other';
+      startDate?: string;
+      endDate?: string;
+      inProgress?: boolean;
+      collaborators?: string[];
+      tags?: string[];
+      imageUrl?: string;
+    }>;
+    experiences?: Array<{
+      company: string;
+      title: string;
+      startDate: string;
+      endDate?: string;
+      current?: boolean;
+      description?: string;
+    }>;
+    linkedin?: string;
+    resumeUrl?: string;
+    avatarUrl?: string;
+    github?: string;
+    interests?: string[];
+    achievements?: string[];
+  };
+  activity: {
+    lastLogin?: string;
+    internshipsPosted: number;
+  };
+  system: {
+    firstLogin: boolean;
+    notifications?: {
+      email: boolean;
+      platform: boolean;
+    };
+  };
   createdAt: string;
   updatedAt: string;
 }
 
+// Updated interface for user data update requests
 interface UpdateUserData {
-  bio?: string;
-  skills?: string[];
-  gradYear?: number;
-  linkedin?: string;
-  resumeUrl?: string;
-  avatarUrl?: string;
+  personal?: {
+    bio?: string;
+    major?: string;
+    gradYear?: number;
+    phone?: string;
+  };
+  profile?: {
+    skills?: string[];
+    linkedin?: string;
+    resumeUrl?: string;
+    avatarUrl?: string;
+    github?: string;
+    interests?: string[];
+    achievements?: string[];
+    experiences?: Array<{
+      company: string;
+      title: string;
+      startDate: string;
+      endDate?: string;
+      current?: boolean;
+      description?: string;
+    }>;
+    projects?: Array<{
+      title: string;
+      description?: string;
+      link?: string;
+      githubLink?: string;
+      type: 'value' | 'quant' | 'other';
+      startDate?: string;
+      endDate?: string;
+      inProgress?: boolean;
+      collaborators?: string[];
+      tags?: string[];
+      imageUrl?: string;
+    }>;
+  };
+  system?: {
+    firstLogin?: boolean;
+    notifications?: {
+      email?: boolean;
+      platform?: boolean;
+    };
+  };
 }
 
-export function useMongoUser() {
+/**
+ * Hook return value interface
+ */
+interface UseMongoUserReturn {
+  /** MongoDB user data */
+  user: MongoUser | null;
+  /** Whether the MongoDB user data is being loaded */
+  isLoading: boolean;
+  /** Error that occurred during the fetch, if any */
+  error: string | null;
+  /** Function to update user data */
+  updateUser: (updateData: UpdateUserData) => Promise<boolean>;
+  /** Function to sync user data */
+  syncUser: (userData?: UpdateUserData) => Promise<boolean>;
+}
+
+/**
+ * Custom hook to fetch and interact with the MongoDB user data
+ *
+ * This hook manages the connection between Clerk authentication
+ * and our MongoDB user records. It fetches the MongoDB user data
+ * corresponding to the currently authenticated Clerk user.
+ *
+ * @returns {UseMongoUserReturn} The MongoDB user data, loading state, error state, and sync function
+ */
+export function useMongoUser(): UseMongoUserReturn {
   const { isLoaded, isSignedIn } = useUser();
   const [user, setUser] = useState<MongoUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,11 +166,11 @@ export function useMongoUser() {
         setError(null);
 
         // Fetch user data from MongoDB through our API
-        const response = await fetch("/api/users/me");
+        const response = await fetch('/api/users/me');
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch user data");
+          throw new Error(errorData.error || 'Failed to fetch user data');
         }
 
         const data = await response.json();
@@ -71,21 +180,21 @@ export function useMongoUser() {
           // Reset sync attempted flag when we successfully get a user
           syncAttempted.current = false;
         } else {
-          throw new Error("No user data returned");
+          throw new Error('No user data returned');
         }
       } catch (err: any) {
-        console.error("Error fetching MongoDB user:", err);
-        setError(err.message || "Failed to load user data");
+        console.error('Error fetching MongoDB user:', err);
+        setError(err.message || 'Failed to load user data');
 
         // Only try to sync once to prevent infinite loops
         if (!syncAttempted.current) {
           syncAttempted.current = true;
           try {
-            console.log("Attempting to sync user...");
-            const syncResponse = await fetch("/api/users/sync");
+            console.log('Attempting to sync user...');
+            const syncResponse = await fetch('/api/users/sync');
             if (syncResponse.ok) {
               // Try fetching user data again
-              const retryResponse = await fetch("/api/users/me");
+              const retryResponse = await fetch('/api/users/me');
               if (retryResponse.ok) {
                 const retryData = await retryResponse.json();
                 if (retryData.success && retryData.user) {
@@ -95,7 +204,7 @@ export function useMongoUser() {
               }
             }
           } catch (syncErr) {
-            console.error("Error syncing user data:", syncErr);
+            console.error('Error syncing user data:', syncErr);
           }
         }
       } finally {
@@ -109,27 +218,27 @@ export function useMongoUser() {
   // Function to update user data
   const updateUser = async (updateData: UpdateUserData) => {
     if (!isSignedIn || !user) {
-      throw new Error("User not authenticated");
+      throw new Error('User not authenticated');
     }
 
     try {
       setIsLoading(true);
 
-      const response = await fetch("/api/users/me", {
-        method: "PATCH",
+      const response = await fetch('/api/users/me', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update user data");
+        throw new Error(errorData.error || 'Failed to update user data');
       }
 
       // Fetch updated user data
-      const updatedResponse = await fetch("/api/users/me");
+      const updatedResponse = await fetch('/api/users/me');
       const updatedData = await updatedResponse.json();
 
       if (updatedData.success && updatedData.user) {
@@ -138,8 +247,8 @@ export function useMongoUser() {
 
       return true;
     } catch (err: any) {
-      console.error("Error updating user:", err);
-      setError(err.message || "Failed to update user data");
+      console.error('Error updating user:', err);
+      setError(err.message || 'Failed to update user data');
       throw err;
     } finally {
       setIsLoading(false);
@@ -149,7 +258,7 @@ export function useMongoUser() {
   // Function to sync user data
   const syncUser = async (userData?: UpdateUserData) => {
     if (!isSignedIn) {
-      throw new Error("User not authenticated");
+      throw new Error('User not authenticated');
     }
 
     try {
@@ -158,47 +267,67 @@ export function useMongoUser() {
 
       let response;
       if (userData) {
-        response = await fetch("/api/users/sync", {
-          method: "POST",
+        // API expects flattened structure, so map the nested fields appropriately
+        const syncData: Record<string, any> = {};
+
+        // Map personal data
+        if (userData.personal) {
+          if (userData.personal.bio !== undefined)
+            syncData.bio = userData.personal.bio;
+          if (userData.personal.major !== undefined)
+            syncData.major = userData.personal.major;
+          if (userData.personal.gradYear !== undefined)
+            syncData.gradYear = userData.personal.gradYear;
+          if (userData.personal.phone !== undefined)
+            syncData.phone = userData.personal.phone;
+        }
+
+        // Map profile data
+        if (userData.profile) {
+          if (userData.profile.skills !== undefined)
+            syncData.skills = userData.profile.skills;
+          if (userData.profile.linkedin !== undefined)
+            syncData.linkedin = userData.profile.linkedin;
+          if (userData.profile.resumeUrl !== undefined)
+            syncData.resumeUrl = userData.profile.resumeUrl;
+          if (userData.profile.avatarUrl !== undefined)
+            syncData.avatarUrl = userData.profile.avatarUrl;
+          if (userData.profile.github !== undefined)
+            syncData.github = userData.profile.github;
+          if (userData.profile.interests !== undefined)
+            syncData.interests = userData.profile.interests;
+          if (userData.profile.achievements !== undefined)
+            syncData.achievements = userData.profile.achievements;
+          if (userData.profile.experiences)
+            syncData.experiences = userData.profile.experiences;
+          if (userData.profile.projects)
+            syncData.projects = userData.profile.projects;
+        }
+
+        // Map system data
+        if (userData.system) {
+          if (userData.system.firstLogin !== undefined)
+            syncData.firstLogin = userData.system.firstLogin;
+        }
+
+        response = await fetch('/api/users/sync', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(userData),
+          body: JSON.stringify(syncData),
         });
       } else {
-        response = await fetch("/api/users/sync");
+        response = await fetch('/api/users/sync');
       }
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        // Check if error is a duplicate key error for email
-        if (
-          errorData.error &&
-          errorData.error.includes("duplicate key error") &&
-          errorData.error.includes("email")
-        ) {
-          console.warn(
-            "Found duplicate email in database. Attempting to resolve..."
-          );
-
-          // Try to resolve the conflict
-          await handleDuplicateEmail();
-
-          // Retry the sync
-          const retryResponse = await fetch("/api/users/sync");
-          if (!retryResponse.ok) {
-            throw new Error(
-              "Failed to sync user data after resolving duplicate email"
-            );
-          }
-        } else {
-          throw new Error(errorData.error || "Failed to sync user data");
-        }
+        throw new Error(errorData.error || 'Failed to sync user data');
       }
 
       // Fetch updated user data
-      const updatedResponse = await fetch("/api/users/me");
+      const updatedResponse = await fetch('/api/users/me');
       const updatedData = await updatedResponse.json();
 
       if (updatedData.success && updatedData.user) {
@@ -207,8 +336,8 @@ export function useMongoUser() {
 
       return true;
     } catch (err: any) {
-      console.error("Error syncing user:", err);
-      setError(err.message || "Failed to sync user data");
+      console.error('Error syncing user:', err);
+      setError(err.message || 'Failed to sync user data');
       throw err;
     } finally {
       setIsLoading(false);
@@ -224,27 +353,8 @@ export function useMongoUser() {
   };
 }
 
-// Standalone function to handle duplicate email issues
+// Helper function for duplicate email handling - simplified
 export async function handleDuplicateEmail() {
-  try {
-    const resolveResponse = await fetch("/api/auth/resolve-duplicate-email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!resolveResponse.ok) {
-      console.error(
-        "Failed to resolve duplicate email:",
-        await resolveResponse.json()
-      );
-      throw new Error("Failed to resolve duplicate email conflict");
-    }
-
-    return await resolveResponse.json();
-  } catch (err: any) {
-    console.error("Error handling duplicate email:", err);
-    throw err;
-  }
+  console.log('Duplicate email handling with new user model structure');
+  return true;
 }

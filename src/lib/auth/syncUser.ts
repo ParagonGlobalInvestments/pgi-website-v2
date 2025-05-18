@@ -1,44 +1,62 @@
-import { currentUser } from "@clerk/nextjs/server";
-import connectDB from "@/lib/database/mongodb";
-import User from "@/lib/database/models/User";
-import Chapter from "@/lib/database/models/Chapter";
+import { currentUser } from '@clerk/nextjs/server';
+import { connectToDatabase } from '@/lib/database/connection';
+import User from '@/lib/database/models/User';
+import Chapter from '@/lib/database/models/Chapter';
 
 // Valid chapter names from our database
 const VALID_CHAPTERS = [
-  "Princeton University",
-  "Brown University",
-  "Columbia University",
-  "Yale University",
-  "University of Pennsylvania",
-  "New York University",
-  "University of Chicago",
-  "Cornell University",
+  'Princeton University',
+  'Brown University',
+  'Columbia University',
+  'Yale University',
+  'University of Pennsylvania',
+  'New York University',
+  'University of Chicago',
+  'Cornell University',
 ];
 
 // Map common incorrect chapter names to valid chapters
 const CHAPTER_NAME_MAP: Record<string, string> = {
-  "New York": "New York University",
-  NYU: "New York University",
-  Penn: "University of Pennsylvania",
-  UPenn: "University of Pennsylvania",
-  Princeton: "Princeton University",
-  Brown: "Brown University",
-  Columbia: "Columbia University",
-  Yale: "Yale University",
-  Chicago: "University of Chicago",
-  Cornell: "Cornell University",
+  'New York': 'New York University',
+  NYU: 'New York University',
+  Penn: 'University of Pennsylvania',
+  UPenn: 'University of Pennsylvania',
+  Princeton: 'Princeton University',
+  Brown: 'Brown University',
+  Columbia: 'Columbia University',
+  Yale: 'Yale University',
+  Chicago: 'University of Chicago',
+  Cornell: 'Cornell University',
 };
 
 // Track which chapters we've already remapped to avoid redundant console logs
 const remappedChapterLogs = new Set<string>();
 
 interface SyncUserOptions {
-  gradYear?: number;
-  skills?: string[];
   bio?: string;
+  skills?: string[];
+  gradYear?: number;
   linkedin?: string;
   resumeUrl?: string;
   avatarUrl?: string;
+  github?: string;
+  major?: string;
+  trackRoles?: string[];
+  track?: string;
+  chapterName?: string;
+  isAlumni?: boolean;
+  phone?: string;
+  experiences?: Array<{
+    company: string;
+    title: string;
+    startDate: Date;
+    endDate?: Date;
+    current?: boolean;
+    description?: string;
+  }>;
+  interests?: string[];
+  achievements?: string[];
+  firstLogin?: boolean;
 }
 
 /**
@@ -47,12 +65,12 @@ interface SyncUserOptions {
  */
 export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
   try {
-    await connectDB();
+    await connectToDatabase();
 
     // Get the current user from Clerk
     const user = await currentUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      throw new Error('User not authenticated');
     }
 
     // Find the user's primary email
@@ -61,186 +79,300 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
     )?.emailAddress;
 
     if (!email) {
-      throw new Error("User email not found");
+      throw new Error('User email not found');
     }
 
-    // Get or set default values from metadata
-    const role = (user.publicMetadata.role as string) || "member";
-    let track = (user.publicMetadata.track as string) || "value";
+    // Get values from metadata (don't set defaults)
+    let track = (user.publicMetadata.track as string) || options.track;
+    const trackRoles = options.trackRoles || [];
+    const execRoles = (user.publicMetadata.execRoles as string[]) || [];
 
-    // Validate track - ensure it's one of the allowed values
-    if (!["quant", "value", "both"].includes(track)) {
-      console.warn(`Invalid track value: ${track}, defaulting to "value"`);
-      track = "value";
+    // Validate and remap track if necessary
+    if (track === 'both' || (track && !['quant', 'value'].includes(track))) {
+      console.warn(
+        `Invalid track value "${track}" found in Clerk metadata or options. Defaulting to "quant".`
+      );
+      track = 'quant'; // Or any other default valid track
     }
 
-    // Get chapter name from metadata and normalize
+    // Get chapter name from metadata (don't set a default)
     let chapterName =
-      (user.publicMetadata.chapter as string) || "Yale University";
+      (user.publicMetadata.chapter as string) || options.chapterName;
+    let chapter = null;
 
-    const originalChapterName = chapterName;
+    // Only process chapter if one is specified
+    if (chapterName) {
+      const originalChapterName = chapterName;
 
-    // Check if chapter name needs to be remapped
-    if (
-      !VALID_CHAPTERS.includes(chapterName) &&
-      CHAPTER_NAME_MAP[chapterName]
-    ) {
-      chapterName = CHAPTER_NAME_MAP[chapterName];
+      // Check if chapter name needs to be remapped
+      if (
+        !VALID_CHAPTERS.includes(chapterName) &&
+        CHAPTER_NAME_MAP[chapterName]
+      ) {
+        chapterName = CHAPTER_NAME_MAP[chapterName];
 
-      // Only log the remapping once per chapter to avoid spam
-      const logKey = `${originalChapterName}-${chapterName}`;
-      if (!remappedChapterLogs.has(logKey)) {
-        console.log(
-          `Remapped chapter name from "${originalChapterName}" to "${chapterName}"`
-        );
-        remappedChapterLogs.add(logKey);
-      }
-    }
-
-    const isManager = (user.publicMetadata.isManager as boolean) || false;
-    const isAlumni = (user.publicMetadata.isAlumni as boolean) || false;
-
-    // Find the chapter ID for the user's chapter
-    let chapter = await Chapter.findOne({ name: chapterName });
-
-    // If chapter not found, fallback to a default chapter
-    if (!chapter) {
-      // Only log once per session
-      if (!remappedChapterLogs.has(`fallback-${originalChapterName}`)) {
-        console.warn(
-          `Chapter not found: ${chapterName}, falling back to default chapter`
-        );
-        remappedChapterLogs.add(`fallback-${originalChapterName}`);
-      }
-
-      // Try to find Yale University as fallback
-      chapter = await Chapter.findOne({ name: "Yale University" });
-
-      // If Yale not found, try any chapter
-      if (!chapter) {
-        chapter = await Chapter.findOne({});
-
-        if (!chapter) {
-          throw new Error("No chapters found in the database");
+        // Only log the remapping once per chapter to avoid spam
+        const logKey = `${originalChapterName}-${chapterName}`;
+        if (!remappedChapterLogs.has(logKey)) {
+          console.log(
+            `Remapped chapter name from "${originalChapterName}" to "${chapterName}"`
+          );
+          remappedChapterLogs.add(logKey);
         }
       }
 
-      // Only log once per session
-      if (!remappedChapterLogs.has(`using-${chapter.name}`)) {
-        console.log(`Using fallback chapter: ${chapter.name}`);
-        remappedChapterLogs.add(`using-${chapter.name}`);
-      }
-
-      chapterName = chapter.name;
+      // Find the chapter ID for the user's chapter
+      chapter = await Chapter.findOne({ name: chapterName });
     }
 
-    // Default values for new users
+    // Default graduation year if none is provided
     const defaultGradYear = new Date().getFullYear() + 1;
-    const defaultSkills = ["Finance"];
+    const gradYear = options.gradYear || defaultGradYear;
 
-    // Check if user already exists in MongoDB
-    let mongoUser = await User.findOne({ clerkId: user.id });
+    // Default values for isAlumni based on graduation year
+    const isAlumni =
+      options.isAlumni !== undefined
+        ? options.isAlumni
+        : (user.publicMetadata.isAlumni as boolean) ||
+          new Date().getFullYear() > gradYear;
+
+    // Check if user already exists in MongoDB by clerkId or email
+    let mongoUser = await User.findOne({
+      $or: [{ 'system.clerkId': user.id }, { 'personal.email': email }],
+    });
+
+    // Log chapter, track and trackRoles for debugging
+    console.log(
+      `Chapter info - Name: ${chapterName}, Found: ${
+        chapter ? 'Yes' : 'No'
+      }, ID: ${chapter?._id}`
+    );
+    console.log(`Track: ${track}, TrackRoles: ${JSON.stringify(trackRoles)}`);
 
     if (mongoUser) {
+      // If user exists but has a different clerkId, update it
+      if (mongoUser.system.clerkId !== user.id) {
+        console.log(
+          `Updating clerkId from ${mongoUser.system.clerkId} to ${user.id}`
+        );
+        mongoUser.system.clerkId = user.id;
+      }
+
       // Update existing user
       // Only update fields if they've changed to reduce DB operations
       let hasChanges = false;
 
-      if (mongoUser.name !== `${user.firstName} ${user.lastName}`) {
-        mongoUser.name = `${user.firstName} ${user.lastName}`;
+      // Update personal information
+      if (mongoUser.personal.name !== `${user.firstName} ${user.lastName}`) {
+        mongoUser.personal.name = `${user.firstName} ${user.lastName}`;
         hasChanges = true;
       }
 
-      if (mongoUser.email !== email) {
-        mongoUser.email = email;
+      if (mongoUser.personal.email !== email) {
+        mongoUser.personal.email = email;
         hasChanges = true;
       }
 
-      if (!mongoUser.chapterId.equals(chapter._id)) {
-        mongoUser.chapterId = chapter._id;
+      if (
+        options.gradYear &&
+        mongoUser.personal.gradYear !== options.gradYear
+      ) {
+        mongoUser.personal.gradYear = options.gradYear;
         hasChanges = true;
       }
 
-      if (mongoUser.role !== role) {
-        mongoUser.role = role as "admin" | "lead" | "member";
+      if (options.bio !== undefined && mongoUser.personal.bio !== options.bio) {
+        mongoUser.personal.bio = options.bio;
         hasChanges = true;
       }
 
-      if (mongoUser.track !== track) {
-        mongoUser.track = track as "quant" | "value" | "both";
+      if (
+        options.major !== undefined &&
+        mongoUser.personal.major !== options.major
+      ) {
+        mongoUser.personal.major = options.major;
         hasChanges = true;
       }
 
-      if (mongoUser.isManager !== isManager) {
-        mongoUser.isManager = isManager;
+      if (
+        options.phone !== undefined &&
+        mongoUser.personal.phone !== options.phone
+      ) {
+        mongoUser.personal.phone = options.phone;
         hasChanges = true;
       }
 
-      if (mongoUser.isAlumni !== isAlumni) {
-        mongoUser.isAlumni = isAlumni;
+      if (isAlumni !== undefined && mongoUser.personal.isAlumni !== isAlumni) {
+        mongoUser.personal.isAlumni = isAlumni;
         hasChanges = true;
       }
 
-      // Update optional fields if provided
-      if (options.gradYear && mongoUser.gradYear !== options.gradYear) {
-        mongoUser.gradYear = options.gradYear;
+      // Update organization information
+      if (
+        chapter &&
+        (!mongoUser.org.chapterId ||
+          !mongoUser.org.chapterId.equals(chapter._id))
+      ) {
+        console.log(
+          `Updating chapter from ${mongoUser.org.chapterId} to ${chapter._id}`
+        );
+        mongoUser.org.chapterId = chapter._id;
+        hasChanges = true;
+      } else if (chapterName && !chapter) {
+        console.log(
+          `Warning: Chapter name ${chapterName} specified but not found in database`
+        );
+      }
+
+      if (track && mongoUser.org.track !== track) {
+        console.log(`Updating track from ${mongoUser.org.track} to ${track}`);
+        mongoUser.org.track = track as 'quant' | 'value';
         hasChanges = true;
       }
 
-      if (options.skills) {
-        mongoUser.skills = options.skills;
+      if (
+        trackRoles &&
+        trackRoles.length > 0 &&
+        JSON.stringify(mongoUser.org.trackRoles) !== JSON.stringify(trackRoles)
+      ) {
+        console.log(
+          `Updating trackRoles from ${JSON.stringify(
+            mongoUser.org.trackRoles
+          )} to ${JSON.stringify(trackRoles)}`
+        );
+        mongoUser.org.trackRoles = trackRoles;
         hasChanges = true;
       }
 
-      if (options.bio && mongoUser.bio !== options.bio) {
-        mongoUser.bio = options.bio;
+      if (
+        execRoles &&
+        execRoles.length > 0 &&
+        JSON.stringify(mongoUser.org.execRoles) !== JSON.stringify(execRoles)
+      ) {
+        mongoUser.org.execRoles = execRoles;
         hasChanges = true;
       }
 
-      if (options.linkedin && mongoUser.linkedin !== options.linkedin) {
-        mongoUser.linkedin = options.linkedin;
+      // Update profile information
+      if (options.skills && options.skills.length > 0) {
+        mongoUser.profile.skills = options.skills;
         hasChanges = true;
       }
 
-      if (options.resumeUrl && mongoUser.resumeUrl !== options.resumeUrl) {
-        mongoUser.resumeUrl = options.resumeUrl;
+      if (
+        options.linkedin !== undefined &&
+        mongoUser.profile.linkedin !== options.linkedin
+      ) {
+        mongoUser.profile.linkedin = options.linkedin;
         hasChanges = true;
       }
 
-      if (options.avatarUrl && mongoUser.avatarUrl !== options.avatarUrl) {
-        mongoUser.avatarUrl = options.avatarUrl || user.imageUrl;
+      if (
+        options.resumeUrl !== undefined &&
+        mongoUser.profile.resumeUrl !== options.resumeUrl
+      ) {
+        mongoUser.profile.resumeUrl = options.resumeUrl;
         hasChanges = true;
+      }
+
+      if (options.avatarUrl !== undefined) {
+        mongoUser.profile.avatarUrl = options.avatarUrl || user.imageUrl;
+        hasChanges = true;
+      }
+
+      if (
+        options.github !== undefined &&
+        mongoUser.profile.github !== options.github
+      ) {
+        mongoUser.profile.github = options.github;
+        hasChanges = true;
+      }
+
+      if (options.interests && options.interests.length > 0) {
+        mongoUser.profile.interests = options.interests;
+        hasChanges = true;
+      }
+
+      if (options.achievements && options.achievements.length > 0) {
+        mongoUser.profile.achievements = options.achievements;
+        hasChanges = true;
+      }
+
+      if (options.experiences && options.experiences.length > 0) {
+        mongoUser.profile.experiences = options.experiences;
+        hasChanges = true;
+      }
+
+      // Update activity information
+      mongoUser.activity.lastLogin = new Date();
+      hasChanges = true;
+
+      // Update system information
+      if (options.firstLogin !== undefined) {
+        mongoUser.system.firstLogin = options.firstLogin;
+        hasChanges = true;
+        console.log(`Updated firstLogin to ${options.firstLogin}`);
       }
 
       // Only save if changes were made
       if (hasChanges) {
         await mongoUser.save();
+        console.log(`User ${mongoUser._id} updated successfully`);
       }
 
       return mongoUser;
     } else {
-      // Create new user
-      const newUser = await User.create({
-        name: `${user.firstName} ${user.lastName}`,
-        email,
-        chapterId: chapter._id,
-        role: role as "admin" | "lead" | "member",
-        track: track as "quant" | "value" | "both",
-        isManager,
-        isAlumni,
-        gradYear: options.gradYear || defaultGradYear,
-        skills: options.skills || defaultSkills,
-        bio: options.bio || "",
-        linkedin: options.linkedin || "",
-        resumeUrl: options.resumeUrl || "",
-        avatarUrl: options.avatarUrl || user.imageUrl,
-        clerkId: user.id,
-      });
+      // Create new user with required fields
+      const userData = {
+        personal: {
+          name: `${user.firstName} ${user.lastName}`,
+          email,
+          gradYear,
+          isAlumni: isAlumni || false,
+          bio: options.bio || '',
+          major: options.major || '',
+          phone: options.phone || '',
+        },
+        org: {
+          permissionLevel: 'member', // Will be set by pre-save hook
+          trackRoles: trackRoles || [],
+          execRoles: execRoles || [],
+          status: 'active' as 'active' | 'inactive' | 'pending',
+          joinDate: new Date(),
+          track: track as 'quant' | 'value' | undefined,
+          chapterId: chapter ? chapter._id : undefined,
+        },
+        profile: {
+          skills: options.skills || [],
+          linkedin: options.linkedin || '',
+          resumeUrl: options.resumeUrl || '',
+          avatarUrl: options.avatarUrl || user.imageUrl,
+          github: options.github || '',
+          interests: options.interests || [],
+          achievements: options.achievements || [],
+          experiences: options.experiences || [],
+        },
+        activity: {
+          lastLogin: new Date(),
+          internshipsPosted: 0,
+        },
+        system: {
+          clerkId: user.id,
+          firstLogin:
+            options.firstLogin !== undefined ? options.firstLogin : true,
+          notifications: {
+            email: true,
+            platform: true,
+          },
+        },
+      };
 
+      const newUser = await User.create(userData);
+      console.log(`New user ${newUser._id} created successfully`);
       return newUser;
     }
   } catch (error) {
-    console.error("Error syncing user with MongoDB:", error);
+    console.error('Error syncing user with MongoDB:', error);
     throw error;
   }
 }

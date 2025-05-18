@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 // Animation variants
 const fadeIn = {
@@ -12,7 +12,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -24,12 +24,12 @@ const teamCardVariant = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
   hover: {
     y: -10,
-    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
+    boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
     transition: {
       duration: 0.3,
     },

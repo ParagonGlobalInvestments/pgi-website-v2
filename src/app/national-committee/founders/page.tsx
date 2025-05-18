@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { FaLinkedin } from "react-icons/fa";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { FaLinkedin } from 'react-icons/fa';
 
 // Animation variants
 const fadeIn = {
@@ -13,7 +13,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -36,7 +36,7 @@ const cardAnimation = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -44,114 +44,114 @@ const cardAnimation = {
 // Founder data
 const founders = [
   {
-    name: "Jay Sivadas",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Jay Sivadas',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Daniel Labrador",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Daniel Labrador',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
   {
-    name: "Erin Ku",
-    university: "University of Chicago",
-    linkedin: "#",
+    name: 'Erin Ku',
+    university: 'University of Chicago',
+    linkedin: '#',
   },
 ];
 
 // Chapter Founders by university
 const chapterFounders = {
-  "University of Chicago": [
-    "Lucas Mantovani",
-    "John Hahn",
-    "Brianna Liu",
-    "Raphael Jimenez",
-    "Advay Mohindra",
-    "Silvia Aydinyan",
-    "Jeffrey Kao",
-    "Bradley Yu",
+  'University of Chicago': [
+    'Lucas Mantovani',
+    'John Hahn',
+    'Brianna Liu',
+    'Raphael Jimenez',
+    'Advay Mohindra',
+    'Silvia Aydinyan',
+    'Jeffrey Kao',
+    'Bradley Yu',
   ],
-  "University of Pennsylvania": [
-    "Arjun Neervanan",
-    "Saahil Kamulkar",
-    "Ria Sharma",
-    "Daniel Barra",
-    "Nicole Rong",
-    "Olgierd Fudali",
-    "Aryan Singh",
-    "Anthony Steimle",
-    "Andy Mei",
-    "Grant Mao",
-    "Ashish Pothireddy",
-    "Prithvi Bale",
-    "Manya Gauba",
-    "Arman Ashaboglu",
+  'University of Pennsylvania': [
+    'Arjun Neervanan',
+    'Saahil Kamulkar',
+    'Ria Sharma',
+    'Daniel Barra',
+    'Nicole Rong',
+    'Olgierd Fudali',
+    'Aryan Singh',
+    'Anthony Steimle',
+    'Andy Mei',
+    'Grant Mao',
+    'Ashish Pothireddy',
+    'Prithvi Bale',
+    'Manya Gauba',
+    'Arman Ashaboglu',
   ],
-  "New York University": [
-    "Christopher Rosa",
-    "Elizabeth Grayfer",
-    "Rishi Subbaraya",
-    "Yihao Zhong",
-    "Harrison Du",
-    "Justin Singh",
-    "Arthur Chen",
+  'New York University': [
+    'Christopher Rosa',
+    'Elizabeth Grayfer',
+    'Rishi Subbaraya',
+    'Yihao Zhong',
+    'Harrison Du',
+    'Justin Singh',
+    'Arthur Chen',
   ],
-  "Columbia University": [
-    "Philip Bardon",
-    "Ali Alomari",
-    "Colby Cox",
-    "Robert Stankard",
-    "Nischal Chennuru",
-    "Harrison Wang",
-    "Kaiji Uno",
-    "Olivia Stevens",
-    "Kenny Zhu",
-    "Emma Liu",
-    "Tony Chen",
-    "Anupam Bhakta",
-    "William Vietor",
-    "Matthew Weng",
+  'Columbia University': [
+    'Philip Bardon',
+    'Ali Alomari',
+    'Colby Cox',
+    'Robert Stankard',
+    'Nischal Chennuru',
+    'Harrison Wang',
+    'Kaiji Uno',
+    'Olivia Stevens',
+    'Kenny Zhu',
+    'Emma Liu',
+    'Tony Chen',
+    'Anupam Bhakta',
+    'William Vietor',
+    'Matthew Weng',
   ],
-  "Brown University": [
-    "Sandra Martinez",
-    "Nick Klatsky",
-    "Tianyu Zhou",
-    "Advay Mansingka",
-    "Luke Briody",
-    "Angela Osei-Ampadu",
-    "Raymundo Chapa Ponce",
-    "Finnur Christianson",
-    "Erica Li",
+  'Brown University': [
+    'Sandra Martinez',
+    'Nick Klatsky',
+    'Tianyu Zhou',
+    'Advay Mansingka',
+    'Luke Briody',
+    'Angela Osei-Ampadu',
+    'Raymundo Chapa Ponce',
+    'Finnur Christianson',
+    'Erica Li',
   ],
-  "Cornell University": [
-    "Kate Michelini",
-    "Flynn Kelleher",
-    "Max Koster",
-    "Michael Negrea",
-    "Leopold Home",
-    "Caroline Duthie",
-    "Pranav Mishra",
-    "Benjamin Collins",
-    "Corey Wang",
+  'Cornell University': [
+    'Kate Michelini',
+    'Flynn Kelleher',
+    'Max Koster',
+    'Michael Negrea',
+    'Leopold Home',
+    'Caroline Duthie',
+    'Pranav Mishra',
+    'Benjamin Collins',
+    'Corey Wang',
   ],
-  "Princeton University": [
-    "Brandon Hwang",
-    "Brandon Cheng",
-    "Jack Deschenes",
-    "Eli Soffer",
-    "Samuel Henriques",
-    "Rebecca Zhu",
-    "Michael Deschenes",
-    "Jason Ciptonugroho",
-    "Ellie Mueller",
+  'Princeton University': [
+    'Brandon Hwang',
+    'Brandon Cheng',
+    'Jack Deschenes',
+    'Eli Soffer',
+    'Samuel Henriques',
+    'Rebecca Zhu',
+    'Michael Deschenes',
+    'Jason Ciptonugroho',
+    'Ellie Mueller',
   ],
-  "Yale University": [
-    "Jack Stemerman",
-    "Joshua Donovan",
-    "Matthew Neissen",
-    "Daniel Siegel",
-    "Charlie Stemerman",
+  'Yale University': [
+    'Jack Stemerman',
+    'Joshua Donovan',
+    'Matthew Neissen',
+    'Daniel Siegel',
+    'Charlie Stemerman',
   ],
 };
 

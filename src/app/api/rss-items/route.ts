@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
-import { connectDB } from "@/lib/database/mongodb";
-import mongoose from "mongoose";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+import { connectToDatabase } from '@/lib/database/connection';
+import mongoose from 'mongoose';
 
 // Ensure dynamic rendering for this route
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // Define the RSS item schema for MongoDB (matching the one in rssFetcher.ts)
 const RssItemSchema = new mongoose.Schema({
@@ -23,7 +23,7 @@ const RssItemSchema = new mongoose.Schema({
 
 // Initialize the model (or get it if it already exists)
 const RssItem =
-  mongoose.models.RssItem || mongoose.model("RssItem", RssItemSchema);
+  mongoose.models.RssItem || mongoose.model('RssItem', RssItemSchema);
 
 // GET handler for the RSS items
 export async function GET(req: NextRequest) {
@@ -31,15 +31,15 @@ export async function GET(req: NextRequest) {
     // Authenticate the user
     const { userId } = getAuth(req);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Connect to the database
-    await connectDB();
+    await connectToDatabase();
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
-    const source = searchParams.get("source");
+    const source = searchParams.get('source');
 
     // Build filter based on source parameter
     const filter: any = {};
@@ -55,9 +55,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(items);
   } catch (error) {
-    console.error("Error fetching RSS items:", error);
+    console.error('Error fetching RSS items:', error);
     return NextResponse.json(
-      { error: "Failed to fetch RSS items" },
+      { error: 'Failed to fetch RSS items' },
       { status: 500 }
     );
   }

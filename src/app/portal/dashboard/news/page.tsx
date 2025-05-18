@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SmoothTransition } from "@/components/ui/SmoothTransition";
-import ProtectedPage from "@/components/auth/ProtectedPage";
-import { FaNewspaper, FaChartLine, FaGlobeAmericas } from "react-icons/fa";
-import MarketWatchNews from "@/components/dashboard/MarketWatchNews";
-import NasdaqNews from "@/components/dashboard/NasdaqNews";
-import SeekingAlphaNews from "@/components/dashboard/SeekingAlphaNews";
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SmoothTransition } from '@/components/ui/SmoothTransition';
+import ProtectedPage from '@/components/auth/ProtectedPage';
+import { FaNewspaper, FaChartLine, FaGlobeAmericas } from 'react-icons/fa';
+import MarketWatchNews from '@/components/dashboard/MarketWatchNews';
+import NasdaqNews from '@/components/dashboard/NasdaqNews';
+import SeekingAlphaNews from '@/components/dashboard/SeekingAlphaNews';
 
 // Animation variants
 const containerVariants = {
@@ -29,7 +29,7 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 260,
       damping: 20,
     },
@@ -48,33 +48,33 @@ interface NewsSource {
 
 export default function NewsPage() {
   const { user, isLoaded } = useUser();
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState('all');
 
   // Define all news sources - add new sources here
   const newsSources: NewsSource[] = [
     {
-      id: "marketwatch",
-      name: "MarketWatch",
-      shortName: "MW",
+      id: 'marketwatch',
+      name: 'MarketWatch',
+      shortName: 'MW',
       icon: <FaNewspaper className="text-green-500" />,
       component: <MarketWatchNews />,
-      description: "Top financial stories from MarketWatch",
+      description: 'Top financial stories from MarketWatch',
     },
     {
-      id: "seekingalpha",
-      name: "Seeking Alpha",
-      shortName: "SA",
+      id: 'seekingalpha',
+      name: 'Seeking Alpha',
+      shortName: 'SA',
       icon: <FaGlobeAmericas className="text-orange-500" />,
       component: <SeekingAlphaNews />,
-      description: "Investment insights from Seeking Alpha",
+      description: 'Investment insights from Seeking Alpha',
     },
     {
-      id: "nasdaq",
-      name: "NASDAQ",
-      shortName: "NASDAQ",
+      id: 'nasdaq',
+      name: 'NASDAQ',
+      shortName: 'NQ',
       icon: <FaChartLine className="text-blue-500" />,
       component: <NasdaqNews />,
-      description: "Latest news from NASDAQ",
+      description: 'Latest news from NASDAQ',
     },
   ];
 
@@ -91,7 +91,7 @@ export default function NewsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0"
+        className="space-y-8 pt-4 lg:pt-0 text-navy"
       >
         <div>
           <motion.h1
@@ -128,7 +128,7 @@ export default function NewsPage() {
                 <FaNewspaper />
                 All Sources
               </TabsTrigger>
-              {newsSources.map((source) => (
+              {newsSources.map(source => (
                 <TabsTrigger
                   key={source.id}
                   value={source.id}
@@ -163,7 +163,7 @@ export default function NewsPage() {
           </TabsContent>
 
           {/* Individual feed tabs */}
-          {newsSources.map((source) => (
+          {newsSources.map(source => (
             <TabsContent key={source.id} value={source.id}>
               <motion.div
                 initial={{ opacity: 0 }}
