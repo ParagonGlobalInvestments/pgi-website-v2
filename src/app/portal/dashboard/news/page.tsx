@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { FaNewspaper, FaChartLine, FaGlobeAmericas } from 'react-icons/fa';

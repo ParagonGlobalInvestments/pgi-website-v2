@@ -14,11 +14,7 @@ import { useRouter } from 'next/navigation';
 import {
   FaSave,
   FaLinkedin,
-  FaUserAlt,
-  FaGraduationCap,
-  FaCogs,
   FaUser,
-  FaDesktop,
   FaGithub,
   FaTrash,
   FaPlus,
@@ -55,14 +51,6 @@ import {
 import { DroppableProvided, DraggableProvided } from 'react-beautiful-dnd';
 
 // Animation variants
-const formVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-};
 
 const itemVariants = {
   hidden: {
