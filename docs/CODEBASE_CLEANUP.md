@@ -71,7 +71,7 @@ This document provides a checklist for maintaining and improving the PGI codebas
 
 - `[ ]` **Incremental Changes**: Focus on one area at a time
 - `[ ]` **Testing**: Test changes thoroughly
-- `[x]` **Documentation**: Document significant changes
+- `[/]` **Documentation**: Document significant changes
 
 ## X. Tools
 
