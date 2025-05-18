@@ -1,45 +1,31 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[FEATURE] "
-labels: "enhancement"
-assignees: ""
+title: '[FEATURE] '
+labels: 'enhancement'
+assignees: ''
 ---
 
 ## Feature Description
 
-A clear and concise description of the feature you're proposing.
+<!-- Brief description of what you want -->
 
-## Problem Statement
+## Problem
 
-Describe the problem or limitation that this feature would address. Ex. I'm always frustrated when [...]
+<!-- What problem does this solve? -->
 
 ## Proposed Solution
 
-A clear and concise description of what you want to happen.
-
-## Alternative Solutions
-
-A clear and concise description of any alternative solutions or features you've considered.
-
-## User Story
-
-As a [type of user], I want [goal] so that [benefit].
+<!-- How should this work? -->
 
 ## Acceptance Criteria
 
-- [ ] Criteria 1
-- [ ] Criteria 2
-- [ ] Criteria 3
+<!-- What would make this complete? -->
 
-## UI/UX Considerations
-
-If applicable, describe how this feature should look and behave from a user experience perspective.
-
-## Technical Considerations
-
-If you have any thoughts on how this could be implemented, include them here.
+- [ ]
+- [ ]
+- [ ]
 
 ## Additional Context
 
-Add any other context, screenshots, or mockups about the feature request here.
+<!-- Screenshots, mockups, technical notes (optional) -->

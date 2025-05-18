@@ -1,49 +1,41 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG] "
-labels: "bug"
-assignees: ""
+title: '[BUG] '
+labels: 'bug'
+assignees: ''
 ---
 
 ## Bug Description
 
-A clear and concise description of what the bug is.
+<!-- Brief description of the bug -->
 
 ## Steps To Reproduce
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!-- How can we recreate this issue? -->
 
-## Expected Behavior
+1.
+2.
+3.
 
-A clear and concise description of what you expected to happen.
+## Expected vs Actual
 
-## Actual Behavior
-
-What actually happened instead.
-
-## Screenshots
-
-If applicable, add screenshots to help explain your problem.
+**Expected:** <!-- What should happen -->
+**Actual:** <!-- What happens instead -->
 
 ## Environment
 
-- **Device**: [e.g. Desktop, iPhone 12]
-- **OS**: [e.g. Windows 11, macOS Monterey, iOS 16]
-- **Browser**: [e.g. Chrome 105, Safari 15]
-- **Application Version**: [e.g. v1.0.0]
+<!-- Delete non-applicable items -->
 
-## Console Errors
+- Device:
+- OS:
+- Browser:
+- Version:
 
-Include any relevant error messages from the browser console or logs.
+## Screenshots/Errors
 
-## Additional Context
+<!-- If applicable -->
 
-Add any other context about the problem here.
+## Additional Notes
 
-## Possible Solution
-
-If you have any ideas on how to fix the issue, include them here.
+<!-- Any context or possible solution -->
