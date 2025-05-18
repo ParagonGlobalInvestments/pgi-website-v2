@@ -24,7 +24,7 @@ Built with Next.js (App Router), TypeScript, Tailwind CSS, Clerk for authenticat
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **UI Components**: Radix UI primitives with custom styling
+- **UI Components**: Shadcn UI (built on Radix UI primitives)
 - **Authentication**: Clerk
 - **Database**: MongoDB with Mongoose ODM
 - **State Management**: SWR for data fetching
@@ -68,6 +68,28 @@ pgi/
 │   │   ├── national-committee/ # National committee page
 │   │   ├── placements/     # Placements/internship listings
 │   │   ├── portal/         # Member portal
+│   │   │   ├── layout.tsx  # Portal layout wrapper
+│   │   │   ├── page.tsx    # Portal home page
+│   │   │   ├── dashboard/  # Member dashboard area
+│   │   │   │   ├── layout.tsx    # Dashboard layout with navigation
+│   │   │   │   ├── page.tsx      # Dashboard home
+│   │   │   │   ├── directory/    # Member directory section
+│   │   │   │   │   ├── page.tsx  # Directory main page
+│   │   │   │   │   └── admin/    # Admin directory management
+│   │   │   │   │       └── page.tsx # Admin directory view
+│   │   │   │   ├── internships/  # Internship listings
+│   │   │   │   │   ├── page.tsx  # Internships main page
+│   │   │   │   │   └── new/      # Add new internship
+│   │   │   │   │       └── page.tsx # New internship form
+│   │   │   │   ├── news/         # News feed section
+│   │   │   │   └── settings/     # User settings
+│   │   │   │       ├── page.tsx  # Settings main page
+│   │   │   │       └── profile/  # User profile settings
+│   │   │   │           └── page.tsx # Profile editor
+│   │   │   ├── sign-up/    # Portal sign-up flow
+│   │   │   ├── signin/     # Portal sign-in flow
+│   │   │   ├── signout/    # Sign-out handling
+│   │   │   └── signup/     # Alternative sign-up path
 │   │   ├── publications/   # Publications page
 │   │   ├── sign-in/        # Authentication sign-in page
 │   │   ├── sign-up/        # Authentication sign-up page
@@ -77,7 +99,39 @@ pgi/
 │   │   ├── auth/           # Authentication-related components
 │   │   ├── dashboard/      # Dashboard-specific components
 │   │   ├── layout/         # Layout components (header, footer, etc.)
-│   │   └── ui/             # Core UI elements based on Radix primitives
+│   │   └── ui/             # Shadcn UI components built on Radix primitives
+│   │       ├── action-button.tsx  # Custom action button
+│   │       ├── alert-dialog.tsx   # Alert dialog component
+│   │       ├── alert.tsx          # Alert component
+│   │       ├── AnimatedSection.tsx # Animated section component
+│   │       ├── AnimatedText.tsx   # Animated text component
+│   │       ├── avatar.tsx         # Avatar component
+│   │       ├── badge.tsx          # Badge component
+│   │       ├── button.tsx         # Button component
+│   │       ├── card.tsx           # Card component
+│   │       ├── checkbox.tsx       # Checkbox input
+│   │       ├── combobox.tsx       # Combobox/autocomplete
+│   │       ├── command.tsx        # Command component
+│   │       ├── dialog.tsx         # Dialog/modal component
+│   │       ├── dropdown-menu.tsx  # Dropdown menu
+│   │       ├── index.ts           # Component exports
+│   │       ├── input.tsx          # Input component
+│   │       ├── label.tsx          # Form label
+│   │       ├── navigation-menu.tsx # Navigation menu
+│   │       ├── PageTransition.tsx # Page transition animations
+│   │       ├── popover.tsx        # Popover component
+│   │       ├── radio-group.tsx    # Radio group input
+│   │       ├── ScrollButton.tsx   # Scroll button
+│   │       ├── select.tsx         # Select dropdown
+│   │       ├── SmoothTransition.tsx # Smooth transition component
+│   │       ├── switch.tsx         # Toggle switch
+│   │       ├── table.tsx          # Table component
+│   │       ├── tabs.tsx           # Tabs component
+│   │       ├── textarea.tsx       # Textarea input
+│   │       ├── toast.tsx          # Toast notification
+│   │       ├── toaster.tsx        # Toast container
+│   │       ├── tooltip.tsx        # Tooltip component
+│   │       └── use-toast.ts       # Toast hook
 │   ├── hooks/              # Custom React hooks
 │   ├── lib/                # Core application modules and services
 │   │   ├── auth/           # Authentication helpers, user synchronization
