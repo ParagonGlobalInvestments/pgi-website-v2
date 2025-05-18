@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import ScrollButton from "@/components/ui/ScrollButton";
-import { motion } from "framer-motion";
+import Link from 'next/link';
+import Image from 'next/image';
+import ScrollButton from '@/components/ui/ScrollButton';
+import { motion } from 'framer-motion';
 
 // Animation variants
 const fadeIn = {
@@ -13,7 +13,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -59,7 +59,7 @@ export default function Home() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        className="bg-gradient-to-r from-navy to-primary text-white min-h-[90vh] flex flex-col justify-center items-center relative"
+        className=" text-white min-h-[90vh] flex flex-col justify-center items-center relative"
       >
         <div className="container mx-auto px-4 text-center py-20">
           <motion.h1
@@ -78,11 +78,30 @@ export default function Home() {
           <motion.p
             variants={fadeIn}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl mb-16 mx-auto text-gray-400 font-light tracking-wide"
+            className="text-lg md:text-xl mb-8 mx-auto text-gray-400 font-light tracking-wide"
           >
             We are a student-run intercollegiate investment fund focused on
             value investing and algorithmic trading
           </motion.p>
+
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
+          >
+            <Link
+              href="/portal"
+              className="bg-pgi-accent-blue hover:bg-pgi-accent-blue/80 text-white font-medium py-3 px-8 rounded-md transition-colors duration-300 text-lg"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/about"
+              className="bg-transparent hover:bg-white/10 text-white border border-white/30 font-medium py-3 px-8 rounded-md transition-colors duration-300 text-lg"
+            >
+              Learn More
+            </Link>
+          </motion.div>
         </div>
         <motion.div
           variants={fadeIn}
@@ -146,21 +165,21 @@ export default function Home() {
             >
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-navy border border-gray-700 rounded-lg"
+                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-3xl font-normal mb-2 text-primary">$40K</p>
                 <p className="text-gray-300 font-light">AUM</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-navy border border-gray-700 rounded-lg"
+                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-3xl font-normal mb-2 text-primary">21</p>
                 <p className="text-gray-300 font-light">Sponsors & Partners</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-navy border border-gray-700 rounded-lg"
+                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-3xl font-normal mb-2 text-primary">8</p>
                 <p className="text-gray-300 font-light">Chapters</p>
@@ -172,7 +191,7 @@ export default function Home() {
 
       {/* Chapters Section */}
       <motion.section
-        className="py-4 bg-navy px-4"
+        className="py-4 bg-pgi-dark-blue px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -192,7 +211,7 @@ export default function Home() {
             {/* Brown University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/brown.png"
@@ -206,7 +225,7 @@ export default function Home() {
             {/* Columbia University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/columbia.png"
@@ -220,7 +239,7 @@ export default function Home() {
             {/* Cornell University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/cornell.png"
@@ -234,7 +253,7 @@ export default function Home() {
             {/* University of Pennsylvania */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/upenn.png"
@@ -248,7 +267,7 @@ export default function Home() {
             {/* University of Chicago */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/uchicago.png"
@@ -262,7 +281,7 @@ export default function Home() {
             {/* Princeton University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/princeton.png"
@@ -276,7 +295,7 @@ export default function Home() {
             {/* NYU */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/nyu.png"
@@ -290,7 +309,7 @@ export default function Home() {
             {/* Yale University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
             >
               <Image
                 src="/images/universities/yale.png"

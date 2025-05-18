@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { FaLinkedin } from "react-icons/fa";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { FaLinkedin } from 'react-icons/fa';
 
 // Animation variants
 const fadeIn = {
@@ -13,7 +13,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -35,7 +35,7 @@ const memberItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -43,140 +43,140 @@ const memberItem = {
 // Investment Committee data
 const investmentCommittee = [
   {
-    name: "Philip Bardon",
-    university: "Columbia University",
-    linkedin: "https://www.linkedin.com/in/philip-b-b19570236/",
+    name: 'Philip Bardon',
+    university: 'Columbia University',
+    linkedin: 'https://www.linkedin.com/in/philip-b-b19570236/',
   },
   {
-    name: "Jayanth Mammen",
-    university: "University of Pennsylvania",
-    linkedin: "https://www.linkedin.com/in/jayanth-mammen/",
+    name: 'Jayanth Mammen',
+    university: 'University of Pennsylvania',
+    linkedin: 'https://www.linkedin.com/in/jayanth-mammen/',
   },
   {
-    name: "Clara Ee",
-    university: "University of Chicago",
-    linkedin: "https://www.linkedin.com/in/claraee/",
+    name: 'Clara Ee',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/claraee/',
   },
   {
-    name: "John Otto",
-    university: "University of Pennsylvania",
-    linkedin: "https://www.linkedin.com/in/john-otto1/",
+    name: 'John Otto',
+    university: 'University of Pennsylvania',
+    linkedin: 'https://www.linkedin.com/in/john-otto1/',
   },
   {
-    name: "Eli Soffer",
-    university: "Princeton University",
-    linkedin: "https://www.linkedin.com/in/elisoffer/",
+    name: 'Eli Soffer',
+    university: 'Princeton University',
+    linkedin: 'https://www.linkedin.com/in/elisoffer/',
   },
   {
-    name: "Ashish Pothireddy",
-    university: "University of Pennsylvania",
-    linkedin: "https://www.linkedin.com/in/ashish-pothireddy/",
+    name: 'Ashish Pothireddy',
+    university: 'University of Pennsylvania',
+    linkedin: 'https://www.linkedin.com/in/ashish-pothireddy/',
   },
   {
-    name: "Sean Oh",
-    university: "University of Pennsylvania",
-    linkedin: "https://www.linkedin.com/in/seanoh26/",
+    name: 'Sean Oh',
+    university: 'University of Pennsylvania',
+    linkedin: 'https://www.linkedin.com/in/seanoh26/',
   },
   {
-    name: "Myles Spiess",
-    university: "University of Chicago",
-    linkedin: "https://www.linkedin.com/in/myles-spiess-304313242/",
+    name: 'Myles Spiess',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/myles-spiess-304313242/',
   },
   {
-    name: "Matthew Weng",
-    university: "Columbia University",
-    linkedin: "https://www.linkedin.com/in/matthewweng/",
+    name: 'Matthew Weng',
+    university: 'Columbia University',
+    linkedin: 'https://www.linkedin.com/in/matthewweng/',
   },
   {
-    name: "Jason Ciptonugroho",
-    university: "Princeton University",
-    linkedin: "https://www.linkedin.com/in/jason-ciptonugroho/",
+    name: 'Jason Ciptonugroho',
+    university: 'Princeton University',
+    linkedin: 'https://www.linkedin.com/in/jason-ciptonugroho/',
   },
   {
-    name: "Stoyan Angelov",
-    university: "New York University",
-    linkedin: "https://www.linkedin.com/in/stoyan-angelov/",
+    name: 'Stoyan Angelov',
+    university: 'New York University',
+    linkedin: 'https://www.linkedin.com/in/stoyan-angelov/',
   },
   {
-    name: "John Yi",
-    university: "New York University",
-    linkedin: "https://www.linkedin.com/in/john-hong-yi/",
+    name: 'John Yi',
+    university: 'New York University',
+    linkedin: 'https://www.linkedin.com/in/john-hong-yi/',
   },
 ];
 
 // Portfolio Managers data
 const portfolioManagers = [
   {
-    name: "Philip Weaver",
-    university: "Columbia University",
-    linkedin: "https://www.linkedin.com/in/philip-weaver-28b097232/",
+    name: 'Philip Weaver',
+    university: 'Columbia University',
+    linkedin: 'https://www.linkedin.com/in/philip-weaver-28b097232/',
   },
   {
-    name: "Aryaman Rakhecha",
-    university: "Columbia University",
-    linkedin: "https://www.linkedin.com/in/aryaman-rakhecha/",
+    name: 'Aryaman Rakhecha',
+    university: 'Columbia University',
+    linkedin: 'https://www.linkedin.com/in/aryaman-rakhecha/',
   },
   {
-    name: "Matthew Geiling",
-    university: "University of Chicago",
-    linkedin: "https://www.linkedin.com/in/matthew-geiling-7981a8212/",
+    name: 'Matthew Geiling',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/matthew-geiling-7981a8212/',
   },
   {
-    name: "Benson Wang",
-    university: "Columbia University",
-    linkedin: "https://www.linkedin.com/in/bensonw/",
+    name: 'Benson Wang',
+    university: 'Columbia University',
+    linkedin: 'https://www.linkedin.com/in/bensonw/',
   },
   {
-    name: "Joshua Donovan",
-    university: "Yale University",
-    linkedin: "https://www.linkedin.com/in/joshua-donovan-b98632237/",
+    name: 'Joshua Donovan',
+    university: 'Yale University',
+    linkedin: 'https://www.linkedin.com/in/joshua-donovan-b98632237/',
   },
   {
-    name: "Jack Stemerman",
-    university: "Yale University",
-    linkedin: "https://www.linkedin.com/in/jack-stemerman-1768a3211/",
+    name: 'Jack Stemerman',
+    university: 'Yale University',
+    linkedin: 'https://www.linkedin.com/in/jack-stemerman-1768a3211/',
   },
   {
-    name: "Aetant Prakash",
-    university: "University of Chicago",
-    linkedin: "https://www.linkedin.com/in/aetantprakash/",
+    name: 'Aetant Prakash',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/aetantprakash/',
   },
 ];
 
 // Analysts data
 const analysts = [
-  { name: "Risha Bhat", university: "University of Pennsylvania" },
-  { name: "Aparna Vagvala", university: "New York University" },
-  { name: "Braden Queen", university: "University of Chicago" },
-  { name: "Justin Burks", university: "Columbia University" },
-  { name: "Siena Verprauskus", university: "University of Chicago" },
-  { name: "Aurian Azghandi", university: "University of Chicago" },
-  { name: "Nicolas Tchkotoua", university: "University of Chicago" },
-  { name: "Noor Kaur", university: "University of Chicago" },
-  { name: "Tommy Soltanian", university: "Columbia University" },
-  { name: "Nana Agyeman", university: "Princeton University" },
-  { name: "Daniel Kim", university: "Princeton University" },
-  { name: "Seoyun Kang", university: "Princeton University" },
-  { name: "Bill Zhang", university: "Columbia University" },
-  { name: "Sarang Kothari", university: "University of Chicago" },
-  { name: "Julian Sweet", university: "University of Chicago" },
-  { name: "Oliver Treen", university: "University of Chicago" },
-  { name: "Marcella Rogerson", university: "University of Chicago" },
-  { name: "Lucas Lu", university: "Cornell University" },
-  { name: "Kartik Arora", university: "New York University" },
-  { name: "Joshua Lou", university: "University of Chicago" },
-  { name: "Andrew Chen", university: "Columbia University" },
-  { name: "Max Ting", university: "University of Chicago" },
-  { name: "Ivan Mikhaylov", university: "University of Chicago" },
-  { name: "Riley Gilsenan", university: "University of Chicago" },
-  { name: "Finnur Christianson", university: "Brown University" },
-  { name: "Samuel Hwang", university: "University of Chicago" },
-  { name: "David Chen", university: "Columbia University" },
-  { name: "Nicholas Simon", university: "Columbia University" },
-  { name: "Jessica Wang", university: "Columbia University" },
-  { name: "Dylan Berretta", university: "Princeton University" },
-  { name: "Robert Zhang", university: "University of Chicago" },
-  { name: "Raghav Mohindra", university: "University of Chicago" },
+  { name: 'Risha Bhat', university: 'University of Pennsylvania' },
+  { name: 'Aparna Vagvala', university: 'New York University' },
+  { name: 'Braden Queen', university: 'University of Chicago' },
+  { name: 'Justin Burks', university: 'Columbia University' },
+  { name: 'Siena Verprauskus', university: 'University of Chicago' },
+  { name: 'Aurian Azghandi', university: 'University of Chicago' },
+  { name: 'Nicolas Tchkotoua', university: 'University of Chicago' },
+  { name: 'Noor Kaur', university: 'University of Chicago' },
+  { name: 'Tommy Soltanian', university: 'Columbia University' },
+  { name: 'Nana Agyeman', university: 'Princeton University' },
+  { name: 'Daniel Kim', university: 'Princeton University' },
+  { name: 'Seoyun Kang', university: 'Princeton University' },
+  { name: 'Bill Zhang', university: 'Columbia University' },
+  { name: 'Sarang Kothari', university: 'University of Chicago' },
+  { name: 'Julian Sweet', university: 'University of Chicago' },
+  { name: 'Oliver Treen', university: 'University of Chicago' },
+  { name: 'Marcella Rogerson', university: 'University of Chicago' },
+  { name: 'Lucas Lu', university: 'Cornell University' },
+  { name: 'Kartik Arora', university: 'New York University' },
+  { name: 'Joshua Lou', university: 'University of Chicago' },
+  { name: 'Andrew Chen', university: 'Columbia University' },
+  { name: 'Max Ting', university: 'University of Chicago' },
+  { name: 'Ivan Mikhaylov', university: 'University of Chicago' },
+  { name: 'Riley Gilsenan', university: 'University of Chicago' },
+  { name: 'Finnur Christianson', university: 'Brown University' },
+  { name: 'Samuel Hwang', university: 'University of Chicago' },
+  { name: 'David Chen', university: 'Columbia University' },
+  { name: 'Nicholas Simon', university: 'Columbia University' },
+  { name: 'Jessica Wang', university: 'Columbia University' },
+  { name: 'Dylan Berretta', university: 'Princeton University' },
+  { name: 'Robert Zhang', university: 'University of Chicago' },
+  { name: 'Raghav Mohindra', university: 'University of Chicago' },
 ];
 
 export default function ValueTeamPage() {

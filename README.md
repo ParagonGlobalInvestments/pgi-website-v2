@@ -1,174 +1,169 @@
-# Paragon Global Investments
+# Paragon Global Investments (PGI) Portal
 
-Student-run intercollegiate investment fund focused on value investing and algorithmic trading.
+This is the official web application for Paragon Global Investments, a student-run intercollegiate investment fund. The portal serves as a central hub for members, providing access to resources, internship listings, and internal tools.
 
-## Folder Structure
+Built with Next.js (App Router), TypeScript, Tailwind CSS, Clerk for authentication, and MongoDB with Mongoose for data storage.
 
-```
-pgi/
-├── public/               # Static assets
-│   ├── icons/            # SVG and other icon files
-│   ├── logos/            # Logo files
-│   └── images/           # General images
-│       └── universities/ # University logos
-│
-├── src/                  # Source code
-│   ├── app/              # Next.js App Router pages
-│   ├── components/       # React components
-│   │   ├── layout/       # Layout components (Header, Footer)
-│   │   ├── ui/           # UI components (buttons, cards, etc.)
-│   │   └── shared/       # Shared components
-│   │
-│   └── lib/              # Utility functions and shared code
-│       ├── database/     # Database connections and operations
-│       ├── utils/        # Utility functions
-│       ├── hooks/        # Custom React hooks
-│       └── types/        # TypeScript types and interfaces
-```
+## Table of Contents
 
-# Paragon Global Investments Website
-
-This is a modern remake of the Paragon Global Investments website, built with Next.js, TypeScript, and Tailwind CSS. It features authentication via Clerk and uses MongoDB for data storage.
+- [Tech Stack](#tech-stack)
+- [Key Features](#key-features)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Running Locally](#running-locally)
+- [Authentication & Authorization](#authentication--authorization)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
-- **Authentication**: Clerk
-- **Database**: MongoDB with Mongoose
+- **Framework**: Next.js 14+ (App Router)
+- **Language**: TypeScript
 - **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/ui (typically, given the structure)
+- **Authentication**: Clerk
+- **Database**: MongoDB with Mongoose ODM
+- **Linting/Formatting**: ESLint, Prettier
 
-## Features
+## Key Features
 
-- Responsive design that works across all devices
-- Authentication system with Clerk (sign-in, sign-up)
-- Protected dashboard for members
-- MongoDB integration for data persistence
+- Secure user authentication (sign-in, sign-up, profile management) via Clerk.
+- Role-based access control (Admin, Lead, Member).
+- Internship board with search and filtering.
+- Member portal/dashboard with protected resources.
+- Responsive design for all devices.
 
 ## Project Structure
 
-- `src/app`: All page components using the App Router
-- `src/components`: Reusable UI components
-- `src/lib`: Utility functions and database connections
+The project follows a standard Next.js App Router structure, with some key conventions:
 
-## Getting Started
+```
+pgi/
+├── .github/            # GitHub Actions, issue/PR templates
+├── .husky/             # Git hooks (e.g., pre-commit checks)
+├── docs/               # Project documentation (architecture, contributing, etc.)
+├── public/             # Static assets (images, icons, logos)
+├── scripts/            # Root-level utility/maintenance scripts (add new scripts here)
+├── src/                # Main source code
+│   ├── app/            # Next.js App Router (pages, layouts, API routes)
+│   │   ├── (auth)/     # Authentication-related pages (signin, signup)
+│   │   ├── (portal)/   # Member portal routes & layouts
+│   │   ├── api/        # Backend API route handlers
+│   │   └── ...         # Other public/app routes (e.g., landing page, about)
+│   ├── components/     # React components
+│   │   ├── ui/         # Core UI elements (Button, Card, Input - often from a library like Shadcn)
+│   │   ├── shared/     # Custom shared components used across multiple features
+│   │   └── features/   # (Recommended) Components specific to a feature/domain
+│   ├── hooks/          # Custom React hooks (e.g., useUserData, useForm)
+│   ├── lib/            # Core application modules and services
+│   │   ├── auth/       # Authentication helpers, user synchronization
+│   │   ├── database/   # MongoDB connection (Mongoose) and model definitions
+│   │   │   ├── connection.ts # Mongoose connection utility
+│   │   │   └── models/     # Mongoose schema definitions (User, Internship, etc.)
+│   │   ├── context/    # React Context API providers
+│   │   └── rss/        # RSS feed fetching library/utilities
+│   ├── server/         # Custom server logic (e.g., Socket.IO, cron jobs)
+│   │   ├── index.ts    # Custom Next.js server entry point
+│   │   └── rssFetcher.ts # Server-side RSS fetching scheduler & Socket.IO integration
+│   ├── types/          # Global TypeScript type definitions and interfaces
+│   │   ├── index.ts    # Main export for shared types
+│   │   └── jest.d.ts   # Jest specific type extensions
+│   ├── utils/          # General-purpose utility functions (e.g., cn, formatDate)
+│   ├── middleware.ts   # Next.js middleware (handles auth, redirects)
+│   └── tailwind.css    # Tailwind CSS global styles/directives
+├── .env.local.example  # Example environment variables file
+├── .eslintrc.json      # ESLint configuration
+├── .gitignore          # Files and directories ignored by Git
+├── .prettierrc         # Prettier code formatter configuration
+├── jest.config.js      # Jest testing configuration
+├── jest.setup.js       # Jest setup file
+├── next.config.mjs     # Next.js configuration
+├── package.json        # Project dependencies and scripts
+├── postcss.config.mjs  # PostCSS configuration
+├── tailwind.config.mjs # Tailwind CSS configuration
+└── tsconfig.json       # TypeScript configuration
+```
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables:
+**Key Directory Explanations:**
 
-   - Create a `.env.local` file and add your Clerk and MongoDB credentials:
-
-   ```
-   # Clerk Auth Keys
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
-
-   # MongoDB Connection
-   MONGODB_URI=your_mongodb_connection_string
-
-   # App URL
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
-
-## Environment Variables
-
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your Clerk publishable key
-- `CLERK_SECRET_KEY`: Your Clerk secret key
-- `MONGODB_URI`: Your MongoDB connection string
-- `NEXT_PUBLIC_APP_URL`: The URL where your app is hosted
-
-## Deployment
-
-This site can be easily deployed on Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fparagon-global-investments)
-
-Don't forget to add the environment variables in your Vercel project settings.
-
-# PGI Portal - University Investment Club
-
-This repository contains the code for Paragon Global Investments (PGI) portal, a platform for university investment club members to access internship listings and other club resources.
-
-## Features
-
-- **Authentication**: Secure sign-in with Clerk
-- **Role-Based Access Control**: Admin, Lead, and Member roles with different permissions
-- **Internship Board**: Searchable and filterable list of internship opportunities
-- **MongoDB Integration**: Data storage for internships and other resources
-- **Mobile-Responsive UI**: Clean interface that works on all devices
+- **`src/app/`**: Follows Next.js App Router conventions. Group routes using parentheses `(groupName)` for organization without affecting URL paths (e.g., `(auth)`, `(portal)`).
+- **`src/components/ui/`**: Typically houses base UI components. If using a library like Shadcn/ui, these are often generated here.
+- **`src/components/shared/`**: For custom components reused in multiple parts of the application.
+- **`src/lib/`**: Contains foundational logic. `database/connection.ts` is the standard way to connect to MongoDB. Mongoose models are in `lib/database/models/`.
+- **`src/hooks/`**: For custom React hooks to encapsulate reusable stateful logic.
+- **`src/utils/`**: For small, stateless utility functions. `utils.ts` contains common helpers like `cn`.
+- **`src/server/`**: If you need a custom server (e.g., for WebSockets or specific background tasks), this is where it lives. `server/index.ts` starts this custom server.
+- **`scripts/` (root)**: Place any project-specific scripts here (e.g., database seeding, maintenance tasks).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm/yarn
-- MongoDB database (local or Atlas)
-- Clerk account for authentication
+- Node.js (version specified in `.nvmrc` if present, or latest LTS)
+- npm (comes with Node.js)
+- MongoDB database (local instance or a cloud service like MongoDB Atlas)
+- A Clerk account for authentication (see [Clerk Dashboard](https://dashboard.clerk.com/))
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Set up environment variables:
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd pgi
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Set up environment variables:**
+    Copy the `.env.local.example` file to `.env.local` and fill in your credentials:
 
-   ```
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
-   MONGODB_URI=your_mongodb_connection_string
-   NEXT_PUBLIC_APP_URL=http://localhost:3000 # or your production URL
-   ```
+    ```bash
+    cp .env.local.example .env.local
+    ```
 
-4. Set up Clerk JWT Templates and user metadata as described in [CLERK_SETUP.md](CLERK_SETUP.md)
+    You'll need to provide:
 
-5. Run the development server:
+    - Clerk keys (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`)
+    - MongoDB connection string (`MONGODB_URI`)
+    - Your application URL (`NEXT_PUBLIC_APP_URL`, e.g., `http://localhost:3000`)
 
-   ```
-   npm run dev
-   ```
+    _(Self-note: Consider if `CLERK_SETUP.md` is still relevant or if its contents should be merged here or into `docs/`)._
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+### Running Locally
 
-## Project Structure
+```bash
+npm run dev
+```
 
-- `/src/app` - Next.js 14 App Router pages
-- `/src/components` - React components
-- `/src/lib` - Utilities and helpers
-  - `/lib/database` - MongoDB connection and models
-  - `/lib/auth` - Authentication helpers
-- `/public` - Static assets
+The application will be available at `http://localhost:3000`.
 
-## Authentication and Authorization
+## Authentication & Authorization
 
-Authentication is handled by Clerk. The middleware in `src/middleware.ts` protects routes and enforces role-based access control:
+- Authentication is managed by [Clerk](https://clerk.com/).
+- Middleware in `src/middleware.ts` protects routes and handles public/private access.
+- User roles and permissions are typically managed via Clerk session claims and synchronized with the MongoDB user profile. Check `src/lib/auth/` for related logic.
 
-- **Public Routes**: Landing page, sign in/up, etc.
-- **Protected Routes**: Dashboard, internships, etc.
-- **Role-Based Routes**: Admin and lead-only sections
+## Deployment
 
-For more details, see the [CLERK_SETUP.md](CLERK_SETUP.md) file.
+This application is configured for easy deployment on Vercel.
 
-## Database Schema
+1.  Push your code to a Git repository (GitHub, GitLab, Bitbucket).
+2.  Import the project into Vercel.
+3.  Configure the environment variables in your Vercel project settings similar to your `.env.local` file.
+    Vercel will automatically build and deploy your Next.js application.
 
-MongoDB is used to store data. The main collections are:
+## Contributing
 
-- **Internships**: Job opportunities with fields for title, company, deadline, etc.
+Please refer to `docs/CONTRIBUTING.md` for guidelines on how to contribute to this project. Key documents in the `docs/` folder include:
 
-## API Routes
-
-- `GET /api/internships` - List internships with filtering options
-- `POST /api/internships` - Create a new internship (admin/lead only)
+- `ARCHITECTURE.md`: Overview of the project architecture.
+- `CODEBASE_CLEANUP.md`: Checklist and guide for codebase maintenance (which you're currently using!).
+- `DEVELOPMENT.md`: Notes on the development process and standards.
 
 ## License
 

@@ -1,6 +1,6 @@
-import Parser from "rss-parser";
-import { connectDB } from "@/lib/database/mongodb";
-import mongoose from "mongoose";
+import Parser from 'rss-parser';
+import { connectToDatabase } from '@/lib/database/connection';
+import mongoose from 'mongoose';
 
 // Define the RSS item schema for MongoDB
 const RssItemSchema = new mongoose.Schema({
@@ -22,36 +22,36 @@ RssItemSchema.index({ source: 1, guid: 1 }, { unique: true });
 
 // Initialize the model (or get it if it already exists)
 export const RssItem =
-  mongoose.models.RssItem || mongoose.model("RssItem", RssItemSchema);
+  mongoose.models.RssItem || mongoose.model('RssItem', RssItemSchema);
 
 // Configure the RSS parser
 const parser = new Parser({
   customFields: {
-    item: ["creator", "categories", "content"],
+    item: ['creator', 'categories', 'content'],
   },
 });
 
 // RSS Feed Sources configuration
 const RSS_FEEDS = {
   marketwatch: {
-    id: "marketwatch-top",
-    url: "https://www.marketwatch.com/rss/topstories",
-    name: "MarketWatch Top Stories",
+    id: 'marketwatch-top',
+    url: 'https://www.marketwatch.com/rss/topstories',
+    name: 'MarketWatch Top Stories',
   },
   nasdaq: {
-    id: "nasdaq-news",
-    url: "https://www.nasdaq.com/feed/nasdaq-original/rss.xml",
-    name: "NASDAQ News",
+    id: 'nasdaq-news',
+    url: 'https://www.nasdaq.com/feed/nasdaq-original/rss.xml',
+    name: 'NASDAQ News',
   },
   reuters: {
-    id: "reuters-business",
-    url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best",
-    name: "Reuters Business News",
+    id: 'reuters-business',
+    url: 'https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best',
+    name: 'Reuters Business News',
   },
   seekingalpha: {
-    id: "seekingalpha-news",
-    url: "https://seekingalpha.com/market_currents.xml",
-    name: "Seeking Alpha",
+    id: 'seekingalpha-news',
+    url: 'https://seekingalpha.com/market_currents.xml',
+    name: 'Seeking Alpha',
   },
 };
 
@@ -68,7 +68,7 @@ async function fetchRssFeed(sourceKey: string) {
     const feed = await parser.parseURL(source.url);
 
     // Connect to MongoDB if not already connected
-    await connectDB();
+    await connectToDatabase();
 
     const insertedItems = [];
 
@@ -79,7 +79,7 @@ async function fetchRssFeed(sourceKey: string) {
         let processedCategories = item.categories || [];
 
         // Handle case where categories is a string (possibly a JSON string)
-        if (typeof processedCategories === "string") {
+        if (typeof processedCategories === 'string') {
           try {
             // Try to parse it as JSON
             const parsed = JSON.parse(processedCategories);
@@ -104,7 +104,7 @@ async function fetchRssFeed(sourceKey: string) {
         // Check if categories contains complex objects (like from Seeking Alpha)
         if (
           processedCategories.length > 0 &&
-          typeof processedCategories[0] === "string"
+          typeof processedCategories[0] === 'string'
         ) {
           // If it's already a string array, use as is
           processedCategories = processedCategories;
@@ -113,14 +113,14 @@ async function fetchRssFeed(sourceKey: string) {
             // Log the original categories for debugging
             console.log(
               `Processing complex categories for item "${item.title}" from ${source.id}:`,
-              typeof processedCategories === "string"
+              typeof processedCategories === 'string'
                 ? processedCategories
                 : JSON.stringify(processedCategories, null, 2)
             );
 
             // For complex objects, try to extract the category name from the "_" property
             processedCategories = processedCategories.map((cat: any) => {
-              if (typeof cat === "object" && cat !== null) {
+              if (typeof cat === 'object' && cat !== null) {
                 // If it's a complex object with "_" property, use that
                 return cat._ || JSON.stringify(cat);
               }
@@ -184,12 +184,12 @@ async function fetchRssFeed(sourceKey: string) {
 
 // MarketWatch specific function for backward compatibility
 export const fetchMarketWatchRSS = async () => {
-  return fetchRssFeed("marketwatch");
+  return fetchRssFeed('marketwatch');
 };
 
 // NASDAQ specific function
 export const fetchNasdaqRSS = async () => {
-  return fetchRssFeed("nasdaq");
+  return fetchRssFeed('nasdaq');
 };
 
 // Generic function to fetch any feed by source key

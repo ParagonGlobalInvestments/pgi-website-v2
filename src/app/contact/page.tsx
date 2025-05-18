@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import AnimatedSection from "@/components/ui/AnimatedSection";
-import AnimatedText from "@/components/ui/AnimatedText";
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import AnimatedText from '@/components/ui/AnimatedText';
 
 type FormData = {
   name: string;
@@ -74,8 +74,8 @@ export default function Contact() {
                   <button
                     className={`px-4 py-2 rounded-md transition-colors ${
                       !isChapterRequest
-                        ? "bg-primary text-white"
-                        : "bg-gray-700 text-gray-300"
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-700 text-gray-300'
                     }`}
                     onClick={() => setIsChapterRequest(false)}
                   >
@@ -84,8 +84,8 @@ export default function Contact() {
                   <button
                     className={`px-4 py-2 rounded-md transition-colors ${
                       isChapterRequest
-                        ? "bg-primary text-white"
-                        : "bg-gray-700 text-gray-300"
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-700 text-gray-300'
                     }`}
                     onClick={() => setIsChapterRequest(true)}
                   >
@@ -119,7 +119,7 @@ export default function Contact() {
                       type="text"
                       className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                       placeholder="Your name"
-                      {...register("name", { required: "Name is required" })}
+                      {...register('name', { required: 'Name is required' })}
                     />
                     {errors.name && (
                       <p className="mt-1 text-sm text-red-400">
@@ -141,11 +141,11 @@ export default function Contact() {
                       type="email"
                       className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                       placeholder="Your email"
-                      {...register("email", {
-                        required: "Email is required",
+                      {...register('email', {
+                        required: 'Email is required',
                         pattern: {
                           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "Invalid email address",
+                          message: 'Invalid email address',
                         },
                       })}
                     />
@@ -169,7 +169,7 @@ export default function Contact() {
                       type="tel"
                       className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                       placeholder="Your phone number"
-                      {...register("phone")}
+                      {...register('phone')}
                     />
                   </div>
 
@@ -188,9 +188,9 @@ export default function Contact() {
                           type="text"
                           className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                           placeholder="Your school name"
-                          {...register("school", {
+                          {...register('school', {
                             required: isChapterRequest
-                              ? "School name is required"
+                              ? 'School name is required'
                               : false,
                           })}
                         />
@@ -213,9 +213,9 @@ export default function Contact() {
                           type="text"
                           className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                           placeholder="Expected graduation year"
-                          {...register("graduationYear", {
+                          {...register('graduationYear', {
                             required: isChapterRequest
-                              ? "Graduation year is required"
+                              ? 'Graduation year is required'
                               : false,
                           })}
                         />
@@ -242,11 +242,11 @@ export default function Contact() {
                       className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
                       placeholder={
                         isChapterRequest
-                          ? "Tell us about your interest in starting a chapter"
-                          : "Your message"
+                          ? 'Tell us about your interest in starting a chapter'
+                          : 'Your message'
                       }
-                      {...register("message", {
-                        required: "Message is required",
+                      {...register('message', {
+                        required: 'Message is required',
                       })}
                     ></textarea>
                     {errors.message && (
@@ -263,8 +263,8 @@ export default function Contact() {
                       className="w-full px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                       {isChapterRequest
-                        ? "Submit Chapter Request"
-                        : "Send Message"}
+                        ? 'Submit Chapter Request'
+                        : 'Send Message'}
                     </button>
                   </div>
                 </div>

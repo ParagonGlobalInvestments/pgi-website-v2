@@ -31,8 +31,9 @@ export default function ProtectedPage({
       return;
     }
 
-    // Get user's role and track from metadata
-    const userRole = (user.publicMetadata?.role as UserRole) || "member";
+    // Get user's permissionLevel and track from metadata
+    const userRole =
+      (user.publicMetadata?.permissionLevel as UserRole) || "member";
     const userTrack = (user.publicMetadata?.track as UserTrack) || "value";
 
     // Check role-based access
@@ -44,7 +45,7 @@ export default function ProtectedPage({
         hasRequiredRole = userRole === requiredRole;
       }
 
-      // Admin role has access to everything
+      // Admin permissionLevel has access to everything
       if (userRole === "admin") {
         hasRequiredRole = true;
       }
@@ -56,17 +57,16 @@ export default function ProtectedPage({
       if (Array.isArray(requiredTrack)) {
         hasRequiredTrack = requiredTrack.includes(userTrack);
       } else {
-        hasRequiredTrack =
-          userTrack === requiredTrack || requiredTrack === "both";
+        hasRequiredTrack = userTrack === requiredTrack;
       }
 
-      // Admin and lead roles can see all tracks
+      // Admin and lead permissionLevels can see all tracks
       if (userRole === "admin" || userRole === "lead") {
         hasRequiredTrack = true;
       }
     }
 
-    // Redirect if the user doesn't have the required role or track
+    // Redirect if the user doesn't have the required permissionLevel or track
     if (!hasRequiredRole || !hasRequiredTrack) {
       router.push(redirectTo);
       return;

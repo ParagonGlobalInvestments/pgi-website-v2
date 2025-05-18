@@ -1,39 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
-import { connectDB } from "@/lib/database/mongodb";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { connectToDatabase } from '@/lib/database/connection';
 import {
   fetchMarketWatchRSS,
   fetchNasdaqRSS,
   fetchRSSBySource,
-} from "@/lib/rss/rssFetcher";
+} from '@/lib/rss/rssFetcher';
 
 // Ensure dynamic rendering for this route
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // POST handler to refresh RSS feed
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate the user - only allow admins to refresh
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await currentUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user role and source from query params
-    const searchParams = req.nextUrl.searchParams;
-    const role = searchParams.get("role");
-    const source = searchParams.get("source") || "marketwatch";
-
-    // Only allow admins to refresh
-    if (role !== "admin") {
+    // Check if user is admin using Clerk metadata
+    if (user.publicMetadata.role !== 'admin') {
       return NextResponse.json(
-        { error: "Only admins can refresh RSS feeds" },
+        { error: 'Only admins can refresh RSS feeds' },
         { status: 403 }
       );
     }
 
+    // Get source from query params
+    const searchParams = req.nextUrl.searchParams;
+    const source = searchParams.get('source') || 'marketwatch';
+
     // Connect to the database
-    await connectDB();
+    await connectToDatabase();
 
     // Execute the RSS feed fetch function based on source
     try {
@@ -41,10 +40,10 @@ export async function POST(req: NextRequest) {
 
       // Source-specific fetching
       switch (source) {
-        case "marketwatch":
+        case 'marketwatch':
           newItems = await fetchMarketWatchRSS();
           break;
-        case "nasdaq":
+        case 'nasdaq':
           newItems = await fetchNasdaqRSS();
           break;
         default:
@@ -65,9 +64,9 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Error in RSS refresh endpoint:", error);
+    console.error('Error in RSS refresh endpoint:', error);
     return NextResponse.json(
-      { error: "Failed to refresh RSS feed" },
+      { error: 'Failed to refresh RSS feed' },
       { status: 500 }
     );
   }

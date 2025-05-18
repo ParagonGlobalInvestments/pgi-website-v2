@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
-import { connectDB } from "@/lib/database/mongodb";
-import User from "@/lib/database/models/User";
+import { NextRequest, NextResponse } from 'next/server';
+import { currentUser } from '@clerk/nextjs/server';
+import { connectToDatabase } from '@/lib/database/connection';
+import User from '@/lib/database/models/User';
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,20 +10,20 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
     // Connect to MongoDB
-    await connectDB();
+    await connectToDatabase();
 
     // Find users with the same email as the current user
     const email = user.emailAddresses[0]?.emailAddress;
 
     if (!email) {
       return NextResponse.json(
-        { error: "User has no email address" },
+        { error: 'User has no email address' },
         { status: 400 }
       );
     }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     if (usersWithSameEmail.length === 0) {
       return NextResponse.json(
-        { error: "No users found with this email" },
+        { error: 'No users found with this email' },
         { status: 404 }
       );
     }
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       // Check if the user already has the correct clerkId
       if (existingUser.clerkId === user.id) {
         return NextResponse.json(
-          { message: "User already has the correct clerkId" },
+          { message: 'User already has the correct clerkId' },
           { status: 200 }
         );
       }
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       await existingUser.save();
 
       return NextResponse.json(
-        { message: "Updated user with correct clerkId" },
+        { message: 'Updated user with correct clerkId' },
         { status: 200 }
       );
     }
@@ -64,13 +64,13 @@ export async function POST(req: NextRequest) {
     console.log(`Found ${usersWithSameEmail.length} users with email ${email}`);
 
     // Find the one with a placeholder clerkId
-    const placeholderUsers = usersWithSameEmail.filter((u) =>
-      u.clerkId.startsWith("placeholder_")
+    const placeholderUsers = usersWithSameEmail.filter(u =>
+      u.clerkId.startsWith('placeholder_')
     );
 
     // Find the one with the real clerkId
     const realUsers = usersWithSameEmail.filter(
-      (u) => !u.clerkId.startsWith("placeholder_")
+      u => !u.clerkId.startsWith('placeholder_')
     );
 
     if (realUsers.length > 0) {
@@ -112,9 +112,9 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error: any) {
-    console.error("Error resolving duplicate email:", error);
+    console.error('Error resolving duplicate email:', error);
     return NextResponse.json(
-      { error: error.message || "Failed to resolve duplicate email" },
+      { error: error.message || 'Failed to resolve duplicate email' },
       { status: 500 }
     );
   }

@@ -1,9 +1,9 @@
-import React from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Button, ButtonProps } from "./button";
-import { IconType } from "react-icons";
+import React from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { cn } from '@/utils';
+import { Button, ButtonProps } from './button';
+import { IconType } from 'react-icons';
 
 interface ActionButtonProps extends ButtonProps {
   icon?: React.ReactNode;
@@ -23,7 +23,7 @@ export function ActionButton({
   const buttonContent = (
     <Button
       className={cn(
-        "relative flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg",
+        'relative flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg',
         className
       )}
       {...props}
@@ -53,7 +53,7 @@ export function ActionIconButton({
 }: {
   icon: IconType;
   label: string;
-} & Omit<ActionButtonProps, "icon" | "children">) {
+} & Omit<ActionButtonProps, 'icon' | 'children'>) {
   return (
     <ActionButton icon={<Icon className="w-4 h-4" />} {...props}>
       {label}

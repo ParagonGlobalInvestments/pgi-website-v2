@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import { FaSave, FaBell, FaUser, FaPalette, FaDesktop } from "react-icons/fa";
-import ProtectedPage from "@/components/auth/ProtectedPage";
-import { motion } from "framer-motion";
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { FaSave, FaBell, FaUser, FaPalette, FaDesktop } from 'react-icons/fa';
+import ProtectedPage from '@/components/auth/ProtectedPage';
+import { motion } from 'framer-motion';
 import {
-  Input,
-  Textarea,
   Button,
   Switch,
   Card,
@@ -20,8 +18,8 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-} from "@/components/ui";
-import { useRouter } from "next/navigation";
+} from '@/components/ui';
+import { useRouter } from 'next/navigation';
 
 // Animation variants
 const cardVariants = {
@@ -31,7 +29,7 @@ const cardVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -50,13 +48,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
 
-  // Profile settings state
-  const [profileSettings, setProfileSettings] = useState({
-    name: "",
-    email: "",
-    bio: "",
-  });
-
   // Notification preferences state
   const [notificationPreferences, setNotificationPreferences] = useState({
     emailNotifications: true,
@@ -69,51 +60,12 @@ export default function SettingsPage() {
   const [displayPreferences, setDisplayPreferences] = useState({
     darkMode: false,
     compactView: false,
-    fontSize: "medium",
+    fontSize: 'medium',
   });
 
   // Save state and message
   const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState({ type: "", message: "" });
-
-  // Load user data once Clerk is loaded
-  useEffect(() => {
-    if (isLoaded && user) {
-      setProfileSettings({
-        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-        email: user.primaryEmailAddress?.emailAddress || "",
-        bio: "",
-      });
-    }
-  }, [isLoaded, user]);
-
-  // Handle profile form submission
-  const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setSaving(true);
-
-      // This would normally call an API to update user profile
-      // Simulating API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setSaveMessage({
-        type: "success",
-        message: "Profile settings saved successfully.",
-      });
-
-      setTimeout(() => {
-        setSaveMessage({ type: "", message: "" });
-      }, 3000);
-    } catch (error) {
-      setSaveMessage({
-        type: "error",
-        message: "Failed to save profile settings.",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+  const [saveMessage, setSaveMessage] = useState({ type: '', message: '' });
 
   // Handle notification preferences submission
   const handleNotificationSubmit = async (e: React.FormEvent) => {
@@ -122,20 +74,20 @@ export default function SettingsPage() {
       setSaving(true);
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       setSaveMessage({
-        type: "success",
-        message: "Notification preferences saved successfully.",
+        type: 'success',
+        message: 'Notification preferences saved successfully.',
       });
 
       setTimeout(() => {
-        setSaveMessage({ type: "", message: "" });
+        setSaveMessage({ type: '', message: '' });
       }, 3000);
     } catch (error) {
       setSaveMessage({
-        type: "error",
-        message: "Failed to save notification preferences.",
+        type: 'error',
+        message: 'Failed to save notification preferences.',
       });
     } finally {
       setSaving(false);
@@ -149,20 +101,20 @@ export default function SettingsPage() {
       setSaving(true);
 
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       setSaveMessage({
-        type: "success",
-        message: "Display preferences saved successfully.",
+        type: 'success',
+        message: 'Display preferences saved successfully.',
       });
 
       setTimeout(() => {
-        setSaveMessage({ type: "", message: "" });
+        setSaveMessage({ type: '', message: '' });
       }, 3000);
     } catch (error) {
       setSaveMessage({
-        type: "error",
-        message: "Failed to save display preferences.",
+        type: 'error',
+        message: 'Failed to save display preferences.',
       });
     } finally {
       setSaving(false);
@@ -178,7 +130,7 @@ export default function SettingsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0"
+        className="space-y-8 pt-4 lg:pt-0 text-navy"
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
@@ -196,7 +148,7 @@ export default function SettingsPage() {
             <TabsTrigger
               value="profile"
               className="flex items-center gap-2"
-              onClick={() => router.push("/portal/dashboard/settings/profile")}
+              onClick={() => router.push('/portal/dashboard/settings/profile')}
             >
               <FaUser className="h-4 w-4" />
               Profile
@@ -207,12 +159,12 @@ export default function SettingsPage() {
         {saveMessage.message && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
+            animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className={`mb-6 p-4 rounded-md ${
-              saveMessage.type === "success"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
+              saveMessage.type === 'success'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
             }`}
           >
             {saveMessage.message}
@@ -251,7 +203,7 @@ export default function SettingsPage() {
                       <Switch
                         id="emailNotifications"
                         checked={notificationPreferences.emailNotifications}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setNotificationPreferences({
                             ...notificationPreferences,
                             emailNotifications: checked,
@@ -273,7 +225,7 @@ export default function SettingsPage() {
                       <Switch
                         id="internshipAlerts"
                         checked={notificationPreferences.internshipAlerts}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setNotificationPreferences({
                             ...notificationPreferences,
                             internshipAlerts: checked,
@@ -294,7 +246,7 @@ export default function SettingsPage() {
                       <Switch
                         id="eventReminders"
                         checked={notificationPreferences.eventReminders}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setNotificationPreferences({
                             ...notificationPreferences,
                             eventReminders: checked,
@@ -315,7 +267,7 @@ export default function SettingsPage() {
                       <Switch
                         id="newsletterUpdates"
                         checked={notificationPreferences.newsletterUpdates}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setNotificationPreferences({
                             ...notificationPreferences,
                             newsletterUpdates: checked,
@@ -333,7 +285,7 @@ export default function SettingsPage() {
                       className="flex items-center gap-2"
                     >
                       <FaSave />
-                      {saving ? "Saving..." : "Save Preferences"}
+                      {saving ? 'Saving...' : 'Save Preferences'}
                     </Button>
                   </div>
                 </form>
@@ -367,7 +319,7 @@ export default function SettingsPage() {
                       <Switch
                         id="darkMode"
                         checked={displayPreferences.darkMode}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setDisplayPreferences({
                             ...displayPreferences,
                             darkMode: checked,
@@ -388,7 +340,7 @@ export default function SettingsPage() {
                       <Switch
                         id="compactView"
                         checked={displayPreferences.compactView}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setDisplayPreferences({
                             ...displayPreferences,
                             compactView: checked,
@@ -403,7 +355,7 @@ export default function SettingsPage() {
                       </h3>
                       <RadioGroup
                         value={displayPreferences.fontSize}
-                        onValueChange={(value) =>
+                        onValueChange={value =>
                           setDisplayPreferences({
                             ...displayPreferences,
                             fontSize: value,
@@ -450,7 +402,7 @@ export default function SettingsPage() {
                       className="flex items-center gap-2"
                     >
                       <FaSave />
-                      {saving ? "Saving..." : "Save Preferences"}
+                      {saving ? 'Saving...' : 'Save Preferences'}
                     </Button>
                   </div>
                 </form>
