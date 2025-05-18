@@ -16,24 +16,6 @@ This document catalogs key UI components in the PGI application. For base UI ele
 - **Features**: Icon display, active highlighting, click handling
 - **Path**: Part of layout components (e.g., dashboard layout)
 
-## Animation Components
-
-### SmoothTransition
-
-- **Purpose**: Apply smooth mount/unmount animations
-- **Props**:
-  - `isVisible`: Boolean to control visibility
-  - `direction`: 'vertical' | 'horizontal' | 'scale'
-  - `className`: Additional CSS classes
-  - `children`: React nodes
-- **Usage**:
-  ```tsx
-  <SmoothTransition isVisible={showContent} direction="vertical">
-    <Content />
-  </SmoothTransition>
-  ```
-- **Path**: `src/components/ui/SmoothTransition.tsx`
-
 ## Authentication Components
 
 ### OnboardingWizard
@@ -58,6 +40,24 @@ The `src/components/ui/` directory contains UI primitives based on shadcn/ui:
 
 - Button, Input, Card, Dialog, Select, Toast, Table, Badge, etc.
 - These are customized variants of shadcn/ui components
+
+## Animation Components
+
+### SmoothTransition
+
+- **Purpose**: Apply smooth mount/unmount animations
+- **Props**:
+  - `isVisible`: Boolean to control visibility
+  - `direction`: 'vertical' | 'horizontal' | 'scale'
+  - `className`: Additional CSS classes
+  - `children`: React nodes
+- **Usage**:
+  ```tsx
+  <SmoothTransition isVisible={showContent} direction="vertical">
+    <Content />
+  </SmoothTransition>
+  ```
+- **Path**: `src/components/ui/SmoothTransition.tsx`
 
 ## Component Guidelines
 

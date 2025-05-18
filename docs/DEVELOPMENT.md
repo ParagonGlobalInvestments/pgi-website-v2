@@ -44,7 +44,6 @@ This guide contains setup instructions and development standards for the PGI pla
 - **`src/app/`**: Next.js pages and API routes
 - **`src/components/`**: React components
   - `ui/`: Core UI elements
-  - `shared/`: Reusable components
 - **`src/lib/`**: Core modules
   - `database/`: MongoDB connection and models
   - `auth/`: Authentication helpers
