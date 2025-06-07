@@ -2,8 +2,23 @@
 
 import { SignUp } from '@clerk/nextjs';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // In production, redirect to home page
+    if (process.env.NODE_ENV === 'production') {
+      router.replace('/');
+    }
+  }, [router]);
+
+  // In production, return null while redirecting
+  if (process.env.NODE_ENV === 'production') {
+    return null;
+  }
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#00172B] to-[#003E6B]">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden">

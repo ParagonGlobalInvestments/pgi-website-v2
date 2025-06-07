@@ -9,6 +9,12 @@ export default function PortalPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // In production, redirect to home page
+    if (process.env.NODE_ENV === 'production') {
+      router.replace('/');
+      return;
+    }
+
     if (isLoaded) {
       if (isSignedIn && userId) {
         // User is signed in, redirect to dashboard

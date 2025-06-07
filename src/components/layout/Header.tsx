@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import Link from 'next/link';
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 // Animation variants
 const navbarAnimation = {
@@ -18,7 +18,7 @@ const navbarAnimation = {
     y: 0,
     transition: {
       duration: 0.4,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -41,7 +41,7 @@ const navItemAnimation = {
     y: 0,
     transition: {
       duration: 0.3,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -53,7 +53,7 @@ const logoAnimation = {
     scale: 1,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -78,17 +78,17 @@ const Header = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const header = document.querySelector("header");
+      const header = document.querySelector('header');
       if (header && !header.contains(event.target as Node) && mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
 
     // Clean up
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [mobileMenuOpen]);
 
@@ -97,14 +97,14 @@ const Header = () => {
     e.preventDefault();
 
     // If we're on the home page, scroll to the About section
-    if (window.location.pathname === "/") {
-      const aboutSection = document.getElementById("about-section");
+    if (window.location.pathname === '/') {
+      const aboutSection = document.getElementById('about-section');
       if (aboutSection) {
-        aboutSection.scrollIntoView({ behavior: "smooth" });
+        aboutSection.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
       // If we're on another page, navigate to home and then scroll
-      window.location.href = "/#about-section";
+      window.location.href = '/#about-section';
     }
 
     // Close mobile menu
@@ -113,45 +113,45 @@ const Header = () => {
 
   // Toggle section expansion for mobile
   const toggleSection = (section: string) => {
-    if (section === "about") {
+    if (section === 'about') {
       setExpandedAbout(!expandedAbout);
-    } else if (section === "nationalCommittee") {
+    } else if (section === 'nationalCommittee') {
       setExpandedNationalCommittee(!expandedNationalCommittee);
-    } else if (section === "members") {
+    } else if (section === 'members') {
       setExpandedMembers(!expandedMembers);
     }
   };
 
   const mainNav = [
-    { name: "Home", url: "/" },
-    { name: "Who We Are", url: "/who-we-are" },
+    { name: 'Home', url: '/' },
+    { name: 'Who We Are', url: '/who-we-are' },
     {
-      name: "National Committee",
-      url: "/national-committee",
+      name: 'National Committee',
+      url: '/national-committee',
       subItems: [
-        { name: "Officers", url: "/national-committee/officers" },
-        { name: "Founders", url: "/national-committee/founders" },
+        { name: 'Officers', url: '/national-committee/officers' },
+        { name: 'Founders', url: '/national-committee/founders' },
       ],
     },
     {
-      name: "Members",
-      url: "/members",
+      name: 'Members',
+      url: '/members',
       subItems: [
-        { name: "Value Team", url: "/members/value-team" },
-        { name: "Quant Team", url: "/members/quant-team" },
+        { name: 'Value Team', url: '/members/value-team' },
+        { name: 'Quant Team', url: '/members/quant-team' },
       ],
     },
-    { name: "Placements", url: "/placements" },
-    { name: "Apply", url: "/apply" },
-    { name: "Contact", url: "/contact" },
+    { name: 'Placements', url: '/placements' },
+    { name: 'Apply', url: '/apply' },
+    { name: 'Contact', url: '/contact' },
   ];
 
   // Define About submenu items for consistency
   const aboutSubItems = [
-    { name: "Who We Are", url: "/who-we-are" },
-    { name: "Investment Strategy", url: "/investment-strategy" },
-    { name: "Publications", url: "/publications" },
-    { name: "Sponsors", url: "/sponsors" },
+    { name: 'Who We Are', url: '/who-we-are' },
+    { name: 'Investment Strategy', url: '/investment-strategy' },
+    { name: 'Publications', url: '/publications' },
+    { name: 'Sponsors', url: '/sponsors' },
   ];
 
   return (
@@ -306,31 +306,34 @@ const Header = () => {
             </Link>
           </motion.div>
 
-          <motion.div variants={navItemAnimation}>
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                className="bg-white text-black py-2 px-4 rounded hover:bg-opacity-90 transition-colors  font-bold"
-              >
-                Dashboard
-              </Link>
-              {/* <UserButton /> */}
-            </SignedIn>
-            <SignedOut>
-              <Link
-                href="/portal"
-                className=" py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
-              >
-                Portal
-              </Link>
-            </SignedOut>
-          </motion.div>
+          {/* Only show Portal in development */}
+          {process.env.NODE_ENV !== 'production' && (
+            <motion.div variants={navItemAnimation}>
+              <SignedIn>
+                <Link
+                  href="/dashboard"
+                  className="bg-white text-black py-2 px-4 rounded hover:bg-opacity-90 transition-colors  font-bold"
+                >
+                  Dashboard
+                </Link>
+                {/* <UserButton /> */}
+              </SignedIn>
+              <SignedOut>
+                <Link
+                  href="/portal"
+                  className=" py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                >
+                  Portal
+                </Link>
+              </SignedOut>
+            </motion.div>
+          )}
         </motion.nav>
 
         {/* Mobile Menu Button */}
         <motion.div className="md:hidden" variants={navItemAnimation}>
           <button
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             className="focus:outline-none text-white p-1.5 rounded-md hover:bg-navy-light transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -372,7 +375,7 @@ const Header = () => {
       {/* Mobile dropdown menu - Non-fixed, flows with the page */}
       <div
         className={`border-t border-gray-700 bg-navy shadow-lg transition-all duration-300 ease-in-out overflow-hidden md:hidden ${
-          mobileMenuOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+          mobileMenuOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="px-3 py-1 text-sm">
@@ -387,13 +390,13 @@ const Header = () => {
           {/* About section with dropdown */}
           <div className="border-b border-gray-700">
             <button
-              onClick={() => toggleSection("about")}
+              onClick={() => toggleSection('about')}
               className="w-full text-left flex items-center justify-between py-2.5 text-white"
             >
               <span>About</span>
               <svg
                 className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedAbout ? "transform rotate-180" : ""
+                  expandedAbout ? 'transform rotate-180' : ''
                 }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -408,7 +411,7 @@ const Header = () => {
             </button>
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedAbout ? "max-h-[200px]" : "max-h-0"
+                expandedAbout ? 'max-h-[200px]' : 'max-h-0'
               }`}
             >
               {aboutSubItems.map((item, index) => (
@@ -426,13 +429,13 @@ const Header = () => {
           {/* National Committee with dropdown */}
           <div className="border-b border-gray-700">
             <button
-              onClick={() => toggleSection("nationalCommittee")}
+              onClick={() => toggleSection('nationalCommittee')}
               className="w-full text-left flex items-center justify-between py-2.5 text-white"
             >
               <span>National Committee</span>
               <svg
                 className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedNationalCommittee ? "transform rotate-180" : ""
+                  expandedNationalCommittee ? 'transform rotate-180' : ''
                 }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -447,7 +450,7 @@ const Header = () => {
             </button>
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedNationalCommittee ? "max-h-[200px]" : "max-h-0"
+                expandedNationalCommittee ? 'max-h-[200px]' : 'max-h-0'
               }`}
             >
               {mainNav[2]?.subItems?.map((item, index) => (
@@ -465,13 +468,13 @@ const Header = () => {
           {/* Members with dropdown */}
           <div className="border-b border-gray-700">
             <button
-              onClick={() => toggleSection("members")}
+              onClick={() => toggleSection('members')}
               className="w-full text-left flex items-center justify-between py-2.5 text-white"
             >
               <span>Members</span>
               <svg
                 className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedMembers ? "transform rotate-180" : ""
+                  expandedMembers ? 'transform rotate-180' : ''
                 }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
@@ -486,7 +489,7 @@ const Header = () => {
             </button>
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedMembers ? "max-h-[200px]" : "max-h-0"
+                expandedMembers ? 'max-h-[200px]' : 'max-h-0'
               }`}
             >
               {mainNav[3]?.subItems?.map((item, index) => (
@@ -512,28 +515,30 @@ const Header = () => {
             </Link>
           ))}
 
-          {/* Authentication links */}
-          <div className="py-2.5 mt-1">
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                className="block py-1.5 px-3 mb-2 bg-primary text-white font-semibold rounded text-center hover:bg-opacity-90 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <div className="flex justify-center">
-                <UserButton />
-              </div>
-            </SignedIn>
-            <SignedOut>
-              <Link
-                href="/portal"
-                className="block py-1.5 px-3 bg-white text-black font-semibold rounded text-center hover:bg-gray-200 transition-colors"
-              >
-                Portal
-              </Link>
-            </SignedOut>
-          </div>
+          {/* Authentication links - Only show Portal in development */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="py-2.5 mt-1">
+              <SignedIn>
+                <Link
+                  href="/dashboard"
+                  className="block py-1.5 px-3 mb-2 bg-primary text-white font-semibold rounded text-center hover:bg-opacity-90 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <div className="flex justify-center">
+                  <UserButton />
+                </div>
+              </SignedIn>
+              <SignedOut>
+                <Link
+                  href="/portal"
+                  className="block py-1.5 px-3 bg-white text-black font-semibold rounded text-center hover:bg-gray-200 transition-colors"
+                >
+                  Portal
+                </Link>
+              </SignedOut>
+            </div>
+          )}
         </div>
       </div>
     </motion.header>
