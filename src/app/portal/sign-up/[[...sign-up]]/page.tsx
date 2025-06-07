@@ -1,8 +1,23 @@
-"use client";
+'use client';
 
-import { SignUp } from "@clerk/nextjs";
+import { SignUp } from '@clerk/nextjs';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // In production, redirect to home page
+    if (process.env.NODE_ENV === 'production') {
+      router.replace('/');
+    }
+  }, [router]);
+
+  // In production, return null while redirecting
+  if (process.env.NODE_ENV === 'production') {
+    return null;
+  }
   return (
     <div className="py-16 px-4">
       <div className="container mx-auto max-w-md">
