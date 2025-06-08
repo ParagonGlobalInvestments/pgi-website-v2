@@ -10,7 +10,6 @@ const isPublicRoute = createRouteMatcher([
   '/',
 
   // Main navigation routes
-  '/about',
   '/who-we-are',
   '/members',
   '/members/value-team',
