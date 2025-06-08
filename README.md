@@ -38,7 +38,7 @@ Built with Next.js (App Router), TypeScript, Tailwind CSS, Clerk for authenticat
 - Role-based access control (Admin, Lead, Member)
 - Internship board with search and filtering
 - Member portal/dashboard with protected resources
-- Publications and investment strategies section
+- Education and investment strategies section
 - Member directory and profiles
 - Responsive design for all devices
 
@@ -90,7 +90,6 @@ pgi/
 │   │   │   ├── signin/     # Portal sign-in flow
 │   │   │   ├── signout/    # Sign-out handling
 │   │   │   └── signup/     # Alternative sign-up path
-│   │   ├── publications/   # Publications page
 │   │   ├── sign-in/        # Authentication sign-in page
 │   │   ├── sign-up/        # Authentication sign-up page
 │   │   ├── sponsors/       # Sponsors page

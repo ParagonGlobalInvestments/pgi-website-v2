@@ -1,6 +1,6 @@
 import StandaloneLayout from "@/components/layout/StandaloneLayout";
 
-export default function PublicationsLayout({
+export default function EducationLayout({
   children,
 }: {
   children: React.ReactNode;

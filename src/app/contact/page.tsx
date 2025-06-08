@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import AnimatedText from '@/components/ui/AnimatedText';
@@ -44,7 +42,7 @@ export default function Contact() {
 
   return (
     <div className="bg-navy min-h-screen">
-      <div className="container mx-auto py-36 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto py-24 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
         <AnimatedSection className="text-center mb-16">
           <AnimatedText

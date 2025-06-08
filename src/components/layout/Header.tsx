@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -150,7 +150,7 @@ const Header = () => {
   const aboutSubItems = [
     { name: 'Who We Are', url: '/who-we-are' },
     { name: 'Investment Strategy', url: '/investment-strategy' },
-    { name: 'Publications', url: '/publications' },
+    { name: 'Education', url: '/education' },
     { name: 'Sponsors & Partners', url: '/sponsors' },
   ];
 
@@ -208,10 +208,10 @@ const Header = () => {
                   Investment Strategy
                 </Link>
                 <Link
-                  href="/publications"
+                  href="/education"
                   className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
                 >
-                  Publications
+                  Education
                 </Link>
                 <Link
                   href="/sponsors"
