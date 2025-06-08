@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+// import Link from 'next/link';
 import Image from 'next/image';
 import ScrollButton from '@/components/ui/ScrollButton';
 import { motion } from 'framer-motion';
@@ -149,21 +149,21 @@ export default function Home() {
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">$40K</p>
+                <p className="text-3xl font-normal mb-2">$40K</p>
                 <p className="text-gray-300 font-light">AUM</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">21</p>
+                <p className="text-3xl font-normal mb-2">21</p>
                 <p className="text-gray-300 font-light">Sponsors & Partners</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">8</p>
+                <p className="text-3xl font-normal mb-2">8</p>
                 <p className="text-gray-300 font-light">Chapters</p>
               </motion.div>
             </motion.div>
@@ -402,7 +402,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
+              <h3 className="text-2xl font-bold mb-4">
                 Value Investment
               </h3>
               <p className="text-gray-300">
@@ -415,7 +415,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
+              <h3 className="text-2xl font-bold mb-4">
                 Algorithmic Trading
               </h3>
               <p className="text-gray-300">
@@ -452,7 +452,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
+              <h3 className="text-2xl font-bold mb-4">
                 Paragon Value
               </h3>
               <p className="text-gray-300">
@@ -466,7 +466,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
+              <h3 className="text-2xl font-bold mb-4">
                 Paragon Systematic
               </h3>
               <p className="text-gray-300">

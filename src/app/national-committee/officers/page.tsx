@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaLinkedin } from 'react-icons/fa';
 
@@ -148,7 +147,7 @@ export default function OfficersPage() {
   return (
     <div className="bg-navy text-white min-h-screen">
       {/* Officers Section */}
-      <section className="py-36 px-4">
+      <section className="py-24 px-4">
         <div className="container mx-auto">
           <motion.h1
             className="text-4xl font-bold mb-16 text-center"

@@ -7,8 +7,8 @@ import {
   FaMoneyBillWave,
   FaUniversity,
 } from 'react-icons/fa';
-import Image from 'next/image';
-import Link from 'next/link';
+// import Image from 'next/image';
+// import Link from 'next/link';
 
 // Animation variants
 const fadeIn = {
@@ -49,7 +49,7 @@ const cardItem = {
 export default function InvestmentStrategy() {
   return (
     <div className="bg-navy text-white min-h-screen">
-      <div className="container mx-auto py-36 px-4">
+      <div className="container mx-auto py-24 px-4">
         <motion.h1
           className="text-4xl font-bold mb-8 text-center"
           initial="hidden"

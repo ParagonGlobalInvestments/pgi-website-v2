@@ -2,12 +2,10 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Link from "next/link";
+// import Link from "next/link";
 import {
   FaHandshake,
-  FaAward,
-  FaChartLine,
-  FaLaptopCode,
+  FaAward
 } from "react-icons/fa";
 
 // Animation variants
@@ -149,7 +147,7 @@ export default function Sponsors() {
 
   return (
     <div className="bg-navy text-white min-h-screen">
-      <div className="container mx-auto py-36 px-4">
+      <div className="container mx-auto py-24 px-4">
         <motion.h1
           className="text-4xl font-bold mb-8 text-center"
           initial="hidden"
