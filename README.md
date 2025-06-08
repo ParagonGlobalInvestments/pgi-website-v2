@@ -175,7 +175,7 @@ pgi/
 
    ```bash
    git clone <repository-url>
-   cd pgi
+   cd pgi-website-v2
    ```
 
 2. **Install dependencies:**
