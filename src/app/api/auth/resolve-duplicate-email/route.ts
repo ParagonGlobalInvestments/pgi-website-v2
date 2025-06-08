@@ -3,7 +3,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/database/connection';
 import User from '@/lib/database/models/User';
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     // Get the authenticated user from Clerk
     const user = await currentUser();
