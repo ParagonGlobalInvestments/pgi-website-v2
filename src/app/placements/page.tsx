@@ -85,13 +85,12 @@ export default function PlacementsPage() {
             animate="visible"
           >
             {[
-              'Goldman',
-              'JP Morgan',
+              'Goldman Sachs',
+              'J.P. Morgan',
               'Morgan Stanley',
               'Bank of America',
               'RBC',
-              'Citi',
-              'CS',
+              'Citigroup',
               'Evercore',
               'Lazard',
               'Qatalyst',
@@ -138,25 +137,24 @@ export default function PlacementsPage() {
             animate="visible"
           >
             {[
-              'Citadel',
-              'JS',
-              'deshaw',
-              'arrowstreet',
+              'Citadel Securities',
+              'Jane Street',
+              'D.E. Shaw',
+              'Arrowstreet',
               'Optiver',
               'AQR',
               'SIG',
               'IMC',
               'Five Rings',
-              'virtu',
               'Peak6',
-              'flow',
+              'Flow Traders',
               'Belvedere',
               'Group One',
-              'Finalzye',
+              'Finalzye Capital',
               'Millennium',
               'BlackEdge',
-              'Kershner',
-              'cloudquant',
+              'Kershner Trading',
+              'CloudQuant',
               'Amazon',
               'Apple',
               'Google',
@@ -168,8 +166,7 @@ export default function PlacementsPage() {
               'Databricks',
               'Plaid',
               'IBM',
-              'siemens',
-              'StoneCo',
+              'Cubist Systematic',
             ].map((company, index) => (
               <motion.div
                 key={index}
@@ -204,7 +201,7 @@ export default function PlacementsPage() {
             {[
               'Citadel',
               'Point72',
-              'dodge',
+              'Dodge & Cox',
               'Apollo Management',
               'Ares Management',
               'Blackstone',

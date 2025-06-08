@@ -64,44 +64,26 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-20">
           <motion.h1
             variants={fadeIn}
-            className="text-5xl md:text-6xl lg:text-7xl font-light tracking-widest mb-8"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-widest mb-8"
           >
             Paragon Global Investments
           </motion.h1>
           <motion.h2
             variants={fadeIn}
             transition={{ delay: 0.2 }}
-            className="text-2xl md:text-3xl lg:text-4xl mb-6 text-gray-300 font-normal tracking-wide"
+            style={{ color: '#d8d8d8' }}
+            className="text-2xl md:text-3xl lg:text-4xl mb-2 font-normal tracking-wide"
           >
             Intersecting Value Investing and Quantitative Finance
           </motion.h2>
           <motion.p
             variants={fadeIn}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl mb-8 mx-auto text-gray-400 font-light tracking-wide"
+            style={{ color: '#d8d8d8' }}
+            className="text-lg md:text-xl mb-10 mx-auto font-light tracking-wide"
           >
-            We are a student-run intercollegiate investment fund focused on
-            value investing and algorithmic trading
+            Student-run intercollegiate investment fund focused on value investing and algorithmic trading
           </motion.p>
-
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
-          >
-            <Link
-              href="/portal"
-              className="bg-pgi-accent-blue hover:bg-pgi-accent-blue/80 text-white font-medium py-3 px-8 rounded-md transition-colors duration-300 text-lg"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/about"
-              className="bg-transparent hover:bg-white/10 text-white border border-white/30 font-medium py-3 px-8 rounded-md transition-colors duration-300 text-lg"
-            >
-              Learn More
-            </Link>
-          </motion.div>
         </div>
         <motion.div
           variants={fadeIn}
@@ -142,7 +124,7 @@ export default function Home() {
             variants={fadeIn}
             className="text-3xl font-light mb-10 text-center text-white"
           >
-            About Us
+            PGI At a Glance
           </motion.h2>
           <div className="max-w-4xl mx-auto">
             <motion.p
@@ -150,8 +132,8 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="text-lg mb-6 text-gray-300 text-center font-light"
             >
-              Paragon Global Investments (formerly PNG) is a student-run
-              intercollegiate investment fund with 8 chapters at the top
+              Paragon Global Investments (PGI) is a student-run
+              intercollegiate investment fund with 8 chapters at top
               universities in the United States. We utilize both fundamental and
               systematic trading strategies to invest into our $40,000
               investment fund. Since our inception, we have grown to 300+ active
@@ -167,21 +149,21 @@ export default function Home() {
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary">$40K</p>
+                <p className="text-3xl font-normal mb-2 text-primary text-white">$40K</p>
                 <p className="text-gray-300 font-light">AUM</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary">21</p>
+                <p className="text-3xl font-normal mb-2 text-primary text-white">21</p>
                 <p className="text-gray-300 font-light">Sponsors & Partners</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary">8</p>
+                <p className="text-3xl font-normal mb-2 text-primary text-white">8</p>
                 <p className="text-gray-300 font-light">Chapters</p>
               </motion.div>
             </motion.div>
@@ -420,7 +402,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary">
+              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
                 Value Investment
               </h3>
               <p className="text-gray-300">
@@ -433,7 +415,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary">
+              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
                 Algorithmic Trading
               </h3>
               <p className="text-gray-300">
@@ -470,7 +452,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary">
+              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
                 Paragon Value
               </h3>
               <p className="text-gray-300">
@@ -484,7 +466,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary">
+              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
                 Paragon Systematic
               </h3>
               <p className="text-gray-300">
@@ -495,43 +477,6 @@ export default function Home() {
                 returns.
               </p>
             </motion.div>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Placements Section */}
-      <motion.section
-        className="py-16 px-4"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        variants={fadeIn}
-      >
-        <div className="container mx-auto">
-          <motion.h2
-            variants={fadeIn}
-            className="text-3xl font-bold mb-10 text-center text-white"
-          >
-            Select Placements
-          </motion.h2>
-          <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-          >
-            {/* Placeholder for placement logos */}
-            {Array(8)
-              .fill(0)
-              .map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={logoAnimation}
-                  className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
-                >
-                  <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
-                    Placement Logo
-                  </div>
-                </motion.div>
-              ))}
           </motion.div>
         </div>
       </motion.section>

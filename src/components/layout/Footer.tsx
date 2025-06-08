@@ -63,8 +63,7 @@ const Footer = () => {
       links: [
         { name: "Who We Are", url: "/who-we-are" },
         { name: "Investment Strategy", url: "/investment-strategy" },
-        { name: "Publications", url: "/publications" },
-        { name: "Sponsors", url: "/sponsors" },
+        { name: "Sponsors & Partners", url: "/sponsors" },
       ],
     },
     {
@@ -79,7 +78,6 @@ const Footer = () => {
       links: [
         { name: "Value Team", url: "/members/value-team" },
         { name: "Quant Team", url: "/members/quant-team" },
-        { name: "Portal", url: "/portal" },
       ],
     },
     {

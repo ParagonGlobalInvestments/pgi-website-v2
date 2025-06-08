@@ -270,7 +270,7 @@ export default function WhoWeAre() {
               </div>
 
               <p className="text-gray-300 mb-4">
-                Part 1 of the curriculum will help students gain a basic
+                The fundamental component of the curriculum will help students gain a basic
                 understanding behind the theory and strategies of value
                 investing. Students will gain a fundamental understanding of
                 accounting, competitive analysis, and valuation.
@@ -304,7 +304,7 @@ export default function WhoWeAre() {
               </div>
 
               <p className="text-gray-300 mb-4">
-                Part 2 of the curriculum aims to educate students on how to
+                The quantitative component of the curriculum aims to educate students on how to
                 research, design, test, and implement systematic algorithmic
                 trading strategies. Students will first learn about statistical
                 analysis and introductory machine learning with Python.
