@@ -151,7 +151,7 @@ const Header = () => {
     { name: 'Who We Are', url: '/who-we-are' },
     { name: 'Investment Strategy', url: '/investment-strategy' },
     { name: 'Publications', url: '/publications' },
-    { name: 'Sponsors', url: '/sponsors' },
+    { name: 'Sponsors & Partners', url: '/sponsors' },
   ];
 
   return (
@@ -162,8 +162,8 @@ const Header = () => {
       variants={navbarAnimation}
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        <motion.div variants={logoAnimation}>
-          <Link href="/" className="">
+        <motion.div variants={logoAnimation} className="flex items-center">
+          <Link href="/" className="flex items-center">
             <Image
               src="/logos/pgiLogoTransparent.png"
               alt="Paragon Global Investments"
@@ -171,6 +171,9 @@ const Header = () => {
               height={36}
               className="h-9 w-auto"
             />
+            <span className="ml-2 text-white text-xl font-light">
+              Paragon Global Investments
+            </span>
           </Link>
         </motion.div>
 
@@ -214,7 +217,7 @@ const Header = () => {
                   href="/sponsors"
                   className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
                 >
-                  Sponsors
+                  Sponsors & Partners
                 </Link>
               </div>
             </div>

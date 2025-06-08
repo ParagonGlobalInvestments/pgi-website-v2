@@ -62,12 +62,11 @@ export default function Sponsors() {
   // Sponsors data
   const sponsors = [
     { name: "Citadel", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "CitSec", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Kershner", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "JS", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "IMC", logo: "/logos/pgiLogoTransparent.png" },
+    { name: "Citadel Securities", logo: "/logos/pgiLogoTransparent.png" },
+    { name: "Kershner Trading Group", logo: "/logos/pgiLogoTransparent.png" },
+    { name: "Jane Street Capital", logo: "/logos/pgiLogoTransparent.png" },
+    { name: "IMC Trading", logo: "/logos/pgiLogoTransparent.png" },
     { name: "DRW", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Kershner", logo: "/logos/pgiLogoTransparent.png" },
     { name: "Adams Street", logo: "/logos/pgiLogoTransparent.png" },
     { name: "Arena Investors LP", logo: "/logos/pgiLogoTransparent.png" },
   ];
@@ -146,90 +145,6 @@ export default function Sponsors() {
       description:
         "Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.",
     },
-    {
-      name: "Jane Street",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Jane Street is a quantitative trading firm and liquidity provider with a focus on technology and collaborative problem solving.",
-    },
-    {
-      name: "Citadel Securities",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Citadel Securities is a leading global market maker that provides liquidity and price discovery to financial markets around the world.",
-    },
-    {
-      name: "Bridgewater Associates",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Bridgewater Associates is a global investment management firm founded by Ray Dalio, focused on understanding how economic and financial markets work.",
-    },
-    {
-      name: "Point72",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Point72 is a global asset management firm led by Steven Cohen that uses discretionary long/short equities, macro, and systematic strategies.",
-    },
-    {
-      name: "Two Sigma",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Two Sigma is a technology company applying cutting-edge AI and machine learning techniques to fields like finance and insurance.",
-    },
-    {
-      name: "D. E. Shaw",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "The D. E. Shaw group is a global investment and technology development firm with a quantitative focus, known for its computational and mathematical approach.",
-    },
-    {
-      name: "AQR Capital",
-      role: "Executive Sponsor",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "AQR Capital Management is a global investment management firm that uses a data-driven approach to find investment opportunities.",
-    },
-    {
-      name: "IMC Trading",
-      role: "Supporting Partner",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "IMC is a leading market maker, combining trading expertise with innovative technology across financial instruments.",
-    },
-    {
-      name: "SIG",
-      role: "Supporting Partner",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Susquehanna International Group (SIG) is a global quantitative trading firm founded on a rigorous analytical approach to decision making.",
-    },
-    {
-      name: "DRW",
-      role: "Supporting Partner",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "DRW is a principal trading firm that utilizes technology to identify and capture trading opportunities in markets around the world.",
-    },
-    {
-      name: "Optiver",
-      role: "Supporting Partner",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Optiver is a leading global market maker with a focus on pricing, execution and risk management technologies.",
-    },
-    {
-      name: "Hudson River Trading",
-      role: "Supporting Partner",
-      logo: "/logos/pgiLogoTransparent.png",
-      description:
-        "Hudson River Trading (HRT) is a multi-asset class quantitative trading firm using a scientific approach to trading financial products.",
-    },
   ];
 
   return (
@@ -275,7 +190,7 @@ export default function Sponsors() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 max-w-6xl mx-auto"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-8 max-w-6xl mx-auto"
             variants={staggerContainer}
           >
             {sponsors.map((sponsor, index) => (

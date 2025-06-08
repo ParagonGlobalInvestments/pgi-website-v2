@@ -63,8 +63,7 @@ const Footer = () => {
       links: [
         { name: "Who We Are", url: "/who-we-are" },
         { name: "Investment Strategy", url: "/investment-strategy" },
-        { name: "Publications", url: "/publications" },
-        { name: "Sponsors", url: "/sponsors" },
+        { name: "Sponsors & Partners", url: "/sponsors" },
       ],
     },
     {
@@ -79,7 +78,6 @@ const Footer = () => {
       links: [
         { name: "Value Team", url: "/members/value-team" },
         { name: "Quant Team", url: "/members/quant-team" },
-        { name: "Portal", url: "/portal" },
       ],
     },
     {
@@ -120,7 +118,7 @@ const Footer = () => {
               </Link>
               <motion.div className="flex space-x-4" variants={logoAnimation}>
                 <a
-                  href="https://www.linkedin.com/company/paragon-global-investments"
+                  href="https://www.linkedin.com/company/paragoninvestments/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
@@ -140,7 +138,7 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a
-                  href="https://www.instagram.com/paragoninvestments"
+                  href="https://www.instagram.com/paragoninvestmentsglobal/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"

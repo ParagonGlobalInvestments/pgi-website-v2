@@ -306,20 +306,10 @@ export default function Contact() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-gray-300 mb-1">Email:</p>
-                    <a
-                      href="mailto:paragonnational@gmail.com"
-                      className="text-primary hover:text-secondary transition-colors"
-                    >
-                      paragonnational@gmail.com
-                    </a>
-                  </div>
-
-                  <div>
                     <p className="text-gray-300 mb-2">Connect with us:</p>
                     <div className="flex space-x-4">
                       <a
-                        href="https://www.linkedin.com/company/paragon-global-investments"
+                        href="https://www.linkedin.com/company/paragoninvestments"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="LinkedIn"
@@ -339,7 +329,7 @@ export default function Contact() {
                         </svg>
                       </a>
                       <a
-                        href="https://www.instagram.com/paragoninvestments"
+                        href="https://www.instagram.com/paragoninvestmentsglobal/"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Instagram"
