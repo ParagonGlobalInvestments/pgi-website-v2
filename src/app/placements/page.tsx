@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+// import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 // Animation variants
 const fadeIn = {
@@ -43,7 +43,7 @@ export default function PlacementsPage() {
   return (
     <div className="bg-navy text-white min-h-screen">
       {/* Hero Section */}
-      <section className="py-36 px-4">
+      <section className="py-24 px-4">
         <div className="container mx-auto">
           <motion.div
             className="text-center"

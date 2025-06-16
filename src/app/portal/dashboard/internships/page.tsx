@@ -110,20 +110,6 @@ interface Internship {
   companyLogoUrl?: string | null;
 }
 
-// Track color utility
-const getTrackColor = (track: string) => {
-  switch (track) {
-    case 'quant':
-      return 'bg-blue-500 hover:bg-blue-600';
-    case 'value':
-      return 'bg-purple-500 hover:bg-purple-600';
-    case 'both':
-      return 'bg-teal-500 hover:bg-teal-600';
-    default:
-      return 'bg-gray-500 hover:bg-gray-600';
-  }
-};
-
 const getTrackBadgeVariant = (track: string) => {
   switch (track) {
     case 'quant':
@@ -254,30 +240,30 @@ export default function InternshipsPage() {
   }, [isLoaded, filters, effectiveRole, effectiveTrack]);
 
   // Function to force sync user data
-  const forceUserSync = async () => {
-    try {
-      console.log('Forcing user data sync...');
-      const response = await fetch('/api/users/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}), // Empty body is fine
-      });
+  // const forceUserSync = async () => {
+  //   try {
+  //     console.log('Forcing user data sync...');
+  //     const response = await fetch('/api/users/sync', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({}), // Empty body is fine
+  //     });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('User sync result:', result);
-        alert('User data synced successfully! Please refresh the page.');
-      } else {
-        console.error('Failed to sync user data');
-        alert('Failed to sync user data. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error syncing user data:', error);
-      alert('Error syncing user data. Please try again.');
-    }
-  };
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       console.log('User sync result:', result);
+  //       alert('User data synced successfully! Please refresh the page.');
+  //     } else {
+  //       console.error('Failed to sync user data');
+  //       alert('Failed to sync user data. Please try again.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error syncing user data:', error);
+  //     alert('Error syncing user data. Please try again.');
+  //   }
+  // };
 
   // Format date for display
   const formatDate = (dateString: string) => {

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import ScrollButton from '@/components/ui/ScrollButton';
 import { motion } from 'framer-motion';
@@ -82,7 +81,8 @@ export default function Home() {
             style={{ color: '#d8d8d8' }}
             className="text-lg md:text-xl mb-10 mx-auto font-light tracking-wide"
           >
-            Student-run intercollegiate investment fund focused on value investing and algorithmic trading
+            Student-run intercollegiate investment fund focused on value
+            investing and algorithmic trading
           </motion.p>
         </div>
         <motion.div
@@ -132,13 +132,13 @@ export default function Home() {
               transition={{ delay: 0.2 }}
               className="text-lg mb-6 text-gray-300 text-center font-light"
             >
-              Paragon Global Investments (PGI) is a student-run
-              intercollegiate investment fund with 8 chapters at top
-              universities in the United States. We utilize both fundamental and
-              systematic trading strategies to invest into our $40,000
-              investment fund. Since our inception, we have grown to 300+ active
-              students and every year we receive close to 2,000 students
-              interested in joining organization nationally.
+              Paragon Global Investments (PGI) is a student-run intercollegiate
+              investment fund with 8 chapters at top universities in the United
+              States. We utilize both fundamental and systematic trading
+              strategies to invest into our $40,000 investment fund. Since our
+              inception, we have grown to 300+ active students and every year we
+              receive close to 2,000 students interested in joining organization
+              nationally.
             </motion.p>
 
             <motion.div
@@ -149,21 +149,21 @@ export default function Home() {
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">$40K</p>
+                <p className="text-3xl font-normal mb-2">$40K</p>
                 <p className="text-gray-300 font-light">AUM</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">21</p>
+                <p className="text-3xl font-normal mb-2">21</p>
                 <p className="text-gray-300 font-light">Sponsors & Partners</p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
                 className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2 text-primary text-white">8</p>
+                <p className="text-3xl font-normal mb-2">8</p>
                 <p className="text-gray-300 font-light">Chapters</p>
               </motion.div>
             </motion.div>
@@ -402,9 +402,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
-                Value Investment
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">Value Investment</h3>
               <p className="text-gray-300">
                 Learn about the basic of accounting, valuation, modeling, and
                 bottom-up analysis of companies. Students will learn to develop
@@ -415,9 +413,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
-                Algorithmic Trading
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">Algorithmic Trading</h3>
               <p className="text-gray-300">
                 Students will learn about quantitative analysis in python,
                 modern portfolio theory and quantitative portfolio allocation,
@@ -452,9 +448,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
-                Paragon Value
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">Paragon Value</h3>
               <p className="text-gray-300">
                 The Paragon Value Fund is a well-diversified, long-only fund
                 focused on identifying mispriced assets using a bottom-up,
@@ -466,9 +460,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 bg-navy border border-gray-700 rounded-lg"
             >
-              <h3 className="text-2xl font-bold mb-4 text-primary text-white">
-                Paragon Systematic
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">Paragon Systematic</h3>
               <p className="text-gray-300">
                 The Paragon Systematic Fund employs systematic algorithmic
                 trading strategies that utilize quantitative analysis of public

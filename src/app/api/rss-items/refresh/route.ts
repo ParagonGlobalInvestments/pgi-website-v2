@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import { connectToDatabase } from '@/lib/database/connection';
 import {
   fetchMarketWatchRSS,

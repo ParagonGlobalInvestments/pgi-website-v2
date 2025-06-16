@@ -36,30 +36,6 @@ import {
 } from '@/components/ui/card';
 import Link from 'next/link';
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 260,
-      damping: 20,
-    },
-  },
-};
-
 // Updated User interface that matches the MongoDB schema
 interface User {
   id: string;
@@ -614,15 +590,20 @@ export default function DirectoryPage() {
 
     // Apply filters to whatever users we have
     const displayFilteredUsers = displayUsers.filter(user => {
-      // Search filter (name or email)
-      const nameMatch =
-        user.personal?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        false;
-      const emailMatch =
-        user.personal?.email
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) || false;
-      const searchMatch = searchTerm === '' || nameMatch || emailMatch;
+      // Search filter (name, email, or bio)
+      const searchFields = [
+        user.personal?.name,
+        user.personal?.email,
+        user.personal?.bio,
+        ...(user.profile?.skills || []),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      const searchMatch =
+        !debouncedSearchTerm ||
+        searchFields.includes(debouncedSearchTerm.toLowerCase());
 
       // Role filter
       const roleMatch =
@@ -641,7 +622,7 @@ export default function DirectoryPage() {
     if (displayFilteredUsers.length === 0) {
       console.log('[Directory] No users match the filters', {
         totalUsers: displayUsers.length,
-        searchTerm,
+        searchTerm: debouncedSearchTerm,
         filters: filter,
       });
       return (
@@ -650,8 +631,8 @@ export default function DirectoryPage() {
             <FaUsers className="text-gray-300 text-5xl mb-4" />
             <p className="text-lg font-medium mb-2">No members found</p>
             <p className="max-w-md mx-auto">
-              {searchTerm
-                ? `No members match "${searchTerm}" with the current filters.`
+              {debouncedSearchTerm
+                ? `No members match "${debouncedSearchTerm}" with the current filters.`
                 : 'Try adjusting your filters to find members.'}
             </p>
 
