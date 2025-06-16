@@ -22,10 +22,8 @@ import { z } from 'zod';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import type { UserRole } from '@/lib/auth';
 import { motion } from 'framer-motion';
-import { ActionButton } from '@/components/ui/action-button';
 import { Button } from '@/components/ui/button';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
-import { Badge } from '@/components/ui/badge';
 
 // Animation variants
 const fadeIn = {
@@ -269,7 +267,7 @@ export default function NewInternshipPage() {
                   <div>
                     <label
                       htmlFor="title"
-                      className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                      className=" text-sm font-medium text-gray-700 mb-1 flex items-center"
                     >
                       <FaBriefcase className="mr-1 text-gray-400" /> Job Title *
                     </label>
@@ -291,7 +289,7 @@ export default function NewInternshipPage() {
                   <div>
                     <label
                       htmlFor="company"
-                      className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                      className=" text-sm font-medium text-gray-700 mb-1 flex items-center"
                     >
                       <FaBuilding className="mr-1 text-gray-400" /> Company *
                     </label>
@@ -313,7 +311,7 @@ export default function NewInternshipPage() {
                   <div>
                     <label
                       htmlFor="location"
-                      className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                      className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                     >
                       <FaMapMarkerAlt className="mr-1 text-gray-400" /> Location
                       *
@@ -337,7 +335,7 @@ export default function NewInternshipPage() {
                     <div>
                       <label
                         htmlFor="applicationLink"
-                        className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                        className=" text-sm font-medium text-gray-700 mb-1 flex items-center"
                       >
                         <FaLink className="mr-2 text-gray-400" />
                         Application Link*
@@ -363,7 +361,7 @@ export default function NewInternshipPage() {
                     <div>
                       <label
                         htmlFor="applicationUrl"
-                        className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                        className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                       >
                         <FaLink className="mr-2 text-gray-400" />
                         Direct Application URL
@@ -395,7 +393,7 @@ export default function NewInternshipPage() {
                   <div>
                     <label
                       htmlFor="deadline"
-                      className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                      className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                     >
                       <FaCalendarAlt className="mr-1 text-gray-400" />{' '}
                       Application Deadline *
@@ -471,7 +469,7 @@ export default function NewInternshipPage() {
               <motion.div variants={fadeIn}>
                 <label
                   htmlFor="schoolTargets"
-                  className="block text-sm font-medium text-gray-700 mb-1 flex items-center"
+                  className="text-sm font-medium text-gray-700 mb-1 flex items-center"
                 >
                   <FaGraduationCap className="mr-2 text-gray-400" />
                   Target Schools
