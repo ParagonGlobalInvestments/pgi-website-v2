@@ -8,7 +8,6 @@ export default {
         secondary: '#adb5bd',
         dark: '#354657',
         light: '#f5f5f5',
-        gray: '#6c757d',
         navy: '#00172B',
         'navy-light': '#001e38',
         'navy-hover': '#00213f',
