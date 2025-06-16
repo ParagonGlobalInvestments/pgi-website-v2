@@ -125,27 +125,27 @@ export default function Home() {
           {/* Hero CTAs */}
           <motion.div
             variants={buttonContainer}
-            className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-16 md:mb-20"
+            className="flex flex-wrap gap-4 md:gap-6 justify-center items-center mb-16 md:mb-20"
           >
             <motion.div variants={buttonFadeIn}>
-              <Link href="/apply">
+              <Link href="/education">
                 <motion.button
-                  className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
-                  whileHover={buttonHover}
+                  className="bg-gray-200  text-pgi-dark-blue md:px-8 lg:px-10 md:py-3 lg:py-4 py-2 px-4 rounded-lg font-semibold text-sm lg:text-base tracking-wide hover:text-white"
+                  whileHover={secondaryButtonHover}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Join PGI
+                  View Our Programs
                 </motion.button>
               </Link>
             </motion.div>
             <motion.div variants={buttonFadeIn}>
-              <Link href="/education">
+              <Link href="/apply">
                 <motion.button
-                  className="bg-gray-200  text-pgi-dark-blue px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide hover:text-white"
-                  whileHover={secondaryButtonHover}
+                  className="bg-pgi-light-blue text-white md:px-8 lg:px-10 md:py-3 lg:py-4 py-2 px-4 rounded-lg font-semibold text-sm lg:text-base tracking-wide"
+                  whileHover={buttonHover}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Learn About Our Programs
+                  Join PGI
                 </motion.button>
               </Link>
             </motion.div>
