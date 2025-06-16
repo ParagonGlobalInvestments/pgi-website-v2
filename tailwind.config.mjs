@@ -28,7 +28,13 @@ export default {
         'pgi-accent-blue': '#1F3A5F',
       },
       fontFamily: {
-        sans: ['var(--font-sans)'],
+        sans: [
+          'var(--font-montserrat)',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+        ],
+        montserrat: ['var(--font-montserrat)', 'sans-serif'],
       },
     },
   },

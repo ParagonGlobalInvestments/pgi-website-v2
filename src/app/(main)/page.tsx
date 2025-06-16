@@ -63,7 +63,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-20">
           <motion.h1
             variants={fadeIn}
-            className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-widest mb-8"
+            className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-wide mb-8"
           >
             Paragon Global Investments
           </motion.h1>
