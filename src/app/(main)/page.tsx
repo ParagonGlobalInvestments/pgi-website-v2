@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import ScrollButton from '@/components/ui/ScrollButton';
 import { motion } from 'framer-motion';
 
@@ -50,6 +51,50 @@ const logoAnimation = {
   },
 };
 
+// Button animation variants
+const buttonContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.8,
+    },
+  },
+};
+
+const buttonFadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const buttonHover = {
+  scale: 1.05,
+  backgroundColor: '#1f4287',
+  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+  transition: {
+    duration: 0.2,
+    ease: 'easeInOut',
+  },
+};
+
+const secondaryButtonHover = {
+  scale: 1.05,
+  backgroundColor: '#2a5298',
+  borderColor: '#ffffff',
+  transition: {
+    duration: 0.2,
+    ease: 'easeInOut',
+  },
+};
+
 export default function Home() {
   return (
     <div>
@@ -63,32 +108,53 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-32">
           <motion.h1
             variants={fadeIn}
-            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-wide mb-6 md:mb-10 lg:mb-12 leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-wide mb-6 lg:mb-8 leading-tight"
           >
             Paragon Global Investments
           </motion.h1>
-          <motion.h2
-            variants={fadeIn}
-            transition={{ delay: 0.2 }}
-            style={{ color: '#d8d8d8' }}
-            className="text-xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 lg:mb-8 font-normal tracking-wide max-w-5xl mx-auto leading-relaxed"
-          >
-            Intersecting Value Investing and Quantitative Finance
-          </motion.h2>
           <motion.p
             variants={fadeIn}
             transition={{ delay: 0.4 }}
             style={{ color: '#d8d8d8' }}
-            className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 mx-auto font-light tracking-wide max-w-4xl leading-relaxed"
+            className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 mx-auto font-normal tracking-wide max-w-7xl leading-relaxed"
           >
-            Student-run intercollegiate investment fund focused on value
+            Intercollegiate quantitative investment fund focused on value
             investing and algorithmic trading
           </motion.p>
+
+          {/* Hero CTAs */}
+          <motion.div
+            variants={buttonContainer}
+            className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-16 md:mb-20"
+          >
+            <motion.div variants={buttonFadeIn}>
+              <Link href="/apply">
+                <motion.button
+                  className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                  whileHover={buttonHover}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Join PGI
+                </motion.button>
+              </Link>
+            </motion.div>
+            <motion.div variants={buttonFadeIn}>
+              <Link href="/education">
+                <motion.button
+                  className="bg-gray-200  text-pgi-dark-blue px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide hover:text-white"
+                  whileHover={secondaryButtonHover}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Learn About Our Programs
+                </motion.button>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
         <motion.div
           variants={fadeIn}
           transition={{ delay: 0.6 }}
-          className="absolute bottom-[20vh] text-center"
+          className="absolute bottom-[25vh] text-center"
         >
           <ScrollButton targetId="about-section">
             <span className="mb-3 md:mb-4 font-light text-sm md:text-base">
@@ -180,6 +246,23 @@ export default function Home() {
                   Chapters
                 </p>
               </motion.div>
+            </motion.div>
+
+            {/* About Section CTA */}
+            <motion.div
+              variants={fadeIn}
+              transition={{ delay: 0.6 }}
+              className="text-center mt-12 md:mt-16 lg:mt-20"
+            >
+              <Link href="/who-we-are">
+                <motion.button
+                  className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                  whileHover={buttonHover}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Learn More About Us
+                </motion.button>
+              </Link>
             </motion.div>
           </div>
         </div>
@@ -316,6 +399,23 @@ export default function Home() {
               />
             </motion.div>
           </motion.div>
+
+          {/* Chapters Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/contact">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                Contact Your Chapter
+              </motion.button>
+            </Link>
+          </motion.div>
         </div>
       </motion.section>
 
@@ -353,6 +453,23 @@ export default function Home() {
                 </motion.div>
               ))}
           </motion.div>
+
+          {/* Sponsors Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/sponsors">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                View All Sponsors
+              </motion.button>
+            </Link>
+          </motion.div>
         </div>
       </motion.section>
 
@@ -389,6 +506,23 @@ export default function Home() {
                   </div>
                 </motion.div>
               ))}
+          </motion.div>
+
+          {/* Partners Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/sponsors">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                View All Partners
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
       </motion.section>
@@ -439,6 +573,23 @@ export default function Home() {
                 algorithmic trading strategies.
               </p>
             </motion.div>
+          </motion.div>
+
+          {/* Education Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.6 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/education">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                View Full Curriculum
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
       </motion.section>
@@ -491,6 +642,23 @@ export default function Home() {
                 returns.
               </p>
             </motion.div>
+          </motion.div>
+
+          {/* Investment Funds Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.6 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/investment-strategy">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                Learn About Our Funds
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
       </motion.section>
