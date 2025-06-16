@@ -20,7 +20,7 @@ const isPublicRoute = createRouteMatcher([
 
   // About section dropdown routes
   '/investment-strategy',
-  '/publications',
+  '/education',
   '/sponsors',
 
   // National Committee routes
