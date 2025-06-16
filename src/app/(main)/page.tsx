@@ -58,12 +58,12 @@ export default function Home() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        className=" text-white min-h-[90vh] flex flex-col justify-center items-center relative"
+        className="text-white min-h-[95vh] flex flex-col justify-center items-center relative"
       >
-        <div className="container mx-auto px-4 text-center py-20">
+        <div className="container mx-auto px-4 text-center py-16 md:py-24 lg:py-32">
           <motion.h1
             variants={fadeIn}
-            className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-wide mb-8"
+            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-wide mb-6 md:mb-10 lg:mb-12 leading-tight"
           >
             Paragon Global Investments
           </motion.h1>
@@ -71,7 +71,7 @@ export default function Home() {
             variants={fadeIn}
             transition={{ delay: 0.2 }}
             style={{ color: '#d8d8d8' }}
-            className="text-2xl md:text-3xl lg:text-4xl mb-2 font-normal tracking-wide"
+            className="text-xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 md:mb-6 lg:mb-8 font-normal tracking-wide max-w-5xl mx-auto leading-relaxed"
           >
             Intersecting Value Investing and Quantitative Finance
           </motion.h2>
@@ -79,7 +79,7 @@ export default function Home() {
             variants={fadeIn}
             transition={{ delay: 0.4 }}
             style={{ color: '#d8d8d8' }}
-            className="text-lg md:text-xl mb-10 mx-auto font-light tracking-wide"
+            className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 mx-auto font-light tracking-wide max-w-4xl leading-relaxed"
           >
             Student-run intercollegiate investment fund focused on value
             investing and algorithmic trading
@@ -88,12 +88,14 @@ export default function Home() {
         <motion.div
           variants={fadeIn}
           transition={{ delay: 0.6 }}
-          className="absolute bottom-12 text-center"
+          className="absolute bottom-8 md:bottom-12 lg:bottom-16 text-center"
         >
           <ScrollButton targetId="about-section">
-            <span className="mb-2 font-light">Learn More</span>
+            <span className="mb-3 md:mb-4 font-light text-sm md:text-base">
+              Learn More
+            </span>
             <svg
-              className="w-8 h-8 animate-bounce"
+              className="w-6 h-6 md:w-8 md:h-8 animate-bounce"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -113,7 +115,7 @@ export default function Home() {
       {/* About Section */}
       <motion.section
         id="about-section"
-        className="py-16 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -122,15 +124,15 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-light mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
           >
             PGI At a Glance
           </motion.h2>
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <motion.p
               variants={fadeIn}
               transition={{ delay: 0.2 }}
-              className="text-lg mb-6 text-gray-300 text-center font-light"
+              className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 text-gray-300 text-center font-light leading-relaxed"
             >
               Paragon Global Investments (PGI) is a student-run intercollegiate
               investment fund with 8 chapters at top universities in the United
@@ -143,28 +145,40 @@ export default function Home() {
 
             <motion.div
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-center"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12 lg:mt-16 text-center"
             >
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2">$40K</p>
-                <p className="text-gray-300 font-light">AUM</p>
+                <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
+                  $40K
+                </p>
+                <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
+                  AUM
+                </p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2">21</p>
-                <p className="text-gray-300 font-light">Sponsors & Partners</p>
+                <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
+                  21
+                </p>
+                <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
+                  Sponsors & Partners
+                </p>
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
               >
-                <p className="text-3xl font-normal mb-2">8</p>
-                <p className="text-gray-300 font-light">Chapters</p>
+                <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
+                  8
+                </p>
+                <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
+                  Chapters
+                </p>
               </motion.div>
             </motion.div>
           </div>
@@ -173,7 +187,7 @@ export default function Home() {
 
       {/* Chapters Section */}
       <motion.section
-        className="py-4 bg-pgi-dark-blue px-4"
+        className="py-16 md:py-24 bg-pgi-dark-blue px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -182,123 +196,123 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-light mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             Our Chapters
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
             {/* Brown University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/brown.png"
                 alt="Brown University"
                 width={148}
                 height={148}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* Columbia University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/columbia.png"
                 alt="Columbia University"
                 width={156}
                 height={156}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* Cornell University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/cornell.png"
                 alt="Cornell University"
                 width={128}
                 height={128}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* University of Pennsylvania */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/upenn.png"
                 alt="University of Pennsylvania"
                 width={216}
                 height={216}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* University of Chicago */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/uchicago.png"
                 alt="University of Chicago"
                 width={100}
                 height={100}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* Princeton University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/princeton.png"
                 alt="Princeton University"
                 width={250}
                 height={250}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* NYU */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/nyu.png"
                 alt="NYU"
                 width={128}
                 height={128}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
 
             {/* Yale University */}
             <motion.div
               variants={logoAnimation}
-              className="p-6 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center"
+              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
             >
               <Image
                 src="/images/universities/yale.png"
                 alt="Yale University"
                 width={128}
                 height={128}
-                className="object-contain"
+                className="object-contain max-w-full h-auto"
               />
             </motion.div>
           </motion.div>
@@ -307,7 +321,7 @@ export default function Home() {
 
       {/* Sponsors Section */}
       <motion.section
-        className="py-16 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -316,13 +330,13 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-light mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             Sponsors
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
             {/* Placeholder for sponsor logos */}
             {Array(8)
@@ -331,9 +345,9 @@ export default function Home() {
                 <motion.div
                   key={index}
                   variants={logoAnimation}
-                  className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
                 >
-                  <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
+                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
                     Sponsor Logo
                   </div>
                 </motion.div>
@@ -344,7 +358,7 @@ export default function Home() {
 
       {/* Partners Section */}
       <motion.section
-        className="py-16 bg-navy px-4 border-t border-b border-gray-800"
+        className="py-16 md:py-24 lg:py-32 bg-navy px-4 border-t border-b border-gray-800"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -353,13 +367,13 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-bold mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             Partners
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
             {/* Placeholder for partner logos */}
             {Array(8)
@@ -368,9 +382,9 @@ export default function Home() {
                 <motion.div
                   key={index}
                   variants={logoAnimation}
-                  className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center"
+                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
                 >
-                  <div className="w-32 h-16 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300">
+                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
                     Partner Logo
                   </div>
                 </motion.div>
@@ -381,7 +395,7 @@ export default function Home() {
 
       {/* Education Section */}
       <motion.section
-        className="py-16 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -390,20 +404,22 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-bold mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             Education
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto"
           >
             <motion.div
               variants={itemFadeIn}
-              className="p-8 bg-navy border border-gray-700 rounded-lg"
+              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-2xl font-bold mb-4">Value Investment</h3>
-              <p className="text-gray-300">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+                Value Investment
+              </h3>
+              <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 Learn about the basic of accounting, valuation, modeling, and
                 bottom-up analysis of companies. Students will learn to develop
                 value-based investment research on publicly traded companies.
@@ -411,10 +427,12 @@ export default function Home() {
             </motion.div>
             <motion.div
               variants={itemFadeIn}
-              className="p-8 bg-navy border border-gray-700 rounded-lg"
+              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-2xl font-bold mb-4">Algorithmic Trading</h3>
-              <p className="text-gray-300">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+                Algorithmic Trading
+              </h3>
+              <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 Students will learn about quantitative analysis in python,
                 modern portfolio theory and quantitative portfolio allocation,
                 and how to research, design, and implement systematic
@@ -427,7 +445,7 @@ export default function Home() {
 
       {/* Investment Funds Section */}
       <motion.section
-        className="py-16 bg-navy px-4 border-t border-b border-gray-800"
+        className="py-16 md:py-24 lg:py-32 bg-navy px-4 border-t border-b border-gray-800"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -436,20 +454,22 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-3xl font-bold mb-10 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             Investment Funds
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto"
           >
             <motion.div
               variants={itemFadeIn}
-              className="p-8 bg-navy border border-gray-700 rounded-lg"
+              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-2xl font-bold mb-4">Paragon Value</h3>
-              <p className="text-gray-300">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+                Paragon Value
+              </h3>
+              <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 The Paragon Value Fund is a well-diversified, long-only fund
                 focused on identifying mispriced assets using a bottom-up,
                 value-based approach. Total portfolio risk and return are
@@ -458,10 +478,12 @@ export default function Home() {
             </motion.div>
             <motion.div
               variants={itemFadeIn}
-              className="p-8 bg-navy border border-gray-700 rounded-lg"
+              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-2xl font-bold mb-4">Paragon Systematic</h3>
-              <p className="text-gray-300">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+                Paragon Systematic
+              </h3>
+              <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 The Paragon Systematic Fund employs systematic algorithmic
                 trading strategies that utilize quantitative analysis of public
                 securities. Students develop algorithms using advanced
