@@ -17,8 +17,8 @@ const navbarAnimation = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.4,
-      ease: 'easeOut',
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
     },
   },
 };
@@ -28,32 +28,86 @@ const staggerNavItems = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.07,
-      delayChildren: 0.2,
+      staggerChildren: 0.08,
+      delayChildren: 0.3,
     },
   },
 };
 
 const navItemAnimation = {
-  hidden: { opacity: 0, y: -10 },
+  hidden: {
+    opacity: 0,
+    y: -15,
+    scale: 0.95,
+  },
   visible: {
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-      duration: 0.3,
-      ease: 'easeOut',
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  hover: {
+    scale: 1.05,
+    transition: {
+      duration: 0.2,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  tap: {
+    scale: 0.98,
+    transition: {
+      duration: 0.1,
     },
   },
 };
 
 const logoAnimation = {
-  hidden: { opacity: 0, scale: 0.95 },
+  hidden: {
+    opacity: 0,
+    scale: 0.9,
+    x: -20,
+  },
   visible: {
     opacity: 1,
     scale: 1,
+    x: 0,
     transition: {
-      duration: 0.5,
-      ease: 'easeOut',
+      duration: 0.7,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  hover: {
+    scale: 1.02,
+    transition: {
+      duration: 0.3,
+    },
+  },
+};
+
+const dropdownAnimation = {
+  hidden: {
+    opacity: 0,
+    scale: 0.95,
+    y: -10,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: -10,
+    transition: {
+      duration: 0.2,
     },
   },
 };
@@ -199,7 +253,11 @@ const Header = () => {
       variants={navbarAnimation}
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        <motion.div variants={logoAnimation} className="flex items-center">
+        <motion.div
+          variants={logoAnimation}
+          className="flex items-center"
+          whileHover="hover"
+        >
           <Link href="/" className="flex items-center">
             <Image
               src="/logos/pgiLogoTransparent.png"
@@ -219,11 +277,16 @@ const Header = () => {
           variants={staggerNavItems}
         >
           {/* About dropdown container */}
-          <motion.div className="relative group" variants={navItemAnimation}>
+          <motion.div
+            className="relative group"
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <a
               href="#"
               onClick={handleAboutClick}
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white hover:text-secondary transition-colors duration-300"
             >
               About
             </a>
@@ -231,40 +294,42 @@ const Header = () => {
             {/* Dropdown menu */}
             <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
               {/* Dropdown content */}
-              <div className="bg-navy-light border border-gray-700 rounded-md shadow-xl overflow-hidden">
-                <Link
-                  href="/who-we-are"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Who We Are
-                </Link>
-                <Link
-                  href="/investment-strategy"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Investment Strategy
-                </Link>
-                <Link
-                  href="/education"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Education
-                </Link>
-                <Link
-                  href="/sponsors"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Sponsors & Partners
-                </Link>
-              </div>
+              <motion.div
+                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                variants={dropdownAnimation}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                {aboutSubItems.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Link
+                      href={item.url}
+                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
           </motion.div>
 
           {/* National Committee dropdown container */}
-          <motion.div className="relative group" variants={navItemAnimation}>
+          <motion.div
+            className="relative group"
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <Link
               href="/national-committee"
-              className="text-white whitespace-nowrap hover:text-secondary transition-colors"
+              className="text-white whitespace-nowrap hover:text-secondary transition-colors duration-300"
             >
               <span className="hidden lg:inline">National Committee</span>
               <span className="lg:hidden">Committee</span>
@@ -273,28 +338,42 @@ const Header = () => {
             {/* Dropdown menu */}
             <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
               {/* Dropdown content */}
-              <div className="bg-navy-light border border-gray-700 rounded-md shadow-xl overflow-hidden">
-                <Link
-                  href="/national-committee/officers"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Officers
-                </Link>
-                <Link
-                  href="/national-committee/founders"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Founders
-                </Link>
-              </div>
+              <motion.div
+                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                variants={dropdownAnimation}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                {mainNav[2]?.subItems?.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Link
+                      href={item.url}
+                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
           </motion.div>
 
           {/* Members dropdown container */}
-          <motion.div className="relative group" variants={navItemAnimation}>
+          <motion.div
+            className="relative group"
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <Link
               href="/members"
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white hover:text-secondary transition-colors duration-300"
             >
               Members
             </Link>
@@ -302,45 +381,66 @@ const Header = () => {
             {/* Dropdown menu */}
             <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
               {/* Dropdown content */}
-              <div className="bg-navy-light border border-gray-700 rounded-md shadow-xl overflow-hidden">
-                <Link
-                  href="/members/value-team"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Value Team
-                </Link>
-                <Link
-                  href="/members/quant-team"
-                  className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Quant Team
-                </Link>
-              </div>
+              <motion.div
+                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                variants={dropdownAnimation}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                {mainNav[3]?.subItems?.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Link
+                      href={item.url}
+                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
           </motion.div>
 
-          <motion.div variants={navItemAnimation}>
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <Link
               href="/placements"
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white hover:text-secondary transition-colors duration-300"
             >
               Placements
             </Link>
           </motion.div>
 
-          <motion.div variants={navItemAnimation}>
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <Link
               href="/apply"
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white hover:text-secondary transition-colors duration-300"
             >
               Apply
             </Link>
           </motion.div>
 
-          <motion.div variants={navItemAnimation}>
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
             <Link
               href="/contact"
-              className="text-white hover:text-secondary transition-colors"
+              className="text-white hover:text-secondary transition-colors duration-300"
             >
               Contact
             </Link>
@@ -348,7 +448,11 @@ const Header = () => {
 
           {/* Only show Portal in development */}
           {process.env.NODE_ENV !== 'production' && (
-            <motion.div variants={navItemAnimation}>
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
               <SignedIn>
                 <Link
                   href="/dashboard"
