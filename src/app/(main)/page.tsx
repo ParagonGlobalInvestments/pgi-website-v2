@@ -58,7 +58,7 @@ export default function Home() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        className="text-white min-h-[95vh] flex flex-col justify-center items-center relative"
+        className="text-white min-h-[100vh] flex flex-col justify-center items-center relative"
       >
         <div className="container mx-auto px-4 text-center py-16 md:py-24 lg:py-32">
           <motion.h1
@@ -88,7 +88,7 @@ export default function Home() {
         <motion.div
           variants={fadeIn}
           transition={{ delay: 0.6 }}
-          className="absolute bottom-8 md:bottom-12 lg:bottom-16 text-center"
+          className="absolute bottom-32 text-center"
         >
           <ScrollButton targetId="about-section">
             <span className="mb-3 md:mb-4 font-light text-sm md:text-base">
@@ -149,7 +149,7 @@ export default function Home() {
             >
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
                   $40K
@@ -160,7 +160,7 @@ export default function Home() {
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
                   21
@@ -171,7 +171,7 @@ export default function Home() {
               </motion.div>
               <motion.div
                 variants={itemFadeIn}
-                className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg"
+                className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
                   8

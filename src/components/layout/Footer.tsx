@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 // Animation variants
 const footerAnimation = {
@@ -15,7 +15,7 @@ const footerAnimation = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -59,33 +59,33 @@ const Footer = () => {
   // Navigation structure matching the site's hierarchy
   const footerNavigation = [
     {
-      title: "About",
+      title: 'About',
       links: [
-        { name: "Who We Are", url: "/who-we-are" },
-        { name: "Investment Strategy", url: "/investment-strategy" },
-        { name: "Sponsors & Partners", url: "/sponsors" },
+        { name: 'Who We Are', url: '/who-we-are' },
+        { name: 'Investment Strategy', url: '/investment-strategy' },
+        { name: 'Sponsors & Partners', url: '/sponsors' },
       ],
     },
     {
-      title: "National Committee",
+      title: 'Resources',
       links: [
-        { name: "Officers", url: "/national-committee/officers" },
-        { name: "Founders", url: "/national-committee/founders" },
+        { name: 'Placements', url: '/placements' },
+        { name: 'Apply', url: '/apply' },
+        { name: 'Contact', url: '/contact' },
       ],
     },
     {
-      title: "Members",
+      title: 'National Committee',
       links: [
-        { name: "Value Team", url: "/members/value-team" },
-        { name: "Quant Team", url: "/members/quant-team" },
+        { name: 'Officers', url: '/national-committee/officers' },
+        { name: 'Founders', url: '/national-committee/founders' },
       ],
     },
     {
-      title: "Resources",
+      title: 'Members',
       links: [
-        { name: "Placements", url: "/placements" },
-        { name: "Apply", url: "/apply" },
-        { name: "Contact", url: "/contact" },
+        { name: 'Value Team', url: '/members/value-team' },
+        { name: 'Quant Team', url: '/members/quant-team' },
       ],
     },
   ];

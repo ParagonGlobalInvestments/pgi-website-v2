@@ -25,6 +25,7 @@ export default {
         lightRed: '#DC3545',
         darkRed: '#C82333',
         'pgi-dark-blue': '#0A192F',
+        'pgi-light-blue': '#1F2A44',
         'pgi-accent-blue': '#1F3A5F',
       },
       fontFamily: {
