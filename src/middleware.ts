@@ -31,6 +31,14 @@ const isPublicRoute = createRouteMatcher([
 
   // API routes
   '/api/webhooks(.*)',
+
+  // Portal auth routes (for development)
+  '/portal/signin',
+  '/portal/signin/(.*)',
+  '/portal/signup',
+  '/portal/signup/(.*)',
+  '/portal/sign-up',
+  '/portal/sign-up/(.*)',
 ]);
 
 // Routes that should redirect to landing page in production
