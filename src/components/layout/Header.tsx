@@ -5,7 +5,7 @@ import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Animation variants
 const navbarAnimation = {
@@ -58,6 +58,40 @@ const logoAnimation = {
   },
 };
 
+const mobileMenuVariants = {
+  hidden: {
+    opacity: 0,
+    height: 0,
+    transition: {
+      duration: 0.3,
+      ease: [0.4, 0.0, 0.2, 1],
+    },
+  },
+  visible: {
+    opacity: 1,
+    height: 'auto',
+    transition: {
+      duration: 0.4,
+      ease: [0.4, 0.0, 0.2, 1],
+    },
+  },
+};
+
+const mobileItemVariants = {
+  hidden: {
+    opacity: 0,
+    x: -20,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.3,
+      ease: [0.4, 0.0, 0.2, 1],
+    },
+  },
+};
+
 const Header = () => {
   // State to manage dropdown visibility for mobile
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,6 +107,9 @@ const Header = () => {
   // Close mobile menu when navigating to a new page
   useEffect(() => {
     setMobileMenuOpen(false);
+    setExpandedAbout(false);
+    setExpandedNationalCommittee(false);
+    setExpandedMembers(false);
   }, [pathname]);
 
   // Close mobile menu when clicking outside
@@ -156,7 +193,7 @@ const Header = () => {
 
   return (
     <motion.header
-      className="bg-navy font-semibold z-50"
+      className="bg-navy font-semibold z-50 relative"
       initial="hidden"
       animate="visible"
       variants={navbarAnimation}
@@ -171,7 +208,7 @@ const Header = () => {
               height={36}
               className="h-9 w-auto"
             />
-            <span className="ml-2 text-white text-xl font-light">
+            <span className="ml-2 text-white text-lg md:text-xl font-light hidden xl:block">
               Paragon Global Investments
             </span>
           </Link>
@@ -337,213 +374,248 @@ const Header = () => {
         <motion.div className="md:hidden" variants={navItemAnimation}>
           <button
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            className="focus:outline-none text-white p-1.5 rounded-md hover:bg-navy-light transition-colors"
+            className="focus:outline-none text-white p-2 rounded-lg hover:bg-navy-light transition-all duration-200 active:scale-95"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
+            <div className="relative w-6 h-6">
+              <span
+                className={`absolute top-1 left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? 'rotate-45 top-3' : ''
+                }`}
+              ></span>
+              <span
+                className={`absolute top-3 left-0 w-6 h-0.5 bg-white transition-all duration-200 ease-in-out ${
+                  mobileMenuOpen ? 'opacity-0' : ''
+                }`}
+              ></span>
+              <span
+                className={`absolute top-5 left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? '-rotate-45 top-3' : ''
+                }`}
+              ></span>
+            </div>
           </button>
         </motion.div>
       </div>
 
-      {/* Mobile dropdown menu - Non-fixed, flows with the page */}
-      <div
-        className={`border-t border-gray-700 bg-navy shadow-lg transition-all duration-300 ease-in-out overflow-hidden md:hidden ${
-          mobileMenuOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <div className="px-3 py-1 text-sm">
-          {/* Home link */}
-          <Link
-            href="/"
-            className="block py-2.5 text-white border-b border-gray-700"
+      {/* Mobile dropdown menu - Enhanced with better animations */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            className="md:hidden bg-navy/95 backdrop-blur-sm shadow-2xl"
+            variants={mobileMenuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
           >
-            Home
-          </Link>
-
-          {/* About section with dropdown */}
-          <div className="border-b border-gray-700">
-            <button
-              onClick={() => toggleSection('about')}
-              className="w-full text-left flex items-center justify-between py-2.5 text-white"
-            >
-              <span>About</span>
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedAbout ? 'transform rotate-180' : ''
-                }`}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedAbout ? 'max-h-[200px]' : 'max-h-0'
-              }`}
-            >
-              {aboutSubItems.map((item, index) => (
+            <div className="px-4 py-6 space-y-1">
+              {/* Home link */}
+              <motion.div variants={mobileItemVariants}>
                 <Link
+                  href="/"
+                  className="block py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                >
+                  Home
+                </Link>
+              </motion.div>
+
+              {/* About section with dropdown */}
+              <motion.div variants={mobileItemVariants}>
+                <button
+                  onClick={() => toggleSection('about')}
+                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <span>About</span>
+                  <svg
+                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                      expandedAbout ? 'rotate-180' : ''
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <AnimatePresence>
+                  {expandedAbout && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                      className="ml-4 mt-1 space-y-1 overflow-hidden"
+                    >
+                      {aboutSubItems.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            href={item.url}
+                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                          >
+                            {item.name}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* National Committee with dropdown */}
+              <motion.div variants={mobileItemVariants}>
+                <button
+                  onClick={() => toggleSection('nationalCommittee')}
+                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <span>National Committee</span>
+                  <svg
+                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                      expandedNationalCommittee ? 'rotate-180' : ''
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <AnimatePresence>
+                  {expandedNationalCommittee && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                      className="ml-4 mt-1 space-y-1 overflow-hidden"
+                    >
+                      {mainNav[2]?.subItems?.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            href={item.url}
+                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                          >
+                            {item.name}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Members with dropdown */}
+              <motion.div variants={mobileItemVariants}>
+                <button
+                  onClick={() => toggleSection('members')}
+                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <span>Members</span>
+                  <svg
+                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                      expandedMembers ? 'rotate-180' : ''
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <AnimatePresence>
+                  {expandedMembers && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                      className="ml-4 mt-1 space-y-1 overflow-hidden"
+                    >
+                      {mainNav[3]?.subItems?.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            href={item.url}
+                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                          >
+                            {item.name}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Regular links */}
+              {mainNav.slice(4).map((item, index) => (
+                <motion.div
                   key={index}
-                  href={item.url}
-                  className="block py-2 pl-4 text-white hover:bg-navy-light transition-colors"
+                  variants={mobileItemVariants}
+                  transition={{ delay: (index + 4) * 0.05 }}
                 >
-                  {item.name}
-                </Link>
+                  <Link
+                    href={item.url}
+                    className="block py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  >
+                    {item.name}
+                  </Link>
+                </motion.div>
               ))}
-            </div>
-          </div>
 
-          {/* National Committee with dropdown */}
-          <div className="border-b border-gray-700">
-            <button
-              onClick={() => toggleSection('nationalCommittee')}
-              className="w-full text-left flex items-center justify-between py-2.5 text-white"
-            >
-              <span>National Committee</span>
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedNationalCommittee ? 'transform rotate-180' : ''
-                }`}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedNationalCommittee ? 'max-h-[200px]' : 'max-h-0'
-              }`}
-            >
-              {mainNav[2]?.subItems?.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.url}
-                  className="block py-2 pl-4 text-white hover:bg-navy-light transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {/* Authentication links - Only show Portal in development */}
+              {process.env.NODE_ENV !== 'production' && (
+                <motion.div variants={mobileItemVariants} className="pt-4 mt-4">
+                  <SignedIn>
+                    <Link
+                      href="/dashboard"
+                      className="block py-3 px-4 mb-3 bg-primary text-white font-semibold rounded-lg text-center hover:bg-primary/90 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      Dashboard
+                    </Link>
+                    <div className="flex justify-center">
+                      <UserButton />
+                    </div>
+                  </SignedIn>
+                  <SignedOut>
+                    <Link
+                      href="/portal"
+                      className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      Portal
+                    </Link>
+                  </SignedOut>
+                </motion.div>
+              )}
             </div>
-          </div>
-
-          {/* Members with dropdown */}
-          <div className="border-b border-gray-700">
-            <button
-              onClick={() => toggleSection('members')}
-              className="w-full text-left flex items-center justify-between py-2.5 text-white"
-            >
-              <span>Members</span>
-              <svg
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  expandedMembers ? 'transform rotate-180' : ''
-                }`}
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                expandedMembers ? 'max-h-[200px]' : 'max-h-0'
-              }`}
-            >
-              {mainNav[3]?.subItems?.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.url}
-                  className="block py-2 pl-4 text-white hover:bg-navy-light transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Regular links */}
-          {mainNav.slice(4).map((item, index) => (
-            <Link
-              key={index}
-              href={item.url}
-              className="block py-2.5 text-white border-b border-gray-700 hover:bg-navy-light transition-colors"
-            >
-              {item.name}
-            </Link>
-          ))}
-
-          {/* Authentication links - Only show Portal in development */}
-          {process.env.NODE_ENV !== 'production' && (
-            <div className="py-2.5 mt-1">
-              <SignedIn>
-                <Link
-                  href="/dashboard"
-                  className="block py-1.5 px-3 mb-2 bg-primary text-white font-semibold rounded text-center hover:bg-opacity-90 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <div className="flex justify-center">
-                  <UserButton />
-                </div>
-              </SignedIn>
-              <SignedOut>
-                <Link
-                  href="/portal"
-                  className="block py-1.5 px-3 bg-white text-black font-semibold rounded text-center hover:bg-gray-200 transition-colors"
-                >
-                  Portal
-                </Link>
-              </SignedOut>
-            </div>
-          )}
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 };
