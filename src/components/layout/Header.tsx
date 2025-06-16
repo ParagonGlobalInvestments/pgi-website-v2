@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
 
 // Animation variants
 const navbarAnimation = {
@@ -481,23 +482,11 @@ const Header = () => {
             className="focus:outline-none text-white p-2 rounded-lg hover:bg-navy-light transition-all duration-200 active:scale-95"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <div className="relative w-6 h-6">
-              <span
-                className={`absolute top-1 left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? 'rotate-45 top-3' : ''
-                }`}
-              ></span>
-              <span
-                className={`absolute top-3 left-0 w-6 h-0.5 bg-white transition-all duration-200 ease-in-out ${
-                  mobileMenuOpen ? 'opacity-0' : ''
-                }`}
-              ></span>
-              <span
-                className={`absolute top-5 left-0 w-6 h-0.5 bg-white transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? '-rotate-45 top-3' : ''
-                }`}
-              ></span>
-            </div>
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </motion.div>
       </div>
@@ -512,12 +501,12 @@ const Header = () => {
             animate="visible"
             exit="hidden"
           >
-            <div className="px-4 py-6 space-y-1">
+            <div className="px-4 py-2 space-y-1">
               {/* Home link */}
               <motion.div variants={mobileItemVariants}>
                 <Link
                   href="/"
-                  className="block py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  className="block py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                 >
                   Home
                 </Link>
@@ -527,7 +516,7 @@ const Header = () => {
               <motion.div variants={mobileItemVariants}>
                 <button
                   onClick={() => toggleSection('about')}
-                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                 >
                   <span>About</span>
                   <svg
@@ -563,7 +552,7 @@ const Header = () => {
                         >
                           <Link
                             href={item.url}
-                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
                           >
                             {item.name}
                           </Link>
@@ -578,7 +567,7 @@ const Header = () => {
               <motion.div variants={mobileItemVariants}>
                 <button
                   onClick={() => toggleSection('nationalCommittee')}
-                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                 >
                   <span>National Committee</span>
                   <svg
@@ -614,7 +603,7 @@ const Header = () => {
                         >
                           <Link
                             href={item.url}
-                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
                           >
                             {item.name}
                           </Link>
@@ -629,7 +618,7 @@ const Header = () => {
               <motion.div variants={mobileItemVariants}>
                 <button
                   onClick={() => toggleSection('members')}
-                  className="w-full text-left flex items-center justify-between py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                 >
                   <span>Members</span>
                   <svg
@@ -665,7 +654,7 @@ const Header = () => {
                         >
                           <Link
                             href={item.url}
-                            className="block py-2.5 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
                           >
                             {item.name}
                           </Link>
@@ -685,7 +674,7 @@ const Header = () => {
                 >
                   <Link
                     href={item.url}
-                    className="block py-3 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                    className="block py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                   >
                     {item.name}
                   </Link>
@@ -694,7 +683,7 @@ const Header = () => {
 
               {/* Authentication links - Only show Portal in development */}
               {process.env.NODE_ENV !== 'production' && (
-                <motion.div variants={mobileItemVariants} className="pt-4 mt-4">
+                <motion.div variants={mobileItemVariants} className="pt-2">
                   <SignedIn>
                     <Link
                       href="/dashboard"
@@ -702,9 +691,9 @@ const Header = () => {
                     >
                       Dashboard
                     </Link>
-                    <div className="flex justify-center">
+                    {/* <div className="flex justify-center">
                       <UserButton />
-                    </div>
+                    </div> */}
                   </SignedIn>
                   <SignedOut>
                     <Link
