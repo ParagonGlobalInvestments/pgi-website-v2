@@ -218,7 +218,7 @@ const Header = () => {
     { name: 'Home', url: '/' },
     { name: 'Who We Are', url: '/who-we-are' },
     {
-      name: 'National Committee',
+      name: 'Committee',
       url: '/national-committee',
       subItems: [
         { name: 'Officers', url: '/national-committee/officers' },
@@ -332,8 +332,7 @@ const Header = () => {
               href="/national-committee"
               className="text-white whitespace-nowrap hover:text-secondary transition-colors duration-300"
             >
-              <span className="hidden lg:inline">National Committee</span>
-              <span className="lg:hidden">Committee</span>
+              Committee
             </Link>
 
             {/* Dropdown menu */}
@@ -569,7 +568,7 @@ const Header = () => {
                   onClick={() => toggleSection('nationalCommittee')}
                   className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                 >
-                  <span>National Committee</span>
+                  <span>Committee</span>
                   <svg
                     className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
                       expandedNationalCommittee ? 'rotate-180' : ''
