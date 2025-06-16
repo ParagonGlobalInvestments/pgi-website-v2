@@ -58,9 +58,9 @@ export default function Home() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        className="text-white min-h-[100vh] flex flex-col justify-center items-center relative"
+        className="text-white min-h-[100vh] flex flex-col justify-start lg:justify-center items-center relative"
       >
-        <div className="container mx-auto px-4 text-center py-16 md:py-24 lg:py-32">
+        <div className="container mx-auto px-4 text-center py-32">
           <motion.h1
             variants={fadeIn}
             className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-wide mb-6 md:mb-10 lg:mb-12 leading-tight"
@@ -88,7 +88,7 @@ export default function Home() {
         <motion.div
           variants={fadeIn}
           transition={{ delay: 0.6 }}
-          className="absolute bottom-32 text-center"
+          className="absolute bottom-[20vh] text-center"
         >
           <ScrollButton targetId="about-section">
             <span className="mb-3 md:mb-4 font-light text-sm md:text-base">
