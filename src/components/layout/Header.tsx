@@ -268,7 +268,7 @@ const Header = () => {
               height={36}
               className="h-9 w-auto"
             />
-            <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
+            {/* <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
               <DecryptedText
                 text="Paragon Global Investments"
                 sequential={true}
@@ -278,7 +278,7 @@ const Header = () => {
                 useOriginalCharsOnly={true}
                 className="text-sm md:text-xl font-normal text-white"
               />
-            </span>
+            </span> */}
           </Link>
         </motion.div>
 

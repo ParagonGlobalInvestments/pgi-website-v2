@@ -1,16 +1,31 @@
 {
   "name": "Paragon Global Investments",
-  "short_name": "Paragon",
+  "short_name": "PGI",
   "description": "Student-run intercollegiate investment fund focused on value investing and algorithmic trading",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#00172B",
+  "background_color": "#00172B",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "education", "business"],
   "icons": [
     {
       "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/png"
+      "sizes": "48x48 32x32 16x16",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
