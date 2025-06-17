@@ -1,0 +1,34 @@
+/* InfiniteScroll Component Styles */
+
+.infinite-scroll-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.infinite-scroll-container {
+  cursor: grab;
+  position: relative;
+  display: block;
+}
+
+.infinite-scroll-container:hover {
+  cursor: grab;
+}
+
+.infinite-scroll-container:active {
+  cursor: grabbing;
+}
+
+.infinite-scroll-item {
+  position: relative;
+  width: 100%;
+}
+
+/* Smooth transitions for better performance */
+.infinite-scroll-container > * {
+  backface-visibility: hidden;
+}

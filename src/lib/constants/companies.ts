@@ -1,0 +1,705 @@
+// Company constants for placements section
+// Cross-referenced from old website and current implementation
+
+export interface Company {
+  name: string;
+  displayName: string;
+  website: string;
+  category: 'investment-banking' | 'quant-tech' | 'asset-mgmt-consulting';
+  imagePath: string;
+}
+
+// Investment Banking Companies
+export const INVESTMENT_BANKING_COMPANIES: Company[] = [
+  {
+    name: 'goldman-sachs',
+    displayName: 'Goldman Sachs',
+    website: 'https://www.goldmansachs.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Goldman Sachs.png',
+  },
+  {
+    name: 'jp-morgan',
+    displayName: 'JP Morgan',
+    website: 'https://www.jpmorgan.com/global/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/JP Morgan.png',
+  },
+  {
+    name: 'morgan-stanley',
+    displayName: 'Morgan Stanley',
+    website: 'https://www.morganstanley.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Morgan Stanley.png',
+  },
+  {
+    name: 'bank-of-america',
+    displayName: 'Bank of America',
+    website: 'https://www.bankofamerica.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/BAML.png',
+  },
+  {
+    name: 'rbc',
+    displayName: 'RBC Capital Markets',
+    website: 'https://www.rbccm.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/RBC.png',
+  },
+  {
+    name: 'citi',
+    displayName: 'Citi',
+    website: 'https://www.citi.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Citi.png',
+  },
+  {
+    name: 'credit-suisse',
+    displayName: 'Credit Suisse',
+    website: 'https://www.credit-suisse.com/us/en.html',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Credit Suisse.png',
+  },
+  {
+    name: 'evercore',
+    displayName: 'Evercore',
+    website: 'https://www.evercore.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Evercore.png',
+  },
+  {
+    name: 'lazard',
+    displayName: 'Lazard',
+    website: 'https://www.lazard.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Lazard.png',
+  },
+  {
+    name: 'qatalyst',
+    displayName: 'Qatalyst Partners',
+    website: 'https://www.qatalyst.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Qatalyst.png',
+  },
+  {
+    name: 'pjt',
+    displayName: 'PJT Partners',
+    website: 'https://pjtpartners.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/PJT.png',
+  },
+  {
+    name: 'pwp',
+    displayName: 'Perella Weinberg Partners',
+    website: 'https://pwpartners.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/PWP.png',
+  },
+  {
+    name: 'liontree',
+    displayName: 'LionTree',
+    website: 'https://www.liontree.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/LionTree.png',
+  },
+  {
+    name: 'mklein',
+    displayName: 'M. Klein & Company',
+    website: 'https://mkleinandcompany.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Mklein.png',
+  },
+  {
+    name: 'guggenheim',
+    displayName: 'Guggenheim Partners',
+    website: 'https://www.guggenheimpartners.com/services/securities',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Guggenheim.png',
+  },
+  {
+    name: 'mizuho',
+    displayName: 'Mizuho',
+    website: 'https://www.mizuhogroup.com/bank',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Mizuho.png',
+  },
+  {
+    name: 'jefferies',
+    displayName: 'Jefferies',
+    website: 'https://www.jefferies.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Jefferies.png',
+  },
+  {
+    name: 'baird',
+    displayName: 'Robert W. Baird',
+    website: 'https://www.rwbaird.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Baird.png',
+  },
+  {
+    name: 'nomura',
+    displayName: 'Nomura',
+    website: 'https://www.nomura.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Nomura.png',
+  },
+  {
+    name: 'macquarie',
+    displayName: 'Macquarie',
+    website: 'https://www.macquarie.com/us/en.html',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Macquarie.png',
+  },
+  {
+    name: 'ubs',
+    displayName: 'UBS',
+    website: 'https://www.ubs.com/us/en.html',
+    category: 'investment-banking',
+    imagePath: '/images/companies/UBS.png',
+  },
+];
+
+// Quantitative Trading and Technology Companies
+export const QUANT_TECH_COMPANIES: Company[] = [
+  {
+    name: 'citadel',
+    displayName: 'Citadel Securities',
+    website: 'https://www.citadel.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CitSec.png',
+  },
+  {
+    name: 'jane-street',
+    displayName: 'Jane Street',
+    website: 'https://www.janestreet.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/JaneStreet.png',
+  },
+  {
+    name: 'de-shaw',
+    displayName: 'D.E. Shaw',
+    website: 'https://www.deshaw.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/DE-Shaw.png',
+  },
+  {
+    name: 'arrowstreet',
+    displayName: 'Arrowstreet Capital',
+    website: 'https://www.arrowstreetcapital.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'optiver',
+    displayName: 'Optiver',
+    website: 'https://optiver.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Optiver.png',
+  },
+  {
+    name: 'aqr',
+    displayName: 'AQR Capital',
+    website: 'https://www.aqr.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/AQR3.png',
+  },
+  {
+    name: 'sig',
+    displayName: 'SIG',
+    website: 'https://sig.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/SIG.png',
+  },
+  {
+    name: 'imc',
+    displayName: 'IMC Trading',
+    website: 'https://www.imc.com/us/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'five-rings',
+    displayName: 'Five Rings Capital',
+    website: 'https://fiverings.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/FiveRings.png',
+  },
+  {
+    name: 'virtu',
+    displayName: 'Virtu Financial',
+    website: 'https://www.virtu.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Virtu.png',
+  },
+  {
+    name: 'peak6',
+    displayName: 'Peak6',
+    website: 'http://www.peak6.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'flow-traders',
+    displayName: 'Flow Traders',
+    website: 'https://www.flowtraders.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'ctc',
+    displayName: 'Chicago Trading Company',
+    website: 'https://www.chicagotrading.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CTC.png',
+  },
+  {
+    name: 'belvedere',
+    displayName: 'Belvedere Trading',
+    website: 'http://www.belvederetrading.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Belvedere.png',
+  },
+  {
+    name: 'akuna',
+    displayName: 'Akuna Capital',
+    website: 'http://www.akunacapital.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Akuna.png',
+  },
+  {
+    name: 'quantedge',
+    displayName: 'QuantEdge',
+    website: 'https://www.quantedge.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Quantedge.png',
+  },
+  {
+    name: 'group-one',
+    displayName: 'Group One Trading',
+    website: 'http://www.group1.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/GroupOne.png',
+  },
+  {
+    name: 'finalyze',
+    displayName: 'Finalyze',
+    website: 'https://www.finalyze.io/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Finalyze.png',
+  },
+  {
+    name: 'millennium',
+    displayName: 'Millennium Management',
+    website: 'https://www.mlp.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Millennium.png',
+  },
+  {
+    name: 'blackedge',
+    displayName: 'BlackEdge Capital',
+    website: 'https://www.blackedge.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Blackedge.png',
+  },
+  {
+    name: 'kershner',
+    displayName: 'Kershner Trading',
+    website: 'https://www.kershnertrading.com/#/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Kershner.png',
+  },
+  {
+    name: 'cloudquant',
+    displayName: 'CloudQuant',
+    website: 'https://www.cloudquant.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CloudQuant.webp',
+  },
+  {
+    name: 'amazon',
+    displayName: 'Amazon',
+    website: 'https://www.amazon.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Amazon.png',
+  },
+  {
+    name: 'apple',
+    displayName: 'Apple',
+    website: 'https://www.apple.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Apple.png',
+  },
+  {
+    name: 'google',
+    displayName: 'Google',
+    website: 'https://about.google/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Google.png',
+  },
+  {
+    name: 'meta',
+    displayName: 'Meta',
+    website: 'https://about.facebook.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Meta.png',
+  },
+  {
+    name: 'microsoft',
+    displayName: 'Microsoft',
+    website: 'https://www.microsoft.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Microsoft.png',
+  },
+  {
+    name: 'nvidia',
+    displayName: 'NVIDIA',
+    website: 'https://www.nvidia.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Nvidia.png',
+  },
+  {
+    name: 'bytedance',
+    displayName: 'ByteDance',
+    website: 'https://www.bytedance.com/en/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/ByteDance.png',
+  },
+  {
+    name: 'palantir',
+    displayName: 'Palantir',
+    website: 'https://www.palantir.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Palantir.png',
+  },
+  {
+    name: 'spacex',
+    displayName: 'SpaceX',
+    website: 'https://www.spacex.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/SpaceX.png',
+  },
+  {
+    name: 'tesla',
+    displayName: 'Tesla',
+    website: 'https://www.tesla.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Tesla.png',
+  },
+  {
+    name: 'notion',
+    displayName: 'Notion',
+    website: 'https://www.notion.so/product',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Notion.png',
+  },
+  {
+    name: 'doordash',
+    displayName: 'DoorDash',
+    website: 'https://www.doordash.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Doordash.png',
+  },
+  {
+    name: 'databricks',
+    displayName: 'Databricks',
+    website: 'https://www.databricks.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'plaid',
+    displayName: 'Plaid',
+    website: 'https://www.plaid.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Plaid.png',
+  },
+  {
+    name: 'factset',
+    displayName: 'FactSet',
+    website: 'https://www.factset.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Factset.png',
+  },
+  {
+    name: 'ibm',
+    displayName: 'IBM',
+    website: 'https://www.ibm.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'siemens',
+    displayName: 'Siemens',
+    website: 'https://www.siemens.com/us/en.html',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Siemens.png',
+  },
+  {
+    name: 'stoneco',
+    displayName: 'StoneCo',
+    website: 'https://www.stone.co/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Stone.png',
+  },
+];
+
+// Asset Management and Consulting Companies
+export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
+  {
+    name: 'citadel-am',
+    displayName: 'Citadel',
+    website: 'https://www.citadel.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Citadel.png',
+  },
+  {
+    name: 'point72',
+    displayName: 'Point72',
+    website: 'https://point72.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Point72.svg',
+  },
+  {
+    name: 'dodge-cox',
+    displayName: 'Dodge & Cox',
+    website: 'https://www.dodgeandcox.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'warburg-pincus',
+    displayName: 'Warburg Pincus',
+    website: 'https://warburgpincus.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'silver-lake',
+    displayName: 'Silver Lake',
+    website: 'https://www.silverlake.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/SilverLake.png',
+  },
+  {
+    name: 'general-atlantic',
+    displayName: 'General Atlantic',
+    website: 'https://www.generalatlantic.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/GA.png',
+  },
+  {
+    name: 'pimco',
+    displayName: 'PIMCO',
+    website: 'https://www.pimco.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Pimco.png',
+  },
+  {
+    name: 'bridgewater',
+    displayName: 'Bridgewater Associates',
+    website: 'https://www.bridgewater.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Bridgewater.png',
+  },
+  {
+    name: 'apollo',
+    displayName: 'Apollo Global Management',
+    website: 'https://www.apollo.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Apollo.png',
+  },
+  {
+    name: 'ares',
+    displayName: 'Ares Management',
+    website: 'https://www.aresmgmt.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Ares.png',
+  },
+  {
+    name: 'blackstone',
+    displayName: 'Blackstone',
+    website: 'https://www.blackstone.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Blackstone.png',
+  },
+  {
+    name: 'carlyle',
+    displayName: 'Carlyle Group',
+    website: 'https://www.carlyle.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Carlyle.png',
+  },
+  {
+    name: 'mckinsey',
+    displayName: 'McKinsey & Company',
+    website: 'https://www.mckinsey.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Mckinsey.png',
+  },
+  {
+    name: 'bain',
+    displayName: 'Bain & Company',
+    website: 'https://www.bain.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'bcg',
+    displayName: 'Boston Consulting Group',
+    website: 'https://www.bcg.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/BCG.png',
+  },
+  {
+    name: 'advent',
+    displayName: 'Advent International',
+    website: 'https://www.adventinternational.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Advent.png',
+  },
+  {
+    name: 'cdr',
+    displayName: 'CDR',
+    website: 'https://www.cdr-inc.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/CDR.jpg',
+  },
+  {
+    name: 'oaktree',
+    displayName: 'Oaktree Capital',
+    website: 'https://www.oaktreecapital.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Oaktree.png',
+  },
+  {
+    name: 'gtcr',
+    displayName: 'GTCR',
+    website: 'https://www.gtcr.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/GTCR.png',
+  },
+  {
+    name: 'accel-kkr',
+    displayName: 'Accel-KKR',
+    website: 'https://www.accel-kkr.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/AKKR.png',
+  },
+  {
+    name: 'permira',
+    displayName: 'Permira',
+    website: 'https://www.permira.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Permira.png',
+  },
+  {
+    name: 'bam',
+    displayName: 'Brookfield Asset Management',
+    website: 'https://www.bamfunds.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/BAM.png',
+  },
+  {
+    name: 't-rowe-price',
+    displayName: 'T. Rowe Price',
+    website: 'https://www.troweprice.com/en/us',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/TRowe.png',
+  },
+  {
+    name: 'sixth-street',
+    displayName: 'Sixth Street',
+    website: 'https://sixthstreet.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'neuberger-berman',
+    displayName: 'Neuberger Berman',
+    website: 'https://www.nb.com/en/global/home',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/NB.png',
+  },
+  {
+    name: 'farallon',
+    displayName: 'Farallon Capital',
+    website: 'https://www.faralloncapital.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Farallon.png',
+  },
+  {
+    name: 'girls-who-invest',
+    displayName: 'Girls Who Invest',
+    website: 'https://www.girlswhoinvest.org/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/GWI.png',
+  },
+  {
+    name: 'golub',
+    displayName: 'Golub Capital',
+    website: 'https://golubcapital.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Golub.png',
+  },
+  {
+    name: 'volition',
+    displayName: 'Volition Capital',
+    website: 'https://www.volitioncapital.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+  },
+  {
+    name: 'icg',
+    displayName: 'Intermediate Capital Group',
+    website: 'https://www.icgam.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/ICG.png',
+  },
+  {
+    name: 'arena',
+    displayName: 'Arena Investors',
+    website: 'https://www.arenaco.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Arena.png',
+  },
+  {
+    name: 'us-bank',
+    displayName: 'US Bank',
+    website: 'https://www.usbank.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/US Bank.png',
+  },
+  {
+    name: 'pwc',
+    displayName: 'PwC',
+    website: 'https://www.pwc.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/PWC.png',
+  },
+];
+
+// Combined export for easy access
+export const ALL_COMPANIES: Company[] = [
+  ...INVESTMENT_BANKING_COMPANIES,
+  ...QUANT_TECH_COMPANIES,
+  ...ASSET_MGMT_CONSULTING_COMPANIES,
+];
+
+// Category constants
+export const COMPANY_CATEGORIES = {
+  INVESTMENT_BANKING: 'investment-banking' as const,
+  QUANT_TECH: 'quant-tech' as const,
+  ASSET_MGMT_CONSULTING: 'asset-mgmt-consulting' as const,
+} as const;
+
+// Helper functions
+export const getCompaniesByCategory = (
+  category: Company['category']
+): Company[] => {
+  return ALL_COMPANIES.filter(company => company.category === category);
+};
+
+export const getCompanyByName = (name: string): Company | undefined => {
+  return ALL_COMPANIES.find(company => company.name === name);
+};
