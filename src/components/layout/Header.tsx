@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
 // Animation variants
 const navbarAnimation = {
@@ -267,8 +268,16 @@ const Header = () => {
               height={36}
               className="h-9 w-auto"
             />
-            <span className="ml-2 text-white text-lg md:text-xl font-light hidden xl:block">
-              Paragon Global Investments
+            <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
+              <DecryptedText
+                text="Paragon Global Investments"
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={50}
+                useOriginalCharsOnly={true}
+                className="text-sm md:text-xl font-normal text-white"
+              />
             </span>
           </Link>
         </motion.div>
