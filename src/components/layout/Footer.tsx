@@ -160,12 +160,12 @@ const Footer = () => {
               </motion.div>
             </div>
             <motion.p
-              className="text-gray-300 text-sm mb-4"
+              className="text-gray-300 text-xs mb-4"
               variants={logoAnimation}
             >
-              Paragon Global Investments is a registered 501(c)(3) nonprofit.
-              Paragon Global Investments was previously known as Paragon
-              National Group (PNG).
+              Paragon Global Investments is a registered 501(c)(3) nonprofit.{' '}
+              <br />
+              Previously known as Paragon National Group (PNG).
             </motion.p>
           </motion.div>
 

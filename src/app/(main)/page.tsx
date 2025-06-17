@@ -14,6 +14,8 @@ import {
   PARTNERS_COMPANIES,
   type Company,
 } from '@/lib/constants/companies';
+import { UNIVERSITIES, type University } from '@/lib/constants/universities';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 
 // Animation variants
 const fadeIn = {
@@ -159,6 +161,32 @@ const SponsorLogo = ({ company }: { company: Company }) => (
   </a>
 );
 
+// University Logo Component
+const UniversityLogo = ({ university }: { university: University }) => (
+  <a
+    href={university.website}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block group"
+  >
+    <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300 h-40">
+      <Image
+        src={university.imagePath}
+        alt={university.displayName}
+        width={120}
+        height={120}
+        className="object-contain max-w-full max-h-full group-hover:scale-105 transition-transform duration-300"
+        style={{
+          width: 'auto',
+          height: 'auto',
+          maxWidth: '120px',
+          maxHeight: '120px',
+        }}
+      />
+    </div>
+  </a>
+);
+
 export default function Home() {
   return (
     <div>
@@ -172,19 +200,21 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-32">
           <motion.h1
             variants={fadeIn}
-            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-wide mb-6 lg:mb-8 leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-wide mb-6 lg:mb-8 leading-tight"
           >
             Paragon Global Investments
           </motion.h1>
-          <motion.p
+          <motion.div
             variants={fadeIn}
             transition={{ delay: 0.4 }}
             style={{ color: '#d8d8d8' }}
-            className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 mx-auto font-normal tracking-wide max-w-7xl leading-relaxed"
+            className="text-base md:text-lg lg:text-xl xl:text-2xl mb-8 mx-auto font-normal tracking-wide max-w-7xl leading-relaxed"
           >
-            Intercollegiate quantitative investment fund focused on value
-            investing and algorithmic trading
-          </motion.p>
+            <ShinyText
+              text="Intercollegiate quantitative investment fund focused on value investing and algorithmic trading"
+              className="text-base md:text-lg lg:text-xl xl:text-2xl font-normal tracking-wide leading-relaxed"
+            />
+          </motion.div>
 
           {/* Hero CTAs */}
           <motion.div
@@ -254,9 +284,12 @@ export default function Home() {
         <div className="container mx-auto">
           <motion.h2
             variants={fadeIn}
-            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-8 md:mb-12 lg:mb-16 text-center text-white"
           >
-            PGI At a Glance
+            <ShinyText
+              text="PGI At a Glance"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <div className="max-w-5xl mx-auto">
             <motion.p
@@ -275,7 +308,7 @@ export default function Home() {
 
             <motion.div
               variants={staggerContainer}
-              className="grid grid-cols-1 w-1/2 mx-auto md:w-full md:grid-cols-3 gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12 lg:mt-16 text-center"
+              className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12 lg:mt-16 text-center"
             >
               <motion.div
                 variants={itemFadeIn}
@@ -345,123 +378,20 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Our Chapters
+            <ShinyText
+              text="Our Chapters"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <motion.div
             variants={staggerContainer}
             className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
-            {/* Brown University */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/brown.png"
-                alt="Brown University"
-                width={148}
-                height={148}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* Columbia University */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/columbia.png"
-                alt="Columbia University"
-                width={156}
-                height={156}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* Cornell University */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/cornell.png"
-                alt="Cornell University"
-                width={128}
-                height={128}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* University of Pennsylvania */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/upenn.png"
-                alt="University of Pennsylvania"
-                width={216}
-                height={216}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* University of Chicago */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/uchicago.png"
-                alt="University of Chicago"
-                width={100}
-                height={100}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* Princeton University */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/princeton.png"
-                alt="Princeton University"
-                width={250}
-                height={250}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* NYU */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/nyu.png"
-                alt="NYU"
-                width={128}
-                height={128}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
-
-            {/* Yale University */}
-            <motion.div
-              variants={logoAnimation}
-              className="p-6 md:p-8 lg:p-10 bg-pgi-dark-blue border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-            >
-              <Image
-                src="/images/universities/yale.png"
-                alt="Yale University"
-                width={128}
-                height={128}
-                className="object-contain max-w-full h-auto"
-              />
-            </motion.div>
+            {UNIVERSITIES.map(university => (
+              <motion.div key={university.name} variants={logoAnimation}>
+                <UniversityLogo university={university} />
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Chapters Section CTA */}
@@ -496,7 +426,10 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Our Placements
+            <ShinyText
+              text="Our Placements"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
 
           {/* Three Column Layout - Stack on mobile, side-by-side on desktop */}
@@ -506,10 +439,10 @@ export default function Home() {
               variants={itemFadeIn}
               className="flex-1 flex flex-col items-center"
             >
-              <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-6 text-center">
+              <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
                 Quantitative Trading & Technology
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
                 <style>
                   {`
                       .quant-tech-scroll .infinite-scroll-wrapper {
@@ -547,10 +480,10 @@ export default function Home() {
               variants={itemFadeIn}
               className="flex-1 flex flex-col items-center"
             >
-              <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-6 text-center">
+              <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
                 Investment Banking
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
                 <style>
                   {`
                       .investment-banking-scroll .infinite-scroll-wrapper {
@@ -588,10 +521,10 @@ export default function Home() {
               variants={itemFadeIn}
               className="flex-1 flex flex-col items-center"
             >
-              <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-6 text-center">
+              <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
                 Asset Management & Consulting
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
                 <style>
                   {`
                       .asset-mgmt-scroll .infinite-scroll-wrapper {
@@ -657,7 +590,10 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Our Education Program
+            <ShinyText
+              text="Our Education Program"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <motion.div
             variants={staggerContainer}
@@ -667,7 +603,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
                 Value Investment
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
@@ -680,7 +616,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
                 Algorithmic Trading
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
@@ -724,7 +660,10 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Investment Funds
+            <ShinyText
+              text="Investment Funds"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <motion.div
             variants={staggerContainer}
@@ -734,7 +673,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
                 Paragon Value
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
@@ -748,7 +687,7 @@ export default function Home() {
               variants={itemFadeIn}
               className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white">
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
                 Paragon Systematic
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
@@ -793,13 +732,16 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Sponsors
+            <ShinyText
+              text="Sponsors"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 items-center"
+            className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10 items-center"
           >
-            {SPONSORS_COMPANIES.slice(0, 4).map((sponsor, index) => (
+            {SPONSORS_COMPANIES.slice(0, 5).map((sponsor, index) => (
               <motion.div key={sponsor.name} variants={logoAnimation}>
                 <SponsorLogo company={sponsor} />
               </motion.div>
@@ -838,13 +780,16 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Partners
+            <ShinyText
+              text="Partners"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
+            className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10 items-center"
           >
-            {PARTNERS_COMPANIES.slice(0, 4).map((partner, index) => (
+            {PARTNERS_COMPANIES.slice(0, 5).map((partner, index) => (
               <motion.div key={partner.name} variants={logoAnimation}>
                 <SponsorLogo company={partner} />
               </motion.div>
