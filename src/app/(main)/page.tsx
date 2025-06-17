@@ -616,117 +616,9 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Sponsors Section */}
-      <motion.section
-        className="py-16 md:py-24 lg:py-32 px-4"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        variants={fadeIn}
-      >
-        <div className="container mx-auto">
-          <motion.h2
-            variants={fadeIn}
-            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
-          >
-            Sponsors
-          </motion.h2>
-          <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
-          >
-            {/* Placeholder for sponsor logos */}
-            {Array(8)
-              .fill(0)
-              .map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={logoAnimation}
-                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-                >
-                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
-                    Sponsor Logo
-                  </div>
-                </motion.div>
-              ))}
-          </motion.div>
-
-          {/* Sponsors Section CTA */}
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.8 }}
-            className="text-center mt-12 md:mt-16 lg:mt-20"
-          >
-            <Link href="/sponsors">
-              <motion.button
-                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
-                whileHover={buttonHover}
-                whileTap={{ scale: 0.95 }}
-              >
-                View All Sponsors
-              </motion.button>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Partners Section */}
-      <motion.section
-        className="py-16 md:py-24 lg:py-32 bg-navy px-4 border-t border-b border-gray-800"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        variants={fadeIn}
-      >
-        <div className="container mx-auto">
-          <motion.h2
-            variants={fadeIn}
-            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
-          >
-            Partners
-          </motion.h2>
-          <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
-          >
-            {/* Placeholder for partner logos */}
-            {Array(8)
-              .fill(0)
-              .map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={logoAnimation}
-                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-                >
-                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
-                    Partner Logo
-                  </div>
-                </motion.div>
-              ))}
-          </motion.div>
-
-          {/* Partners Section CTA */}
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.8 }}
-            className="text-center mt-12 md:mt-16 lg:mt-20"
-          >
-            <Link href="/sponsors">
-              <motion.button
-                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
-                whileHover={buttonHover}
-                whileTap={{ scale: 0.95 }}
-              >
-                View All Partners
-              </motion.button>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.section>
-
       {/* Education Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 px-4"
+        className="py-16 md:py-24 lg:py-32 bg-navy px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -737,7 +629,7 @@ export default function Home() {
             variants={fadeIn}
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Education
+            Our Education Program
           </motion.h2>
           <motion.div
             variants={staggerContainer}
@@ -793,7 +685,7 @@ export default function Home() {
 
       {/* Investment Funds Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 bg-navy px-4 border-t border-b border-gray-800"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -854,6 +746,114 @@ export default function Home() {
                 whileTap={{ scale: 0.95 }}
               >
                 Learn About Our Funds
+              </motion.button>
+            </Link>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Sponsors Section */}
+      <motion.section
+        className="py-16 md:py-24 lg:py-32 bg-navy px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
+        <div className="container mx-auto">
+          <motion.h2
+            variants={fadeIn}
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
+          >
+            Sponsors
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
+          >
+            {/* Placeholder for sponsor logos */}
+            {Array(8)
+              .fill(0)
+              .map((_, index) => (
+                <motion.div
+                  key={index}
+                  variants={logoAnimation}
+                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
+                >
+                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
+                    Sponsor Logo
+                  </div>
+                </motion.div>
+              ))}
+          </motion.div>
+
+          {/* Sponsors Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/sponsors">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                View All Sponsors
+              </motion.button>
+            </Link>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Partners Section */}
+      <motion.section
+        className="py-16 md:py-24 lg:py-32 px-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={fadeIn}
+      >
+        <div className="container mx-auto">
+          <motion.h2
+            variants={fadeIn}
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
+          >
+            Partners
+          </motion.h2>
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
+          >
+            {/* Placeholder for partner logos */}
+            {Array(8)
+              .fill(0)
+              .map((_, index) => (
+                <motion.div
+                  key={index}
+                  variants={logoAnimation}
+                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
+                >
+                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
+                    Partner Logo
+                  </div>
+                </motion.div>
+              ))}
+          </motion.div>
+
+          {/* Partners Section CTA */}
+          <motion.div
+            variants={fadeIn}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-12 md:mt-16 lg:mt-20"
+          >
+            <Link href="/sponsors">
+              <motion.button
+                className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                whileHover={buttonHover}
+                whileTap={{ scale: 0.95 }}
+              >
+                View All Partners
               </motion.button>
             </Link>
           </motion.div>

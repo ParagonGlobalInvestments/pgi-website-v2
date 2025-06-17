@@ -188,7 +188,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'Arrowstreet Capital',
     website: 'https://www.arrowstreetcapital.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/arrowstreet.png',
   },
   {
     name: 'optiver',
@@ -216,7 +216,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'IMC Trading',
     website: 'https://www.imc.com/us/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/imc.png',
   },
   {
     name: 'five-rings',
@@ -237,14 +237,14 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'Peak6',
     website: 'http://www.peak6.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/peak6.png',
   },
   {
     name: 'flow-traders',
     displayName: 'Flow Traders',
     website: 'https://www.flowtraders.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/flow.png',
   },
   {
     name: 'ctc',
@@ -384,7 +384,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'Tesla',
     website: 'https://www.tesla.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Tesla.png',
+    imagePath: '/images/companies/Tesla1.png',
   },
   {
     name: 'notion',
@@ -405,7 +405,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'Databricks',
     website: 'https://www.databricks.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/databricks.png',
   },
   {
     name: 'plaid',
@@ -426,7 +426,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'IBM',
     website: 'https://www.ibm.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/ibm.png',
   },
   {
     name: 'siemens',
@@ -465,14 +465,14 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
     displayName: 'Dodge & Cox',
     website: 'https://www.dodgeandcox.com/',
     category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/dodge.png',
   },
   {
     name: 'warburg-pincus',
     displayName: 'Warburg Pincus',
     website: 'https://warburgpincus.com/',
     category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/WarburgPincus.png',
   },
   {
     name: 'silver-lake',
@@ -542,7 +542,7 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
     displayName: 'Bain & Company',
     website: 'https://www.bain.com/',
     category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/bain.png',
   },
   {
     name: 'bcg',
@@ -612,7 +612,7 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
     displayName: 'Sixth Street',
     website: 'https://sixthstreet.com/',
     category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/sixthstreet.png',
   },
   {
     name: 'neuberger-berman',
@@ -647,7 +647,7 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
     displayName: 'Volition Capital',
     website: 'https://www.volitioncapital.com/',
     category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Goldman Sachs.png', // Placeholder - no specific image found
+    imagePath: '/images/companies/Volition.png',
   },
   {
     name: 'icg',
