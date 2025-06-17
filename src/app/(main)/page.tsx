@@ -10,6 +10,8 @@ import {
   INVESTMENT_BANKING_COMPANIES,
   QUANT_TECH_COMPANIES,
   ASSET_MGMT_CONSULTING_COMPANIES,
+  SPONSORS_COMPANIES,
+  PARTNERS_COMPANIES,
   type Company,
 } from '@/lib/constants/companies';
 
@@ -127,6 +129,32 @@ const CompanyLogo = ({ company }: { company: Company }) => (
           }}
         />
       </div>
+    </div>
+  </a>
+);
+
+// Sponsor/Partner Logo Component
+const SponsorLogo = ({ company }: { company: Company }) => (
+  <a
+    href={company.website}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block group"
+  >
+    <div className=" flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+      <Image
+        src={company.imagePath}
+        alt={company.displayName}
+        width={200}
+        height={200}
+        className="object-contain max-w-full max-h-full"
+        style={{
+          width: 'auto',
+          height: 'auto',
+          maxWidth: '200px',
+          maxHeight: '200px',
+        }}
+      />
     </div>
   </a>
 );
@@ -769,29 +797,20 @@ export default function Home() {
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 items-center"
           >
-            {/* Placeholder for sponsor logos */}
-            {Array(8)
-              .fill(0)
-              .map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={logoAnimation}
-                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-                >
-                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
-                    Sponsor Logo
-                  </div>
-                </motion.div>
-              ))}
+            {SPONSORS_COMPANIES.slice(0, 4).map((sponsor, index) => (
+              <motion.div key={sponsor.name} variants={logoAnimation}>
+                <SponsorLogo company={sponsor} />
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Sponsors Section CTA */}
           <motion.div
             variants={fadeIn}
             transition={{ delay: 0.8 }}
-            className="text-center mt-12 md:mt-16 lg:mt-20"
+            className="text-center mt-12 "
           >
             <Link href="/sponsors">
               <motion.button
@@ -825,27 +844,18 @@ export default function Home() {
             variants={staggerContainer}
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
-            {/* Placeholder for partner logos */}
-            {Array(8)
-              .fill(0)
-              .map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={logoAnimation}
-                  className="p-6 md:p-8 lg:p-10 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300"
-                >
-                  <div className="w-24 h-12 md:w-32 md:h-16 lg:w-36 lg:h-18 bg-gray-800 rounded-lg flex items-center justify-center text-gray-300 text-xs md:text-sm">
-                    Partner Logo
-                  </div>
-                </motion.div>
-              ))}
+            {PARTNERS_COMPANIES.slice(0, 4).map((partner, index) => (
+              <motion.div key={partner.name} variants={logoAnimation}>
+                <SponsorLogo company={partner} />
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Partners Section CTA */}
           <motion.div
             variants={fadeIn}
             transition={{ delay: 0.8 }}
-            className="text-center mt-12 md:mt-16 lg:mt-20"
+            className="text-center mt-12 "
           >
             <Link href="/sponsors">
               <motion.button

@@ -679,6 +679,161 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
   },
 ];
 
+// Sponsors Companies
+export const SPONSORS_COMPANIES: Company[] = [
+  {
+    name: 'citadel',
+    displayName: 'Citadel',
+    website: 'https://www.citadel.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Citadel.png',
+  },
+  {
+    name: 'citadel-securities',
+    displayName: 'Citadel Securities',
+    website: 'https://www.citadel.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CitSec.png',
+  },
+  {
+    name: 'jane-street',
+    displayName: 'Jane Street',
+    website: 'https://www.janestreet.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/JaneStreet.png',
+  },
+  {
+    name: 'de-shaw',
+    displayName: 'D.E. Shaw & Co.',
+    website: 'https://www.deshaw.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/desco.png',
+  },
+  {
+    name: 'imc',
+    displayName: 'IMC',
+    website: 'https://imc.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/imc.png',
+  },
+  {
+    name: 'drw',
+    displayName: 'DRW',
+    website: 'https://drw.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/drw.png',
+  },
+  {
+    name: 'kershner',
+    displayName: 'Kershner Trading',
+    website: 'https://www.kershnertrading.com/#/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Kershner.png',
+  },
+  {
+    name: 'adams-street',
+    displayName: 'Adams Street Partners',
+    website: 'https://www.adamsstreetpartners.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/AdamsStreet.png',
+  },
+  {
+    name: 'arena',
+    displayName: 'Arena',
+    website: 'https://www.arenaco.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Arena.png',
+  },
+];
+
+// Partners Companies
+export const PARTNERS_COMPANIES: Company[] = [
+  {
+    name: 'kirkland',
+    displayName: 'Kirkland & Ellis',
+    website: 'https://www.kirkland.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/kirkland.png',
+  },
+  {
+    name: 'databento',
+    displayName: 'Databento',
+    website: 'https://databento.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/databento.png',
+  },
+  {
+    name: 'cloudquant',
+    displayName: 'CloudQuant',
+    website: 'https://www.cloudquant.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CloudQuant.webp',
+  },
+  {
+    name: 'visible-alpha',
+    displayName: 'Visible Alpha',
+    website: 'https://visiblealpha.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/visiblealpha.png',
+  },
+  {
+    name: 'bamsec',
+    displayName: 'BamSEC',
+    website: 'https://www.bamsec.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/BamSEC.png',
+  },
+  {
+    name: 'tegus',
+    displayName: 'Tegus',
+    website: 'https://www.tegus.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Tegus.png',
+  },
+  {
+    name: 'elevate',
+    displayName: 'Elevate Career Network',
+    website: 'https://www.elevatecareernetwork.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Elevate.jpg',
+  },
+  {
+    name: 'wso',
+    displayName: 'Wall Street Oasis',
+    website: 'https://www.wallstreetoasis.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/WSO.png',
+  },
+  {
+    name: 'edmund-sec',
+    displayName: 'Edmund Securities',
+    website: 'https://www.edmundsec.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/EdmundSEC.png',
+  },
+  {
+    name: 'biws',
+    displayName: 'Breaking Into Wall Street',
+    website: 'https://breakingintowallstreet.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/BIWS-1.png',
+  },
+  {
+    name: 'hireflix',
+    displayName: 'Hireflix',
+    website: 'https://www.hireflix.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Hireflix-2.png',
+  },
+  {
+    name: 'portfolio123',
+    displayName: 'Portfolio123',
+    website: 'https://www.portfolio123.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Portfolio123.png',
+  },
+];
+
 // Combined export for easy access
 export const ALL_COMPANIES: Company[] = [
   ...INVESTMENT_BANKING_COMPANIES,
