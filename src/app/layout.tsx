@@ -14,7 +14,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Paragon Global Investments',
+  title: 'PGI',
   description:
     'Student-run intercollegiate investment fund focused on value investing and algorithmic trading',
 };
