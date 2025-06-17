@@ -1,12 +1,14 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { motion } from "framer-motion";
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 // import Link from "next/link";
+import { FaHandshake, FaAward } from 'react-icons/fa';
 import {
-  FaHandshake,
-  FaAward
-} from "react-icons/fa";
+  SPONSORS_COMPANIES,
+  PARTNERS_COMPANIES,
+  type Company,
+} from '@/lib/constants/companies';
 
 // Animation variants
 const fadeIn = {
@@ -16,7 +18,7 @@ const fadeIn = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -39,7 +41,7 @@ const cardAnimation = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
@@ -51,99 +53,37 @@ const sponsorAnimation = {
     scale: 1,
     transition: {
       duration: 0.4,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   },
 };
 
 export default function Sponsors() {
-  // Sponsors data
-  const sponsors = [
-    { name: "Citadel", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Citadel Securities", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Kershner Trading Group", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Jane Street Capital", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "IMC Trading", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "DRW", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Adams Street", logo: "/logos/pgiLogoTransparent.png" },
-    { name: "Arena Investors LP", logo: "/logos/pgiLogoTransparent.png" },
-  ];
-
-  // Partners data
-  const partners = [
-    {
-      name: "CloudQuant",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "The exclusive partnership between Paragon and CloudQuant gives Paragon quantitative analysts access to over 15,000 private alternative data sets for building models and developing signals, enabling PNG students to perform real quantitative research.",
-    },
-    {
-      name: "Databento",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Databento is a leading provider of real-time and historical market data to leading institutional investors. Paragon and Databento are partnered to provide Paragon students with access to real-time and exclusive market data across equities, options, and forex data!",
-    },
-    {
-      name: "Kirkland & Ellis",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Kirkland & Ellis, one of the largest law firms in the United States, is Paragon's official legal advisor, actively helping spread the organization's mission to as many students as possible.",
-    },
-    {
-      name: "Visible Alpha",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Visible Alpha is a leading provider of market data, sell-side information, financial information, and other company analysis software. All Paragon investment analysts will have access to visible alpha software through their PMs, which will assist them in developing deeper insights into the companies Paragon researches.",
-    },
-    {
-      name: "Tegus",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Tegus, a leading investment research platform, is a partner of Paragon's Value Fund.",
-    },
-    {
-      name: "BamSEC",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "BamSEC is a leading online platform that allows users to more efficiently perform financial research when working with Securities and Exchange Commission (SEC) filings and earnings transcripts. BamSEC helps Paragon students analyze companies and build financial models for our investment pitches.",
-    },
-    {
-      name: "EdmundSEC",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "EdmundSEC is a leading provider of software that helps users efficiently perform financial research when working with SEC documents. The company leverages unique AI software to accelerate financial research. EdmundSEC helps students with their financial research and building financial models.",
-    },
-    {
-      name: "Wall Street Oasis",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Wall Street Oasis provides Paragon Global Investments members exclusive resources to prepare them for professional recruitment.",
-    },
-    {
-      name: "Elevate",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Paragon partnered with Elevate Career Network—the largest Private Equity, Investment Banking, Venture Capital, Hedge Fund Network in North America and Europe—to provide our members with exclusive access to recruiting opportunities in finance.",
-    },
-    {
-      name: "Breaking Into Wall Street",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Breaking Into Wall Street is the premier financial modeling training platform for investment banking and private equity interviews.",
-    },
-    {
-      name: "Hireflix",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Hireflix is a leading one-way video interview software platform. Hireflix has partnered with PGI to support our national recruitment efforts.",
-    },
-    {
-      name: "Portfolio123",
-      logo: "/images/pgiLogoTransparent.png",
-      description:
-        "Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.",
-    },
-  ];
+  // Partner descriptions mapping
+  const partnerDescriptions: { [key: string]: string } = {
+    cloudquant:
+      'The exclusive partnership between Paragon and CloudQuant gives Paragon quantitative analysts access to over 15,000 private alternative data sets for building models and developing signals, enabling PNG students to perform real quantitative research.',
+    databento:
+      'Databento is a leading provider of real-time and historical market data to leading institutional investors. Paragon and Databento are partnered to provide Paragon students with access to real-time and exclusive market data across equities, options, and forex data!',
+    kirkland:
+      "Kirkland & Ellis, one of the largest law firms in the United States, is Paragon's official legal advisor, actively helping spread the organization's mission to as many students as possible.",
+    'visible-alpha':
+      'Visible Alpha is a leading provider of market data, sell-side information, financial information, and other company analysis software. All Paragon investment analysts will have access to visible alpha software through their PMs, which will assist them in developing deeper insights into the companies Paragon researches.',
+    tegus:
+      "Tegus, a leading investment research platform, is a partner of Paragon's Value Fund.",
+    bamsec:
+      'BamSEC is a leading online platform that allows users to more efficiently perform financial research when working with Securities and Exchange Commission (SEC) filings and earnings transcripts. BamSEC helps Paragon students analyze companies and build financial models for our investment pitches.',
+    'edmund-sec':
+      'EdmundSEC is a leading provider of software that helps users efficiently perform financial research when working with SEC documents. The company leverages unique AI software to accelerate financial research. EdmundSEC helps students with their financial research and building financial models.',
+    wso: 'Wall Street Oasis provides Paragon Global Investments members exclusive resources to prepare them for professional recruitment.',
+    elevate:
+      'Paragon partnered with Elevate Career Network—the largest Private Equity, Investment Banking, Venture Capital, Hedge Fund Network in North America and Europe—to provide our members with exclusive access to recruiting opportunities in finance.',
+    biws: 'Breaking Into Wall Street is the premier financial modeling training platform for investment banking and private equity interviews.',
+    hireflix:
+      'Hireflix is a leading one-way video interview software platform. Hireflix has partnered with PGI to support our national recruitment efforts.',
+    portfolio123:
+      'Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.',
+  };
 
   return (
     <div className="bg-navy text-white min-h-screen">
@@ -188,28 +128,38 @@ export default function Sponsors() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-8 max-w-6xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-8 max-w-6xl mx-auto"
             variants={staggerContainer}
           >
-            {sponsors.map((sponsor, index) => (
+            {SPONSORS_COMPANIES.map((sponsor, index) => (
               <motion.div
-                key={index}
-                className="bg-navy-light p-6 rounded-lg border border-gray-700 flex flex-col items-center justify-center"
+                key={sponsor.name}
+                className=" flex items-center justify-center"
                 variants={sponsorAnimation}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center p-3 mb-4">
-                  <Image
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    width={80}
-                    height={80}
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-center">
-                  {sponsor.name}
-                </h3>
+                <a
+                  href={sponsor.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center"
+                >
+                  <div className="w-auto h-auto bg-transparent rounded-lg flex items-center justify-center p-3">
+                    <Image
+                      src={sponsor.imagePath}
+                      alt={sponsor.displayName}
+                      width={120}
+                      height={120}
+                      className="object-contain max-w-full max-h-full"
+                      style={{
+                        width: 'auto',
+                        height: 'auto',
+                        maxWidth: '200px',
+                        maxHeight: '200px',
+                      }}
+                    />
+                  </div>
+                </a>
               </motion.div>
             ))}
           </motion.div>
@@ -230,27 +180,48 @@ export default function Sponsors() {
           </motion.div>
 
           <div className="max-w-6xl mx-auto">
-            {partners.map((partner, index) => (
+            {PARTNERS_COMPANIES.map((partner, index) => (
               <motion.div
-                key={index}
+                key={partner.name}
                 className="bg-navy-light p-6 mb-8 rounded-lg border border-gray-700 hover:border-secondary transition-duration-300"
                 variants={cardAnimation}
               >
                 <div className="flex flex-col md:flex-row items-center md:items-start">
-                  <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center p-4 mb-6 md:mb-0 md:mr-8 shrink-0">
+                  <a
+                    href={partner.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-auto h-auto bg-transparent rounded-lg flex items-center justify-center p-4 mb-6 md:mb-0 md:mr-8 shrink-0 hover:scale-105 transition-transform duration-300"
+                  >
                     <Image
-                      src={partner.logo}
-                      alt={partner.name}
-                      width={100}
-                      height={100}
-                      className="object-contain"
+                      src={partner.imagePath}
+                      alt={partner.displayName}
+                      width={150}
+                      height={150}
+                      className="object-contain max-w-full max-h-full"
+                      style={{
+                        width: 'auto',
+                        height: 'auto',
+                        maxWidth: '150px',
+                        maxHeight: '150px',
+                      }}
                     />
-                  </div>
+                  </a>
                   <div>
                     <h3 className="text-xl font-bold mb-4 text-secondary">
-                      {partner.name}
+                      <a
+                        href={partner.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {partner.displayName}
+                      </a>
                     </h3>
-                    <p className="text-gray-300">{partner.description}</p>
+                    <p className="text-gray-300">
+                      {partnerDescriptions[partner.name] ||
+                        'Partnership details coming soon.'}
+                    </p>
                   </div>
                 </div>
               </motion.div>
