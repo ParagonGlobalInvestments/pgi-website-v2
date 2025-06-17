@@ -707,7 +707,7 @@ export const SPONSORS_COMPANIES: Company[] = [
     displayName: 'D.E. Shaw & Co.',
     website: 'https://www.deshaw.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/desco.png',
+    imagePath: '/images/companies/DE-Shaw.png',
   },
   {
     name: 'imc',

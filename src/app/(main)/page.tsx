@@ -16,6 +16,7 @@ import {
 } from '@/lib/constants/companies';
 import { UNIVERSITIES, type University } from '@/lib/constants/universities';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
 // Animation variants
 const fadeIn = {
@@ -169,7 +170,7 @@ const UniversityLogo = ({ university }: { university: University }) => (
     rel="noopener noreferrer"
     className="block group"
   >
-    <div className="p-6 bg-navy border border-gray-700 rounded-lg flex items-center justify-center hover:border-gray-600 transition-colors duration-300 h-40">
+    <div className=" flex items-center justify-center  transition-colors duration-300 h-40">
       <Image
         src={university.imagePath}
         alt={university.displayName}
@@ -440,9 +441,17 @@ export default function Home() {
               className="flex-1 flex flex-col items-center"
             >
               <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
-                Quantitative Trading & Technology
+                <DecryptedText
+                  text="Quantitative Trading & Technology"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={30}
+                  useOriginalCharsOnly={true}
+                  className="text-lg md:text-xl lg:text-2xl font-medium text-white"
+                />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
                 <style>
                   {`
                       .quant-tech-scroll .infinite-scroll-wrapper {
@@ -466,7 +475,7 @@ export default function Home() {
                     isTilted={true}
                     tiltDirection="left"
                     autoplay={true}
-                    autoplaySpeed={0.8}
+                    autoplaySpeed={2}
                     autoplayDirection="down"
                     pauseOnHover={true}
                     negativeMargin="-5px"
@@ -481,9 +490,17 @@ export default function Home() {
               className="flex-1 flex flex-col items-center"
             >
               <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
-                Investment Banking
+                <DecryptedText
+                  text="Investment Banking"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={30}
+                  useOriginalCharsOnly={true}
+                  className="text-lg md:text-xl lg:text-2xl font-medium text-white"
+                />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-br from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
                 <style>
                   {`
                       .investment-banking-scroll .infinite-scroll-wrapper {
@@ -507,7 +524,7 @@ export default function Home() {
                     isTilted={true}
                     tiltDirection="right"
                     autoplay={true}
-                    autoplaySpeed={0.8}
+                    autoplaySpeed={2}
                     autoplayDirection="up"
                     pauseOnHover={true}
                     negativeMargin="-5px"
@@ -522,9 +539,17 @@ export default function Home() {
               className="flex-1 flex flex-col items-center"
             >
               <h3 className="text-lg md:text-xl lg:text-2xl font-medium text-white mb-6 text-center">
-                Asset Management & Consulting
+                <DecryptedText
+                  text="Asset Management & Consulting"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={30}
+                  useOriginalCharsOnly={true}
+                  className="text-lg md:text-xl lg:text-2xl font-medium text-white"
+                />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-b from-navy via-navy-light to-navy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
                 <style>
                   {`
                       .asset-mgmt-scroll .infinite-scroll-wrapper {
@@ -548,7 +573,7 @@ export default function Home() {
                     isTilted={true}
                     tiltDirection="left"
                     autoplay={true}
-                    autoplaySpeed={0.8}
+                    autoplaySpeed={2}
                     autoplayDirection="down"
                     pauseOnHover={true}
                     negativeMargin="-5px"
@@ -601,10 +626,18 @@ export default function Home() {
           >
             <motion.div
               variants={itemFadeIn}
-              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
+              className="p-8 md:p-10 lg:p-12 bg-darkNavy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
               <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
-                Value Investment
+                <DecryptedText
+                  text="Value Investment"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={40}
+                  useOriginalCharsOnly={true}
+                  className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                />
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 Learn about the basic of accounting, valuation, modeling, and
@@ -614,10 +647,18 @@ export default function Home() {
             </motion.div>
             <motion.div
               variants={itemFadeIn}
-              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
+              className="p-8 md:p-10 lg:p-12 bg-darkNavy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
               <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
-                Algorithmic Trading
+                <DecryptedText
+                  text="Algorithmic Trading"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={40}
+                  useOriginalCharsOnly={true}
+                  className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                />
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 Students will learn about quantitative analysis in python,
@@ -671,10 +712,18 @@ export default function Home() {
           >
             <motion.div
               variants={itemFadeIn}
-              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
+              className="p-8 md:p-10 lg:p-12 bg-pgi-light-blue border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
               <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
-                Paragon Value
+                <DecryptedText
+                  text="Paragon Value"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={50}
+                  useOriginalCharsOnly={true}
+                  className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                />
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 The Paragon Value Fund is a well-diversified, long-only fund
@@ -685,10 +734,18 @@ export default function Home() {
             </motion.div>
             <motion.div
               variants={itemFadeIn}
-              className="p-8 md:p-10 lg:p-12 bg-navy border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
+              className="p-8 md:p-10 lg:p-12 bg-pgi-light-blue border border-gray-700 rounded-lg hover:border-gray-600 transition-colors duration-300"
             >
               <h3 className="text-xl md:text-2xl lg:text-3xl font-medium mb-4 md:mb-6 text-white">
-                Paragon Systematic
+                <DecryptedText
+                  text="Paragon Systematic"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={50}
+                  useOriginalCharsOnly={true}
+                  className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                />
               </h3>
               <p className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed">
                 The Paragon Systematic Fund employs systematic algorithmic
@@ -739,7 +796,7 @@ export default function Home() {
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10 items-center"
+            className="flex flex-wrap justify-center gap-10 items-center"
           >
             {SPONSORS_COMPANIES.slice(0, 5).map((sponsor, index) => (
               <motion.div key={sponsor.name} variants={logoAnimation}>
@@ -787,7 +844,7 @@ export default function Home() {
           </motion.h2>
           <motion.div
             variants={staggerContainer}
-            className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-10 items-center"
+            className="flex flex-wrap justify-center gap-10 items-center"
           >
             {PARTNERS_COMPANIES.slice(0, 5).map((partner, index) => (
               <motion.div key={partner.name} variants={logoAnimation}>
