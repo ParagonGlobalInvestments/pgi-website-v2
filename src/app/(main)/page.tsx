@@ -190,20 +190,28 @@ const UniversityLogo = ({ university }: { university: University }) => (
 
 export default function Home() {
   return (
-    <div>
+    <div className="scrollbar-none">
       {/* Hero Section */}
       <motion.section
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        className="text-white min-h-[100vh] flex flex-col justify-start lg:justify-center items-center relative"
+        className="text-white min-h-[100vh] flex flex-col justify-start lg:justify-center items-center relative scrollbar-none"
       >
         <div className="container mx-auto px-4 text-center py-32">
           <motion.h1
             variants={fadeIn}
-            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-wide mb-6 lg:mb-8 leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-extralight tracking-wide text-gray-300/50 mb-6 lg:mb-8 leading-tight"
           >
-            Paragon Global Investments
+            <DecryptedText
+              text="Paragon Global Investments"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={40}
+              useOriginalCharsOnly={true}
+              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-normal text-white tracking-wide leading-tight"
+            />
           </motion.h1>
           <motion.div
             variants={fadeIn}
