@@ -6,6 +6,7 @@ import ScrollButton from '@/components/ui/ScrollButton';
 import { motion } from 'framer-motion';
 import CountUp from '@/components/reactbits/TextAnimations/CountUp/CountUp';
 import InfiniteScroll from '@/components/reactbits/Components/InfiniteScroll/InfiniteScroll';
+import AnimatedUniversityMasonry from '@/components/ui/AnimatedUniversityMasonry';
 import {
   INVESTMENT_BANKING_COMPANIES,
   QUANT_TECH_COMPANIES,
@@ -156,32 +157,6 @@ const SponsorLogo = ({ company }: { company: Company }) => (
           height: 'auto',
           maxWidth: '200px',
           maxHeight: '200px',
-        }}
-      />
-    </div>
-  </a>
-);
-
-// University Logo Component
-const UniversityLogo = ({ university }: { university: University }) => (
-  <a
-    href={university.website}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block group"
-  >
-    <div className=" flex items-center justify-center  transition-colors duration-300 h-40">
-      <Image
-        src={university.imagePath}
-        alt={university.displayName}
-        width={120}
-        height={120}
-        className="object-contain max-w-full max-h-full group-hover:scale-105 transition-transform duration-300"
-        style={{
-          width: 'auto',
-          height: 'auto',
-          maxWidth: '120px',
-          maxHeight: '120px',
         }}
       />
     </div>
@@ -392,15 +367,19 @@ export default function Home() {
               className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
-          <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
-          >
-            {UNIVERSITIES.map(university => (
-              <motion.div key={university.name} variants={logoAnimation}>
-                <UniversityLogo university={university} />
-              </motion.div>
-            ))}
+
+          {/* Masonry Layout for Universities */}
+          <motion.div variants={fadeIn} className="max-w-6xl mx-auto">
+            <AnimatedUniversityMasonry
+              universities={UNIVERSITIES}
+              animateFrom="bottom"
+              stagger={0.1}
+              scaleOnHover={true}
+              hoverScale={1.05}
+              blurToFocus={true}
+              colorShiftOnHover={false}
+              threshold={0.3}
+            />
           </motion.div>
 
           {/* Chapters Section CTA */}
