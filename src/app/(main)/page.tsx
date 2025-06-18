@@ -433,7 +433,7 @@ export default function Home() {
                   sequential={true}
                   revealDirection="start"
                   animateOn="view"
-                  speed={30}
+                  speed={20}
                   useOriginalCharsOnly={true}
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
@@ -446,7 +446,7 @@ export default function Home() {
                       }
                       @media (min-width: 1024px) {
                         .quant-tech-scroll .infinite-scroll-wrapper {
-                          max-height: 600px;
+                          max-height: 400px;
                         }
                       }
                     `}
@@ -459,7 +459,7 @@ export default function Home() {
                       content: <CompanyLogo company={company} />,
                     }))}
                     itemMinHeight={80}
-                    isTilted={true}
+                    isTilted={false}
                     tiltDirection="left"
                     autoplay={true}
                     autoplaySpeed={2}
@@ -482,7 +482,7 @@ export default function Home() {
                   sequential={true}
                   revealDirection="start"
                   animateOn="view"
-                  speed={30}
+                  speed={20}
                   useOriginalCharsOnly={true}
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
@@ -495,7 +495,7 @@ export default function Home() {
                       }
                       @media (min-width: 1024px) {
                         .investment-banking-scroll .infinite-scroll-wrapper {
-                          max-height: 600px;
+                          max-height: 400px;
                         }
                       }
                     `}
@@ -508,11 +508,11 @@ export default function Home() {
                       content: <CompanyLogo company={company} />,
                     }))}
                     itemMinHeight={80}
-                    isTilted={true}
+                    isTilted={false}
                     tiltDirection="right"
                     autoplay={true}
                     autoplaySpeed={2}
-                    autoplayDirection="up"
+                    autoplayDirection="down"
                     pauseOnHover={true}
                     negativeMargin="-5px"
                   />
@@ -531,7 +531,7 @@ export default function Home() {
                   sequential={true}
                   revealDirection="start"
                   animateOn="view"
-                  speed={30}
+                  speed={20}
                   useOriginalCharsOnly={true}
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
@@ -544,7 +544,7 @@ export default function Home() {
                       }
                       @media (min-width: 1024px) {
                         .asset-mgmt-scroll .infinite-scroll-wrapper {
-                          max-height: 600px;
+                          max-height: 400px;
                         }
                       }
                     `}
@@ -557,7 +557,7 @@ export default function Home() {
                       content: <CompanyLogo company={company} />,
                     }))}
                     itemMinHeight={80}
-                    isTilted={true}
+                    isTilted={false}
                     tiltDirection="left"
                     autoplay={true}
                     autoplaySpeed={2}
