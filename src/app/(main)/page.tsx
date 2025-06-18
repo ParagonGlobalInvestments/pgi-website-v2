@@ -201,7 +201,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center py-32">
           <motion.h1
             variants={fadeIn}
-            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-extralight tracking-wide text-gray-300/50 mb-6 lg:mb-8 leading-tight"
+            className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-extralight tracking-wide text-gray-300/50 mb-2 lg:mb-4 leading-tight"
           >
             <DecryptedText
               text="Paragon Global Investments"
@@ -210,7 +210,7 @@ export default function Home() {
               animateOn="view"
               speed={40}
               useOriginalCharsOnly={true}
-              className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-normal text-white tracking-wide leading-tight"
+              className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-normal text-white tracking-wide leading-tight"
             />
           </motion.h1>
           <motion.div
@@ -233,7 +233,7 @@ export default function Home() {
             <motion.div variants={buttonFadeIn}>
               <Link href="/education">
                 <motion.button
-                  className="bg-gray-200  text-pgi-dark-blue md:px-8 lg:px-10 md:py-3 lg:py-4 py-2 px-4 rounded-lg font-semibold text-sm lg:text-base tracking-wide hover:text-white"
+                  className="bg-pgi-light-blue text-white md:px-8 lg:px-10 md:py-2 lg:py-3 py-2 px-4 rounded-lg font-semibold text-sm lg:text-sm tracking-wide hover:text-white"
                   whileHover={secondaryButtonHover}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -244,7 +244,7 @@ export default function Home() {
             <motion.div variants={buttonFadeIn}>
               <Link href="/apply">
                 <motion.button
-                  className="bg-pgi-light-blue text-white md:px-8 lg:px-10 md:py-3 lg:py-4 py-2 px-4 rounded-lg font-semibold text-sm lg:text-base tracking-wide"
+                  className="bg-pgi-light-blue text-white md:px-8 lg:px-10 md:py-2 lg:py-3 py-2 px-4 rounded-lg font-semibold text-sm lg:text-sm tracking-wide"
                   whileHover={buttonHover}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -257,7 +257,7 @@ export default function Home() {
         <motion.div
           variants={fadeIn}
           transition={{ delay: 0.6 }}
-          className="absolute bottom-[25vh] text-center"
+          className="absolute bottom-[15vh] text-center"
         >
           <ScrollButton targetId="about-section">
             <span className="mb-3 md:mb-4 font-light text-sm md:text-base">
@@ -284,7 +284,7 @@ export default function Home() {
       {/* About Section */}
       <motion.section
         id="about-section"
-        className="py-16 md:py-24 lg:py-32 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4 bg-navy"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -297,14 +297,14 @@ export default function Home() {
           >
             <ShinyText
               text="PGI At a Glance"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <div className="max-w-5xl mx-auto">
             <motion.p
               variants={fadeIn}
               transition={{ delay: 0.2 }}
-              className="text-base md:text-lg lg:text-xl xl:text-2xl mb-12 md:mb-16 lg:mb-20 text-gray-300 text-center font-light leading-relaxed"
+              className="text-base md:text-lg lg:text-lg xl:text-lg mb-12 md:mb-16 lg:mb-20 text-gray-300 text-center font-light leading-relaxed"
             >
               Paragon Global Investments (PGI) is a student-run intercollegiate
               investment fund with 8 chapters at top universities in the United
@@ -389,7 +389,7 @@ export default function Home() {
           >
             <ShinyText
               text="Our Chapters"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <motion.div
@@ -424,7 +424,7 @@ export default function Home() {
 
       {/* Our Placements Section */}
       <motion.section
-        className="bg-pgi-dark-blue py-16 md:py-24 lg:py-32 px-4 lg:min-h-screen"
+        className="bg-navy py-16 md:py-24 lg:py-32 px-4 lg:min-h-screen"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -437,7 +437,7 @@ export default function Home() {
           >
             <ShinyText
               text="Our Placements"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
 
@@ -612,7 +612,7 @@ export default function Home() {
 
       {/* Education Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 bg-navy px-4"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -625,7 +625,7 @@ export default function Home() {
           >
             <ShinyText
               text="Our Education Program"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <motion.div
@@ -698,7 +698,7 @@ export default function Home() {
 
       {/* Investment Funds Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4 bg-navy"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -711,7 +711,7 @@ export default function Home() {
           >
             <ShinyText
               text="Investment Funds"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <motion.div
@@ -786,7 +786,7 @@ export default function Home() {
 
       {/* Sponsors Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 bg-navy px-4"
+        className="py-16 md:py-24 lg:py-32 px-4"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -798,8 +798,8 @@ export default function Home() {
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             <ShinyText
-              text="Sponsors"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              text="Select Sponsors"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <motion.div
@@ -834,7 +834,7 @@ export default function Home() {
 
       {/* Partners Section */}
       <motion.section
-        className="py-16 md:py-24 lg:py-32 px-4"
+        className="py-16 md:py-24 lg:py-32 px-4 bg-navy"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
@@ -846,8 +846,8 @@ export default function Home() {
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
             <ShinyText
-              text="Partners"
-              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              text="Select Partners"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
           <motion.div
