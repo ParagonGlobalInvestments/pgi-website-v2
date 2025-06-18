@@ -696,13 +696,6 @@ export const SPONSORS_COMPANIES: Company[] = [
     imagePath: '/images/companies/CitSec.png',
   },
   {
-    name: 'jane-street',
-    displayName: 'Jane Street',
-    website: 'https://www.janestreet.com/',
-    category: 'quant-tech',
-    imagePath: '/images/companies/JaneStreet.png',
-  },
-  {
     name: 'de-shaw',
     displayName: 'D.E. Shaw & Co.',
     website: 'https://www.deshaw.com/',
@@ -716,6 +709,14 @@ export const SPONSORS_COMPANIES: Company[] = [
     category: 'quant-tech',
     imagePath: '/images/companies/imc.png',
   },
+  {
+    name: 'jane-street',
+    displayName: 'Jane Street',
+    website: 'https://www.janestreet.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/JaneStreet.png',
+  },
+
   {
     name: 'drw',
     displayName: 'DRW',
@@ -763,18 +764,26 @@ export const PARTNERS_COMPANIES: Company[] = [
     imagePath: '/images/companies/databento.png',
   },
   {
-    name: 'cloudquant',
-    displayName: 'CloudQuant',
-    website: 'https://www.cloudquant.com/',
-    category: 'quant-tech',
-    imagePath: '/images/companies/CloudQuant.webp',
+    name: 'elevate',
+    displayName: 'Elevate Career Network',
+    website: 'https://www.elevatecareernetwork.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Elevate.jpg',
   },
+
   {
     name: 'visible-alpha',
     displayName: 'Visible Alpha',
     website: 'https://visiblealpha.com/',
     category: 'quant-tech',
     imagePath: '/images/companies/visiblealpha.png',
+  },
+  {
+    name: 'wso',
+    displayName: 'Wall Street Oasis',
+    website: 'https://www.wallstreetoasis.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/WSO.png',
   },
   {
     name: 'bamsec',
@@ -790,26 +799,20 @@ export const PARTNERS_COMPANIES: Company[] = [
     category: 'asset-mgmt-consulting',
     imagePath: '/images/companies/Tegus.png',
   },
-  {
-    name: 'elevate',
-    displayName: 'Elevate Career Network',
-    website: 'https://www.elevatecareernetwork.com/',
-    category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/Elevate.jpg',
-  },
-  {
-    name: 'wso',
-    displayName: 'Wall Street Oasis',
-    website: 'https://www.wallstreetoasis.com/',
-    category: 'asset-mgmt-consulting',
-    imagePath: '/images/companies/WSO.png',
-  },
+
   {
     name: 'edmund-sec',
     displayName: 'Edmund Securities',
     website: 'https://www.edmundsec.com/',
     category: 'investment-banking',
     imagePath: '/images/companies/EdmundSEC.png',
+  },
+  {
+    name: 'cloudquant',
+    displayName: 'CloudQuant',
+    website: 'https://www.cloudquant.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/CloudQuant.webp',
   },
   {
     name: 'biws',

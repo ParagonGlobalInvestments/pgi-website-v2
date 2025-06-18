@@ -120,18 +120,8 @@ const UniversityMasonry: React.FC<UniversityMasonryProps> = ({
   const items: UniversityMasonryItem[] = useMemo(
     () =>
       universities.map(university => {
-        // Use regular .png for brown, columbia, and princeton; banner.png for others
-        const useRegularImage = [
-          'brown',
-          'upenn',
-          'princeton',
-          'uchicago',
-          'cornell',
-          'yale',
-        ].includes(university.name);
-        const imagePath = useRegularImage
-          ? `/images/universities/${university.name}.png`
-          : `/images/universities/${university.name}-banner.png`;
+        // Always use banner images for consistency
+        const imagePath = `/images/universities/${university.name}-banner.png`;
 
         return {
           ...university,
@@ -190,7 +180,8 @@ const UniversityMasonry: React.FC<UniversityMasonryProps> = ({
       const col = colHeights.indexOf(Math.min(...colHeights));
       const x = (columnWidth + gap) * col;
       const itemWidth = columnWidth - gap;
-      const height = 160; // Fixed height for university banners
+      // Responsive height: smaller on mobile for better proportions
+      const height = columns === 2 ? 120 : 140; // Mobile: 120px, Desktop: 140px
       const y = colHeights[col];
 
       colHeights[col] += height + gap;
@@ -306,14 +297,17 @@ const UniversityMasonry: React.FC<UniversityMasonryProps> = ({
           onMouseEnter={e => handleMouseEnter(item.id, e.currentTarget)}
           onMouseLeave={e => handleMouseLeave(item.id, e.currentTarget)}
         >
-          <div className="relative w-full h-full overflow-hidden ">
+          <div className="relative w-full h-full overflow-hidden rounded-lg bg-[#ced4da] border-2 border-darkNavy flex items-center justify-center ">
             <Image
               src={item.bannerPath}
               alt={item.displayName}
-              fill
-              className="object-contain"
+              width={200}
+              height={80}
+              className="object-contain max-w-full max-h-full text-pgi-light-blue"
               style={{
                 objectPosition: 'center',
+                maxWidth: '90%',
+                maxHeight: '100%',
               }}
             />
           </div>
