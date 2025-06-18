@@ -725,7 +725,7 @@ export default function Home() {
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-2xl bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-xl">
                 <style>
                   {`
                       .quant-tech-scroll .infinite-scroll-wrapper {
@@ -774,7 +774,7 @@ export default function Home() {
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-br from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-2xl bg-gradient-to-br from-darkNavy via-pgi-dark-blue to-darkNavy shadow-xl">
                 <style>
                   {`
                       .investment-banking-scroll .infinite-scroll-wrapper {
@@ -823,7 +823,7 @@ export default function Home() {
                   className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                 />
               </h3>
-              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-lg bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-lg">
+              <div className="w-full max-w-xs lg:max-w-sm overflow-hidden border border-gray-700 rounded-2xl bg-gradient-to-bl from-darkNavy via-pgi-dark-blue to-darkNavy shadow-xl">
                 <style>
                   {`
                       .asset-mgmt-scroll .infinite-scroll-wrapper {
