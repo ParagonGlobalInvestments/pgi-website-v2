@@ -123,9 +123,11 @@ const UniversityMasonry: React.FC<UniversityMasonryProps> = ({
         // Use regular .png for brown, columbia, and princeton; banner.png for others
         const useRegularImage = [
           'brown',
-          'columbia',
+          'upenn',
           'princeton',
-          //   'uchicago',
+          'uchicago',
+          'cornell',
+          'yale',
         ].includes(university.name);
         const imagePath = useRegularImage
           ? `/images/universities/${university.name}.png`
