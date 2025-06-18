@@ -163,8 +163,7 @@ const Footer = () => {
               className="text-gray-300 text-xs mb-4"
               variants={logoAnimation}
             >
-              Paragon Global Investments is a registered 501(c)(3) nonprofit.{' '}
-              <br />
+              PGI is a registered 501(c)(3) nonprofit. <br />
               Previously known as Paragon National Group (PNG).
             </motion.p>
           </motion.div>
