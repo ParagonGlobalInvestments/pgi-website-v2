@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 // import Link from "next/link";
 import { FaHandshake, FaAward } from 'react-icons/fa';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import {
   SPONSORS_COMPANIES,
   PARTNERS_COMPANIES,
@@ -30,6 +32,17 @@ const staggerContainer = {
     transition: {
       staggerChildren: 0.1,
       delayChildren: 0.3,
+    },
+  },
+};
+
+const itemFadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
     },
   },
 };
@@ -89,12 +102,15 @@ export default function Sponsors() {
     <div className="bg-navy text-white min-h-screen">
       <div className="container mx-auto py-24 px-4">
         <motion.h1
-          className="text-4xl font-bold mb-8 text-center"
+          className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
         >
-          Sponsors and Partners
+          <ShinyText
+            text="Sponsors and Partners"
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+          />
         </motion.h1>
 
         <motion.div
@@ -103,13 +119,16 @@ export default function Sponsors() {
           animate="visible"
           variants={fadeIn}
         >
-          <p className="text-lg text-center text-gray-300">
+          <motion.p
+            className="text-base md:text-lg lg:text-xl text-center text-gray-300 font-light leading-relaxed"
+            variants={itemFadeIn}
+          >
             Paragon Global Investments is partnered with top firms and
             organizations to provide our students the best access to the top
             firms in finance, tech, and quant across the United States. Sponsors
             contribute to Paragon's investment fund, operations, and the growth
             of our members.
-          </p>
+          </motion.p>
         </motion.div>
 
         {/* Sponsors Section */}
@@ -124,7 +143,17 @@ export default function Sponsors() {
             variants={fadeIn}
           >
             <FaAward className="text-secondary text-2xl mr-3" />
-            <h2 className="text-3xl font-bold text-secondary">Sponsors</h2>
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary">
+              <DecryptedText
+                text="Sponsors"
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={40}
+                useOriginalCharsOnly={true}
+                className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary"
+              />
+            </h2>
           </motion.div>
 
           <motion.div
@@ -176,7 +205,17 @@ export default function Sponsors() {
             variants={fadeIn}
           >
             <FaHandshake className="text-secondary text-2xl mr-3" />
-            <h2 className="text-3xl font-bold text-secondary">Partners</h2>
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary">
+              <DecryptedText
+                text="Partners"
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={40}
+                useOriginalCharsOnly={true}
+                className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary"
+              />
+            </h2>
           </motion.div>
 
           <div className="max-w-6xl mx-auto">
@@ -208,7 +247,7 @@ export default function Sponsors() {
                     />
                   </a>
                   <div>
-                    <h3 className="text-xl font-bold mb-4 text-secondary">
+                    <h3 className="text-lg md:text-xl font-semibold mb-4 text-secondary">
                       <a
                         href={partner.website}
                         target="_blank"
@@ -218,7 +257,7 @@ export default function Sponsors() {
                         {partner.displayName}
                       </a>
                     </h3>
-                    <p className="text-gray-300">
+                    <p className="text-gray-300 text-sm md:text-base leading-relaxed">
                       {partnerDescriptions[partner.name] ||
                         'Partnership details coming soon.'}
                     </p>
