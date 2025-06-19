@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { FaLinkedin } from 'react-icons/fa';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
 // Animation variants
 const fadeIn = {
@@ -147,19 +149,22 @@ export default function OfficersPage() {
   return (
     <div className="bg-navy text-white min-h-screen">
       {/* Officers Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 md:py-24 lg:py-32 px-4">
         <div className="container mx-auto">
           <motion.h1
-            className="text-4xl font-bold mb-16 text-center"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
             initial="hidden"
             animate="visible"
             variants={fadeIn}
           >
-            Officers
+            <ShinyText
+              text="Officers"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
           </motion.h1>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16 md:mb-20 lg:mb-24"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
@@ -167,22 +172,26 @@ export default function OfficersPage() {
             {officers.map((officer, index) => (
               <motion.div
                 key={index}
-                className="bg-navy-light p-6 rounded-lg border border-gray-700 hover:border-secondary transition-colors"
+                className="bg-darkNavy p-4 md:p-6 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
                 variants={cardAnimation}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <h2 className="text-2xl font-semibold mb-1">{officer.name}</h2>
-                <p className="text-secondary font-medium mb-1">
+                <h2 className="text-lg md:text-xl lg:text-2xl font-medium mb-2 text-white">
+                  {officer.name}
+                </h2>
+                <p className="text-pgi-light-blue font-medium mb-2 text-sm md:text-base">
                   {officer.title}
                 </p>
-                <p className="text-gray-400 mb-4">{officer.university}</p>
+                <p className="text-gray-300 mb-4 text-sm md:text-base font-light">
+                  {officer.university}
+                </p>
                 <a
                   href={officer.linkedin}
-                  className="inline-flex items-center text-white hover:text-secondary transition-colors"
+                  className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <FaLinkedin className="text-xl mr-2" />
+                  <FaLinkedin className="text-lg md:text-xl mr-2" />
                   <span>LinkedIn</span>
                 </a>
               </motion.div>
@@ -191,17 +200,25 @@ export default function OfficersPage() {
 
           {/* Alumni Board Section */}
           <motion.h2
-            className="text-3xl font-bold mb-10 text-center"
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
             initial="hidden"
             animate="visible"
             variants={fadeIn}
             transition={{ delay: 0.5 }}
           >
-            Alumni Board
+            <DecryptedText
+              text="Alumni Board"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
@@ -210,19 +227,23 @@ export default function OfficersPage() {
             {alumniBoard.map((alumni, index) => (
               <motion.div
                 key={index}
-                className="bg-navy-light p-5 rounded-lg border border-gray-700 hover:border-secondary transition-colors"
+                className="bg-darkNavy p-4 md:p-6 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
                 variants={cardAnimation}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <h3 className="text-xl font-semibold mb-1">{alumni.name}</h3>
-                <p className="text-gray-400 mb-4">{alumni.company}</p>
+                <h3 className="text-lg md:text-xl font-medium mb-2 text-white">
+                  {alumni.name}
+                </h3>
+                <p className="text-gray-300 mb-4 text-sm md:text-base font-light">
+                  {alumni.company}
+                </p>
                 <a
                   href={alumni.linkedin}
-                  className="inline-flex items-center text-white hover:text-secondary transition-colors"
+                  className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <FaLinkedin className="text-xl mr-2" />
+                  <FaLinkedin className="text-lg md:text-xl mr-2" />
                   <span>LinkedIn</span>
                 </a>
               </motion.div>
