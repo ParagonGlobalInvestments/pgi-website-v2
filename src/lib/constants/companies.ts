@@ -86,7 +86,7 @@ export const INVESTMENT_BANKING_COMPANIES: Company[] = [
     displayName: 'PJT Partners',
     website: 'https://pjtpartners.com/',
     category: 'investment-banking',
-    imagePath: '/images/companies/PJT.png',
+    imagePath: '/images/companies/pjt.png',
   },
   {
     name: 'pwp',
