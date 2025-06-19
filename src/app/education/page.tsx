@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { TrendingUp, Terminal } from 'lucide-react';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
-// Animation variants
+// Animation variants from home page
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -25,6 +26,37 @@ const staggerContainer = {
       staggerChildren: 0.1,
       delayChildren: 0.3,
     },
+  },
+};
+
+const itemFadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+    },
+  },
+};
+
+const buttonHover = {
+  scale: 1.05,
+  backgroundColor: '#1f4287',
+  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+  transition: {
+    duration: 0.2,
+    ease: 'easeInOut',
+  },
+};
+
+const cardHover = {
+  scale: 1.02,
+  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+  borderColor: '#4a90e2',
+  transition: {
+    duration: 0.3,
+    ease: 'easeInOut',
   },
 };
 
@@ -70,171 +102,251 @@ const curricularItems = [
 export default function Education() {
   return (
     <div className="bg-navy text-white min-h-screen">
-      <div className="container mx-auto py-24 px-4">
-        {/* Curriculum Section */}
-        <motion.div
-          className="max-w-5xl mx-auto mb-8 border-gray-800"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-        >
+      {/* Main Content Section */}
+      <motion.section
+        className="py-16 md:py-24 lg:py-32 px-4"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <div className="container mx-auto">
           <motion.h1
-            className="text-4xl font-bold mb-8 text-center"
-            initial="hidden"
-            animate="visible"
             variants={fadeIn}
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
           >
-            Education Curriculum
+            <ShinyText
+              text="Education Curriculum"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+            />
           </motion.h1>
 
-          <motion.p
-            className="text-center text-sm lg:text-base text-gray-300 mb-8"
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
+          <motion.div
+            className="max-w-5xl mx-auto text-center"
+            variants={staggerContainer}
           >
-            Our program equips students with the skills to excel in value
-            investing and algorithmic trading.
-          </motion.p>
+            <motion.p
+              className="text-base md:text-lg lg:text-xl mb-12 md:mb-16 text-gray-300 font-light leading-relaxed"
+              variants={itemFadeIn}
+            >
+              Our comprehensive program equips students with the analytical
+              skills and practical knowledge to excel in value investing and
+              algorithmic trading. Through rigorous coursework and hands-on
+              experience, students develop the expertise needed for careers in
+              quantitative finance.
+            </motion.p>
+          </motion.div>
 
           {/* Curriculum Table */}
           <motion.div className="overflow-x-auto mb-16" variants={fadeIn}>
-            <table className="min-w-full border-2 border-gray-700 bg-navy-light rounded-lg overflow-hidden">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="px-6 py-4 text-left text-lg font-semibold text-secondary">
-                    Topic
-                  </th>
-                  <th className="px-6 py-4 text-left text-lg font-semibold text-secondary">
-                    Materials
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="text-sm md:text-base">
-                {curricularItems.map((item, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-700 hover:bg-navy transition-colors"
-                  >
-                    <td className="px-6 py-4 text-white">{item.topic}</td>
-                    <td className="px-6 py-4">
-                      {item.isExternal ? (
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-secondary whitespace-nowrap hover:text-white hover:scale-105 transition-all duration-100 bg-pgi-light-blue px-4 py-2 rounded-lg inline-block"
-                        >
-                          {item.week}
-                        </a>
-                      ) : (
-                        <Link
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-secondary whitespace-nowrap hover:text-white hover:scale-105 transition-all duration-100 bg-pgi-light-blue px-4 py-2 rounded-lg inline-block"
-                        >
-                          {item.week}
-                        </Link>
-                      )}
-                    </td>
+            <div className="bg-darkNavy border border-gray-700 rounded-xl max-w-4xl mx-auto overflow-hidden shadow-xl">
+              <table className="min-w-full ">
+                <thead>
+                  <tr className="border-b border-gray-700 bg-pgi-light-blue">
+                    <th className="px-6 py-4 text-left text-lg font-semibold text-white">
+                      Topic
+                    </th>
+                    <th className="px-6 py-4 text-left text-lg font-semibold text-white">
+                      Materials
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="text-sm md:text-base">
+                  {curricularItems.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-700 hover:bg-pgi-dark-blue transition-colors duration-300"
+                    >
+                      <td className="px-6 py-4 text-white">{item.topic}</td>
+                      <td className="px-6 py-4">
+                        {item.isExternal ? (
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-secondary whitespace-nowrap hover:text-white hover:scale-105 transition-all duration-100 bg-pgi-light-blue px-4 py-2 rounded-lg inline-block"
+                          >
+                            {item.week}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-secondary whitespace-nowrap hover:text-white hover:scale-105 transition-all duration-100 bg-pgi-light-blue px-4 py-2 rounded-lg inline-block"
+                          >
+                            {item.week}
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </motion.div>
 
-          {/* Value Investing Section */}
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16"
-            variants={staggerContainer}
-          >
-            <motion.div
-              className="bg-navy-light p-8 rounded-lg border border-gray-700"
+          {/* Education Tracks Section */}
+          <motion.div className="mt-16 md:mt-24 lg:mt-32" variants={fadeIn}>
+            <motion.h2
               variants={fadeIn}
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
             >
-              <div className="flex items-center mb-6">
-                <div className="bg-pgi-light-blue p-3 rounded-lg mr-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    className="text-white text-xl"
-                  >
-                    <path d="M14.828 14.828 21 21" />
-                    <path d="M21 16v5h-5" />
-                    <path d="m21 3-9 9-4-4-6 6" />
-                    <path d="M21 8V3h-5" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-secondary">
-                  Value Investing
-                </h3>
-              </div>
+              <ShinyText
+                text="Education Tracks"
+                className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+              />
+            </motion.h2>
 
-              <p className="text-gray-300 mb-4">
-                The fundamental component of the curriculum will help students
-                gain a basic understanding behind the theory and strategies of
-                value investing. Students will gain a fundamental understanding
-                of accounting, competitive analysis, and valuation.
-              </p>
+            {/* Education Tracks Grid */}
+            <motion.div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto"
+              variants={staggerContainer}
+            >
+              {/* Value Investing Track */}
+              <motion.div
+                className="p-6 md:p-8 lg:p-10 bg-darkNavy border border-gray-700 rounded-xl shadow-xl transition-all duration-300 hover:border-pgi-light-blue hover:shadow-2xl"
+                variants={itemFadeIn}
+                whileHover={cardHover}
+              >
+                <motion.h3
+                  className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white"
+                  variants={itemFadeIn}
+                >
+                  <DecryptedText
+                    text="Value Investing"
+                    sequential={true}
+                    revealDirection="start"
+                    animateOn="view"
+                    speed={40}
+                    useOriginalCharsOnly={true}
+                    className="text-xl md:text-2xl lg:text-3xl font-semibold text-white"
+                  />
+                </motion.h3>
 
-              <p className="text-gray-300 mb-4">
-                General modeling, including operating models and discounted cash
-                flows models, will be explored as well as general investment
-                theory related to these models.
-              </p>
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6"
+                  variants={itemFadeIn}
+                >
+                  The fundamental component of the curriculum helps students
+                  gain a comprehensive understanding of value investing theory
+                  and strategies. Students develop expertise in accounting
+                  principles, competitive analysis, and sophisticated valuation
+                  methodologies.
+                </motion.p>
 
-              <p className="text-gray-300">
-                By the end of the curriculum, students will be able to
-                accurately value companies and understand complex business
-                models.
-              </p>
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6"
+                  variants={itemFadeIn}
+                >
+                  Advanced modeling techniques, including operating models and
+                  discounted cash flow analysis, are explored alongside
+                  investment theory and portfolio construction principles that
+                  drive institutional decision-making.
+                </motion.p>
+
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-8"
+                  variants={itemFadeIn}
+                >
+                  Upon completion, students possess the analytical frameworks to
+                  accurately value complex business models and identify
+                  mispriced securities across global markets.
+                </motion.p>
+
+                <motion.div
+                  className="flex justify-center"
+                  variants={itemFadeIn}
+                >
+                  <div className="bg-pgi-light-blue/50 border border-pgi-light-blue/30 px-4 py-2 rounded-lg">
+                    <span className="text-gray-400 text-sm md:text-base font-medium">
+                      Fundamental Analysis
+                    </span>
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              {/* Algorithmic Trading Track */}
+              <motion.div
+                className="p-6 md:p-8 lg:p-10 bg-darkNavy border border-gray-700 rounded-xl shadow-xl transition-all duration-300 hover:border-pgi-light-blue hover:shadow-2xl"
+                variants={itemFadeIn}
+                whileHover={cardHover}
+              >
+                <motion.h3
+                  className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 md:mb-6 text-white"
+                  variants={itemFadeIn}
+                >
+                  <DecryptedText
+                    text="Algorithmic Trading"
+                    sequential={true}
+                    revealDirection="start"
+                    animateOn="view"
+                    speed={40}
+                    useOriginalCharsOnly={true}
+                    className="text-xl md:text-2xl lg:text-3xl font-semibold text-white"
+                  />
+                </motion.h3>
+
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6"
+                  variants={itemFadeIn}
+                >
+                  The quantitative curriculum provides comprehensive training in
+                  systematic trading strategy development. Students master
+                  statistical analysis, machine learning applications, and
+                  advanced Python programming for financial markets.
+                </motion.p>
+
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-6"
+                  variants={itemFadeIn}
+                >
+                  Advanced topics include modern portfolio theory, factor
+                  modeling, and risk management systems. Students learn to
+                  construct systematic strategies that optimize risk-adjusted
+                  returns through quantitative analysis.
+                </motion.p>
+
+                <motion.p
+                  className="text-gray-300 text-sm md:text-base lg:text-lg leading-relaxed mb-8"
+                  variants={itemFadeIn}
+                >
+                  Graduates possess the technical expertise to design, backtest,
+                  and implement institutional-grade algorithmic trading systems
+                  using cutting-edge quantitative methodologies.
+                </motion.p>
+
+                <motion.div
+                  className="flex justify-center"
+                  variants={itemFadeIn}
+                >
+                  <div className="bg-pgi-light-blue/50 border border-pgi-light-blue/30 px-4 py-2 rounded-lg">
+                    <span className="text-gray-400 text-sm md:text-base font-medium">
+                      Quantitative Analysis
+                    </span>
+                  </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
 
-            {/* Algorithmic Trading Section */}
+            {/* Call to Action */}
             <motion.div
-              className="bg-navy-light p-8 rounded-lg border border-gray-700"
               variants={fadeIn}
+              transition={{ delay: 0.8 }}
+              className="text-center mt-12 md:mt-16 lg:mt-20"
             >
-              <div className="flex items-center mb-6">
-                <div className="bg-pgi-light-blue p-3 rounded-lg mr-4">
-                  <Terminal className="text-white text-xl" />
-                </div>
-                <h3 className="text-2xl font-bold text-secondary">
-                  Algorithmic Trading
-                </h3>
-              </div>
-
-              <p className="text-gray-300 mb-4">
-                The quantitative component of the curriculum aims to educate
-                students on how to research, design, test, and implement
-                systematic algorithmic trading strategies. Students will first
-                learn about statistical analysis and introductory machine
-                learning with Python.
-              </p>
-
-              <p className="text-gray-300 mb-4">
-                They will also learn about modern portfolio theory and linear
-                factor pricing models, and how to analyze assets and portfolio
-                to optimize risk-adjusted returns.
-              </p>
-
-              <p className="text-gray-300">
-                By the end of the curriculum, students will have a toolset to
-                quantitatively analyze companies and design systematic trading
-                strategies.
-              </p>
+              <Link href="/apply">
+                <motion.button
+                  className="bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide"
+                  whileHover={buttonHover}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Start Your Education Journey
+                </motion.button>
+              </Link>
             </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.section>
     </div>
   );
 }
