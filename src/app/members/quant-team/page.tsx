@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FaLinkedin } from 'react-icons/fa';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
 // Animation variants
 const fadeIn = {
@@ -24,6 +26,7 @@ const staggerContainer = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
+      delayChildren: 0.3,
     },
   },
 };
@@ -143,7 +146,7 @@ export default function QuantTeamPage() {
   return (
     <div className="bg-navy text-white min-h-screen">
       {/* Hero Section */}
-      <section className="py-36 px-4">
+      <section className="py-16 md:py-24 lg:py-32 px-4">
         <div className="container mx-auto">
           <motion.div
             className="text-center"
@@ -151,8 +154,13 @@ export default function QuantTeamPage() {
             animate="visible"
             variants={fadeIn}
           >
-            <h1 className="text-4xl font-bold mb-6">Quant Team</h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
+              <ShinyText
+                text="Quant Team"
+                className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              />
+            </h1>
+            <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
               Our Quantitative Team focuses on algorithmic trading strategies
               and data-driven investment approaches. The team is composed of our
               Quantitative Research Committee and Analysts.
@@ -162,19 +170,27 @@ export default function QuantTeamPage() {
       </section>
 
       {/* Research Committee Section */}
-      <section className="py-16 px-4 bg-navy-light">
+      <section className="py-16 md:py-24 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto">
           <motion.h2
-            className="text-3xl font-bold mb-12 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
           >
-            Quantitative Research Committee
+            <DecryptedText
+              text="Quantitative Research Committee"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
@@ -183,19 +199,26 @@ export default function QuantTeamPage() {
               <motion.div
                 key={index}
                 variants={memberItem}
-                className="bg-navy p-6 rounded-lg border border-gray-700 hover:border-secondary transition-all"
+                className="bg-darkNavy p-4 md:p-6 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
-                <p className="text-gray-400 mb-3">{member.university}</p>
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-secondary hover:text-white transition-colors flex items-center gap-2"
-                >
-                  <FaLinkedin />
-                  <span>LinkedIn</span>
-                </a>
+                <h3 className="text-lg md:text-xl font-medium mb-2 text-white">
+                  {member.name}
+                </h3>
+                <p className="text-gray-300 mb-4 text-sm md:text-base font-light">
+                  {member.university}
+                </p>
+                {member.linkedin && (
+                  <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
+                  >
+                    <FaLinkedin className="text-lg md:text-xl mr-2" />
+                    <span>LinkedIn</span>
+                  </a>
+                )}
               </motion.div>
             ))}
           </motion.div>
@@ -203,19 +226,27 @@ export default function QuantTeamPage() {
       </section>
 
       {/* Analysts Section */}
-      <section className="py-16 px-4">
+      <section className="py-16 md:py-24 px-4">
         <div className="container mx-auto">
           <motion.h2
-            className="text-3xl font-bold mb-12 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
           >
-            Analysts
+            <DecryptedText
+              text="Analysts"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
@@ -224,10 +255,15 @@ export default function QuantTeamPage() {
               <motion.div
                 key={index}
                 variants={memberItem}
-                className="bg-navy-light p-4 rounded-lg border border-gray-700"
+                className="bg-darkNavy p-4 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
               >
-                <h3 className="text-lg font-semibold">{analyst.name}</h3>
-                <p className="text-gray-400">{analyst.university}</p>
+                <h3 className="text-base md:text-lg font-medium text-white">
+                  {analyst.name}
+                </h3>
+                <p className="text-gray-300 text-sm md:text-base font-light">
+                  {analyst.university}
+                </p>
               </motion.div>
             ))}
           </motion.div>
