@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import {
   INVESTMENT_BANKING_COMPANIES,
   QUANT_TECH_COMPANIES,
@@ -29,7 +31,7 @@ const staggerContainer = {
     opacity: 1,
     transition: {
       staggerChildren: 0.08,
-      delayChildren: 0.2,
+      delayChildren: 0.3,
     },
   },
 };
@@ -50,6 +52,8 @@ const companyItem = {
 const hoverEffect = {
   scale: 1.05,
   y: -5,
+  backgroundColor: '#1f4287',
+  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
   transition: {
     duration: 0.2,
     ease: 'easeInOut',
@@ -62,7 +66,7 @@ const CompanyCard = ({ company }: { company: Company }) => (
     variants={companyItem}
     whileHover={hoverEffect}
     whileTap={{ scale: 0.95 }}
-    className="group"
+    className="group rounded-lg"
   >
     <a
       href={company.website}
@@ -70,7 +74,7 @@ const CompanyCard = ({ company }: { company: Company }) => (
       rel="noopener noreferrer"
       className="block"
     >
-      <div className="bg-navy rounded-lg p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-700 hover:border-blue-600">
+      <div className="bg-darkNavy rounded-lg p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-700 hover:border-pgi-light-blue">
         <div className="h-16 sm:h-20 w-full flex items-center justify-center">
           <Image
             src={company.imagePath}
@@ -95,7 +99,7 @@ export default function PlacementsPage() {
   return (
     <div className="bg-navy text-white min-h-screen">
       {/* Hero Section */}
-      <section className="py-16 sm:py-24 px-4">
+      <section className="py-16 md:py-24 lg:py-32 px-4">
         <div className="container mx-auto">
           <motion.div
             className="text-center"
@@ -103,10 +107,13 @@ export default function PlacementsPage() {
             animate="visible"
             variants={fadeIn}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-              Alumni Placements
+            <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
+              <ShinyText
+                text="Alumni Placements"
+                className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+              />
             </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-5xl mx-auto font-light leading-relaxed">
               Since 2021, members of Paragon Global Investments have excelled in
               many different fields within the finance and tech industries.
               Paragon alumni have received internship and job offers from the
@@ -121,20 +128,28 @@ export default function PlacementsPage() {
       </section>
 
       {/* Investment Banking Section */}
-      <section className="py-12 sm:py-16 px-4 bg-pgi-dark-blue">
+      <section className="py-16 md:py-24 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto">
           <motion.h2
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            variants={fadeIn}
           >
-            Investment Banking
+            <DecryptedText
+              text="Investment Banking"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6 md:gap-8"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -151,20 +166,28 @@ export default function PlacementsPage() {
       </section>
 
       {/* Quantitative Trading and Technology Section */}
-      <section className="py-12 sm:py-16 px-4 bg-navy">
+      <section className="py-16 md:py-24 px-4 bg-navy">
         <div className="container mx-auto">
           <motion.h2
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            variants={fadeIn}
           >
-            Quantitative Trading & Technology
+            <DecryptedText
+              text="Quantitative Trading & Technology"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6 md:gap-8"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -181,20 +204,28 @@ export default function PlacementsPage() {
       </section>
 
       {/* Asset Management and Consulting Section */}
-      <section className="py-12 sm:py-16 px-4 bg-pgi-dark-blue">
+      <section className="py-16 md:py-24 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto">
           <motion.h2
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 sm:mb-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            variants={fadeIn}
           >
-            Asset Management & Consulting
+            <DecryptedText
+              text="Asset Management & Consulting"
+              sequential={true}
+              revealDirection="start"
+              animateOn="view"
+              speed={50}
+              useOriginalCharsOnly={true}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            />
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6 md:gap-8"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -211,26 +242,39 @@ export default function PlacementsPage() {
       </section>
 
       {/* Back to Home CTA */}
-      <section className="py-16 px-4 bg-navy">
+      <section className="py-16 md:py-24 px-4 bg-navy">
         <div className="container mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            variants={fadeIn}
           >
-            <h3 className="text-xl sm:text-2xl font-semibold mb-4">
-              Ready to Join Our Alumni Network?
+            <h3 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium mb-4 md:mb-6 text-white">
+              <DecryptedText
+                text="Ready to Join Our Alumni Network?"
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={50}
+                useOriginalCharsOnly={true}
+                className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-white"
+              />
             </h3>
-            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto text-sm md:text-base lg:text-lg font-light leading-relaxed">
               Start your journey with Paragon Global Investments and become part
               of our successful alumni network at top finance and technology
               companies.
             </p>
             <Link href="/apply">
               <motion.button
-                className="bg-pgi-light-blue text-white px-8 py-3 rounded-lg font-semibold text-lg tracking-wide hover:bg-blue-600 transition-colors duration-300"
-                whileHover={{ scale: 1.05 }}
+                className="bg-pgi-light-blue text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-medium text-base md:text-lg tracking-wide hover:bg-blue-600 transition-colors duration-300"
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: '#1f4287',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+                  transition: { duration: 0.2 },
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 Apply to PGI
