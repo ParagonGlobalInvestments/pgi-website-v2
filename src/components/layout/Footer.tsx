@@ -202,7 +202,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <motion.div
-          className="text-center mt-4 text-xs text-gray-400"
+          className="text-center mt-8 text-xs text-gray-400"
           variants={logoAnimation}
           transition={{ delay: 0.4 }}
         >

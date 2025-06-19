@@ -380,7 +380,7 @@ const CombinedSponsorsPartnersSection = () => {
 // Combined Education & Investment Section Component
 const CombinedEducationInvestmentSection = () => {
   const [activeTab, setActiveTab] = useState<'education' | 'investment'>(
-    'education'
+    'investment'
   );
 
   const tabVariants = {
@@ -445,24 +445,14 @@ const CombinedEducationInvestmentSection = () => {
           <motion.div
             className="absolute top-1 bottom-1 bg-pgi-light-blue rounded-full"
             animate={{
-              left: activeTab === 'education' ? '4px' : '50%',
-              right: activeTab === 'education' ? '50%' : '4px',
+              left: activeTab === 'investment' ? '4px' : '50%',
+              right: activeTab === 'investment' ? '50%' : '4px',
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           />
 
           {/* Tab Buttons */}
           <div className="relative z-10 flex">
-            <button
-              onClick={() => setActiveTab('education')}
-              className={`px-6 py-3 text-xs md:text-base font-medium rounded-full transition-colors duration-200 ${
-                activeTab === 'education'
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Education
-            </button>
             <button
               onClick={() => setActiveTab('investment')}
               className={`px-6 py-3 text-xs md:text-base font-medium rounded-full transition-colors duration-200 ${
@@ -472,6 +462,16 @@ const CombinedEducationInvestmentSection = () => {
               }`}
             >
               Our Funds
+            </button>
+            <button
+              onClick={() => setActiveTab('education')}
+              className={`px-6 py-3 text-xs md:text-base font-medium rounded-full transition-colors duration-200 ${
+                activeTab === 'education'
+                  ? 'text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Education
             </button>
           </div>
         </div>
@@ -494,8 +494,8 @@ const CombinedEducationInvestmentSection = () => {
             <ShinyText
               text={
                 activeTab === 'education'
-                  ? 'Our Education Program'
-                  : 'Our Investment Funds'
+                  ? 'Paragon Education Program'
+                  : 'Investment Funds'
               }
               className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
