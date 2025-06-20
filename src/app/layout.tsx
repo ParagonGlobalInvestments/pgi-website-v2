@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/logos/pgiLogoTransparent.png',
+        url: '/logos/pgiLogoTransparentDark.png',
         width: 1200,
         height: 630,
         alt: 'Paragon Global Investments Logo',
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     title: 'PGI',
     description:
       'Student-run intercollegiate investment fund with 8 chapters at top universities.',
-    images: ['/logos/pgiLogoTransparent.png'],
+    images: ['/logos/pgiLogoTransparentDark.png'],
     creator: '@paragonglobal',
   },
 
