@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from '@/components/ui/toaster';
+import { PHProvider } from '@/components/providers/PostHogProvider';
 // import '../tailwind.css'; // Removed this import
 import './globals.css';
 
@@ -137,7 +138,7 @@ export default function RootLayout({
           <link rel="manifest" href="/site.webmanifest" />
         </head>
         <body className={`${montserrat.variable} antialiased`}>
-          {children}
+          <PHProvider>{children}</PHProvider>
           <Toaster />
         </body>
       </html>
