@@ -2,8 +2,55 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import AnimatedSection from '@/components/ui/AnimatedSection';
-import AnimatedText from '@/components/ui/AnimatedText';
+import { motion } from 'framer-motion';
+import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const cardItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+    },
+  },
+};
+
+const buttonHover = {
+  scale: 1.05,
+  backgroundColor: '#1f4287',
+  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+  transition: {
+    duration: 0.2,
+    ease: 'easeInOut',
+  },
+};
 
 type FormData = {
   name: string;
@@ -41,81 +88,99 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-navy min-h-screen">
-      <div className="container mx-auto py-24 px-4 sm:px-6 lg:px-8">
+    <div className="bg-navy text-white min-h-screen">
+      <div className="container mx-auto py-16 md:py-24 lg:py-32 px-4">
         {/* Page header */}
-        <AnimatedSection className="text-center mb-16">
-          <AnimatedText
-            text="Let's Get in Touch"
-            className="text-4xl font-bold text-white mb-4"
-            type="words"
-          />
-          <AnimatedText
-            text="We would love to hear from you. If you're interested or have any questions, send us a message through the form below."
-            className="text-xl text-gray-300 max-w-3xl mx-auto"
-            type="full"
-            delay={0.3}
-          />
-        </AnimatedSection>
+        <motion.section
+          className="text-center mb-16 md:mb-20 lg:mb-24"
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+        >
+          <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
+            <ShinyText
+              text="Let's Get in Touch"
+              className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
+            />
+          </h1>
+          <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
+            We would love to hear from you. If you're interested or have any
+            questions, send us a message through the form below.
+          </p>
+        </motion.section>
 
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <motion.div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Left column - Contact form */}
-            <AnimatedSection
-              delay={0.4}
-              direction="left"
-              className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700"
+            <motion.div
+              variants={cardItem}
+              className="bg-darkNavy p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
               {/* Form type selector */}
               <div className="mb-6">
                 <div className="flex space-x-4">
-                  <button
-                    className={`px-4 py-2 rounded-md transition-colors ${
+                  <motion.button
+                    className={`px-4 py-2 rounded-md transition-colors text-sm md:text-base font-medium ${
                       !isChapterRequest
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-700 text-gray-300'
+                        ? 'bg-pgi-light-blue text-white'
+                        : 'bg-gray-700/10 text-gray-500 hover:bg-gray-600 hover:text-white'
                     }`}
                     onClick={() => setIsChapterRequest(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Contact Us
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded-md transition-colors ${
+                  </motion.button>
+                  <motion.button
+                    className={`px-4 py-2 rounded-md transition-colors text-sm md:text-base font-medium ${
                       isChapterRequest
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-700 text-gray-300'
+                        ? 'bg-pgi-light-blue text-white'
+                        : 'bg-gray-700/10 text-gray-500 hover:bg-gray-600 hover:text-white'
                     }`}
                     onClick={() => setIsChapterRequest(true)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Start a Chapter
-                  </button>
+                  </motion.button>
                 </div>
               </div>
 
               {/* Form success message */}
               {submitted && (
-                <div className="mb-6 p-4 bg-green-900 bg-opacity-30 border border-green-700 rounded-md">
-                  <p className="text-green-400">
+                <motion.div
+                  className="mb-6 p-4 bg-green-900 bg-opacity-30 border border-green-700 rounded-md"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-green-400 text-sm md:text-base">
                     Thank you for your message! We'll get back to you soon.
                   </p>
-                </div>
+                </motion.div>
               )}
 
               {/* Contact form */}
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-4">
+                <div className="space-y-4 md:space-y-6">
                   {/* Name field */}
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-300 mb-1"
+                      className="block text-sm font-medium text-gray-300 mb-2"
                     >
                       Name
                     </label>
                     <input
                       id="name"
                       type="text"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                       placeholder="Your name"
                       {...register('name', { required: 'Name is required' })}
                     />
@@ -130,14 +195,14 @@ export default function Contact() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-medium text-gray-300 mb-1"
+                      className="block text-sm font-medium text-gray-300 mb-2"
                     >
                       Email
                     </label>
                     <input
                       id="email"
                       type="email"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                       placeholder="Your email"
                       {...register('email', {
                         required: 'Email is required',
@@ -158,14 +223,14 @@ export default function Contact() {
                   <div>
                     <label
                       htmlFor="phone"
-                      className="block text-sm font-medium text-gray-300 mb-1"
+                      className="block text-sm font-medium text-gray-300 mb-2"
                     >
                       Phone
                     </label>
                     <input
                       id="phone"
                       type="tel"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                       placeholder="Your phone number"
                       {...register('phone')}
                     />
@@ -177,14 +242,14 @@ export default function Contact() {
                       <div>
                         <label
                           htmlFor="school"
-                          className="block text-sm font-medium text-gray-300 mb-1"
+                          className="block text-sm font-medium text-gray-300 mb-2"
                         >
                           School
                         </label>
                         <input
                           id="school"
                           type="text"
-                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                          className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                           placeholder="Your school name"
                           {...register('school', {
                             required: isChapterRequest
@@ -202,14 +267,14 @@ export default function Contact() {
                       <div>
                         <label
                           htmlFor="graduationYear"
-                          className="block text-sm font-medium text-gray-300 mb-1"
+                          className="block text-sm font-medium text-gray-300 mb-2"
                         >
                           Graduation Year
                         </label>
                         <input
                           id="graduationYear"
                           type="text"
-                          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                          className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                           placeholder="Expected graduation year"
                           {...register('graduationYear', {
                             required: isChapterRequest
@@ -230,14 +295,14 @@ export default function Contact() {
                   <div>
                     <label
                       htmlFor="message"
-                      className="block text-sm font-medium text-gray-300 mb-1"
+                      className="block text-sm font-medium text-gray-300 mb-2"
                     >
                       Message
                     </label>
                     <textarea
                       id="message"
                       rows={5}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors resize-none"
                       placeholder={
                         isChapterRequest
                           ? 'Tell us about your interest in starting a chapter'
@@ -256,65 +321,89 @@ export default function Contact() {
 
                   {/* Submit button */}
                   <div>
-                    <button
+                    <motion.button
                       type="submit"
-                      className="w-full px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                      className="w-full px-6 py-3 md:py-4 bg-pgi-light-blue text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pgi-light-blue text-sm md:text-base"
+                      whileHover={buttonHover}
+                      whileTap={{ scale: 0.98 }}
                     >
                       {isChapterRequest
                         ? 'Submit Chapter Request'
                         : 'Send Message'}
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               </form>
-            </AnimatedSection>
+            </motion.div>
 
             {/* Right column - Contact info */}
-            <div>
+            <div className="space-y-6 md:space-y-8">
               {/* Chapter info card */}
-              <AnimatedSection
-                delay={0.5}
-                direction="right"
-                className="bg-navy-light p-8 rounded-lg shadow-xl mb-8 border border-gray-700"
+              <motion.div
+                variants={cardItem}
+                className="bg-darkNavy p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  Start a Chapter
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-medium text-white mb-4 md:mb-6">
+                  <DecryptedText
+                    text="Start a Chapter"
+                    sequential={true}
+                    revealDirection="start"
+                    animateOn="view"
+                    speed={50}
+                    useOriginalCharsOnly={true}
+                    className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                  />
                 </h2>
-                <p className="text-gray-300 mb-6">
+                <p className="text-gray-300 mb-6 md:mb-8 text-sm md:text-base font-light leading-relaxed">
                   If you're interested in starting a Paragon chapter at your
                   school, please fill out the form with your school, graduation
                   year, and contact info and we will get back to you!
                 </p>
-                <button
+                <motion.button
                   onClick={() => setIsChapterRequest(true)}
-                  className="px-6 py-2 bg-secondary text-white font-medium rounded-md hover:bg-opacity-90 transition-colors"
+                  className="px-6 py-3 bg-pgi-light-blue text-white font-medium rounded-md transition-colors text-sm md:text-base"
+                  whileHover={buttonHover}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Start a Chapter
-                </button>
-              </AnimatedSection>
+                </motion.button>
+              </motion.div>
 
               {/* Contact info card */}
-              <AnimatedSection
-                delay={0.6}
-                direction="right"
-                className="bg-navy-light p-8 rounded-lg shadow-xl border border-gray-700"
+              <motion.div
+                variants={cardItem}
+                className="bg-darkNavy p-6 md:p-8 rounded-lg shadow-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  Other Contacts
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-medium text-white mb-4 md:mb-6">
+                  <DecryptedText
+                    text="Other Contacts"
+                    sequential={true}
+                    revealDirection="start"
+                    animateOn="view"
+                    speed={50}
+                    useOriginalCharsOnly={true}
+                    className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
+                  />
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-gray-300 mb-2">Connect with us:</p>
+                    <p className="text-gray-300 mb-4 text-sm md:text-base font-light">
+                      Connect with us:
+                    </p>
                     <div className="flex space-x-4">
-                      <a
+                      <motion.a
                         href="https://www.linkedin.com/company/paragoninvestments"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="LinkedIn"
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-gray-300 hover:text-pgi-light-blue transition-colors"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         <svg
-                          className="w-6 h-6"
+                          className="w-6 h-6 md:w-8 md:h-8"
                           fill="currentColor"
                           viewBox="0 0 24 24"
                           aria-hidden="true"
@@ -325,16 +414,18 @@ export default function Contact() {
                             clipRule="evenodd"
                           />
                         </svg>
-                      </a>
-                      <a
+                      </motion.a>
+                      <motion.a
                         href="https://www.instagram.com/paragoninvestmentsglobal/"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Instagram"
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-gray-300 hover:text-pgi-light-blue transition-colors"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         <svg
-                          className="w-6 h-6"
+                          className="w-6 h-6 md:w-8 md:h-8"
                           fill="currentColor"
                           viewBox="0 0 24 24"
                           aria-hidden="true"
@@ -345,13 +436,13 @@ export default function Contact() {
                             clipRule="evenodd"
                           />
                         </svg>
-                      </a>
+                      </motion.a>
                     </div>
                   </div>
                 </div>
-              </AnimatedSection>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
