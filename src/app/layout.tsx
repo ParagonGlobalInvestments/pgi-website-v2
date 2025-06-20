@@ -3,6 +3,7 @@ import { Montserrat } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from '@/components/ui/toaster';
 import { PHProvider } from '@/components/providers/PostHogProvider';
+import { Analytics } from '@vercel/analytics/next';
 // import '../tailwind.css'; // Removed this import
 import './globals.css';
 
@@ -140,6 +141,7 @@ export default function RootLayout({
         <body className={`${montserrat.variable} antialiased`}>
           <PHProvider>{children}</PHProvider>
           <Toaster />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
