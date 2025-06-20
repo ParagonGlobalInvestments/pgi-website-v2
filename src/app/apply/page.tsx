@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+import { handleFormClick } from '@/components/analytics/FormTracker';
 
 // Animation variants
 const fadeIn = {
@@ -300,10 +301,25 @@ export default function ApplyPage() {
                 Fill out this form to be notified of updates and events.
               </p>
               <motion.a
-                href="#"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSe5Fz3UnIf9S_p5scoFVi5WUL4mhpGWLkG8RG21NXUSgx8-Zw/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
                 whileHover="hover"
                 variants={buttonVariant}
+                onClick={() =>
+                  handleFormClick({
+                    formName: 'interest_form',
+                    formType: 'google_form',
+                    targetUrl:
+                      'https://docs.google.com/forms/d/e/1FAIpQLSe5Fz3UnIf9S_p5scoFVi5WUL4mhpGWLkG8RG21NXUSgx8-Zw/viewform',
+                    section: 'apply_page',
+                    additionalData: {
+                      button_position: 'interest_form_card',
+                      page_section: 'application_links',
+                    },
+                  })
+                }
               >
                 Interest Form
               </motion.a>
@@ -327,10 +343,26 @@ export default function ApplyPage() {
                 Application will close on 1/17/2025 at 11:59 PM ET.
               </p>
               <motion.a
-                href="#"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSesqXvAMhZjHmpRwiPlJAkfTO2zLqQUyr6SEEImYqMjfQnGvg/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
                 whileHover="hover"
                 variants={buttonVariant}
+                onClick={() =>
+                  handleFormClick({
+                    formName: 'application_form',
+                    formType: 'google_form',
+                    targetUrl:
+                      'https://docs.google.com/forms/d/e/1FAIpQLSesqXvAMhZjHmpRwiPlJAkfTO2zLqQUyr6SEEImYqMjfQnGvg/viewform',
+                    section: 'apply_page',
+                    additionalData: {
+                      button_position: 'application_form_card',
+                      page_section: 'application_links',
+                      priority: 'critical',
+                    },
+                  })
+                }
               >
                 Apply
               </motion.a>
@@ -354,10 +386,25 @@ export default function ApplyPage() {
                 Coffee chats will take place between 1/11/2025 and 1/13/2025.
               </p>
               <motion.a
-                href="#"
+                href="https://signup.com/go/nqJvsor"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
                 whileHover="hover"
                 variants={buttonVariant}
+                onClick={() =>
+                  handleFormClick({
+                    formName: 'coffee_chat_signup',
+                    formType: 'signup_com',
+                    targetUrl: 'https://signup.com/go/nqJvsor',
+                    section: 'apply_page',
+                    additionalData: {
+                      button_position: 'coffee_chat_card',
+                      page_section: 'application_links',
+                      event_dates: '1/11/2025-1/13/2025',
+                    },
+                  })
+                }
               >
                 Coffee Chat Signups
               </motion.a>
