@@ -675,7 +675,7 @@ export default function Home() {
         variants={fadeIn}
         className="text-white min-h-[100vh] flex flex-col justify-start lg:justify-center items-center relative scrollbar-none"
       >
-        <div className="container mx-auto px-4 text-center py-32">
+        <div className="container mx-auto px-4 text-center lg:pt-0 pt-32">
           <motion.h1
             variants={fadeIn}
             className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-extralight tracking-wide text-gray-300/50 mb-2 lg:mb-4 leading-tight"
