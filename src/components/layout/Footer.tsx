@@ -106,7 +106,7 @@ const Footer = () => {
             className="w-full lg:w-1/3 lg:pr-8"
             variants={logoAnimation}
           >
-            <div className="flex flex-row items-center mb-4 justify-between">
+            <div className="flex flex-row items-center mb-4 justify-between lg:justify-start">
               <Link href="/" className="inline-block ">
                 <Image
                   src="/logos/pgiLogoTransparent.png"
@@ -116,7 +116,10 @@ const Footer = () => {
                   className="h-9 w-auto rounded-lg"
                 />
               </Link>
-              <motion.div className="flex space-x-4" variants={logoAnimation}>
+              <motion.div
+                className="flex space-x-4 lg:ml-4"
+                variants={logoAnimation}
+              >
                 <a
                   href="https://www.linkedin.com/company/paragoninvestments/"
                   target="_blank"
@@ -207,10 +210,16 @@ const Footer = () => {
           transition={{ delay: 0.4 }}
         >
           <p>
-            Paragon Global Investments | {currentYear} |{' '}
+            <Link
+              href="/"
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              Paragon Global Investments
+            </Link>{' '}
+            | {currentYear} |{' '}
             <Link
               href="/privacy-policy"
-              className="text-gray-300 hover:text-white transition-colors underline"
+              className="text-gray-400 hover:text-white transition-colors "
             >
               Privacy Policy
             </Link>
