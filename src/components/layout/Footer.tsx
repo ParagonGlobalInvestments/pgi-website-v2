@@ -109,11 +109,11 @@ const Footer = () => {
             <div className="flex flex-row items-center mb-4 justify-between">
               <Link href="/" className="inline-block ">
                 <Image
-                  src="/logos/pgiLogoFull.jpg"
+                  src="/logos/pgiLogoTransparent.png"
                   alt="Paragon Global Investments"
-                  width={180}
-                  height={65}
-                  className="rounded"
+                  width={200}
+                  height={36}
+                  className="h-9 w-auto rounded-lg"
                 />
               </Link>
               <motion.div className="flex space-x-4" variants={logoAnimation}>

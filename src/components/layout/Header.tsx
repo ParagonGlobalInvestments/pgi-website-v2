@@ -250,7 +250,7 @@ const Header = () => {
 
   return (
     <motion.header
-      className="bg-navy font-semibold z-50 relative"
+      className="bg-pgi-dark-blue font-semibold z-50 relative"
       initial="hidden"
       animate="visible"
       variants={navbarAnimation}
@@ -267,7 +267,7 @@ const Header = () => {
               alt="Paragon Global Investments"
               width={200}
               height={36}
-              className="h-9 w-auto"
+              className="h-9 w-auto rounded-lg"
             />
             {/* <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
               <DecryptedText
