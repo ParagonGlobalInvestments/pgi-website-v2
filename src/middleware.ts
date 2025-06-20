@@ -29,6 +29,9 @@ const isPublicRoute = createRouteMatcher([
   '/national-committee/officers',
   '/national-committee/founders',
 
+  // Legal pages
+  '/privacy-policy',
+
   // API routes
   '/api/webhooks(.*)',
 

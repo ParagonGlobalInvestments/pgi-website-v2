@@ -206,7 +206,15 @@ const Footer = () => {
           variants={logoAnimation}
           transition={{ delay: 0.4 }}
         >
-          <p>Paragon Global Investments | {currentYear}</p>
+          <p>
+            Paragon Global Investments | {currentYear} |{' '}
+            <Link
+              href="/privacy-policy"
+              className="text-gray-300 hover:text-white transition-colors underline"
+            >
+              Privacy Policy
+            </Link>
+          </p>
         </motion.div>
       </div>
     </motion.footer>
