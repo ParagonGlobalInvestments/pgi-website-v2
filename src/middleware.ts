@@ -87,6 +87,9 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files
     '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Explicitly run for any legacy .html/.htm paths
+    '/:path*.html',
+    '/:path*.htm',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],

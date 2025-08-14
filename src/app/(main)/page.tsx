@@ -16,7 +16,7 @@ import {
   PARTNERS_COMPANIES,
   type Company,
 } from '@/lib/constants/companies';
-import { UNIVERSITIES, type University } from '@/lib/constants/universities';
+import { UNIVERSITIES } from '@/lib/constants/universities';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
@@ -51,17 +51,6 @@ const itemFadeIn = {
     y: 0,
     transition: {
       duration: 0.5,
-    },
-  },
-};
-
-const logoAnimation = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.4,
     },
   },
 };
@@ -134,32 +123,6 @@ const CompanyLogo = ({ company }: { company: Company }) => (
           }}
         />
       </div>
-    </div>
-  </a>
-);
-
-// Sponsor/Partner Logo Component
-const SponsorLogo = ({ company }: { company: Company }) => (
-  <a
-    href={company.website}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block group"
-  >
-    <div className=" flex items-center justify-center transition-all duration-300 group-hover:scale-105">
-      <Image
-        src={company.imagePath}
-        alt={company.displayName}
-        width={200}
-        height={200}
-        className="object-contain max-w-full max-h-full"
-        style={{
-          width: 'auto',
-          height: 'auto',
-          maxWidth: '200px',
-          maxHeight: '200px',
-        }}
-      />
     </div>
   </a>
 );
