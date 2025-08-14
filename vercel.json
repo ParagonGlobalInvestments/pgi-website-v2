@@ -20,35 +20,8 @@
       ]
     }
   ],
-  "redirects": [
-    { "source": "/:path*\\.html", "destination": "/", "permanent": false },
-    { "source": "/:path*\\.htm", "destination": "/", "permanent": false },
-    { "source": "/:path*\\.php", "destination": "/", "permanent": false },
-    { "source": "/:path*\\.asp", "destination": "/", "permanent": false },
-    { "source": "/:path*\\.aspx", "destination": "/", "permanent": false },
-    { "source": "/(.+)\\.html", "destination": "/", "permanent": false },
-    { "source": "/(.+)\\.htm", "destination": "/", "permanent": false },
-    { "source": "/(.+)\\.php", "destination": "/", "permanent": false },
-    { "source": "/(.+)\\.asp", "destination": "/", "permanent": false },
-    { "source": "/(.+)\\.aspx", "destination": "/", "permanent": false },
-    { "source": "/index.html", "destination": "/", "permanent": false },
-    { "source": "/home.html", "destination": "/", "permanent": false },
-    { "source": "/default.html", "destination": "/", "permanent": false },
-    { "source": "/news.html", "destination": "/", "permanent": false },
-    { "source": "/about.html", "destination": "/", "permanent": false },
-    { "source": "/contact.html", "destination": "/", "permanent": false },
-    { "source": "/investment.html", "destination": "/", "permanent": false },
-    { "source": "/placements.html", "destination": "/", "permanent": false },
-    { "source": "/apply.html", "destination": "/", "permanent": false },
-    { "source": "/team_national.html", "destination": "/", "permanent": false },
-    { "source": "/team_quant.html", "destination": "/", "permanent": false },
-    { "source": "/team_value.html", "destination": "/", "permanent": false },
-    { "source": "/founders.html", "destination": "/", "permanent": false },
-    {
-      "source": "/sponsors_and_partners.html",
-      "destination": "/",
-      "permanent": false
-    },
-    { "source": "/wso.html", "destination": "/", "permanent": false }
+  "rewrites": [
+    { "source": "/:path*.html", "destination": "/" },
+    { "source": "/:path*.htm",  "destination": "/" }
   ]
 }
