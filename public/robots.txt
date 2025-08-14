@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Block admin and authentication pages
+Disallow: /portal/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+# Block PDF files from being primary indexed content
+Disallow: /lectures/*.pdf
+Disallow: /News/*.pdf
+
+# Block legacy extensions that redirect
+Disallow: /*.html
+Disallow: /*.htm
+Disallow: /*.php
+
+# Sitemap location
+Sitemap: https://paragoninvestments.org/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
