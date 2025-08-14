@@ -1,113 +1,75 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
 import { ClerkProvider } from '@clerk/nextjs';
-import { Toaster } from '@/components/ui/toaster';
 import { PHProvider } from '@/components/providers/PostHogProvider';
-import { Analytics } from '@vercel/analytics/next';
-// import '../tailwind.css'; // Removed this import
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
-// Montserrat font configuration
-const montserrat = Montserrat({
-  variable: '--font-montserrat',
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pgi-website-v2.vercel.app'),
-  title: 'PGI',
+  title: 'Paragon Global Investments',
   description:
-    'Student-run intercollegiate investment fund with 8 chapters at top universities. We utilize fundamental and systematic trading strategies with $40,000 AUM.',
+    'Paragon Global Investments is the premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
   keywords: [
-    'investment fund',
-    'student finance',
-    'quantitative trading',
-    'value investing',
-    'algorithmic trading',
-    'university investment club',
+    'finance',
+    'investment',
+    'undergraduate',
+    'career',
+    'opportunities',
+    'education',
+    'Paragon Global Investments',
+    'PGI',
   ],
   authors: [{ name: 'Paragon Global Investments' }],
   creator: 'Paragon Global Investments',
   publisher: 'Paragon Global Investments',
-
-  // Open Graph tags for social sharing
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://paragoninvestments.org'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'PGI',
+    title: 'Paragon Global Investments',
     description:
-      'Student-run intercollegiate investment fund with 8 chapters at top universities. $40,000 AUM focused on value investing and algorithmic trading.',
-    url: 'https://pgi-website-v2.vercel.app',
+      'The premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
+    url: 'https://paragoninvestments.org',
     siteName: 'Paragon Global Investments',
-    type: 'website',
     images: [
       {
-        url: '/logos/pgiLogoTransparentDark.png',
+        url: '/logos/pgiLogoTransparent.png',
         width: 1200,
         height: 630,
         alt: 'Paragon Global Investments Logo',
       },
     ],
     locale: 'en_US',
+    type: 'website',
   },
-
-  // Twitter Card tags
   twitter: {
     card: 'summary_large_image',
-    title: 'PGI',
+    title: 'Paragon Global Investments',
     description:
-      'Student-run intercollegiate investment fund with 8 chapters at top universities.',
-    images: ['/logos/pgiLogoTransparentDark.png'],
-    creator: '@paragonglobal',
+      'The premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
+    images: ['/logos/pgiLogoTransparent.png'],
   },
-
-  // Apple and mobile specific
-  appleWebApp: {
-    capable: true,
-    title: 'PGI',
-    statusBarStyle: 'black-translucent',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
-
-  // Additional meta tags
-  other: {
-    'theme-color': '#00172B',
-    'msapplication-TileColor': '#00172B',
-    'msapplication-config': '/browserconfig.xml',
+  verification: {
+    google: 'your-google-verification-code',
   },
-
-  // Icons configuration
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: '48x48' },
-      { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/favicon.ico', sizes: '16x16' },
-    ],
-    apple: [
-      { url: '/favicon.ico', sizes: '180x180' },
-      { url: '/favicon.ico', sizes: '152x152' },
-      { url: '/favicon.ico', sizes: '144x144' },
-      { url: '/favicon.ico', sizes: '120x120' },
-      { url: '/favicon.ico', sizes: '114x114' },
-      { url: '/favicon.ico', sizes: '76x76' },
-      { url: '/favicon.ico', sizes: '72x72' },
-      { url: '/favicon.ico', sizes: '60x60' },
-      { url: '/favicon.ico', sizes: '57x57' },
-    ],
-    other: [
-      {
-        rel: 'icon',
-        type: 'image/x-icon',
-        url: '/favicon.ico',
-      },
-      {
-        rel: 'shortcut icon',
-        url: '/favicon.ico',
-      },
-    ],
-  },
-
-  // Web app manifest
-  manifest: '/site.webmanifest',
+  category: 'finance',
 };
 
 export default function RootLayout({
@@ -117,31 +79,34 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={GeistSans.className}>
         <head>
-          {/* Additional meta tags for better compatibility */}
-          <meta name="theme-color" content="#00172B" />
-          <meta name="msapplication-TileColor" content="#00172B" />
-          <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
+          <link rel="icon" href="/favicon.ico" sizes="any" />
+          <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+          <link rel="apple-touch-icon" href="/icons/favicon.ico" />
+          <meta name="theme-color" content="#ffffff" />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Legacy route redirect - runs immediately on page load
+                (function() {
+                  const path = window.location.pathname;
+                  const isLegacyRoute = /\\.(html?|php|asp|aspx|jsp|cfm)$/i.test(path);
+                  
+                  if (isLegacyRoute) {
+                    console.log('Client-side redirecting legacy route:', path, '-> /');
+                    window.location.replace('/');
+                  }
+                })();
+              `,
+            }}
           />
-          <meta name="apple-mobile-web-app-title" content="PGI" />
-
-          {/* Favicon links for maximum compatibility */}
-          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-          <link rel="shortcut icon" href="/favicon.ico" />
-          <link rel="apple-touch-icon" href="/favicon.ico" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico" />
-          <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
-          <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico" />
-          <link rel="manifest" href="/site.webmanifest" />
         </head>
-        <body className={`${montserrat.variable} antialiased`}>
-          <PHProvider>{children}</PHProvider>
-          <Toaster />
-          <Analytics />
+        <body className="min-h-screen bg-background font-sans antialiased">
+          <PHProvider>
+            {children}
+            <Toaster />
+          </PHProvider>
         </body>
       </html>
     </ClerkProvider>
