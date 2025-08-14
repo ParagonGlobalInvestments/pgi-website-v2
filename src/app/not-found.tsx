@@ -13,12 +13,58 @@ export default function NotFound() {
     const isLegacyRoute = pathname.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
     if (isLegacyRoute) {
-      // Redirect legacy routes to homepage
+      // Redirect legacy routes to homepage immediately
       console.log(`404 page redirecting legacy route: ${pathname} -> /`);
+      // Use both methods for maximum compatibility
+      window.location.replace('/');
       router.replace('/');
       return;
     }
   }, [pathname, router]);
+
+  // Check if current path is a legacy route for immediate redirect
+  const isLegacyRoute = pathname?.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
+
+  // If it's a legacy route, show a redirecting message and meta refresh
+  if (isLegacyRoute) {
+    return (
+      <>
+        <meta httpEquiv="refresh" content="0; url=/" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Immediate redirect for legacy routes
+              (function() {
+                console.log('Immediate redirect from 404 page for legacy route');
+                window.location.replace('/');
+              })();
+            `,
+          }}
+        />
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                Redirecting...
+              </h2>
+              <p className="text-gray-600 mb-6">
+                This legacy page is being redirected to our new site.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Link
+                href="/"
+                className="inline-block w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Go to Homepage
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
