@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { trackEvent } from '@/lib/posthog';
 
 // Animation variants
