@@ -60,6 +60,17 @@ const isAuthRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   console.log(`Middleware: ${req.method} ${req.nextUrl.pathname}`);
 
+  // Redirect legacy .html URLs on the public site to home
+  const pathname = req.nextUrl.pathname;
+  const isLegacyHtml = pathname.endsWith('.html') || pathname.endsWith('.htm');
+  const isPrivateSection =
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/portal') ||
+    pathname.startsWith('/dashboard');
+  if (isLegacyHtml && !isPrivateSection) {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
   // In production, redirect auth/portal routes to landing page
   if (process.env.NODE_ENV === 'production' && isAuthRoute(req)) {
     return NextResponse.redirect(new URL('/', req.url));
@@ -68,12 +79,14 @@ export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth().protect();
   }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
