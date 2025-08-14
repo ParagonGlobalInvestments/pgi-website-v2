@@ -40,13 +40,57 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Legacy .html/.htm redirects - multiple patterns to ensure comprehensive coverage
       {
-        source: '/:path*.html',
+        source: '/:path*\\.html',
         destination: '/',
         permanent: false,
       },
       {
-        source: '/:path*.htm',
+        source: '/:path*\\.htm',
+        destination: '/',
+        permanent: false,
+      },
+      // Catch any remaining .html/.htm with regex pattern
+      {
+        source: '/(.+)\\.html',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/(.+)\\.htm',
+        destination: '/',
+        permanent: false,
+      },
+      // Catch common legacy extensions
+      {
+        source: '/(.+)\\.php',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/(.+)\\.asp',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/(.+)\\.aspx',
+        destination: '/',
+        permanent: false,
+      },
+      // Specific legacy routes that might exist
+      {
+        source: '/index.html',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/home.html',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/default.html',
         destination: '/',
         permanent: false,
       },
