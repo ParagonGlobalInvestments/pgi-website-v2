@@ -38,6 +38,20 @@ const nextConfig = {
       ],
     };
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*.html',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/:path*.htm',
+        destination: '/',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

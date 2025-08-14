@@ -19,5 +19,9 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    { "source": "/:path*.html", "destination": "/", "permanent": false },
+    { "source": "/:path*.htm", "destination": "/", "permanent": false }
   ]
 }
