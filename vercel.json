@@ -21,6 +21,11 @@
     }
   ],
   "redirects": [
+    { "source": "/:path*\\.html", "destination": "/", "permanent": false },
+    { "source": "/:path*\\.htm", "destination": "/", "permanent": false },
+    { "source": "/:path*\\.php", "destination": "/", "permanent": false },
+    { "source": "/:path*\\.asp", "destination": "/", "permanent": false },
+    { "source": "/:path*\\.aspx", "destination": "/", "permanent": false },
     { "source": "/(.+)\\.html", "destination": "/", "permanent": false },
     { "source": "/(.+)\\.htm", "destination": "/", "permanent": false },
     { "source": "/(.+)\\.php", "destination": "/", "permanent": false },
