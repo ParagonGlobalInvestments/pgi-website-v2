@@ -16,12 +16,16 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
         }
       ]
     }
   ],
   "rewrites": [
     { "source": "/:path*.html", "destination": "/" },
-    { "source": "/:path*.htm",  "destination": "/" }
+    { "source": "/:path*.htm", "destination": "/" }
   ]
 }
