@@ -17,6 +17,12 @@ export default function CatchAllPage() {
 
     console.log('Catch-all route hit:', fullPath);
 
+    // Exclude sitemap.xml and robots.txt from catch-all handling
+    if (fullPath === '/sitemap.xml' || fullPath === '/robots.txt') {
+      console.log('Allowing Next.js to handle:', fullPath);
+      return;
+    }
+
     // Check if this is a legacy route
     const isLegacyRoute = fullPath.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
@@ -37,6 +43,12 @@ export default function CatchAllPage() {
     ? params.slug.join('/')
     : params.slug || '';
   const fullPath = `/${slug}`;
+  
+  // Don't render anything for sitemap.xml or robots.txt - let Next.js handle them
+  if (fullPath === '/sitemap.xml' || fullPath === '/robots.txt') {
+    return null;
+  }
+  
   const isLegacyRoute = fullPath.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
   if (isLegacyRoute) {
