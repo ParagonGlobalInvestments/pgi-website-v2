@@ -32,6 +32,10 @@ const isPublicRoute = createRouteMatcher([
   // Legal pages
   '/privacy-policy',
 
+  // SEO files
+  '/sitemap.xml',
+  '/robots.txt',
+
   // API routes
   '/api/webhooks(.*)',
 
