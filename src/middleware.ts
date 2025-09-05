@@ -86,9 +86,7 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.startsWith('/portal') ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname.startsWith('/robots') ||
-    pathname.startsWith('/sitemap');
+    pathname.startsWith('/favicon');
 
   if ((isLegacyRoute || isOldSitePath) && !isPrivateSection) {
     console.log(`Redirecting legacy route: ${pathname} -> /`);
@@ -110,7 +108,7 @@ export default clerkMiddleware(async (auth, req) => {
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files except legacy extensions
-    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml)).*)',
+    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     // Explicitly run for any legacy .html/.htm/.php etc paths
     '/:path*\\.html',
     '/:path*\\.htm',
