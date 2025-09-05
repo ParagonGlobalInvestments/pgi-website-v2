@@ -1173,14 +1173,14 @@ Check console for complete data.`);
           <CardHeader
             className={
               lightTheme
-                ? 'bg-blue-600 text-white rounded-t-lg pb-6'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg pb-6'
                 : 'bg-[#00172B] text-white rounded-t-lg pb-8'
             }
           >
             <CardTitle className="text-2xl font-bold text-center">
               Set Up Your Profile
             </CardTitle>
-            <CardDescription className="text-gray-100 text-center">
+            <CardDescription className={`text-center ${lightTheme ? 'text-blue-50' : 'text-gray-100'}`}>
               Complete your profile to get the most out of Paragon
             </CardDescription>
           </CardHeader>
@@ -1189,7 +1189,7 @@ Check console for complete data.`);
           >
             {renderStepContent()}
           </CardContent>
-          <CardFooter className="flex justify-center border-t py-4 bg-gray-50 rounded-b-lg">
+          <CardFooter className={`flex justify-center border-t py-4 rounded-b-lg ${lightTheme ? 'bg-gray-50' : 'bg-gray-50'}`}>
             <div className="flex space-x-2">
               {Array.from({ length: OnboardingStep.Complete + 1 }).map(
                 (_, index) => (
