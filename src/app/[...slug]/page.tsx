@@ -23,22 +23,11 @@ export default function CatchAllPage() {
       return;
     }
 
-    // Check if this is a legacy route
-    const isLegacyRoute = fullPath.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
-
-    if (isLegacyRoute) {
-      console.log(`Catch-all redirecting legacy route: ${fullPath} -> /`);
-      // Immediate redirect
-      window.location.replace('/');
-      router.replace('/');
-      return;
-    }
-
-    // If not a legacy route, show 404
+    // Show 404 for any unmatched routes
     notFound();
   }, [params.slug, router]);
 
-  // Immediate check for legacy routes
+  // Immediate check for SEO files
   const slug = Array.isArray(params.slug)
     ? params.slug.join('/')
     : params.slug || '';
@@ -48,41 +37,7 @@ export default function CatchAllPage() {
   if (fullPath === '/sitemap.xml' || fullPath === '/robots.txt') {
     return null;
   }
-  
-  const isLegacyRoute = fullPath.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
-  if (isLegacyRoute) {
-    return (
-      <>
-        <meta httpEquiv="refresh" content="0; url=/" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Immediate redirect for legacy routes
-              (function() {
-                console.log('Immediate redirect from catch-all page for legacy route');
-                window.location.replace('/');
-              })();
-            `,
-          }}
-        />
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                Redirecting...
-              </h2>
-              <p className="text-gray-600 mb-6">
-                This legacy page is being redirected to our homepage.
-              </p>
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // This should never render for non-legacy routes as notFound() is called in useEffect
+  // This should never render as notFound() is called in useEffect
   return null;
 }

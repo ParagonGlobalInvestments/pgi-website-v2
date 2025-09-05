@@ -72,26 +72,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // Comprehensive legacy route handling - redirect ANY legacy extension to homepage
-  const isLegacyRoute = pathname.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
-
-  // Also catch specific legacy paths that might not have extensions
-  const isOldSitePath = pathname.match(
-    /^\/(?:news|about|contact|investment|placements|apply|team_national|team_quant|team_value|founders|sponsors_and_partners|wso)(?:\/.*)?$/i
-  );
-
-  // Exclude API, portal, and dashboard from legacy redirects
-  const isPrivateSection =
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/portal') ||
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon');
-
-  if ((isLegacyRoute || isOldSitePath) && !isPrivateSection) {
-    console.log(`Redirecting legacy route: ${pathname} -> /`);
-    return NextResponse.redirect(new URL('/', req.url));
-  }
+  // Legacy route handling removed
 
   // In production, redirect auth/portal routes to landing page
   if (process.env.NODE_ENV === 'production' && isAuthRoute(req)) {
@@ -107,14 +88,8 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files except legacy extensions
-    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Explicitly run for any legacy .html/.htm/.php etc paths
-    '/:path*\\.html',
-    '/:path*\\.htm',
-    '/:path*\\.php',
-    '/:path*\\.asp',
-    '/:path*\\.aspx',
+    // Skip Next.js internals and all static files
+    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml|html?|htm|php|asp|aspx)).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
