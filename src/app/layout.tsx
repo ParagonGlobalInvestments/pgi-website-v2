@@ -3,57 +3,40 @@ import { GeistSans } from 'geist/font/sans';
 import { ClerkProvider } from '@clerk/nextjs';
 import { PHProvider } from '@/components/providers/PostHogProvider';
 import { Toaster } from '@/components/ui/toaster';
+import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Paragon Global Investments',
-  description:
-    'Paragon Global Investments is the premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
-  keywords: [
-    'finance',
-    'investment',
-    'undergraduate',
-    'career',
-    'opportunities',
-    'education',
-    'Paragon Global Investments',
-    'PGI',
-  ],
-  authors: [{ name: 'Paragon Global Investments' }],
-  creator: 'Paragon Global Investments',
-  publisher: 'Paragon Global Investments',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
   metadataBase: new URL('https://paragoninvestments.org'),
-  alternates: {
-    canonical: '/',
+  title: {
+    default: 'Paragon Global Investments',
+    template: '%s | Paragon Global Investments',
   },
+  description:
+    'Student-run intercollegiate investment fund combining value and systematic strategies across 8 top universities.',
+  alternates: { canonical: '/' },
   openGraph: {
+    type: 'website',
+    url: 'https://paragoninvestments.org/',
+    siteName: 'Paragon Global Investments',
     title: 'Paragon Global Investments',
     description:
-      'The premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
-    url: 'https://paragoninvestments.org',
-    siteName: 'Paragon Global Investments',
+      'Student-run intercollegiate investment fund with value + algorithmic strategies.',
     images: [
       {
-        url: '/logos/pgiLogoTransparent.png',
+        url: '/logos/pgiLogoTransparentDark.png',
         width: 1200,
         height: 630,
         alt: 'Paragon Global Investments Logo',
       },
     ],
-    locale: 'en_US',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Paragon Global Investments',
     description:
-      'The premier undergraduate finance organization, empowering students with investment knowledge and career opportunities.',
-    images: ['/logos/pgiLogoTransparent.png'],
+      'Student-run intercollegiate investment fund with value + algorithmic strategies.',
+    images: ['/logos/pgiLogoTransparentDark.png'],
   },
   robots: {
     index: true,
@@ -107,6 +90,23 @@ export default function RootLayout({
             {children}
             <Toaster />
           </PHProvider>
+          <Script
+            id="org-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'Paragon Global Investments',
+                url: 'https://paragoninvestments.org/',
+                logo: 'https://paragoninvestments.org/logos/pgiLogoTransparentDark.png',
+                sameAs: [
+                  'https://www.linkedin.com/company/paragon-global-investments/',
+                  'https://www.instagram.com/paragoninvestmentsglobal/',
+                ],
+              }),
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.VERCEL_ENV === 'production';
+
 const nextConfig = {
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -95,6 +97,18 @@ const nextConfig = {
         permanent: false,
       },
     ];
+  },
+  async headers() {
+    return isProd
+      ? []
+      : [
+          {
+            source: '/:path*',
+            headers: [
+              { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+            ],
+          },
+        ];
   },
 };
 
