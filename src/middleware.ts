@@ -87,5 +87,5 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next|api|.*\\..*).*)'],
+  matcher: ['/((?!_next|api|robots\\.txt|sitemap\\.xml|.*\\..*).*)'],
 };
