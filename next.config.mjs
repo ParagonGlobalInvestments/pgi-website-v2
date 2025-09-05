@@ -42,16 +42,7 @@ const nextConfig = {
   },
   // Legacy redirects removed
   async headers() {
-    return isProd
-      ? []
-      : [
-          {
-            source: '/:path*',
-            headers: [
-              { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
-            ],
-          },
-        ];
+    return [];
   },
 };
 
