@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "regions": ["iad1"],
   "headers": [
     {
       "source": "/(.*)",
@@ -13,9 +12,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
+    { "source": "/((?!robots\\.txt|sitemap\\.xml).*)", "destination": "/" }
   ]
 }
