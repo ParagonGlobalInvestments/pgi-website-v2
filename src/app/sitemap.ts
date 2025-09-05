@@ -31,3 +31,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === '/' ? 1.0 : 0.7,
   }));
 }
+
+// Force sitemap regeneration
