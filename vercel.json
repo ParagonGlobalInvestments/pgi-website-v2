@@ -23,9 +23,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/:path*.html", "destination": "/" },
-    { "source": "/:path*.htm", "destination": "/" }
   ]
 }
