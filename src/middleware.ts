@@ -62,6 +62,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   const pathname = req.nextUrl.pathname;
 
+  // Allow sitemap.xml and robots.txt to pass through immediately
+  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+    console.log(`Allowing ${pathname} to pass through middleware`);
+    return NextResponse.next();
+  }
+
   // Comprehensive legacy route handling - redirect ANY legacy extension to homepage
   const isLegacyRoute = pathname.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
@@ -100,7 +106,7 @@ export default clerkMiddleware(async (auth, req) => {
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files except legacy extensions
-    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/((?!_next|[^?]*\\.(?:css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|xml)).*)',
     // Explicitly run for any legacy .html/.htm/.php etc paths
     '/:path*\\.html',
     '/:path*\\.htm',
