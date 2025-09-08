@@ -217,7 +217,7 @@ export default function ApplyPage() {
                 further details, please refer to the education application
                 below.
               </p>
-              <p className="text-pgi-light-blue font-medium mb-6 text-sm md:text-base">
+              <p className="text-white font-medium mb-6 text-sm md:text-base">
                 This opportunity is exclusively available to first-year
                 students.
               </p>
@@ -258,7 +258,7 @@ export default function ApplyPage() {
                 Systematic Fund. Additional information is available on the
                 application form.
               </p>
-              <p className="text-pgi-light-blue font-medium mb-6 text-sm md:text-base">
+              <p className="text-white font-medium mb-6 text-sm md:text-base">
                 This opportunity is exclusively available to second-year
                 students.
               </p>
@@ -268,21 +268,8 @@ export default function ApplyPage() {
       </section>
 
       {/* Interest Form Section */}
-      <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
+      <section className="py-20 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto max-w-4xl">
-          {/* Section Title */}
-          <motion.h2
-            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-          >
-            <ShinyText
-              text="Stay Updated"
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
-            />
-          </motion.h2>
-
           <motion.div
             className="flex justify-center"
             variants={staggerContainer}
@@ -304,7 +291,8 @@ export default function ApplyPage() {
                 </h3>
               </div>
               <p className="text-gray-300 mb-8 text-base md:text-lg font-light leading-relaxed">
-                Fill out this form to be notified of updates, events, and important recruitment information.
+                Fill out this form to be notified of updates, events, and
+                important recruitment information.
               </p>
               <motion.a
                 href="https://docs.google.com/forms/d/e/1FAIpQLSe5Fz3UnIf9S_p5scoFVi5WUL4mhpGWLkG8RG21NXUSgx8-Zw/viewform"
@@ -357,7 +345,7 @@ export default function ApplyPage() {
 
           <div className="mb-8 md:mb-12 text-center">
             <span className="inline-flex items-center bg-darkNavy px-4 py-2 rounded-full border border-gray-700">
-              <FaCalendarAlt className="mr-2 text-pgi-light-blue" />
+              <FaCalendarAlt className="mr-2 text-white" />
               <span className="text-gray-300 text-sm md:text-base">
                 Time Zone: America/New_York
               </span>
@@ -447,20 +435,10 @@ export default function ApplyPage() {
             variants={fadeIn}
           >
             <ShinyText
-              text="Meet Our Recruitment Team"
+              text="Our Recruitment Team"
               className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
-
-          <motion.p
-            className="text-base md:text-lg text-gray-300 text-center max-w-3xl mx-auto mb-16 md:mb-20 lg:mb-24 font-light leading-relaxed"
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            transition={{ delay: 0.2 }}
-          >
-            Our dedicated recruitment team is here to guide you through the application process and answer any questions you may have.
-          </motion.p>
 
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10"
@@ -474,18 +452,18 @@ export default function ApplyPage() {
                 key={index}
                 variants={cardItem}
                 className="bg-darkNavy p-6 md:p-8 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-all duration-300 shadow-lg hover:shadow-xl"
-                whileHover={{ 
-                  y: -8, 
+                whileHover={{
+                  y: -8,
                   scale: 1.02,
                   boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-                  transition: { duration: 0.3 } 
+                  transition: { duration: 0.3 },
                 }}
               >
                 <div className="text-center">
                   <h3 className="text-lg md:text-xl font-semibold mb-3 text-white">
                     {member.name}
                   </h3>
-                  <p className="text-pgi-light-blue text-sm md:text-base mb-2 font-medium">
+                  <p className="text-white text-sm md:text-base mb-2 font-medium">
                     {member.role}
                   </p>
                   <p className="text-gray-400 text-sm md:text-base font-light">
@@ -515,7 +493,7 @@ export default function ApplyPage() {
                 scale: 1.05,
                 backgroundColor: '#1f4287',
                 boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-                transition: { duration: 0.2 }
+                transition: { duration: 0.2 },
               }}
               whileTap={{ scale: 0.95 }}
             >
