@@ -745,6 +745,13 @@ export const SPONSORS_COMPANIES: Company[] = [
     category: 'asset-mgmt-consulting',
     imagePath: '/images/companies/Arena.png',
   },
+  {
+    name: 'radial-equity-partners',
+    displayName: 'Radial Equity Partners',
+    website: 'https://radialequity.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/RadialEquityPartners.png',
+  },
 ];
 
 // Partners Companies

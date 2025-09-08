@@ -90,7 +90,7 @@ export default function InvestmentStrategy() {
               variants={itemFadeIn}
             >
               Thanks to the generous gifts of donors and sponsors, Paragon
-              Global Investments deploys $40,000 into both the Paragon Value
+              Global Investments deploys $60,000 into both the Paragon Value
               Fund and Paragon Systematic Fund. Members of Paragon Global
               Investments both develop pitches on mispriced assets and research
               and develop novel algorithmic trading strategies that will be
