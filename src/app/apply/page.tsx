@@ -3,11 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import {
-  FaUserGraduate,
-  FaChartLine,
-  FaClipboardList,
-} from 'react-icons/fa';
+import { FaUserGraduate, FaChartLine, FaClipboardList } from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { handleFormClick } from '@/components/analytics/FormTracker';
@@ -272,8 +268,21 @@ export default function ApplyPage() {
       </section>
 
       {/* Interest Form Section */}
-      <section className="py-16 md:py-24 px-4">
-        <div className="container mx-auto max-w-2xl">
+      <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
+        <div className="container mx-auto max-w-4xl">
+          {/* Section Title */}
+          <motion.h2
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-12 md:mb-16 lg:mb-20 text-center text-white"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            <ShinyText
+              text="Stay Updated"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+            />
+          </motion.h2>
+
           <motion.div
             className="flex justify-center"
             variants={staggerContainer}
@@ -282,26 +291,26 @@ export default function ApplyPage() {
           >
             {/* Interest Form */}
             <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col w-full max-w-md"
+              className="bg-darkNavy p-8 md:p-10 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-all duration-300 flex flex-col w-full max-w-lg shadow-xl"
               variants={cardItem}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.3 } }}
             >
-              <div className="flex items-center mb-6">
-                <div className="bg-pgi-light-blue p-3 rounded-full mr-4">
-                  <FaClipboardList className="text-navy text-xl" />
+              <div className="flex items-center mb-8">
+                <div className="bg-pgi-light-blue p-4 rounded-full mr-6">
+                  <FaClipboardList className="text-navy text-2xl" />
                 </div>
-                <h3 className="text-lg md:text-xl font-medium text-white">
+                <h3 className="text-xl md:text-2xl font-semibold text-white">
                   Interest Form
                 </h3>
               </div>
-              <p className="text-gray-300 mb-6 flex-grow text-sm md:text-base font-light leading-relaxed">
-                Fill out this form to be notified of updates and events.
+              <p className="text-gray-300 mb-8 text-base md:text-lg font-light leading-relaxed">
+                Fill out this form to be notified of updates, events, and important recruitment information.
               </p>
               <motion.a
                 href="https://docs.google.com/forms/d/e/1FAIpQLSe5Fz3UnIf9S_p5scoFVi5WUL4mhpGWLkG8RG21NXUSgx8-Zw/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
+                className="block w-full bg-pgi-light-blue text-white text-center py-4 px-8 rounded-lg font-semibold text-base md:text-lg tracking-wide shadow-lg"
                 whileHover="hover"
                 variants={buttonVariant}
                 onClick={() =>
@@ -318,14 +327,14 @@ export default function ApplyPage() {
                   })
                 }
               >
-                Interest Form
+                Submit Interest Form
               </motion.a>
             </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Timeline Section - Commented Out */}
+      {/* Timeline Section */}
       {/* 
       <section className="py-16 md:py-24 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto max-w-6xl">
@@ -429,49 +438,89 @@ export default function ApplyPage() {
       */}
 
       {/* Recruitment Team Section */}
-      <section className="py-16 md:py-24 px-4">
-        <div className="container mx-auto max-w-6xl">
+      <section className="py-20 md:py-28 lg:py-32 px-4 bg-navy">
+        <div className="container mx-auto max-w-7xl">
           <motion.h2
-            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light mb-8 md:mb-12 lg:mb-16 text-center text-white"
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-center text-white"
             initial="hidden"
             animate="visible"
             variants={fadeIn}
           >
-            <DecryptedText
-              text="Recruitment Team"
-              sequential={true}
-              revealDirection="start"
-              animateOn="view"
-              speed={50}
-              useOriginalCharsOnly={true}
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-white"
+            <ShinyText
+              text="Meet Our Recruitment Team"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
             />
           </motion.h2>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
-            variants={staggerContainer}
+          <motion.p
+            className="text-base md:text-lg text-gray-300 text-center max-w-3xl mx-auto mb-16 md:mb-20 lg:mb-24 font-light leading-relaxed"
             initial="hidden"
             animate="visible"
+            variants={fadeIn}
+            transition={{ delay: 0.2 }}
+          >
+            Our dedicated recruitment team is here to guide you through the application process and answer any questions you may have.
+          </motion.p>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
           >
             {recruitmentTeam.map((member, index) => (
               <motion.div
                 key={index}
                 variants={cardItem}
-                className="bg-darkNavy p-4 md:p-6 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                className="bg-darkNavy p-6 md:p-8 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-all duration-300 shadow-lg hover:shadow-xl"
+                whileHover={{ 
+                  y: -8, 
+                  scale: 1.02,
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                  transition: { duration: 0.3 } 
+                }}
               >
-                <h3 className="text-base md:text-lg font-medium mb-2 text-white">
-                  {member.name}
-                </h3>
-                <p className="text-pgi-light-blue text-sm mb-1 font-medium">
-                  {member.role}
-                </p>
-                <p className="text-gray-400 text-sm font-light">
-                  {member.university}
-                </p>
+                <div className="text-center">
+                  <h3 className="text-lg md:text-xl font-semibold mb-3 text-white">
+                    {member.name}
+                  </h3>
+                  <p className="text-pgi-light-blue text-sm md:text-base mb-2 font-medium">
+                    {member.role}
+                  </p>
+                  <p className="text-gray-400 text-sm md:text-base font-light">
+                    {member.university}
+                  </p>
+                </div>
               </motion.div>
             ))}
+          </motion.div>
+
+          {/* Contact CTA */}
+          <motion.div
+            className="text-center mt-16 md:mt-20 lg:mt-24"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            transition={{ delay: 0.4 }}
+          >
+            <p className="text-gray-300 mb-6 text-base md:text-lg font-light">
+              Have questions? Don't hesitate to reach out!
+            </p>
+            <motion.a
+              href="/contact"
+              className="inline-block bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide shadow-lg"
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: '#1f4287',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+                transition: { duration: 0.2 }
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Contact Us
+            </motion.a>
           </motion.div>
         </div>
       </section>
