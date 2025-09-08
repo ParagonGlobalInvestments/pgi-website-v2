@@ -4,12 +4,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
-  FaCalendarAlt,
   FaUserGraduate,
   FaChartLine,
   FaClipboardList,
-  FaCoffee,
-  FaRegClock,
 } from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
@@ -274,18 +271,18 @@ export default function ApplyPage() {
         </div>
       </section>
 
-      {/* Application Links Section */}
+      {/* Interest Form Section */}
       <section className="py-16 md:py-24 px-4">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-2xl">
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+            className="flex justify-center"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
             {/* Interest Form */}
             <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col"
+              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col w-full max-w-md"
               variants={cardItem}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
@@ -324,96 +321,12 @@ export default function ApplyPage() {
                 Interest Form
               </motion.a>
             </motion.div>
-
-            {/* Application Form */}
-            <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col"
-              variants={cardItem}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="flex items-center mb-6">
-                <div className="bg-pgi-light-blue p-3 rounded-full mr-4">
-                  <FaRegClock className="text-navy text-xl" />
-                </div>
-                <h3 className="text-lg md:text-xl font-medium text-white">
-                  Application Form
-                </h3>
-              </div>
-              <p className="text-gray-300 mb-6 flex-grow text-sm md:text-base font-light leading-relaxed">
-                Application will close on 1/17/2025 at 11:59 PM ET.
-              </p>
-              <motion.a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSesqXvAMhZjHmpRwiPlJAkfTO2zLqQUyr6SEEImYqMjfQnGvg/viewform"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
-                whileHover="hover"
-                variants={buttonVariant}
-                onClick={() =>
-                  handleFormClick({
-                    formName: 'application_form',
-                    formType: 'google_form',
-                    targetUrl:
-                      'https://docs.google.com/forms/d/e/1FAIpQLSesqXvAMhZjHmpRwiPlJAkfTO2zLqQUyr6SEEImYqMjfQnGvg/viewform',
-                    section: 'apply_page',
-                    additionalData: {
-                      button_position: 'application_form_card',
-                      page_section: 'application_links',
-                      priority: 'critical',
-                    },
-                  })
-                }
-              >
-                Apply
-              </motion.a>
-            </motion.div>
-
-            {/* Coffee Chat Signups */}
-            <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col"
-              variants={cardItem}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <div className="flex items-center mb-6">
-                <div className="bg-pgi-light-blue p-3 rounded-full mr-4">
-                  <FaCoffee className="text-navy text-xl" />
-                </div>
-                <h3 className="text-lg md:text-xl font-medium text-white">
-                  Coffee Chat Signups
-                </h3>
-              </div>
-              <p className="text-gray-300 mb-6 flex-grow text-sm md:text-base font-light leading-relaxed">
-                Coffee chats will take place between 1/11/2025 and 1/13/2025.
-              </p>
-              <motion.a
-                href="https://signup.com/go/nqJvsor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-pgi-light-blue text-white text-center py-3 px-6 rounded-md font-medium text-sm md:text-base"
-                whileHover="hover"
-                variants={buttonVariant}
-                onClick={() =>
-                  handleFormClick({
-                    formName: 'coffee_chat_signup',
-                    formType: 'signup_com',
-                    targetUrl: 'https://signup.com/go/nqJvsor',
-                    section: 'apply_page',
-                    additionalData: {
-                      button_position: 'coffee_chat_card',
-                      page_section: 'application_links',
-                      event_dates: '1/11/2025-1/13/2025',
-                    },
-                  })
-                }
-              >
-                Coffee Chat Signups
-              </motion.a>
-            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Timeline Section */}
+      {/* Timeline Section - Commented Out */}
+      {/* 
       <section className="py-16 md:py-24 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto max-w-6xl">
           <motion.h2
@@ -493,7 +406,6 @@ export default function ApplyPage() {
                   </motion.div>
                 </div>
 
-                {/* Timeline Node */}
                 <motion.div
                   className="absolute left-9 md:left-1/2 top-8 w-3 h-3 md:w-4 md:h-4 rounded-full bg-pgi-light-blue border-4 border-navy transform md:-translate-x-1/2 shadow-lg"
                   whileHover={{ scale: 1.3 }}
@@ -502,7 +414,6 @@ export default function ApplyPage() {
                   <div className="absolute inset-0 rounded-full bg-pgi-light-blue animate-ping opacity-75"></div>
                 </motion.div>
 
-                {/* Connector line for desktop */}
                 <div
                   className={`hidden md:block absolute top-12 w-8 lg:w-12 h-0.5 bg-gradient-to-r ${
                     index % 2 === 1
@@ -515,6 +426,7 @@ export default function ApplyPage() {
           </motion.div>
         </div>
       </section>
+      */}
 
       {/* Recruitment Team Section */}
       <section className="py-16 md:py-24 px-4">

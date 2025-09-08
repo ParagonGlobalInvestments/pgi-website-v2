@@ -23,7 +23,7 @@ export default function AboutPage() {
               Paragon Global Investments (formerly PNG) is a student-run
               intercollegiate investment fund with 8 chapters at the top
               universities in the United States. We utilize both fundamental and
-              systematic trading strategies to invest into our $40,000
+              systematic trading strategies to invest into our $60,000
               investment fund.
             </p>
             <p className="text-lg mb-6">
