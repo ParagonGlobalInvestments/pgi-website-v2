@@ -400,7 +400,7 @@ export default function FoundersPage() {
                 </p>
                 <a
                   href={founder.linkedin}
-                  className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
+                  className="inline-flex items-center text-white hover:text-white transition-colors text-sm md:text-base"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -444,7 +444,7 @@ export default function FoundersPage() {
                   <h3 className="text-lg md:text-xl lg:text-2xl font-medium mb-6 md:mb-8 text-center">
                     <ShinyText
                       text={university}
-                      className="text-lg md:text-xl lg:text-2xl font-medium text-pgi-light-blue"
+                      className="text-lg md:text-xl lg:text-2xl font-medium text-white"
                     />
                   </h3>
                   <motion.div
@@ -469,7 +469,7 @@ export default function FoundersPage() {
                         </p>
                         <a
                           href={founder.linkedin}
-                          className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
+                          className="inline-flex items-center text-gray-300 hover:text-white transition-colors text-sm md:text-base"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
