@@ -48,52 +48,52 @@ const researchCommittee = [
   {
     name: 'Soupy De',
     university: 'University of Chicago',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/souptik-de-3b275122b',
   },
   {
     name: 'William Vietor',
     university: 'Columbia University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/william-vietor-4b552022b',
   },
   {
     name: 'Samuel Henriques',
     university: 'Princeton University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/samuel-henriques-62748122b',
   },
   {
     name: 'Ronak Datta',
     university: 'University of Chicago',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/ronak-datta-3b275122b',
   },
   {
     name: 'Anirudh Pottammal',
     university: 'New York University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/anirudh-pottammal-01b186216',
   },
   {
     name: 'Sahishnu Hanumolu',
     university: 'University of Pennsylvania',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/sahishnu-hanumolu-3b275122b',
   },
   {
     name: 'Dominic Olaguera-Delogu',
     university: 'University of Pennsylvania',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/dominic-olaguera-delogu-3b275122b',
   },
   {
     name: 'Matthew Neissen',
     university: 'Yale University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/matthew-neissen-3b275122b',
   },
   {
     name: 'Daniel Siegel',
     university: 'Yale University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/daniel-siegel-3b275122b',
   },
   {
     name: 'Ethan Chang',
     university: 'Columbia University',
-    linkedin: '',
+    linkedin: 'https://www.linkedin.com/in/ethan-chang-3b275122b',
   },
 ];
 
@@ -213,7 +213,7 @@ export default function QuantTeamPage() {
                     href={member.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
+                    className="inline-flex items-center text-white hover:text-white transition-colors text-sm md:text-base"
                   >
                     <FaLinkedin className="text-lg md:text-xl mr-2" />
                     <span>LinkedIn</span>
