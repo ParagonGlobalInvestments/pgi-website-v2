@@ -76,12 +76,11 @@ const investmentCommittee = [
     linkedin: 'https://www.linkedin.com/in/ashish-pothireddy/',
   },
   {
-  {
     name: 'Sean Oh',
     university: 'University of Pennsylvania',
     linkedin: 'https://www.linkedin.com/in/seanoh26/',
   },
-    name: 'Myles Spiess',
+  {    name: 'Myles Spiess',
     university: 'University of Chicago',
     linkedin: 'https://www.linkedin.com/in/myles-spiess-304313242/',
   },
