@@ -56,13 +56,12 @@ const officers = [
     linkedin: 'https://www.linkedin.com/in/myles-spiess-304313242/',
   },
   {
-  {
     name: 'Sean Oh',
     title: 'Co-Chief Operating Officer',
     university: 'University of Pennsylvania',
     linkedin: 'https://www.linkedin.com/in/seanoh26/',
   },
-    name: 'Sohini Banerjee',
+  {    name: 'Sohini Banerjee',
     title: 'Co-Chief Operating Officer',
     university: 'University of Chicago',
     linkedin: '#',
@@ -179,7 +178,7 @@ export default function OfficersPage() {
                 <h2 className="text-lg md:text-xl lg:text-2xl font-medium mb-2 text-white">
                   {officer.name}
                 </h2>
-                <p className="text-white font-medium mb-2 text-sm md:text-base">
+                <p className="text-pgi-light-blue font-medium mb-2 text-sm md:text-base">
                   {officer.title}
                 </p>
                 <p className="text-gray-300 mb-4 text-sm md:text-base font-light">
@@ -187,7 +186,7 @@ export default function OfficersPage() {
                 </p>
                 <a
                   href={officer.linkedin}
-                  className="inline-flex items-center text-white hover:text-white transition-colors text-sm md:text-base"
+                  className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -239,7 +238,7 @@ export default function OfficersPage() {
                 </p>
                 <a
                   href={alumni.linkedin}
-                  className="inline-flex items-center text-white hover:text-white transition-colors text-sm md:text-base"
+                  className="inline-flex items-center text-white hover:text-pgi-light-blue transition-colors text-sm md:text-base"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
