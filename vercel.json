@@ -10,8 +10,5 @@
         { "key": "X-Robots-Tag", "value": "index, follow" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/((?!robots\\.txt|sitemap\\.xml).*)", "destination": "/" }
   ]
 }
