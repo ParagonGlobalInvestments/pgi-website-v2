@@ -88,8 +88,10 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Recommended by Clerk docs:
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Protect APIs
     '/(api|trpc)(.*)',
+
+    // Protect ONLY your private app areas (adjust as needed)
+    '/portal/(.*)'
   ],
 };

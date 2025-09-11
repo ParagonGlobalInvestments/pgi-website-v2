@@ -20,6 +20,3 @@ Disallow: /*.php
 
 # Sitemap location
 Sitemap: https://paragoninvestments.org/sitemap.xml
-
-# Crawl-delay for politeness
-Crawl-delay: 1
