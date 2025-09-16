@@ -24,7 +24,7 @@ export const metadata: Metadata = {
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
     images: [
       {
-        url: '/logos/pgiLogo.jpg',
+        url: '/logos/pgiLogoTransparentDark.png',
         width: 1200,
         height: 630,
         alt: 'Paragon Global Investments Logo',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: 'Paragon Global Investments',
     description:
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
-    images: ['/logos/pgiLogo.jpg'],
+    images: ['/logos/pgiLogoTransparentDark.png'],
   },
   robots: {
     index: true,
@@ -115,7 +115,7 @@ export default function RootLayout({
                 '@type': 'Organization',
                 name: 'Paragon Global Investments',
                 url: 'https://paragoninvestments.org/',
-                logo: 'https://paragoninvestments.org/logos/pgiLogo.jpg',
+                logo: 'https://paragoninvestments.org/logos/pgiLogoTransparentDark.png',
                 sameAs: [
                   'https://www.linkedin.com/company/paragon-global-investments/',
                   'https://www.instagram.com/paragoninvestmentsglobal/',
