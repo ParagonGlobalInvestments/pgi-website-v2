@@ -24,7 +24,7 @@ export const metadata: Metadata = {
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
     images: [
       {
-        url: '/logos/pgiLogoTransparentDark.png',
+        url: '/logos/pgiLogo.jpg',
         width: 1200,
         height: 630,
         alt: 'Paragon Global Investments Logo',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: 'Paragon Global Investments',
     description:
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
-    images: ['/logos/pgiLogoTransparentDark.png'],
+    images: ['/logos/pgiLogo.jpg'],
   },
   robots: {
     index: true,
@@ -53,6 +53,16 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
   category: 'finance',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    other: [{ rel: 'mask-icon', url: '/icons/icon-192.png', color: '#00172B' }],
+  },
 };
 
 export default function RootLayout({
@@ -64,10 +74,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={GeistSans.className}>
         <head>
-          <link rel="icon" href="/favicon.ico" sizes="any" />
-          <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
-          <link rel="apple-touch-icon" href="/icons/favicon.ico" />
-          <meta name="theme-color" content="#ffffff" />
+          <link rel="icon" href="/favicon.ico" sizes="32x32" />
+          <link
+            rel="icon"
+            href="/icons/icon-192.png"
+            type="image/png"
+            sizes="192x192"
+          />
+          <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+          <link rel="manifest" href="/site.webmanifest" />
+          <meta name="theme-color" content="#00172B" />
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -99,7 +115,7 @@ export default function RootLayout({
                 '@type': 'Organization',
                 name: 'Paragon Global Investments',
                 url: 'https://paragoninvestments.org/',
-                logo: 'https://paragoninvestments.org/logos/pgiLogoTransparentDark.png',
+                logo: 'https://paragoninvestments.org/logos/pgiLogo.jpg',
                 sameAs: [
                   'https://www.linkedin.com/company/paragon-global-investments/',
                   'https://www.instagram.com/paragoninvestmentsglobal/',
