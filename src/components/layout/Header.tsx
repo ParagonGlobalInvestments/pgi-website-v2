@@ -244,6 +244,7 @@ const Header = () => {
     { name: 'Who We Are', url: '/who-we-are' },
     { name: 'Investment Strategy', url: '/investment-strategy' },
     { name: 'Education', url: '/education' },
+    { name: 'Resources', url: '/resources' },
     { name: 'Sponsors & Partners', url: '/sponsors' },
   ];
 
