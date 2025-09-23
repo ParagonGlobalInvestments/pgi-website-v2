@@ -68,6 +68,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   const pathname = req.nextUrl.pathname;
 
+  // Skip NextAuth routes entirely - don't process with Clerk
+  if (pathname.startsWith('/api/nextauth')) {
+    console.log(`Skipping NextAuth route: ${pathname}`);
+    return NextResponse.next();
+  }
+
   // Allow sitemap.xml and robots.txt to pass through immediately
   if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
     console.log(`Allowing ${pathname} to pass through middleware`);
