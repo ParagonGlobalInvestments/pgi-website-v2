@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import StandaloneLayout from '@/components/layout/StandaloneLayout';
-import { SessionProvider } from 'next-auth/react';
+import { NextAuthProvider } from '@/components/providers/NextAuthProvider';
 
 export const metadata: Metadata = {
   title: 'Resources',
@@ -15,8 +15,8 @@ export default function ResourcesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider>
+    <NextAuthProvider>
       <StandaloneLayout>{children}</StandaloneLayout>
-    </SessionProvider>
+    </NextAuthProvider>
   );
 }
