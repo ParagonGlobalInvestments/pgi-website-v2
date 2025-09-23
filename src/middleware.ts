@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
   // About section dropdown routes
   '/investment-strategy',
   '/education',
+  '/resources',
   '/sponsors',
 
   // National Committee routes
@@ -38,6 +39,7 @@ const isPublicRoute = createRouteMatcher([
 
   // API routes
   '/api/webhooks(.*)',
+  '/api/nextauth(.*)',
 
   // Portal auth routes (for development)
   '/portal/signin',
