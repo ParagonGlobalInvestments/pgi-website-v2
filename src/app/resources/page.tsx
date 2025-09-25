@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { createClient } from '@/lib/supabase/browser';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/posthog';
@@ -42,24 +42,16 @@ const itemFadeIn = {
   },
 };
 
-const buttonHover = {
-  scale: 1.05,
-  backgroundColor: '#1f4287',
-  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  transition: {
-    duration: 0.2,
-    ease: 'easeInOut',
-  },
-};
-
 const DRIVE_FOLDER_ID = '1ArM8sjxfNGaxxTHeTrjd1I-EqJWHvB49';
 const DRIVE_FOLDER_URL = `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}?usp=drive_link`;
 const DRIVE_EMBED_URL = `https://drive.google.com/embeddedfolderview?id=${DRIVE_FOLDER_ID}#grid`;
 
 export default function ResourcesPage() {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
   const [isEduRequired, setIsEduRequired] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     // Check if .edu requirement is enabled
@@ -67,30 +59,52 @@ export default function ResourcesPage() {
       process.env.NEXT_PUBLIC_PGI_REQUIRE_EDU === 'true' ||
       process.env.PGI_REQUIRE_EDU === 'true';
     setIsEduRequired(requireEdu);
-  }, []);
 
-  const handleSignIn = () => {
+    // Get current user
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+  }, [supabase]);
+
+  const handleSignIn = async () => {
     trackEvent('resources_cta_clicked', {
       page: '/resources',
       action: 'google_signin_initiated',
     });
-    signIn('google', { callbackUrl: '/resources' });
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/resources',
+      },
+    });
+
+    if (error) {
+      console.error('Sign in error:', error);
+    }
   };
 
-  const handleSwitchAccount = () => {
+  const handleSwitchAccount = async () => {
     trackEvent('resources_access_denied', {
       page: '/resources',
       action: 'switch_account_clicked',
-      email: session?.user?.email,
+      email: user?.email,
     });
-    signOut({ callbackUrl: '/resources' });
+
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   const handleDriveButtonClick = () => {
     trackEvent('resources_access_granted', {
       page: '/resources',
       action: 'drive_button_clicked',
-      email: session?.user?.email,
+      email: user?.email,
     });
   };
 
@@ -99,7 +113,7 @@ export default function ResourcesPage() {
     trackEvent('resources_embed_blocked', {
       page: '/resources',
       action: 'iframe_blocked_fallback',
-      email: session?.user?.email,
+      email: user?.email,
     });
   };
 
@@ -108,11 +122,9 @@ export default function ResourcesPage() {
   };
 
   const shouldShowEduError =
-    isEduRequired &&
-    session?.user?.email &&
-    !isValidEduEmail(session.user.email);
+    isEduRequired && user?.email && !isValidEduEmail(user.email);
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="bg-navy text-white min-h-screen flex items-center justify-center">
         <div className="text-center" role="status" aria-live="polite">
@@ -163,7 +175,7 @@ export default function ResourcesPage() {
 
           {/* Authentication and Content Section */}
           <motion.div className="max-w-4xl mx-auto" variants={fadeIn}>
-            {!session ? (
+            {!user ? (
               /* Sign-in CTA */
               <div className="text-center">
                 <motion.div
@@ -221,7 +233,7 @@ export default function ResourcesPage() {
                     students. Please sign in with your .edu email address.
                   </p>
                   <p className="text-gray-400 mb-8 text-sm">
-                    Currently signed in as: {session.user?.email}
+                    Currently signed in as: {user.email}
                   </p>
                   <Button
                     onClick={handleSwitchAccount}
@@ -237,51 +249,47 @@ export default function ResourcesPage() {
             ) : (
               /* Authenticated and validated - show resources */
               <div>
-                <motion.div className="text-center mb-8" variants={itemFadeIn}>
-                  <h2 className="text-xl md:text-2xl font-semibold mb-4 text-white">
-                    Welcome, {session.user?.name?.split(' ')[0]}!
-                  </h2>
-                  <p className="text-gray-300 text-base md:text-lg mb-4">
-                    Access granted. Explore our comprehensive resource library.
-                  </p>
-                  <p className="text-gray-400 text-sm mb-4">
-                    Signed in as: {session.user?.email}
-                  </p>
-                  <button
-                    onClick={handleSwitchAccount}
-                    className="text-gray-400 hover:text-gray-300 text-sm underline transition-colors"
-                  >
-                    Sign out
-                  </button>
-                </motion.div>
-
                 <motion.div
                   className="bg-darkNavy border border-gray-700 rounded-xl overflow-hidden shadow-xl"
                   variants={itemFadeIn}
                 >
                   {!iframeError ? (
-                    <iframe
-                      src={DRIVE_EMBED_URL}
-                      className="w-full h-[70vh] rounded-lg border-0"
-                      onError={handleIframeError}
-                      onLoad={() => {
-                        // Check if iframe loaded successfully
-                        setTimeout(() => {
-                          try {
-                            const iframe = document.querySelector('iframe');
-                            if (iframe && !iframe.contentDocument) {
-                              handleIframeError();
-                            }
-                          } catch (e) {
-                            handleIframeError();
-                          }
-                        }, 3000);
-                      }}
-                      title="PGI Resources Drive Folder - Educational materials and templates"
-                      aria-label="Google Drive folder containing PGI educational resources"
-                      allow="fullscreen"
-                      loading="lazy"
-                    />
+                    <div className="relative">
+                      <iframe
+                        src={DRIVE_EMBED_URL}
+                        className="w-full h-[70vh] rounded-lg border-0"
+                        onError={handleIframeError}
+                        onLoad={() => {
+                          // Iframe loaded successfully - no need to check contentDocument
+                          // as Google Drive embeds are cross-origin and will always fail this check
+                          console.log('Google Drive embed loaded successfully');
+                        }}
+                        title="PGI Resources Drive Folder - Educational materials and templates"
+                        aria-label="Google Drive folder containing PGI educational resources"
+                        allow="fullscreen"
+                        loading="lazy"
+                      />
+
+                      {/* Helpful overlay for access issues */}
+                      <div className="absolute bottom-4 right-4 bg-black/80 text-white text-xs px-3 py-2 rounded-lg backdrop-blur-sm">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span>
+                            Need access? Request it in the embed above
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     /* Fallback button if iframe is blocked */
                     <div className="text-center p-12 md:p-16">
