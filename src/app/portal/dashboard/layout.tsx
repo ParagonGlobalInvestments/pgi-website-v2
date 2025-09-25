@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { createClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import {
   FaBriefcase,
@@ -340,7 +340,8 @@ export default function DashboardLayout({
   const [internships, setInternships] = useState([]);
   const [userCount, setUserCount] = useState(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { user, isLoaded } = useUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
   const {
     user: mongoUser,
     isLoading: isMongoUserLoading,
@@ -357,6 +358,25 @@ export default function DashboardLayout({
 
   // Add state for sidebar hover
   const [isHoveringCollapsed, setIsHoveringCollapsed] = useState(false);
+
+  // Check Supabase auth
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    checkAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Add effect for Escape key to close onboarding modal
   useEffect(() => {
@@ -379,14 +399,14 @@ export default function DashboardLayout({
 
   // Update needsOnboarding when mongoUser changes
   useEffect(() => {
-    if (isLoaded && user && !isMongoUserLoading && mongoUser) {
+    if (supabaseUser && !isMongoUserLoading && mongoUser) {
       setNeedsOnboarding(checkOnboardingNeeded(mongoUser));
     }
-  }, [isLoaded, user, mongoUser, isMongoUserLoading]);
+  }, [supabaseUser, mongoUser, isMongoUserLoading]);
 
-  // Sync Clerk user with MongoDB on initial load - only once
+  // Sync Supabase user with MongoDB on initial load - only once
   useEffect(() => {
-    if (isLoaded && user && !syncAttempted && !mongoUser) {
+    if (supabaseUser && !syncAttempted && !mongoUser) {
       setSyncAttempted(true);
 
       // Only sync once per session
@@ -402,12 +422,12 @@ export default function DashboardLayout({
 
       syncUserOnce();
     }
-  }, [isLoaded, user, syncUser, mongoUser, syncAttempted]);
+  }, [supabaseUser, syncUser, mongoUser, syncAttempted]);
 
-  // Get user metadata once loaded
-  const userRole = (user?.publicMetadata?.role as string) || 'member';
-  const userTrack = (user?.publicMetadata?.track as string) || 'N/A';
-  const userChapter = (user?.publicMetadata?.chapter as string) || 'N/A';
+  // Get user metadata from MongoDB user data
+  const userRole = mongoUser?.org?.permissionLevel || 'member';
+  const userTrack = mongoUser?.org?.track || 'value';
+  const userChapter = mongoUser?.org?.chapter?.name || 'N/A';
 
   // Get role icon with proper type checking
   const getRoleIcon = (role: string | undefined) => {
@@ -438,7 +458,7 @@ export default function DashboardLayout({
   // Fetch chapters and internships with proper typing and error handling
   useEffect(() => {
     // Only fetch if user is loaded and we haven't already loaded chapters
-    if (isLoaded && chapters.length === 0) {
+    if (supabaseUser && chapters.length === 0) {
       const fetchData = async () => {
         try {
           // Fetch chapters
@@ -467,7 +487,7 @@ export default function DashboardLayout({
 
       fetchData();
     }
-  }, [isLoaded, chapters.length, userChapter]);
+  }, [supabaseUser, chapters.length, userChapter]);
 
   useEffect(() => {
     // Set active link based on URL
@@ -512,10 +532,10 @@ export default function DashboardLayout({
       }
     };
 
-    if (isLoaded) {
+    if (supabaseUser) {
       fetchUserStats();
     }
-  }, [isLoaded]);
+  }, [supabaseUser]);
 
   // Handle onboarding completion
   const handleOnboardingComplete = async () => {
@@ -561,7 +581,7 @@ export default function DashboardLayout({
   };
 
   // Create a loading state that waits for client-side rendering
-  if (!isClient || !isLoaded) {
+  if (!isClient || !supabaseUser) {
     return (
       <div className="flex min-h-screen bg-white">
         <div className="flex-1 min-w-0 bg-white lg:ml-0">
@@ -594,16 +614,23 @@ export default function DashboardLayout({
   // Update displayName, displayRole, etc. to reference the correct MongoUser interface type and handle incomplete data
   const displayName =
     mongoUser?.personal?.name ||
-    (user ? `${user.firstName || ''} ${user.lastName || ''}` : '');
+    supabaseUser?.user_metadata?.full_name ||
+    supabaseUser?.email?.split('@')[0] ||
+    '';
   const displayRole = mongoUser?.org?.permissionLevel || userRole;
   const displayTrack = mongoUser?.org?.track || userTrack;
   const displayChapter =
     mongoUser?.org?.chapter?.name || selectedChapter?.name || userChapter;
-  const displayAvatar = mongoUser?.profile?.avatarUrl || user?.imageUrl;
+  const displayAvatar =
+    mongoUser?.profile?.avatarUrl || supabaseUser?.user_metadata?.avatar_url;
 
-  const firstName = user?.firstName || '';
-  const lastName = user?.lastName || '';
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const firstName = supabaseUser?.user_metadata?.full_name?.split(' ')[0] || '';
+  const lastName =
+    supabaseUser?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '';
+  const initials =
+    `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() ||
+    supabaseUser?.email?.charAt(0).toUpperCase() ||
+    'U';
 
   // Is data complete enough to show
   const hasCompleteData =
@@ -612,7 +639,7 @@ export default function DashboardLayout({
     displayChapter &&
     displayChapter !== 'N/A' &&
     displayTrack &&
-    displayTrack !== 'N/A';
+    displayTrack !== undefined;
 
   // OnboardingWizard userData needs to use the correct fields from the nested structure
   const onboardingUserData = {
@@ -1117,7 +1144,7 @@ export default function DashboardLayout({
                         href="#"
                         onClick={() =>
                           window.open(
-                            'https://accounts.clerk.dev/user/user_profile',
+                            '/portal/dashboard/settings/profile',
                             '_blank'
                           )
                         }
@@ -1235,7 +1262,7 @@ export default function DashboardLayout({
                             href="#"
                             onClick={() =>
                               window.open(
-                                'https://accounts.clerk.dev/user/user_profile',
+                                '/portal/dashboard/settings/profile',
                                 '_blank'
                               )
                             }
