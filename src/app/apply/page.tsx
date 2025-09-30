@@ -57,7 +57,9 @@ type TeamMember = {
     name: string;
     role: string;
     university: string;
-  };
+    linkedin?: string; // <-- add this
+};
+  
   
 const nationalRecruitmentTeam: TeamMember[] = [
     {
@@ -127,31 +129,37 @@ const uchicagoRecruitmentTeam: TeamMember[] = [
       name: 'Nicolas Tchkotoua',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
     },
     {
       name: 'Riley Gilsenan',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/rileygilsenan/',
     },
     {
       name: 'Noor Kaur',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/noor-kaur-738867272/'
     },
     {
       name: 'Glen Cahilly',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/glen-cahilly/'
     },
     {
       name: 'Ishaan Sareen',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/ishaansareen/'
     },
     {
       name: 'Lars Barth',
       role: 'Recruiter',
       university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/lars-barth/'
     },
 ];
 
@@ -164,7 +172,7 @@ function RecruitmentTeamSection({
     title?: string;
   }) {
     return (
-      <section className="py-20 md:py-28 lg:py-32 px-4 bg-navy">
+      <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
         <div className="container mx-auto max-w-7xl">
           <motion.h2
             className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-10 text-center text-white"
@@ -189,10 +197,40 @@ function RecruitmentTeamSection({
                 viewport={{ once: true, amount: 0.2 }}
               >
                 <div>
-                  <p className="text-white font-semibold text-lg">{m.name}</p>
-                  <p className="text-gray-300 text-sm mt-1">{m.role}</p>
-                  <p className="text-gray-400 text-sm mt-2 italic">{m.university}</p>
-                </div>
+                    <p className="text-white font-semibold text-lg">{m.name}</p>
+                    <p className="text-gray-300 text-sm mt-1">{m.role}</p>
+                    <p className="text-gray-400 text-sm mt-2 italic">{m.university}</p>
+
+                    {m.linkedin && (
+                        <div className="mt-4">
+                        <a
+                            href={m.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`Open ${m.name}'s LinkedIn`}
+                            className="inline-flex items-center gap-2 rounded-lg border border-pgi-light-blue/60 px-3 py-2 text-sm
+                                    text-white hover:bg-pgi-light-blue hover:text-white transition shadow-md"
+                        >
+                            {/* If you already use react-icons, you can import FaLinkedin */}
+                            {/* import { FaLinkedin } from 'react-icons/fa'; */}
+                            {/* <FaLinkedin className="text-base" /> */}
+                            <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 448 512"
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                            focusable="false"
+                            >
+                            <path
+                                fill="currentColor"
+                                d="M100.28 448H7.4V148.9h92.88zm-46.44-340a53.79 53.79 0 1 1 53.79-53.79 53.79 53.79 0 0 1-53.79 53.8zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.27-79.2-48.3 0-55.7 37.7-55.7 76.6V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.6 42.7-48.5 87.8-48.5 94 0 111.3 61.9 111.3 142.3V448z"
+                            />
+                            </svg>
+                            LinkedIn
+                        </a>
+                        </div>
+                    )}
+                    </div>         
               </motion.div>
             ))}
           </div>
@@ -246,12 +284,12 @@ function GeneralRecruitment() {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-10 md:pt-18 lg:pt-24 pb-8 md:pb-12 px-4">
+      <section className="pt-10 md:pt-16 lg:pt-20 pb-12 md:pb-16 px-4 bg-navy">
         <div className="container mx-auto">
           <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
               <ShinyText
-                text="PGI Winter 2025 National Recruitment"
+                text="PGI 2025 National Recruitment"
                 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
               />
             </h1>
@@ -341,7 +379,7 @@ function GeneralRecruitment() {
       </section>
 
       {/* Interest Form */}
-      <section className="py-20 px-4 bg-pgi-dark-blue">
+      <section className="py-20 px-4 bg-navy">
         <div className="container mx-auto max-w-4xl">
           <motion.div className="flex justify-center" variants={staggerContainer} initial="hidden" animate="visible">
             <motion.div
@@ -389,7 +427,7 @@ function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-10 md:pt-18 lg:pt-24 pb-8 md:pb-12 px-4">
+      <section className="pt-10 md:pt-16 lg:pt-20 pb-10 md:pb-16 px-4 bg-navy">
         <div className="container mx-auto">
           <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
@@ -466,9 +504,8 @@ function UChicagoRecruitment() {
     </>
   );
 }
-
-
-function TabUnderline({
+  
+  function TabSwitch({
     value,
     onChange,
   }: {
@@ -480,22 +517,16 @@ function TabUnderline({
       { key: 'uchicago', label: 'UChicago' },
     ];
   
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const idx = options.findIndex(o => o.key === value);
-      if (e.key === 'ArrowRight') onChange(options[(idx + 1) % options.length].key);
-      if (e.key === 'ArrowLeft') onChange(options[(idx - 1 + options.length) % options.length].key);
-    };
-  
     return (
-        <div className="sticky top-0 z-20 bg-pgi-light-blue backdrop-blur border-b border-gray-800">
-          <div className="container mx-auto px-4">
-            <div
-              role="tablist"
-              aria-label="Recruitment tabs"
-              className="relative mx-auto flex justify-center items-center gap-6 md:gap-8 h-12 max-w-2xl"
-              onKeyDown={handleKeyDown}
-            >
-              {options.map(opt => {
+        <div className="sticky top-0 z-20 bg-pgi-dark-blue">
+        <div className="container mx-auto px-4">
+          <div
+            role="tablist"
+            aria-label="Recruitment tabs"
+            className="mx-auto max-w-xl relative py-3"
+          >
+            <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
+              {options.map((opt) => {
                 const isActive = value === opt.key;
                 return (
                   <button
@@ -505,25 +536,27 @@ function TabUnderline({
                     aria-controls={`panel-${opt.key}`}
                     tabIndex={isActive ? 0 : -1}
                     onClick={() => onChange(opt.key)}
-                    className={`relative h-full -mb-px inline-flex items-center text-sm md:text-base font-medium
-                      transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
-                      ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+                    className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
+                      ${isActive ? 'text-white' : 'text-gray-200 hover:text-white'}`}
                   >
-                    {opt.label}
+                    {/* Animated pill background */}
                     {isActive && (
                       <motion.span
-                        layoutId="underline"
-                        className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-pgi-light-blue"
-                        transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                        layoutId="seg-pill"
+                        className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
+                        transition={{ type: 'spring', stiffness: 450, damping: 30 }}
                       />
                     )}
+                    <span className="relative">{opt.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
         </div>
-      );      
+      </div>
+    );
   }
   
 
@@ -544,9 +577,9 @@ function TabUnderline({
     }, [tab]);
   
     return (
-      <div className="bg-navy text-white min-h-screen">
+      <div className="bg-pgi-dark-blue text-white min-h-screen">
         {/* Minimal underline nav */}
-        <TabUnderline value={tab} onChange={setTab} />
+        <TabSwitch value={tab} onChange={setTab} />
   
         {/* Tab Content */}
         {tab === 'general' ? (
