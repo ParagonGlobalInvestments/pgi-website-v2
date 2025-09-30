@@ -246,7 +246,7 @@ function GeneralRecruitment() {
   return (
     <>
       {/* Hero Section */}
-      <section className="pt-16 md:pt-24 lg:pt-32 pb-6 md:pb-8 px-4">
+      <section className="pt-10 md:pt-18 lg:pt-24 pb-8 md:pb-12 px-4">
         <div className="container mx-auto">
           <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
@@ -389,7 +389,7 @@ function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-16 md:pt-24 lg:pt-32 pb-6 md:pb-8 px-4">
+      <section className="pt-10 md:pt-18 lg:pt-24 pb-8 md:pb-12 px-4">
         <div className="container mx-auto">
           <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
@@ -487,43 +487,43 @@ function TabUnderline({
     };
   
     return (
-      <div className="sticky top-0 z-20 bg-navy/80 backdrop-blur border-b border-gray-800">
-        <div className="container mx-auto px-4">
-          <div
-            role="tablist"
-            aria-label="Recruitment tabs"
-            className="relative flex gap-6 md:gap-8 items-center h-12"
-            onKeyDown={handleKeyDown}
-          >
-            {options.map(opt => {
-              const isActive = value === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`panel-${opt.key}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => onChange(opt.key)}
-                  className={`relative h-full -mb-px inline-flex items-center text-sm md:text-base font-medium
-                    transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
-                    ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`}
-                >
-                  {opt.label}
-                  {isActive && (
-                    <motion.span
-                      layoutId="underline"
-                      className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-pgi-light-blue"
-                      transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
+        <div className="sticky top-0 z-20 bg-pgi-light-blue backdrop-blur border-b border-gray-800">
+          <div className="container mx-auto px-4">
+            <div
+              role="tablist"
+              aria-label="Recruitment tabs"
+              className="relative mx-auto flex justify-center items-center gap-6 md:gap-8 h-12 max-w-2xl"
+              onKeyDown={handleKeyDown}
+            >
+              {options.map(opt => {
+                const isActive = value === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`panel-${opt.key}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => onChange(opt.key)}
+                    className={`relative h-full -mb-px inline-flex items-center text-sm md:text-base font-medium
+                      transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
+                      ${isActive ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+                  >
+                    {opt.label}
+                    {isActive && (
+                      <motion.span
+                        layoutId="underline"
+                        className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-pgi-light-blue"
+                        transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );      
   }
   
 
