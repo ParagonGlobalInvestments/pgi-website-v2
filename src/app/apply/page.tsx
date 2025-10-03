@@ -12,8 +12,8 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 
-const UCHICAGO_APPLY_URL = '#'; // replace with real URL when ready
-const applicationsOpen = false;  // set to true when applications open
+const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
+const applicationsOpen = true;  // set to true when applications open
 
 
 /** Animation variants (unchanged) */
@@ -447,6 +447,7 @@ function UChicagoRecruitment() {
                             bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
+                target='_blank'
                 >
                 Apply Now — UChicago
                 </motion.a>
