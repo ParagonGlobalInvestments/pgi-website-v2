@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useUser } from '@clerk/nextjs';
-import { useMongoUser } from '@/hooks/useMongoUser';
-import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
 import {
   Card,
   CardContent,
@@ -26,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
 // Updated to match the nested MongoDB schema
 interface UserData {
@@ -206,23 +205,55 @@ export default function OnboardingWizard({
   userData,
   lightTheme = false,
 }: OnboardingWizardProps) {
-  const { user } = useUser();
-  const { syncUser } = useMongoUser();
-  const router = useRouter();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(OnboardingStep.Welcome);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Form data with nested structure to match MongoDB schema
+  // Check Supabase auth
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    checkAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  // Update form data when supabaseUser is loaded
+  useEffect(() => {
+    if (supabaseUser) {
+      setFormData(prev => ({
+        ...prev,
+        personal: {
+          ...prev.personal,
+          name: supabaseUser.user_metadata?.full_name || '',
+          email: supabaseUser.email || '',
+        },
+      }));
+    }
+  }, [supabaseUser]);
+
+  // Form data with nested structure to match MongoDB schema - initialize with useEffect
   const [formData, setFormData] = useState<UserData>({
     personal: {
-      name: user?.fullName || '',
-      email: user?.primaryEmailAddress?.emailAddress || '',
+      name: '',
+      email: '',
       bio: userData?.bio || '',
       major: userData?.major || '',
       gradYear: userData?.gradYear || new Date().getFullYear() + 1,
       isAlumni: false,
-      phone: user?.phoneNumbers?.[0]?.phoneNumber || '',
+      phone: '',
     },
     org: {
       chapter: {
@@ -580,29 +611,47 @@ export default function OnboardingWizard({
         return (
           <div className="space-y-6">
             <div className="flex justify-center">
-              <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-4xl">🚀</span>
+              <div className="w-24 h-24 rounded-full flex items-center justify-center">
+                <img
+                  src="/logos/pgiLogoTransparentDark.png"
+                  alt="Paragon Global Investments"
+                  className="w-24 h-24 object-contain"
+                />
               </div>
             </div>
             <div className="text-center space-y-2">
-              <h3 className="text-2xl font-bold text-gray-800">
-                Welcome to Paragon
+              <h3 className="text-2xl font-semibold text-gray-800">
+                <DecryptedText
+                  text="Welcome to"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={30}
+                  useOriginalCharsOnly={true}
+                  className="text-2xl font-semibold text-gray-800"
+                />
+                <br />
+                <DecryptedText
+                  text="Paragon Global Investments"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={25}
+                  useOriginalCharsOnly={true}
+                  className="text-pgi-accent-blue font-bold"
+                />
               </h3>
               <p className="text-gray-600">
-                Let's set up your profile so you can get the most out of our
-                platform. This will only take a few minutes.
+                Let's set up your profile. This will only take a few minutes, I
+                promise.
               </p>
             </div>
             <div className="flex justify-center pt-4">
               <Button
                 onClick={goToNextStep}
-                className={`${
-                  lightTheme
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-[#00172B] hover:bg-[#003E6B]'
-                } text-white px-6 py-2 rounded-md transition-colors`}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
               >
-                Let's Get Started <ChevronRightIcon className="ml-2 h-4 w-4" />
+                Start <ChevronRightIcon className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -613,10 +662,26 @@ export default function OnboardingWizard({
           <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-gray-800">
-                Your Basic Information
+                <DecryptedText
+                  text="Your Basic Information"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={20}
+                  useOriginalCharsOnly={true}
+                  className="text-xl font-semibold text-gray-800"
+                />
               </h3>
               <p className="text-gray-600">
-                Confirm these details from your account.
+                <DecryptedText
+                  text="Confirm these details from your account."
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={15}
+                  useOriginalCharsOnly={true}
+                  className="text-gray-600"
+                />
               </p>
             </div>
 
@@ -633,7 +698,7 @@ export default function OnboardingWizard({
                     updateFormData('personal', 'name', e.target.value)
                   }
                   placeholder="Your full name"
-                  className="border-2 border-gray-300 focus-visible:ring-blue-500"
+                  className="border-2 border-gray-300 text-black focus-visible:ring-blue-500"
                 />
               </div>
 
@@ -650,10 +715,10 @@ export default function OnboardingWizard({
                   }
                   placeholder="Your email address"
                   type="email"
-                  disabled={!!user?.primaryEmailAddress}
-                  className="border-2 border-gray-300 focus-visible:ring-blue-500"
+                  disabled={!!supabaseUser?.email}
+                  className="border-2 border-gray-300 text-black focus-visible:ring-blue-500"
                 />
-                {user?.primaryEmailAddress && (
+                {supabaseUser?.email && (
                   <p className="text-xs text-gray-500">
                     This email is verified through your account.
                   </p>
@@ -689,11 +754,7 @@ export default function OnboardingWizard({
               <Button
                 onClick={goToNextStep}
                 disabled={!canProceed()}
-                className={`${
-                  lightTheme
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-[#00172B] hover:bg-[#003E6B]'
-                } text-white`}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white"
               >
                 Next
               </Button>
@@ -706,11 +767,26 @@ export default function OnboardingWizard({
           <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-gray-800">
-                Select Your Investment Track
+                <DecryptedText
+                  text="Select Your Investment Track"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={20}
+                  useOriginalCharsOnly={true}
+                  className="text-xl font-semibold text-gray-800"
+                />
               </h3>
               <p className="text-gray-600">
-                Choose the investment approach that best aligns with your
-                interests and goals.
+                <DecryptedText
+                  text="Choose the investment approach that best aligns with your interests and goals."
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={12}
+                  useOriginalCharsOnly={true}
+                  className="text-gray-600"
+                />
               </p>
             </div>
 
@@ -724,12 +800,16 @@ export default function OnboardingWizard({
                   value={formData.org?.track}
                   onValueChange={value => updateFormData('org', 'track', value)}
                 >
-                  <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500">
+                  <SelectTrigger className="border-2 border-gray-300 text-black focus:border-blue-500">
                     <SelectValue placeholder="Select your investment track" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white text-gray-900 border border-gray-200 z-[90]">
                     {TRACKS.map(track => (
-                      <SelectItem key={track.id} value={track.id}>
+                      <SelectItem
+                        key={track.id}
+                        value={track.id}
+                        className="cursor-pointer hover:bg-gray-100"
+                      >
                         {track.name}
                       </SelectItem>
                     ))}
@@ -758,12 +838,16 @@ export default function OnboardingWizard({
                     value={formData.org.trackRoles?.[0] || ''}
                     onValueChange={value => updateTrackRole(value)}
                   >
-                    <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500">
+                    <SelectTrigger className="border-2 border-gray-300 text-black focus:border-blue-500">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white text-gray-900 border border-gray-200 z-[90]">
                       {availableRoles.map(role => (
-                        <SelectItem key={role.id} value={role.id}>
+                        <SelectItem
+                          key={role.id}
+                          value={role.id}
+                          className="cursor-pointer hover:bg-gray-100"
+                        >
                           {role.name}
                         </SelectItem>
                       ))}
@@ -800,12 +884,16 @@ export default function OnboardingWizard({
                       }
                       onValueChange={value => updateTrackRole(value)}
                     >
-                      <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500">
+                      <SelectTrigger className="border-2 border-gray-300 text-black focus:border-blue-500">
                         <SelectValue placeholder="Select your primary role" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white text-gray-900 border border-gray-200 z-[90]">
                         {availableRoles.map(role => (
-                          <SelectItem key={role.id} value={role.id}>
+                          <SelectItem
+                            key={role.id}
+                            value={role.id}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
                             {role.name}
                           </SelectItem>
                         ))}
@@ -833,7 +921,7 @@ export default function OnboardingWizard({
                           />
                           <Label
                             htmlFor={role.id}
-                            className="text-sm font-normal cursor-pointer"
+                            className="text-sm font-normal cursor-pointer text-black"
                           >
                             {role.name}
                           </Label>
@@ -859,11 +947,7 @@ export default function OnboardingWizard({
               <Button
                 onClick={goToNextStep}
                 disabled={!canProceed()}
-                className={`${
-                  lightTheme
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-[#00172B] hover:bg-[#003E6B]'
-                } text-white`}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white"
               >
                 Next
               </Button>
@@ -876,10 +960,26 @@ export default function OnboardingWizard({
           <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-gray-800">
-                Select Your Chapter
+                <DecryptedText
+                  text="Select Your Chapter"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={20}
+                  useOriginalCharsOnly={true}
+                  className="text-xl font-semibold text-gray-800"
+                />
               </h3>
               <p className="text-gray-600">
-                Which university chapter are you a part of?
+                <DecryptedText
+                  text="Which university chapter are you a part of?"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={15}
+                  useOriginalCharsOnly={true}
+                  className="text-gray-600"
+                />
               </p>
             </div>
 
@@ -894,12 +994,16 @@ export default function OnboardingWizard({
                   updateFormData('org', 'chapter', { name: value })
                 }
               >
-                <SelectTrigger className="border-2 border-gray-300 focus:border-blue-500">
+                <SelectTrigger className="border-2 border-gray-300 text-black focus:border-blue-500">
                   <SelectValue placeholder="Select your university chapter" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-gray-900 border border-gray-200 z-[90]">
                   {CHAPTERS.map(chapter => (
-                    <SelectItem key={chapter} value={chapter}>
+                    <SelectItem
+                      key={chapter}
+                      value={chapter}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
                       {chapter}
                     </SelectItem>
                   ))}
@@ -918,11 +1022,7 @@ export default function OnboardingWizard({
               <Button
                 onClick={goToNextStep}
                 disabled={!canProceed()}
-                className={`${
-                  lightTheme
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-[#00172B] hover:bg-[#003E6B]'
-                } text-white`}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white"
               >
                 Next
               </Button>
@@ -935,9 +1035,27 @@ export default function OnboardingWizard({
           <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="text-xl font-semibold text-gray-800">
-                Complete Your Profile
+                <DecryptedText
+                  text="Complete Your Profile"
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={20}
+                  useOriginalCharsOnly={true}
+                  className="text-xl font-semibold text-gray-800"
+                />
               </h3>
-              <p className="text-gray-600">Let us know a bit more about you.</p>
+              <p className="text-gray-600">
+                <DecryptedText
+                  text="Let us know a bit more about you."
+                  sequential={true}
+                  revealDirection="start"
+                  animateOn="view"
+                  speed={15}
+                  useOriginalCharsOnly={true}
+                  className="text-gray-600"
+                />
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -1069,11 +1187,7 @@ export default function OnboardingWizard({
               <Button
                 onClick={goToNextStep}
                 disabled={!canProceed()}
-                className={`${
-                  lightTheme
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-[#00172B] hover:bg-[#003E6B]'
-                } text-white`}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white"
               >
                 Complete Setup
               </Button>
@@ -1087,11 +1201,27 @@ export default function OnboardingWizard({
             <div className="p-3 rounded-full bg-green-100 mb-6">
               <CheckIcon className="h-10 w-10 text-green-600" />
             </div>
-            <CardTitle className="mb-4 text-2xl">You're all set!</CardTitle>
+            <CardTitle className="mb-4 text-2xl">
+              <DecryptedText
+                text="You're all set!"
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={25}
+                useOriginalCharsOnly={true}
+                className="text-2xl font-bold text-gray-900"
+              />
+            </CardTitle>
             <CardDescription className="mb-8 max-w-md mx-auto">
-              Thanks for completing your onboarding. Click the button below to
-              save your profile and start using the platform. Your chapter,
-              track, and profile information will be saved.
+              <DecryptedText
+                text="Thanks for completing your onboarding. Click the button below to save your profile and start using the platform. Your chapter, track, and profile information will be saved."
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={10}
+                useOriginalCharsOnly={true}
+                className="text-gray-600"
+              />
             </CardDescription>
             <Button
               className="w-full max-w-sm mb-4"
@@ -1170,26 +1300,23 @@ Check console for complete data.`);
             lightTheme ? 'overflow-hidden' : ''
           }`}
         >
-          <CardHeader
-            className={
-              lightTheme
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg pb-6'
-                : 'bg-[#00172B] text-white rounded-t-lg pb-8'
-            }
-          >
-            <CardTitle className="text-2xl font-bold text-center">
-              Set Up Your Profile
+          <CardHeader className="bg-white border-b border-gray-200 rounded-t-lg pb-6 pt-6">
+            <CardTitle className="text-2xl font-bold text-center text-gray-900">
+              <DecryptedText
+                text={`Hey ${supabaseUser?.user_metadata?.full_name || 'there'},`}
+                sequential={true}
+                revealDirection="start"
+                animateOn="view"
+                speed={30}
+                useOriginalCharsOnly={true}
+                className="text-2xl font-bold text-center text-gray-900"
+              />
             </CardTitle>
-            <CardDescription className={`text-center ${lightTheme ? 'text-blue-50' : 'text-gray-100'}`}>
-              Complete your profile to get the most out of Paragon
-            </CardDescription>
           </CardHeader>
-          <CardContent
-            className={`pt-6 pb-6 px-8 ${lightTheme ? 'bg-white' : ''}`}
-          >
+          <CardContent className="pt-6 pb-6 px-8 bg-white">
             {renderStepContent()}
           </CardContent>
-          <CardFooter className={`flex justify-center border-t py-4 rounded-b-lg ${lightTheme ? 'bg-gray-50' : 'bg-gray-50'}`}>
+          <CardFooter className="flex justify-center border-t py-4 rounded-b-lg bg-gray-50">
             <div className="flex space-x-2">
               {Array.from({ length: OnboardingStep.Complete + 1 }).map(
                 (_, index) => (
@@ -1199,8 +1326,8 @@ Check console for complete data.`);
                       index === currentStep
                         ? 'bg-blue-600'
                         : index < currentStep
-                        ? 'bg-blue-400'
-                        : 'bg-gray-200'
+                          ? 'bg-blue-400'
+                          : 'bg-gray-200'
                     }`}
                   />
                 )

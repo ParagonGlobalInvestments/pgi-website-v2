@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { syncUserWithMongoDB } from '@/lib/auth/syncUser';
-import { auth } from '@clerk/nextjs/server';
-import User from '@/lib/database/models/User';
-import { connectToDatabase } from '@/lib/database/connection';
+import { syncUserWithSupabase } from '@/lib/supabase/syncUser';
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,11 +10,14 @@ const lastSyncTimes = new Map<string, number>();
 const SYNC_COOLDOWN_MS = 0; // Temporarily disable cooldown to allow all sync attempts
 
 export async function POST(req: NextRequest) {
-  await connectToDatabase();
   try {
     // Check authentication
-    const session = await auth();
-    if (!session?.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: supabaseUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !supabaseUser) {
       return NextResponse.json(
         { error: 'Unauthorized - Authentication required' },
         { status: 401 }
@@ -28,54 +30,9 @@ export async function POST(req: NextRequest) {
     // Log full request body for debugging
     console.log('FULL SYNC REQUEST BODY:', JSON.stringify(body, null, 2));
 
-    // Skip cooldown check temporarily
-    /*
-    // Check if we recently synced this user
-    const lastSyncTime = lastSyncTimes.get(session.userId);
-    const now = Date.now();
-    if (lastSyncTime && now - lastSyncTime < SYNC_COOLDOWN_MS) {
-      // Get existing user without syncing
-      await connectDB();
-      const existingUser = await User.findOne({
-        'system.clerkId': session.userId,
-      });
-
-      if (existingUser) {
-        console.log('Using cached user data - sync skipped (cooldown active)');
-        return NextResponse.json({
-          success: true,
-          user: {
-            id: existingUser._id,
-            personal: {
-              name: existingUser.personal.name,
-              email: existingUser.personal.email,
-              bio: existingUser.personal.bio || '',
-              major: existingUser.personal.major || '',
-              gradYear: existingUser.personal.gradYear,
-              isAlumni: existingUser.personal.isAlumni,
-            },
-            org: {
-              permissionLevel: existingUser.org.permissionLevel,
-              track: existingUser.org.track,
-              trackRoles: existingUser.org.trackRoles || [],
-              execRoles: existingUser.org.execRoles || [],
-            },
-            profile: {
-              skills: existingUser.profile.skills || [],
-            },
-            system: {
-              firstLogin: existingUser.system.firstLogin,
-            },
-          },
-          cached: true,
-        });
-      }
-    }
-    */
-
     // Update sync time
     const now = Date.now();
-    lastSyncTimes.set(session.userId, now);
+    lastSyncTimes.set(supabaseUser.id, now);
 
     // Parse request body
     const syncOptions = {
@@ -112,35 +69,13 @@ export async function POST(req: NextRequest) {
       )
     );
 
-    // Sync user with MongoDB
-    const user = await syncUserWithMongoDB(syncOptions);
+    // Sync user with Supabase
+    const user = await syncUserWithSupabase(syncOptions);
 
-    // Return user data without sensitive info
+    // Return user data - already formatted correctly
     return NextResponse.json({
       success: true,
-      user: {
-        id: user._id,
-        personal: {
-          name: user.personal.name,
-          email: user.personal.email,
-          bio: user.personal.bio || '',
-          major: user.personal.major || '',
-          gradYear: user.personal.gradYear,
-          isAlumni: user.personal.isAlumni,
-        },
-        org: {
-          permissionLevel: user.org.permissionLevel,
-          track: user.org.track,
-          trackRoles: user.org.trackRoles || [],
-          execRoles: user.org.execRoles || [],
-        },
-        profile: {
-          skills: user.profile.skills || [],
-        },
-        system: {
-          firstLogin: user.system.firstLogin,
-        },
-      },
+      user,
     });
   } catch (error: any) {
     console.error('Error syncing user:', error);
@@ -155,8 +90,12 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     // Check authentication
-    const session = await auth();
-    if (!session?.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: supabaseUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !supabaseUser) {
       return NextResponse.json(
         { error: 'Unauthorized - Authentication required' },
         { status: 401 }
@@ -164,79 +103,33 @@ export async function GET() {
     }
 
     // Check if we recently synced this user
-    const lastSyncTime = lastSyncTimes.get(session.userId);
+    const lastSyncTime = lastSyncTimes.get(supabaseUser.id);
     const now = Date.now();
     if (lastSyncTime && now - lastSyncTime < SYNC_COOLDOWN_MS) {
       // Get existing user without syncing
-      await connectToDatabase();
-      const existingUser = await User.findOne({
-        'system.clerkId': session.userId,
-      });
+      const db = createDatabase();
+      const existingUser = await db.getUserBySupabaseId(supabaseUser.id);
 
       if (existingUser) {
         console.log('Using cached user data - sync skipped (cooldown active)');
         return NextResponse.json({
           success: true,
-          user: {
-            id: existingUser._id,
-            personal: {
-              name: existingUser.personal.name,
-              email: existingUser.personal.email,
-              bio: existingUser.personal.bio || '',
-              major: existingUser.personal.major || '',
-              gradYear: existingUser.personal.gradYear,
-              isAlumni: existingUser.personal.isAlumni,
-            },
-            org: {
-              permissionLevel: existingUser.org.permissionLevel,
-              track: existingUser.org.track,
-              trackRoles: existingUser.org.trackRoles || [],
-              execRoles: existingUser.org.execRoles || [],
-            },
-            profile: {
-              skills: existingUser.profile.skills || [],
-            },
-            system: {
-              firstLogin: existingUser.system.firstLogin,
-            },
-          },
+          user: existingUser,
           cached: true,
         });
       }
     }
 
     // Update sync time
-    lastSyncTimes.set(session.userId, now);
+    lastSyncTimes.set(supabaseUser.id, now);
 
     // Sync user with default values
-    const user = await syncUserWithMongoDB();
+    const user = await syncUserWithSupabase();
 
-    // Return user data without sensitive info
+    // Return user data - already formatted correctly
     return NextResponse.json({
       success: true,
-      user: {
-        id: user._id,
-        personal: {
-          name: user.personal.name,
-          email: user.personal.email,
-          bio: user.personal.bio || '',
-          major: user.personal.major || '',
-          gradYear: user.personal.gradYear,
-          isAlumni: user.personal.isAlumni,
-        },
-        org: {
-          permissionLevel: user.org.permissionLevel,
-          track: user.org.track,
-          trackRoles: user.org.trackRoles || [],
-          execRoles: user.org.execRoles || [],
-        },
-        profile: {
-          skills: user.profile.skills || [],
-        },
-        system: {
-          firstLogin: user.system.firstLogin,
-        },
-      },
+      user,
     });
   } catch (error: any) {
     console.error('Error syncing user:', error);

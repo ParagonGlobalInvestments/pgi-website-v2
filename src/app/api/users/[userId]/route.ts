@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import User from '@/lib/database/models/User';
-
-interface ClerkMetadata {
-  role?: string;
-}
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 
 export async function PUT(
   request: NextRequest,
@@ -20,54 +15,36 @@ export async function PUT(
       );
     }
 
-    const authSession = await getAuth(request);
-    if (!authSession.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    await connectToDatabase();
+    const db = createDatabase();
+    const currentUser = await db.getUserBySupabaseId(authUser.id);
 
-    const currentUser = await User.findOne({
-      'system.clerkId': authSession.userId,
-    });
-
-    const metadata = authSession.sessionClaims?.metadata as
-      | ClerkMetadata
-      | undefined;
-    const isClerkAdmin = metadata?.role === 'admin';
-
-    if (
-      !currentUser ||
-      (!isClerkAdmin && currentUser.roles?.permissionLevel !== 'admin')
-    ) {
+    if (!currentUser || currentUser.org.permissionLevel !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized - Admin access required' },
-        { status: 401 }
+        { status: 403 }
       );
     }
 
     const updateData = await request.json();
-    delete updateData._id;
-    delete updateData.id;
-    delete updateData['system.clerkId'];
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      { new: true }
+    // For now, return not implemented - this needs the updateUser method enhanced
+    return NextResponse.json(
+      { success: false, error: 'User update not yet fully implemented' },
+      { status: 501 }
     );
-
-    if (!updatedUser) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {
     console.error('Error updating user:', error);
     return NextResponse.json(
@@ -90,38 +67,34 @@ export async function DELETE(
       );
     }
 
-    const authSession = await getAuth(request);
-    if (!authSession.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    await connectToDatabase();
+    const db = createDatabase();
+    const adminUser = await db.getUserBySupabaseId(authUser.id);
 
-    const adminUser = await User.findOne({
-      'system.clerkId': authSession.userId,
-      'roles.permissionLevel': 'admin',
-    });
-
-    if (!adminUser) {
+    if (!adminUser || adminUser.org.permissionLevel !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized - Admin access required' },
         { status: 403 }
       );
     }
 
-    const result = await User.findByIdAndDelete(userId);
-
-    if (!result) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
+    // For now, return not implemented - this needs a deleteUser method
+    return NextResponse.json(
+      { success: false, error: 'User deletion not yet implemented' },
+      { status: 501 }
+    );
   } catch (error: any) {
     console.error('Error deleting user:', error);
     return NextResponse.json(
