@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
 import {
   FaSearch,
   FaGraduationCap,
@@ -203,7 +204,27 @@ const filterUsers = (users: User[], searchTerm: string, filters: any) => {
 };
 
 export default function DirectoryPage() {
-  const { isLoaded, user } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -375,8 +396,8 @@ export default function DirectoryPage() {
 
   // Fetch users and chapters
   useEffect(() => {
-    if (!isLoaded) {
-      console.log('[Directory] Clerk not loaded yet, skipping data fetch');
+    if (isLoading || !supabaseUser) {
+      console.log('[Directory] User not loaded yet, skipping data fetch');
       return;
     }
 
@@ -501,7 +522,7 @@ export default function DirectoryPage() {
     };
 
     fetchData();
-  }, [isLoaded, filter.role, filter.track]);
+  }, [supabaseUser, filter.role, filter.track]);
 
   // Helper functions for display formatting
   const getRoleDisplayName = (role: string) => {
@@ -693,38 +714,56 @@ export default function DirectoryPage() {
                     {user.personal?.email || 'No email'}
                   </CardDescription>
 
-                  <div className="flex gap-1 flex-wrap mt-2">
+                  <div className="flex gap-1.5 flex-wrap mt-2.5">
+                    {/* Permission Level Badge - Prominent */}
                     <Badge
                       variant={getRoleBadgeVariant(
                         user.org?.permissionLevel || 'member'
                       )}
+                      className="font-semibold"
                     >
                       {getRoleDisplayName(
                         user.org?.permissionLevel || 'member'
                       )}
                     </Badge>
-                    {/* Show track roles */}
+
+                    {/* Track Badge - Show track (quant/value) */}
+                    {user.org?.track && (
+                      <Badge
+                        variant="outline"
+                        className={`font-medium ${
+                          user.org.track === 'quant'
+                            ? 'bg-blue-50 text-blue-700 border-blue-300'
+                            : 'bg-green-50 text-green-700 border-green-300'
+                        }`}
+                      >
+                        {user.org.track === 'quant' ? 'Quant' : 'Value'}
+                      </Badge>
+                    )}
+
+                    {/* Track Roles - Smaller, secondary */}
                     {user.org?.trackRoles && user.org.trackRoles.length > 0 && (
-                      <div className="flex gap-1 flex-wrap ">
+                      <>
                         {user.org.trackRoles.map((role, idx) => (
                           <Badge
                             key={idx}
                             variant="outline"
-                            className="bg-gray-50 text-xs text-gray-500"
+                            className="bg-gray-50 text-gray-600 border-gray-300 text-xs"
                           >
                             {getTrackRoleDisplayName(role)}
                           </Badge>
                         ))}
-                      </div>
+                      </>
                     )}
-                    {/* Display execRoles if they exist */}
+
+                    {/* Exec Roles - Distinctive, prominent */}
                     {user.org?.execRoles && user.org.execRoles.length > 0 && (
                       <>
                         {user.org.execRoles.map(role => (
                           <Badge
                             key={role}
                             variant={getExecRoleBadgeVariant(role)}
-                            className="text-xs"
+                            className="font-semibold shadow-sm text-xs"
                           >
                             {getExecRoleDisplayName(role)}
                           </Badge>
@@ -1056,7 +1095,7 @@ export default function DirectoryPage() {
   };
 
   // Loading state
-  if (!isLoaded) {
+  if (isLoading || !supabaseUser) {
     return null; // Let layout handle loading
   }
 
@@ -1081,18 +1120,19 @@ export default function DirectoryPage() {
         >
           <h1 className="text-3xl font-bold text-gray-800">Member Directory</h1>
           <div className="flex items-center gap-4">
-            {isLoaded && user?.publicMetadata?.role === 'admin' && (
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 border-2"
-                asChild
-              >
-                <Link href="/portal/dashboard/directory/admin">
-                  <FaUsers className="w-4 h-4" />
-                  Manage Users
-                </Link>
-              </Button>
-            )}
+            {!isLoading &&
+              supabaseUserData?.org_permission_level === 'admin' && (
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 border-2"
+                  asChild
+                >
+                  <Link href="/portal/dashboard/directory/admin">
+                    <FaUsers className="w-4 h-4" />
+                    Manage Users
+                  </Link>
+                </Button>
+              )}
             <div className="text-sm text-gray-500">
               Found: {users.length} members
             </div>

@@ -1,59 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import mongoose from 'mongoose';
+import { createClient } from '@/lib/supabase/server';
+import { createRSSDatabase } from '@/lib/supabase/rss';
 
 // Ensure dynamic rendering for this route
 export const dynamic = 'force-dynamic';
-
-// Define the RSS item schema for MongoDB (matching the one in rssFetcher.ts)
-const RssItemSchema = new mongoose.Schema({
-  source: { type: String, required: true },
-  guid: { type: String, required: true },
-  title: { type: String, required: true },
-  link: { type: String, required: true },
-  pubDate: { type: Date, required: true },
-  contentSnippet: { type: String },
-  categories: [String],
-  creator: String,
-  isoDate: Date,
-  content: String,
-  fetchedAt: { type: Date, default: Date.now },
-});
-
-// Initialize the model (or get it if it already exists)
-const RssItem =
-  mongoose.models.RssItem || mongoose.model('RssItem', RssItemSchema);
 
 // GET handler for the RSS items
 export async function GET(req: NextRequest) {
   try {
     // Authenticate the user
-    const { userId } = getAuth(req);
-    if (!userId) {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    // Connect to the database
-    await connectToDatabase();
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
     const source = searchParams.get('source');
+    const limit = searchParams.get('limit');
 
-    // Build filter based on source parameter
-    const filter: any = {};
-    if (source) {
-      filter.source = source;
-    }
+    // Get RSS items from Supabase
+    const rssDb = createRSSDatabase();
+    const items = await rssDb.getRSSItems({
+      source: source || undefined,
+      limit: limit ? parseInt(limit) : 50,
+    });
 
-    // Get the most recent RSS items
-    const items = await RssItem.find(filter)
-      .sort({ pubDate: -1 })
-      .limit(50)
-      .lean(); // Use lean() for better performance since we don't need Mongoose methods
+    // Transform snake_case to camelCase for frontend compatibility
+    const transformedItems = items.map(item => ({
+      _id: item.id,
+      source: item.source,
+      guid: item.guid,
+      title: item.title,
+      link: item.link,
+      pubDate: item.pub_date, // Transform snake_case to camelCase
+      contentSnippet: item.content_snippet,
+      categories: item.categories || [],
+      creator: item.creator,
+      content: item.content,
+      fetchedAt: item.fetched_at || item.created_at,
+    }));
 
-    return NextResponse.json(items);
+    return NextResponse.json(transformedItems);
   } catch (error) {
     console.error('Error fetching RSS items:', error);
     return NextResponse.json(

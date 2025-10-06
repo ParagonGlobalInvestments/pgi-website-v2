@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { createClient } from '@/lib/supabase/browser';
 
 interface MongoUserChapter {
   id: string;
@@ -137,35 +137,67 @@ interface UseMongoUserReturn {
 }
 
 /**
- * Custom hook to fetch and interact with the MongoDB user data
+ * Custom hook to fetch and interact with the Supabase user data
  *
- * This hook manages the connection between Clerk authentication
- * and our MongoDB user records. It fetches the MongoDB user data
- * corresponding to the currently authenticated Clerk user.
+ * This hook manages the connection between Supabase authentication
+ * and our user records. It fetches the user data
+ * corresponding to the currently authenticated Supabase user.
  *
- * @returns {UseMongoUserReturn} The MongoDB user data, loading state, error state, and sync function
+ * @returns {UseMongoUserReturn} The user data, loading state, error state, and sync function
  */
 export function useMongoUser(): UseMongoUserReturn {
-  const { isLoaded, isSignedIn } = useUser();
   const [user, setUser] = useState<MongoUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
   // Track sync attempts to prevent infinite loops
   const syncAttempted = useRef(false);
+  const lastFetchTime = useRef(0);
+  const FETCH_COOLDOWN_MS = 2000; // 2 seconds between fetches
+  const supabase = createClient();
+
+  // Check Supabase auth state
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Initial fetch of user data
   useEffect(() => {
     const fetchUser = async () => {
-      if (!isLoaded || !isSignedIn) {
+      if (!supabaseUser) {
         setIsLoading(false);
+        setUser(null);
+        syncAttempted.current = false; // Reset sync flag when no user
         return;
       }
+
+      // Prevent too frequent fetches
+      const now = Date.now();
+      if (now - lastFetchTime.current < FETCH_COOLDOWN_MS) {
+        return;
+      }
+      lastFetchTime.current = now;
 
       try {
         setIsLoading(true);
         setError(null);
 
-        // Fetch user data from MongoDB through our API
+        // Fetch user data from Supabase through our API
         const response = await fetch('/api/users/me');
 
         if (!response.ok) {
@@ -179,11 +211,12 @@ export function useMongoUser(): UseMongoUserReturn {
           setUser(data.user);
           // Reset sync attempted flag when we successfully get a user
           syncAttempted.current = false;
+          setError(null); // Clear any previous errors
         } else {
           throw new Error('No user data returned');
         }
       } catch (err: any) {
-        console.error('Error fetching MongoDB user:', err);
+        console.error('Error fetching user:', err);
         setError(err.message || 'Failed to load user data');
 
         // Only try to sync once to prevent infinite loops
@@ -213,11 +246,11 @@ export function useMongoUser(): UseMongoUserReturn {
     };
 
     fetchUser();
-  }, [isLoaded, isSignedIn]);
+  }, [supabaseUser]);
 
   // Function to update user data
   const updateUser = async (updateData: UpdateUserData) => {
-    if (!isSignedIn || !user) {
+    if (!supabaseUser || !user) {
       throw new Error('User not authenticated');
     }
 
@@ -257,7 +290,7 @@ export function useMongoUser(): UseMongoUserReturn {
 
   // Function to sync user data
   const syncUser = async (userData?: UpdateUserData) => {
-    if (!isSignedIn) {
+    if (!supabaseUser) {
       throw new Error('User not authenticated');
     }
 

@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import User from '@/lib/database/models/User';
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 
 export async function POST(_req: NextRequest) {
   try {
-    // Get the authenticated user from Clerk
-    const user = await currentUser();
+    // Get the authenticated user from Supabase
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    if (error || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Connect to MongoDB
-    await connectToDatabase();
-
-    // Find users with the same email as the current user
-    const email = user.emailAddresses[0]?.emailAddress;
-
+    const email = user.email;
     if (!email) {
       return NextResponse.json(
         { error: 'User has no email address' },
@@ -28,89 +23,26 @@ export async function POST(_req: NextRequest) {
       );
     }
 
-    // Find all users with this email
-    const usersWithSameEmail = await User.find({ email });
+    // Use Supabase database to find user by email
+    const db = createDatabase();
+    const existingUser = await db.getUserByEmail(email);
 
-    if (usersWithSameEmail.length === 0) {
+    if (!existingUser) {
       return NextResponse.json(
-        { error: 'No users found with this email' },
+        { error: 'No user found with this email' },
         { status: 404 }
       );
     }
 
-    if (usersWithSameEmail.length === 1) {
-      // If there's only one user, update their clerkId
-      const existingUser = usersWithSameEmail[0];
+    // For now, just return success since the user exists
+    // The sync process handles Supabase ID management automatically
 
-      // Check if the user already has the correct clerkId
-      if (existingUser.clerkId === user.id) {
-        return NextResponse.json(
-          { message: 'User already has the correct clerkId' },
-          { status: 200 }
-        );
-      }
-
-      // Update the clerkId
-      existingUser.clerkId = user.id;
-      await existingUser.save();
-
-      return NextResponse.json(
-        { message: 'Updated user with correct clerkId' },
-        { status: 200 }
-      );
-    }
-
-    // If there are multiple users with the same email
-    console.log(`Found ${usersWithSameEmail.length} users with email ${email}`);
-
-    // Find the one with a placeholder clerkId
-    const placeholderUsers = usersWithSameEmail.filter(u =>
-      u.clerkId.startsWith('placeholder_')
+    // For now, just return success - the sync process will handle updating the Supabase ID
+    // This endpoint is mainly for legacy Clerk cleanup which is no longer needed
+    return NextResponse.json(
+      { message: 'Email resolved - user sync will handle Supabase ID updates' },
+      { status: 200 }
     );
-
-    // Find the one with the real clerkId
-    const realUsers = usersWithSameEmail.filter(
-      u => !u.clerkId.startsWith('placeholder_')
-    );
-
-    if (realUsers.length > 0) {
-      // If there's already a real user, delete the placeholder ones
-      for (const placeholderUser of placeholderUsers) {
-        await User.deleteOne({ _id: placeholderUser._id });
-      }
-
-      // Make sure the real user has the current clerkId
-      if (realUsers[0].clerkId !== user.id) {
-        realUsers[0].clerkId = user.id;
-        await realUsers[0].save();
-      }
-
-      return NextResponse.json(
-        {
-          message: `Kept real user and deleted ${placeholderUsers.length} placeholder users`,
-        },
-        { status: 200 }
-      );
-    } else {
-      // If they're all placeholder users, keep one and update it, delete the rest
-      const keepUser = usersWithSameEmail[0];
-      keepUser.clerkId = user.id;
-      await keepUser.save();
-
-      // Delete the other placeholder users
-      for (let i = 1; i < usersWithSameEmail.length; i++) {
-        await User.deleteOne({ _id: usersWithSameEmail[i]._id });
-      }
-
-      return NextResponse.json(
-        {
-          message: `Updated one placeholder user and deleted ${
-            usersWithSameEmail.length - 1
-          } others`,
-        },
-        { status: 200 }
-      );
-    }
   } catch (error: any) {
     console.error('Error resolving duplicate email:', error);
     return NextResponse.json(

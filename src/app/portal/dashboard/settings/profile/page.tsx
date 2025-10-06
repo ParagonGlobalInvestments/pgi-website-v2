@@ -9,7 +9,8 @@ import {
 } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProtectedPage from '@/components/auth/ProtectedPage';
-import { useMongoUser } from '@/hooks/useMongoUser';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
 import {
   FaSave,
@@ -20,6 +21,7 @@ import {
   FaPlus,
   FaBriefcase,
   FaCode,
+  FaDesktop,
 } from 'react-icons/fa';
 
 import {
@@ -151,7 +153,8 @@ const skillOptions: ComboboxOption[] = [
 ];
 
 export default function ProfileSettingsPage() {
-  const { user, isLoading, error, updateUser } = useMongoUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const supabase = createClient();
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -322,18 +325,29 @@ export default function ProfileSettingsPage() {
         description: exp.description || '',
       })) as FormExperience[];
 
-      await updateUser({
-        personal: {
-          major: data.personal.major,
-          bio: data.personal.bio,
-          gradYear: data.personal.gradYear,
-        },
-        profile: {
-          ...data.profile,
-          projects: formattedProjects,
-          experiences: formattedExperiences,
-        },
-      });
+      // Update user in Supabase using flat structure
+      if (!supabaseUserData?.id) {
+        throw new Error('User not found');
+      }
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          personal_major: data.personal.major,
+          personal_bio: data.personal.bio,
+          personal_grad_year: data.personal.gradYear,
+          profile_skills: data.profile.skills,
+          profile_linkedin: data.profile.linkedin,
+          profile_github: data.profile.github,
+          profile_avatar_url: data.profile.avatarUrl,
+          profile_projects: JSON.stringify(formattedProjects),
+          profile_experiences: JSON.stringify(formattedExperiences),
+        })
+        .eq('id', supabaseUserData.id);
+
+      if (updateError) {
+        throw updateError;
+      }
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -363,20 +377,38 @@ export default function ProfileSettingsPage() {
 
   // Set form values when user data is loaded
   useEffect(() => {
-    if (user) {
-      setValue('personal.major', user.personal?.major || '');
-      setValue('personal.bio', user.personal?.bio || '');
+    if (supabaseUserData) {
+      setValue('personal.major', supabaseUserData.personal_major || '');
+      setValue('personal.bio', supabaseUserData.personal_bio || '');
       setValue(
         'personal.gradYear',
-        user.personal?.gradYear || new Date().getFullYear() + 1
+        supabaseUserData.personal_grad_year || new Date().getFullYear() + 1
       );
-      setValue('profile.skills', user.profile?.skills || []);
-      setValue('profile.linkedin', user.profile?.linkedin || '');
-      setValue('profile.github', user.profile?.github || '');
-      setValue('profile.avatarUrl', user.profile?.avatarUrl || '');
+      setValue('profile.skills', supabaseUserData.profile_skills || []);
+      setValue(
+        'profile.linkedin',
+        (supabaseUserData as any).profile_linkedin || ''
+      );
+      setValue(
+        'profile.github',
+        (supabaseUserData as any).profile_github || ''
+      );
+      setValue('profile.avatarUrl', supabaseUserData.profile_avatar_url || '');
 
-      // Format projects with required fields
-      const formattedProjects = (user.profile?.projects || []).map(project => ({
+      // Parse and format projects
+      let projects: FormProject[] = [];
+      try {
+        const projectsData = (supabaseUserData as any).profile_projects;
+        if (typeof projectsData === 'string') {
+          projects = JSON.parse(projectsData);
+        } else if (Array.isArray(projectsData)) {
+          projects = projectsData;
+        }
+      } catch (e) {
+        console.error('Error parsing projects:', e);
+      }
+
+      const formattedProjects = projects.map(project => ({
         title: project.title || '',
         description: project.description || '',
         type: project.type || 'other',
@@ -389,20 +421,30 @@ export default function ProfileSettingsPage() {
       })) as FormProject[];
       setValue('profile.projects', formattedProjects);
 
-      // Format experiences with required fields
-      const formattedExperiences = (user.profile?.experiences || []).map(
-        exp => ({
-          company: exp.company || '',
-          title: exp.title || '',
-          startDate: exp.startDate || new Date().toISOString().split('T')[0],
-          endDate: exp.endDate,
-          current: Boolean(exp.current),
-          description: exp.description || '',
-        })
-      ) as FormExperience[];
+      // Parse and format experiences
+      let experiences: FormExperience[] = [];
+      try {
+        const experiencesData = (supabaseUserData as any).profile_experiences;
+        if (typeof experiencesData === 'string') {
+          experiences = JSON.parse(experiencesData);
+        } else if (Array.isArray(experiencesData)) {
+          experiences = experiencesData;
+        }
+      } catch (e) {
+        console.error('Error parsing experiences:', e);
+      }
+
+      const formattedExperiences = experiences.map(exp => ({
+        company: exp.company || '',
+        title: exp.title || '',
+        startDate: exp.startDate || new Date().toISOString().split('T')[0],
+        endDate: exp.endDate,
+        current: Boolean(exp.current),
+        description: exp.description || '',
+      })) as FormExperience[];
       setValue('profile.experiences', formattedExperiences);
     }
-  }, [user, setValue]);
+  }, [supabaseUserData, setValue]);
 
   if (isLoading) {
     return (
@@ -421,11 +463,35 @@ export default function ProfileSettingsPage() {
         direction="vertical"
         className="space-y-4 p-4 mx-auto text-navy"
       >
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
+          <p className="text-gray-600 mt-1">
+            Manage your account, profile, and preferences
+          </p>
+        </div>
+
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger
+              value="account"
+              className="flex items-center gap-2"
+              onClick={() => router.push('/portal/dashboard/settings')}
+            >
+              <FaDesktop className="h-4 w-4" />
+              Account
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <FaUser className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-800">
               Profile Settings
-            </h1>
+            </h2>
             <p className="text-gray-600">
               Update your professional information
             </p>
