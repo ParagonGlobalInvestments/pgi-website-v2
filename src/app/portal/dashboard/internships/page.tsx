@@ -20,7 +20,6 @@ import {
   FaGraduationCap,
   FaUniversity,
 } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { motion } from 'framer-motion';
 import { ActionButton } from '@/components/ui/action-button';
