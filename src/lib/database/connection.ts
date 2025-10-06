@@ -22,9 +22,10 @@ global.mongoose = global.mongoose || { conn: null, promise: null };
  * MongoDB connection options
  */
 const MONGODB_OPTIONS = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   bufferCommands: false,
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 };
 
 /**
@@ -54,7 +55,9 @@ export async function connectToDatabase() {
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI is not defined in environment variables');
+    throw new Error(
+      'MONGODB_URI is not defined in environment variables. Please check your .env.local file.'
+    );
   }
 
   // Use cached connection if available
@@ -64,6 +67,7 @@ export async function connectToDatabase() {
 
   // If a connection is being established, wait for it
   if (!global.mongoose.promise) {
+    console.log('Attempting to connect to MongoDB...');
     // Create new connection
     global.mongoose.promise = mongoose.connect(MONGODB_URI, MONGODB_OPTIONS);
   }
@@ -81,10 +85,24 @@ export async function connectToDatabase() {
     }
 
     return global.mongoose.conn;
-  } catch (error) {
+  } catch (error: any) {
     // Reset promise to allow retry
     global.mongoose.promise = null;
-    throw error;
+
+    console.error('MongoDB connection failed:', error.message);
+
+    // Provide more helpful error messages
+    if (error.message.includes('ENOTFOUND')) {
+      throw new Error(
+        'MongoDB connection failed: Cannot resolve MongoDB hostname. Please check your MONGODB_URI and internet connection.'
+      );
+    } else if (error.message.includes('authentication failed')) {
+      throw new Error(
+        'MongoDB connection failed: Authentication failed. Please check your database credentials.'
+      );
+    } else {
+      throw new Error(`MongoDB connection failed: ${error.message}`);
+    }
   }
 }
 

@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import Chapter from '@/lib/database/models/Chapter';
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 
 // GET /api/chapters - Get all chapters
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const { userId } = getAuth(req);
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Connect to the database
-    await connectToDatabase();
-
-    // Get all chapters
-    const chapters = await Chapter.find({}).sort({ name: 1 });
+    // Get all chapters from Supabase
+    const db = createDatabase();
+    const chapters = await db.getChapters();
 
     return NextResponse.json(chapters);
   } catch (error) {
@@ -31,23 +32,26 @@ export async function GET(req: NextRequest) {
 // POST /api/chapters - Create a new chapter (admin only)
 export async function POST(req: NextRequest) {
   try {
-    const { userId, sessionClaims } = getAuth(req);
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins can create chapters
-    const userRole = (sessionClaims?.role as string) || 'member';
-    if (userRole !== 'admin') {
+    // Check user role via Supabase database
+    const db = createDatabase();
+    const dbUser = await db.getUserBySupabaseId(user.id);
+
+    if (!dbUser || dbUser.org.permissionLevel !== 'admin') {
       return NextResponse.json(
         { error: 'Only admins can create chapters' },
         { status: 403 }
       );
     }
-
-    // Connect to the database
-    await connectToDatabase();
 
     // Parse the request body
     const data = await req.json();
@@ -60,16 +64,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the chapter
-    const chapter = new Chapter(data);
-    await chapter.save();
-
-    return NextResponse.json(chapter, { status: 201 });
+    // For now, just return success - chapter creation can be handled directly in Supabase dashboard
+    // This endpoint needs the createChapter method to be implemented in the database class
+    return NextResponse.json(
+      {
+        error: 'Chapter creation not yet implemented - use Supabase dashboard',
+      },
+      { status: 501 }
+    );
   } catch (error) {
     console.error('Error creating chapter:', error);
 
-    // Check if it's a MongoDB duplicate key error
-    if ((error as any).code === 11000) {
+    // Check if it's a unique constraint violation
+    if ((error as any).code === '23505') {
       return NextResponse.json(
         { error: 'A chapter with this name or slug already exists' },
         { status: 409 }

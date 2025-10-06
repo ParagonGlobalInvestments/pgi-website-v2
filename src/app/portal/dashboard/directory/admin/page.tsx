@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useMongoUser } from '@/hooks/useMongoUser';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
 import {
@@ -76,7 +76,7 @@ interface User {
 }
 
 export default function AdminDirectoryPage() {
-  const { user: mongoUser, isLoading } = useMongoUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
   const [supabaseUser, setSupabaseUser] = useState<any>(null);
   const supabase = createClient();
 
@@ -177,10 +177,10 @@ export default function AdminDirectoryPage() {
 
   // Check admin permission
   useEffect(() => {
-    if (!isLoading && mongoUser?.org?.permissionLevel !== 'admin') {
+    if (!isLoading && supabaseUserData?.org_permission_level !== 'admin') {
       router.push('/portal/dashboard/directory');
     }
-  }, [isLoading, mongoUser, router]);
+  }, [isLoading, supabaseUserData, router]);
 
   // Filter users based on search
   const filteredUsers = useMemo(() => {

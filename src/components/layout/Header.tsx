@@ -158,19 +158,38 @@ const Header = () => {
   const [expandedMembers, setExpandedMembers] = useState(false);
   // Authentication state
   const [user, setUser] = useState<any>(null);
+  const [isPGIMember, setIsPGIMember] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   // Get current pathname for navigation events
   const pathname = usePathname();
   const supabase = createClient();
 
-  // Check authentication state
+  // Check authentication state and PGI membership
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      // If user is authenticated, check if they're a PGI member
+      if (user) {
+        try {
+          const response = await fetch('/api/users/me');
+          if (response.ok) {
+            setIsPGIMember(true);
+          } else {
+            setIsPGIMember(false);
+          }
+        } catch (error) {
+          console.error('Error checking PGI membership:', error);
+          setIsPGIMember(false);
+        }
+      } else {
+        setIsPGIMember(false);
+      }
+
       setLoading(false);
     };
     checkAuth();
@@ -178,8 +197,25 @@ const Header = () => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const sessionUser = session?.user || null;
+      setUser(sessionUser);
+
+      // Check PGI membership when auth state changes
+      if (sessionUser) {
+        try {
+          const response = await fetch('/api/users/me');
+          if (response.ok) {
+            setIsPGIMember(true);
+          } else {
+            setIsPGIMember(false);
+          }
+        } catch (error) {
+          setIsPGIMember(false);
+        }
+      } else {
+        setIsPGIMember(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -262,6 +298,7 @@ const Header = () => {
     { name: 'Placements', url: '/placements' },
     { name: 'Apply', url: '/apply' },
     { name: 'Contact', url: '/contact' },
+    { name: 'Resources', url: '/resources' },
   ];
 
   // Define About submenu items for consistency
@@ -269,7 +306,6 @@ const Header = () => {
     { name: 'Who We Are', url: '/who-we-are' },
     { name: 'Investment Strategy', url: '/investment-strategy' },
     { name: 'Education', url: '/education' },
-    { name: 'Resources', url: '/resources' },
     { name: 'Sponsors & Partners', url: '/sponsors' },
   ];
 
@@ -309,7 +345,7 @@ const Header = () => {
         </motion.div>
 
         <motion.nav
-          className="hidden md:flex items-center space-x-4 lg:space-x-8 font-semibold"
+          className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-8 font-normal text-xs lg:text-base"
           variants={staggerNavItems}
         >
           {/* About dropdown container */}
@@ -504,24 +540,39 @@ const Header = () => {
             </Link>
           </motion.div>
 
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
+            <Link
+              href="/resources"
+              className="text-white hover:text-secondary transition-colors duration-300"
+            >
+              Resources
+            </Link>
+          </motion.div>
+
           {/* Authentication Links - Only show in development */}
           {process.env.NODE_ENV !== 'production' && (
             <motion.div
               variants={navItemAnimation}
               whileHover="hover"
               whileTap="tap"
+              className=""
             >
               {loading ? (
                 <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
                   Loading...
                 </div>
-              ) : user ? (
-                <div className="flex items-center space-x-3">
+              ) : user && isPGIMember ? (
+                <div className="flex items-center pl-1 lg:pl-0">
                   <Link
                     href="/portal"
-                    className="py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                    className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
                   >
-                    Dashboard
+                    <span className="block lg:hidden">Portal</span>
+                    <span className="hidden lg:block">Dashboard</span>
                   </Link>
                   <button
                     onClick={async () => {
@@ -529,7 +580,7 @@ const Header = () => {
                       await supabase.auth.signOut();
                       window.location.reload();
                     }}
-                    className="text-white text-sm hover:text-gray-300 underline transition-colors"
+                    className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
                   >
                     Sign out
                   </button>
@@ -537,7 +588,7 @@ const Header = () => {
               ) : (
                 <Link
                   href="/sign-in"
-                  className="py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                  className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
                 >
                   Sign In
                 </Link>
@@ -759,7 +810,7 @@ const Header = () => {
                     <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
                       Loading...
                     </div>
-                  ) : user ? (
+                  ) : user && isPGIMember ? (
                     <div className="space-y-2">
                       <Link
                         href="/portal"

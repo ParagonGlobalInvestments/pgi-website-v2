@@ -1,35 +1,35 @@
-"use client";
+'use client';
 
-import { useClerk } from "@clerk/nextjs";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
 
 export default function SignOutPage() {
-  const { signOut } = useClerk();
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     // Attempt to sign out when the component mounts
     const performSignOut = async () => {
       try {
-        await signOut();
-        router.push("/");
+        await supabase.auth.signOut();
+        router.push('/');
       } catch (error) {
-        console.error("Error signing out:", error);
+        console.error('Error signing out:', error);
         // Fallback redirect if sign out fails
-        router.push("/");
+        router.push('/');
       }
     };
 
     // Auto-redirect to home page after 3 seconds regardless
     const timer = setTimeout(() => {
-      router.push("/");
+      router.push('/');
     }, 3000);
 
     performSignOut();
 
     return () => clearTimeout(timer);
-  }, [signOut, router]);
+  }, [router, supabase]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-navy">
@@ -41,7 +41,7 @@ export default function SignOutPage() {
 
         <div className="flex justify-center">
           <button
-            onClick={() => signOut(() => router.push("/"))}
+            onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
             className="bg-primary hover:bg-opacity-90 text-white font-bold py-2 px-6 rounded transition-colors"
           >
             Sign Out Now

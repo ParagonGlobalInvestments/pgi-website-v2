@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
@@ -46,7 +47,27 @@ interface NewsSource {
 }
 
 export default function NewsPage() {
-  const { user, isLoaded } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
   const [activeTab, setActiveTab] = useState('all');
 
   // Define all news sources - add new sources here
@@ -77,7 +98,7 @@ export default function NewsPage() {
     },
   ];
 
-  if (!isLoaded) {
+  if (isLoading || !supabaseUser) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>

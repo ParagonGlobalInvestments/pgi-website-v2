@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 import {
   fetchMarketWatchRSS,
   fetchNasdaqRSS,
@@ -13,14 +13,22 @@ export const dynamic = 'force-dynamic';
 // POST handler to refresh RSS feed
 export async function POST(req: NextRequest) {
   try {
-    const user = await currentUser();
+    // Get the authenticated user from Supabase
+    const supabase = createClient();
+    const {
+      data: { user: authUser },
+      error,
+    } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (error || !authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin using Clerk metadata
-    if (user.publicMetadata.role !== 'admin') {
+    // Check if user is admin using Supabase database
+    const db = createDatabase();
+    const currentUser = await db.getUserBySupabaseId(authUser.id);
+
+    if (!currentUser || currentUser.org.permissionLevel !== 'admin') {
       return NextResponse.json(
         { error: 'Only admins can refresh RSS feeds' },
         { status: 403 }
@@ -30,9 +38,6 @@ export async function POST(req: NextRequest) {
     // Get source from query params
     const searchParams = req.nextUrl.searchParams;
     const source = searchParams.get('source') || 'marketwatch';
-
-    // Connect to the database
-    await connectToDatabase();
 
     // Execute the RSS feed fetch function based on source
     try {

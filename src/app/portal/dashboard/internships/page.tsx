@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
+import { useRouter } from 'next/navigation';
+import { isDevOrEnabled } from '@/lib/featureFlags';
 import Link from 'next/link';
 import {
   FaPlus,
@@ -124,7 +127,27 @@ const getTrackBadgeVariant = (track: string) => {
 };
 
 export default function InternshipsPage() {
-  const { user, isLoaded } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
   const router = useRouter();
   const [internships, setInternships] = useState<Internship[]>([]);
   const [chapters, setChapters] = useState<{ _id: string; name: string }[]>([]);
@@ -137,43 +160,15 @@ export default function InternshipsPage() {
   });
   const [filterOpen, setFilterOpen] = useState(false);
 
-  // Get user metadata
-  const userRole = (user?.publicMetadata?.role as string) || 'member';
-  const userTrack = (user?.publicMetadata?.track as string) || 'value';
-
-  // State for MongoDB user data
-  const [mongoUser, setMongoUser] = useState<{
-    role: string;
-    track: string;
-  } | null>(null);
-
-  // Fetch MongoDB user data
-  useEffect(() => {
-    if (!isLoaded || !user) return;
-
-    fetch('/api/users/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data && !data.error) {
-          console.log('MongoDB user data:', data);
-          setMongoUser({
-            role: data.role || 'member',
-            track: data.track || 'value',
-          });
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching MongoDB user data:', err);
-      });
-  }, [isLoaded, user]);
-
-  // Use MongoDB user role/track if available, otherwise use Clerk metadata
-  const effectiveRole = mongoUser?.role || userRole;
-  const effectiveTrack = mongoUser?.track || userTrack;
+  // Get user metadata from Supabase
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const userTrack = supabaseUserData?.org_track || 'value';
+  const effectiveRole = userRole;
+  const effectiveTrack = userTrack;
 
   // Fetch internships and chapters based on filters
   useEffect(() => {
-    if (!isLoaded) return;
+    if (isLoading || !supabaseUser) return;
 
     const fetchData = async () => {
       try {
@@ -237,7 +232,7 @@ export default function InternshipsPage() {
     };
 
     fetchData();
-  }, [isLoaded, filters, effectiveRole, effectiveTrack]);
+  }, [supabaseUser, filters, effectiveRole, effectiveTrack]);
 
   // Function to force sync user data
   // const forceUserSync = async () => {
@@ -289,12 +284,24 @@ export default function InternshipsPage() {
     return internship.applicationUrl || internship.applicationLink;
   };
 
-  if (!isLoaded) {
+  // Redirect if feature is disabled
+  useEffect(() => {
+    if (!isDevOrEnabled('enableInternships')) {
+      router.push('/portal/dashboard');
+    }
+  }, [router]);
+
+  if (isLoading || !supabaseUser) {
     return (
       <div className="flex h-full w-full items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003E6B]"></div>
       </div>
     );
+  }
+
+  // Don't render if feature is disabled
+  if (!isDevOrEnabled('enableInternships')) {
+    return null;
   }
 
   return (

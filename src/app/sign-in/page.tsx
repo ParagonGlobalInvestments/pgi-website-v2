@@ -24,6 +24,7 @@ function SignInPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [user, setUser] = useState<any>(null);
+  const [checkingMembership, setCheckingMembership] = useState(false);
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -34,36 +35,69 @@ function SignInPageContent() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      // If user is signed in, middleware will handle the redirect
+      // We just need to check PGI membership here
+      if (user) {
+        setCheckingMembership(true);
+        try {
+          const response = await fetch('/api/users/me');
+          if (response.ok) {
+            // User exists in PGI database - redirect to portal
+            const redirectTo =
+              searchParams?.get('redirectTo') || '/portal/dashboard';
+            window.location.href = redirectTo;
+            return;
+          } else {
+            // User not in PGI database - sign them out and redirect to resources
+            await supabase.auth.signOut();
+            window.location.href = '/resources?notMember=true';
+            return;
+          }
+        } catch (error) {
+          console.error('Error checking PGI membership:', error);
+          // On error, sign them out and redirect
+          await supabase.auth.signOut();
+          window.location.href = '/resources?notMember=true';
+          return;
+        }
+      }
     };
     checkUser();
-  }, [supabase]);
+  }, [supabase, searchParams]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
 
-    const redirectTo =
-      searchParams.get('redirectTo') || window.location.origin + '/resources';
+    // Get the intended redirect destination
+    const intendedRedirect =
+      searchParams?.get('redirectTo') || window.location.origin + '/resources';
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectTo,
+        redirectTo: intendedRedirect,
         queryParams: {
-          hd: '*.edu', // Hint to Google to prefer .edu accounts
+          access_type: 'offline',
+          prompt: 'consent',
         },
+        scopes:
+          'openid email profile https://www.googleapis.com/auth/drive.metadata.readonly',
       },
     });
 
     if (error) {
-      setError('Please sign in with your university Google account (.edu email required)');
+      setError(
+        'Please sign in with your university Google account (.edu email required)'
+      );
     }
     setLoading(false);
   };
 
   // Email/password authentication removed - Google only
 
-  if (user) {
+  if (user && checkingMembership) {
     return (
       <div className="min-h-screen bg-navy flex items-center justify-center px-4">
         <motion.div
@@ -73,38 +107,19 @@ function SignInPageContent() {
           variants={fadeIn}
         >
           <div className="flex justify-center mb-6">
-            <Image
-              src="/logos/pgiLogoTransparent.png"
-              alt="PGI Logo"
-              width={80}
-              height={80}
-              className="h-16 w-auto"
-            />
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-400"></div>
           </div>
-          <h2 className="text-2xl font-semibold text-white mb-4">
-            You're signed in!
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Checking membership...
           </h2>
-          <p className="text-gray-300 mb-6">
-            Welcome back, {user.user_metadata?.full_name || user.email}
-          </p>
-          <div className="space-y-3">
-            <Link href="/resources">
-              <Button variant="navy-accent" className="w-full">
-                Access PGI Resources
-              </Button>
-            </Link>
-            <Link href="/">
-              <Button
-                variant="outline"
-                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-              >
-                Back to Home
-              </Button>
-            </Link>
-          </div>
         </motion.div>
       </div>
     );
+  }
+
+  // If user is signed in and we're checking membership, they should be redirected
+  if (user) {
+    return null;
   }
 
   return (
@@ -132,17 +147,7 @@ function SignInPageContent() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* University Email Notice */}
-          <div className="text-center mb-6">
-            <p className="text-gray-300 text-sm">
-              Sign in with your university Google account
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              Only .edu email addresses are permitted
-            </p>
-          </div>
-
-          {/* Google Sign In - Only Option */}
+          {/* Google Sign In */}
           <Button
             onClick={handleGoogleSignIn}
             disabled={loading}
@@ -167,7 +172,7 @@ function SignInPageContent() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            {loading ? 'Signing in...' : 'Continue with University Google Account'}
+            {loading ? 'Signing in...' : 'Continue with Google'}
           </Button>
 
           {error && (

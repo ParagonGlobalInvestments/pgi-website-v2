@@ -15,8 +15,10 @@ import {
 } from 'react-icons/fa';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMongoUser } from '@/hooks/useMongoUser';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { MdDashboard } from 'react-icons/md';
+import { NewsRefreshProvider } from '@/contexts/NewsRefreshContext';
+import { isDevOrEnabled } from '@/lib/featureFlags';
 // Import shadcn components
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -24,8 +26,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -37,7 +37,6 @@ import {
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import OnboardingWizard from '@/components/auth/OnboardingWizard';
 import { toast } from '@/components/ui/use-toast';
-import { needsOnboarding } from '@/components/auth/OnboardingWizard';
 
 // Map chapter names to their logo filenames
 const universityLogoMap: { [key: string]: string } = {
@@ -205,121 +204,6 @@ const OnboardingBanner = ({
   </motion.div>
 );
 
-// Keep the MongoUserData type for the checkOnboardingNeeded function
-interface MongoUserData {
-  id: string;
-  name?: string;
-  email?: string;
-  permissionLevel?: string;
-  track?: string;
-  trackRole?: string;
-  chapter?: {
-    name: string;
-    id: string;
-    slug: string;
-    logoUrl: string;
-  };
-  skills?: string[];
-  bio?: string;
-  major?: string;
-  gradYear?: number;
-  isAlumni?: boolean;
-}
-
-// Add type safety for the useMongoUser hook result
-type MongoUserWithNestedStructure = {
-  id: string;
-  personal?: {
-    name?: string;
-    email?: string;
-    bio?: string;
-    major?: string;
-    gradYear?: number;
-    isAlumni?: boolean;
-    phone?: string;
-  };
-  org?: {
-    chapter?: {
-      id: string;
-      name: string;
-      slug: string;
-      logoUrl: string;
-    };
-    permissionLevel?: 'admin' | 'lead' | 'member';
-    track?: 'quant' | 'value';
-    trackRoles?: string[];
-    execRoles?: string[];
-    joinDate?: string;
-    status?: 'active' | 'inactive' | 'pending';
-  };
-  profile?: {
-    skills?: string[];
-    linkedin?: string;
-    resumeUrl?: string;
-    avatarUrl?: string;
-    github?: string;
-    interests?: string[];
-    achievements?: string[];
-    projects?: any[];
-    experiences?: any[];
-  };
-  activity?: {
-    lastLogin?: string;
-    internshipsPosted?: number;
-  };
-  system?: {
-    firstLogin: boolean;
-    notifications?: {
-      email: boolean;
-      platform: boolean;
-    };
-  };
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-// Update the checkOnboardingNeeded function to handle both types
-const checkOnboardingNeeded = (
-  mongoUser: MongoUserWithNestedStructure | MongoUserData | null
-) => {
-  if (!mongoUser) return true;
-
-  // First check if firstLogin is explicitly true (takes precedence)
-  if (
-    'system' in mongoUser &&
-    mongoUser.system &&
-    mongoUser.system.firstLogin === true
-  ) {
-    console.log('User needs onboarding because firstLogin is true');
-    return true;
-  }
-
-  // Check if it's the nested structure or flat structure
-  if ('personal' in mongoUser && mongoUser.personal) {
-    // It's a nested structure
-    return needsOnboarding({
-      track: mongoUser.org?.track,
-      trackRole: mongoUser.org?.trackRoles?.[0],
-      chapter: mongoUser.org?.chapter?.name,
-      major: mongoUser.personal.major,
-      gradYear: mongoUser.personal.gradYear,
-      skills: mongoUser.profile?.skills,
-      bio: mongoUser.personal.bio,
-    });
-  } else {
-    // It's a flat structure (MongoUserData)
-    return needsOnboarding({
-      track: (mongoUser as MongoUserData).track,
-      trackRole: (mongoUser as MongoUserData).trackRole,
-      chapter: (mongoUser as MongoUserData).chapter?.name,
-      major: (mongoUser as MongoUserData).major,
-      gradYear: (mongoUser as MongoUserData).gradYear,
-      skills: (mongoUser as MongoUserData).skills,
-      bio: (mongoUser as MongoUserData).bio,
-    });
-  }
-};
-
 // Add a helper function to safely display user data
 const safeDisplayValue = (
   value: string | undefined,
@@ -342,11 +226,8 @@ export default function DashboardLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [supabaseUser, setSupabaseUser] = useState<any>(null);
   const supabase = createClient();
-  const {
-    user: mongoUser,
-    isLoading: isMongoUserLoading,
-    syncUser,
-  } = useMongoUser();
+  const { user: supabaseUserData, isLoading: isSupabaseUserLoading } =
+    useSupabaseUser();
 
   // Replace direct state initialization with null
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -355,9 +236,6 @@ export default function DashboardLayout({
 
   // Add state for client-side rendering
   const [isClient, setIsClient] = useState(false);
-
-  // Add state for sidebar hover
-  const [isHoveringCollapsed, setIsHoveringCollapsed] = useState(false);
 
   // Check Supabase auth
   useEffect(() => {
@@ -397,37 +275,27 @@ export default function DashboardLayout({
     setIsClient(true);
   }, []);
 
-  // Update needsOnboarding when mongoUser changes
+  // Update needsOnboarding when supabaseUserData changes
   useEffect(() => {
-    if (supabaseUser && !isMongoUserLoading && mongoUser) {
-      setNeedsOnboarding(checkOnboardingNeeded(mongoUser));
+    if (supabaseUser && !isSupabaseUserLoading && supabaseUserData) {
+      // Simplified onboarding check - just check if chapter is set
+      const needsOnboard =
+        !supabaseUserData.org_chapter_name || !supabaseUserData.org_track;
+      setNeedsOnboarding(needsOnboard);
     }
-  }, [supabaseUser, mongoUser, isMongoUserLoading]);
+  }, [supabaseUser, supabaseUserData, isSupabaseUserLoading]);
 
-  // Sync Supabase user with MongoDB on initial load - only once
+  // Mark sync as attempted once user data is loaded
   useEffect(() => {
-    if (supabaseUser && !syncAttempted && !mongoUser) {
+    if (supabaseUser && !syncAttempted && supabaseUserData) {
       setSyncAttempted(true);
-
-      // Only sync once per session
-      const syncUserOnce = async () => {
-        try {
-          await syncUser();
-          console.log('User synced successfully');
-        } catch (err) {
-          console.error('Failed to sync user with MongoDB:', err);
-          // No retry - we've already set syncAttempted to true
-        }
-      };
-
-      syncUserOnce();
     }
-  }, [supabaseUser, syncUser, mongoUser, syncAttempted]);
+  }, [supabaseUser, supabaseUserData, syncAttempted]);
 
-  // Get user metadata from MongoDB user data
-  const userRole = mongoUser?.org?.permissionLevel || 'member';
-  const userTrack = mongoUser?.org?.track || 'value';
-  const userChapter = mongoUser?.org?.chapter?.name || 'N/A';
+  // Get user metadata from Supabase user data
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const userTrack = supabaseUserData?.org_track || 'value';
+  const userChapter = supabaseUserData?.org_chapter_name || 'N/A';
 
   // Get role icon with proper type checking
   const getRoleIcon = (role: string | undefined) => {
@@ -537,30 +405,16 @@ export default function DashboardLayout({
     }
   }, [supabaseUser]);
 
+  // Automatically show onboarding wizard modal if needed on first load
+  useEffect(() => {
+    if (needsOnboarding && !syncAttempted && !showOnboardingWizard) {
+      setShowOnboardingWizard(true);
+    }
+  }, [needsOnboarding, syncAttempted, showOnboardingWizard]);
+
   // Handle onboarding completion
   const handleOnboardingComplete = async () => {
     try {
-      // Refresh user data with forced refresh
-      await syncUser({
-        system: {
-          firstLogin: false,
-        },
-      });
-
-      // Force re-fetch from API to update UI
-      const refreshResponse = await fetch('/api/users/me', {
-        method: 'GET',
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache, no-store' },
-      });
-
-      if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        if (refreshData.success && refreshData.user) {
-          console.log('Successfully refreshed user data after onboarding');
-        }
-      }
-
       setNeedsOnboarding(false);
       setShowOnboardingWizard(false);
 
@@ -593,36 +447,17 @@ export default function DashboardLayout({
     );
   }
 
-  // Show onboarding wizard if explicitly shown or needed on first load
-  if (showOnboardingWizard || (needsOnboarding && !syncAttempted)) {
-    return (
-      <OnboardingWizard
-        onComplete={handleOnboardingComplete}
-        userData={{
-          track: mongoUser?.org?.track,
-          trackRole: mongoUser?.org?.trackRoles?.[0],
-          chapter: mongoUser?.org?.chapter?.name,
-          major: mongoUser?.personal?.major,
-          gradYear: mongoUser?.personal?.gradYear,
-          skills: mongoUser?.profile?.skills,
-          bio: mongoUser?.personal?.bio,
-        }}
-      />
-    );
-  }
-
-  // Update displayName, displayRole, etc. to reference the correct MongoUser interface type and handle incomplete data
+  // Update displayName, displayRole, etc. to reference Supabase user data
   const displayName =
-    mongoUser?.personal?.name ||
+    supabaseUserData?.personal_name ||
     supabaseUser?.user_metadata?.full_name ||
     supabaseUser?.email?.split('@')[0] ||
     '';
-  const displayRole = mongoUser?.org?.permissionLevel || userRole;
-  const displayTrack = mongoUser?.org?.track || userTrack;
+  const displayRole = supabaseUserData?.org_permission_level || userRole;
+  const displayTrack = supabaseUserData?.org_track || userTrack;
   const displayChapter =
-    mongoUser?.org?.chapter?.name || selectedChapter?.name || userChapter;
-  const displayAvatar =
-    mongoUser?.profile?.avatarUrl || supabaseUser?.user_metadata?.avatar_url;
+    supabaseUserData?.org_chapter_name || selectedChapter?.name || userChapter;
+  const displayAvatar = supabaseUser?.user_metadata?.avatar_url;
 
   const firstName = supabaseUser?.user_metadata?.full_name?.split(' ')[0] || '';
   const lastName =
@@ -635,24 +470,23 @@ export default function DashboardLayout({
   // Is data complete enough to show
   const hasCompleteData =
     !needsOnboarding &&
-    mongoUser?.system?.firstLogin !== true &&
     displayChapter &&
     displayChapter !== 'N/A' &&
     displayTrack &&
     displayTrack !== undefined;
 
-  // OnboardingWizard userData needs to use the correct fields from the nested structure
+  // OnboardingWizard userData from Supabase
   const onboardingUserData = {
-    track: mongoUser?.org?.track,
-    trackRole: mongoUser?.org?.trackRoles?.[0], // Get first track role as primary
-    chapter: mongoUser?.org?.chapter?.name,
-    major: mongoUser?.personal?.major,
-    gradYear: mongoUser?.personal?.gradYear,
-    skills: mongoUser?.profile?.skills,
-    bio: mongoUser?.personal?.bio,
+    track: supabaseUserData?.org_track,
+    trackRole: supabaseUserData?.org_track_roles?.[0],
+    chapter: supabaseUserData?.org_chapter_name,
+    major: supabaseUserData?.personal_major,
+    gradYear: supabaseUserData?.personal_grad_year,
+    skills: supabaseUserData?.profile_skills,
+    bio: supabaseUserData?.personal_bio,
   };
 
-  // Updated sidebar width animation with transparent collapsed state
+  // Simplified sidebar - always visible with navy blue background
   const sidebarVariants = {
     expanded: {
       width: '16rem',
@@ -662,21 +496,10 @@ export default function DashboardLayout({
     },
     collapsed: {
       width: '4.5rem',
-      backgroundColor: 'transparent',
-      boxShadow: 'none',
-    },
-    hovering: {
-      width: '4.5rem',
       backgroundColor: '#00172B',
       boxShadow:
         '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     },
-  };
-
-  // Icon animation variants
-  const iconVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.2 } },
   };
 
   return (
@@ -790,26 +613,29 @@ export default function DashboardLayout({
               <MdDashboard className="h-5 w-5" />
               <span>Dashboard</span>
             </Link>
-            <Link
-              href="/portal/dashboard/internships"
-              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
-                activeLink === 'internships'
-                  ? 'bg-[#003E6B]'
-                  : 'hover:bg-[#002C4D]'
-              }`}
-              onClick={() => {
-                setActiveLink('internships');
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              <FaBriefcase className="h-5 w-5" />
-              <span>Internships</span>
-              {internships.length > 0 && (
-                <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
-                  {internships.length}
-                </span>
-              )}
-            </Link>
+            {/* Internships - Only show in dev or when feature flag enabled */}
+            {isDevOrEnabled('enableInternships') && (
+              <Link
+                href="/portal/dashboard/internships"
+                className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                  activeLink === 'internships'
+                    ? 'bg-[#003E6B]'
+                    : 'hover:bg-[#002C4D]'
+                }`}
+                onClick={() => {
+                  setActiveLink('internships');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <FaBriefcase className="h-5 w-5" />
+                <span>Internships</span>
+                {internships.length > 0 && (
+                  <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
+                    {internships.length}
+                  </span>
+                )}
+              </Link>
+            )}
             <Link
               href="/portal/dashboard/directory"
               className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
@@ -907,25 +733,17 @@ export default function DashboardLayout({
 
       {/* Desktop Sidebar - Hide on mobile */}
       <motion.aside
-        className="hidden group lg:flex flex-shrink-0 flex-col h-screen sticky top-0 overflow-hidden z-50"
+        className="hidden lg:flex flex-shrink-0 flex-col h-screen sticky top-0 overflow-hidden z-50"
         variants={sidebarVariants}
-        animate={
-          isCollapsed
-            ? isHoveringCollapsed
-              ? 'hovering'
-              : 'collapsed'
-            : 'expanded'
-        }
+        animate={isCollapsed ? 'collapsed' : 'expanded'}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        onHoverStart={() => setIsHoveringCollapsed(true)}
-        onHoverEnd={() => setIsHoveringCollapsed(false)}
       >
         {/* Organization Header */}
         <div className={`px-4 py-4 flex items-center justify-between`}>
           <SmoothTransition
             isVisible={!isCollapsed}
             direction="vertical"
-            className="flex w-full items-center justify-between gap-2"
+            className="flex w-full items-center  mt-2 justify-between gap-2"
           >
             <div className="w-30 h-8 bg-primary rounded flex items-center justify-center">
               <Image
@@ -953,14 +771,7 @@ export default function DashboardLayout({
                   alt="Paragon Global Investments"
                   width={32}
                   height={32}
-                  className="w-auto group-hover:block hidden"
-                />
-                <Image
-                  src="/logos/pgiLogoTransparentDark.png"
-                  alt="Paragon Global Investments"
-                  width={32}
-                  height={32}
-                  className="w-auto group-hover:hidden"
+                  className="w-auto"
                 />
               </div>
             </SmoothTransition>
@@ -994,128 +805,51 @@ export default function DashboardLayout({
             </h2>
           )}
           <nav className="space-y-1">
-            {/* Replace standard NavItem with animated version for collapsed state */}
-            {isCollapsed ? (
-              <>
-                <motion.div
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                >
-                  <NavItem
-                    href="/portal/dashboard"
-                    icon={<MdDashboard />}
-                    label="Dashboard"
-                    isActive={activeLink === 'dashboard'}
-                    onClick={() => setActiveLink('dashboard')}
-                    isCollapsed={isCollapsed}
-                  />
-                </motion.div>
-                <motion.div
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                >
-                  <NavItem
-                    href="/portal/dashboard/internships"
-                    icon={<FaBriefcase />}
-                    label="Internships"
-                    isActive={activeLink === 'internships'}
-                    onClick={() => setActiveLink('internships')}
-                    count={internships.length}
-                    isCollapsed={isCollapsed}
-                  />
-                </motion.div>
-                <motion.div
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                >
-                  <NavItem
-                    href="/portal/dashboard/directory"
-                    icon={<FaUsers />}
-                    label="Directory"
-                    isActive={activeLink === 'directory'}
-                    onClick={() => setActiveLink('directory')}
-                    count={userCount}
-                    isCollapsed={isCollapsed}
-                  />
-                </motion.div>
-                <motion.div
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                >
-                  <NavItem
-                    href="/portal/dashboard/news"
-                    icon={<FaNewspaper />}
-                    label="News"
-                    isActive={activeLink === 'news'}
-                    onClick={() => setActiveLink('news')}
-                    isCollapsed={isCollapsed}
-                  />
-                </motion.div>
-                <motion.div
-                  variants={iconVariants}
-                  initial="hidden"
-                  animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                >
-                  <NavItem
-                    href="/portal/dashboard/settings"
-                    icon={<FaCog />}
-                    label="Settings"
-                    isActive={activeLink === 'settings'}
-                    onClick={() => setActiveLink('settings')}
-                    isCollapsed={isCollapsed}
-                  />
-                </motion.div>
-              </>
-            ) : (
-              <>
-                <NavItem
-                  href="/portal/dashboard"
-                  icon={<MdDashboard />}
-                  label="Dashboard"
-                  isActive={activeLink === 'dashboard'}
-                  onClick={() => setActiveLink('dashboard')}
-                  isCollapsed={isCollapsed}
-                />
-                <NavItem
-                  href="/portal/dashboard/internships"
-                  icon={<FaBriefcase />}
-                  label="Internships"
-                  isActive={activeLink === 'internships'}
-                  onClick={() => setActiveLink('internships')}
-                  count={internships.length}
-                  isCollapsed={isCollapsed}
-                />
-                <NavItem
-                  href="/portal/dashboard/directory"
-                  icon={<FaUsers />}
-                  label="Directory"
-                  isActive={activeLink === 'directory'}
-                  onClick={() => setActiveLink('directory')}
-                  count={userCount}
-                  isCollapsed={isCollapsed}
-                />
-                <NavItem
-                  href="/portal/dashboard/news"
-                  icon={<FaNewspaper />}
-                  label="News"
-                  isActive={activeLink === 'news'}
-                  onClick={() => setActiveLink('news')}
-                  isCollapsed={isCollapsed}
-                />
-                <NavItem
-                  href="/portal/dashboard/settings"
-                  icon={<FaCog />}
-                  label="Settings"
-                  isActive={activeLink === 'settings'}
-                  onClick={() => setActiveLink('settings')}
-                  isCollapsed={isCollapsed}
-                />
-              </>
+            <NavItem
+              href="/portal/dashboard"
+              icon={<MdDashboard />}
+              label="Dashboard"
+              isActive={activeLink === 'dashboard'}
+              onClick={() => setActiveLink('dashboard')}
+              isCollapsed={isCollapsed}
+            />
+            {/* Internships - Only show in dev or when feature flag enabled */}
+            {isDevOrEnabled('enableInternships') && (
+              <NavItem
+                href="/portal/dashboard/internships"
+                icon={<FaBriefcase />}
+                label="Internships"
+                isActive={activeLink === 'internships'}
+                onClick={() => setActiveLink('internships')}
+                count={internships.length}
+                isCollapsed={isCollapsed}
+              />
             )}
+            <NavItem
+              href="/portal/dashboard/directory"
+              icon={<FaUsers />}
+              label="Directory"
+              isActive={activeLink === 'directory'}
+              onClick={() => setActiveLink('directory')}
+              count={userCount}
+              isCollapsed={isCollapsed}
+            />
+            <NavItem
+              href="/portal/dashboard/news"
+              icon={<FaNewspaper />}
+              label="News"
+              isActive={activeLink === 'news'}
+              onClick={() => setActiveLink('news')}
+              isCollapsed={isCollapsed}
+            />
+            <NavItem
+              href="/portal/dashboard/settings"
+              icon={<FaCog />}
+              label="Settings"
+              isActive={activeLink === 'settings'}
+              onClick={() => setActiveLink('settings')}
+              isCollapsed={isCollapsed}
+            />
           </nav>
         </div>
 
@@ -1136,30 +870,12 @@ export default function DashboardLayout({
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                  <DropdownMenuContent align="start" className="w-40">
                     <DropdownMenuItem asChild>
-                      <a
-                        href="#"
-                        onClick={() =>
-                          window.open(
-                            '/portal/dashboard/settings/profile',
-                            '_blank'
-                          )
-                        }
+                      <Link
+                        href="/portal/signout"
+                        className="text-red-500 w-full"
                       >
-                        Profile Settings
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/portal/dashboard/settings">
-                        App Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/portal/signout" className="text-red-500">
                         Sign Out
                       </Link>
                     </DropdownMenuItem>
@@ -1238,12 +954,7 @@ export default function DashboardLayout({
 
           {/* Collapsed state profile display */}
           {isCollapsed && (
-            <motion.div
-              variants={iconVariants}
-              initial="hidden"
-              animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-              className="py-4 mt-auto mx-auto flex flex-col items-center gap-3"
-            >
+            <div className="py-4 mt-auto mx-auto flex flex-col items-center gap-3">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -1254,30 +965,12 @@ export default function DashboardLayout({
                           <AvatarFallback>{initials}</AvatarFallback>
                         </Avatar>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                      <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuItem asChild>
-                          <a
-                            href="#"
-                            onClick={() =>
-                              window.open(
-                                '/portal/dashboard/settings/profile',
-                                '_blank'
-                              )
-                            }
+                          <Link
+                            href="/portal/signout"
+                            className="text-red-500 w-full"
                           >
-                            Profile Settings
-                          </a>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/portal/dashboard/settings">
-                            App Settings
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/portal/signout" className="text-red-500">
                             Sign Out
                           </Link>
                         </DropdownMenuItem>
@@ -1342,39 +1035,28 @@ export default function DashboardLayout({
                   </Tooltip>
                 </TooltipProvider>
               )}
-            </motion.div>
+            </div>
           )}
 
           {/* Footer Navigation */}
           <div className="px-3 py-3 border-t border-[#003E6B] mt-2">
             {isCollapsed ? (
-              // Collapsed footer
-              <motion.div
-                variants={iconVariants}
-                initial="hidden"
-                animate={isHoveringCollapsed ? 'visible' : 'hidden'}
-                className="flex flex-col items-center gap-3"
-              >
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link href="/" className="w-full block">
-                        <Button
-                          variant="ghost"
-                          className="text-gray-300 hover:text-white hover:bg-[#003E6B] w-9 h-9 p-0 flex items-center justify-center rounded-full"
-                        >
-                          <FaHome />
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      Back to Website
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </motion.div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/" className="w-full flex justify-center">
+                      <Button
+                        variant="ghost"
+                        className="text-gray-300 hover:text-white hover:bg-[#003E6B] w-9 h-9 p-0 flex items-center justify-center rounded-full"
+                      >
+                        <FaHome />
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Back to Website</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ) : (
-              // Expanded footer
               <Link href="/" className="w-full block">
                 <Button
                   variant="ghost"
@@ -1397,32 +1079,34 @@ export default function DashboardLayout({
             isCollapsed={isCollapsed}
           />
         )}
-        <div className="lg:p-8 p-4 pt-16 lg:pt-8">{children}</div>
+        <div className="lg:p-8 p-4 pt-16 lg:pt-8">
+          <NewsRefreshProvider>{children}</NewsRefreshProvider>
+        </div>
       </div>
 
       {/* Onboarding Wizard Modal Overlay */}
       <AnimatePresence>
         {showOnboardingWizard && (
           <>
-            {/* Backdrop overlay with blur effect */}
+            {/* Backdrop overlay - darkened gray background */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[70]"
+              className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70]"
             />
 
             {/* Modal container */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
               className="fixed inset-0 flex items-center justify-center z-[80] p-4"
               onClick={e => e.stopPropagation()}
             >
-              <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-auto">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <OnboardingWizard
                   onComplete={handleOnboardingComplete}
                   userData={onboardingUserData}

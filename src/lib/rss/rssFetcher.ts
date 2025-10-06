@@ -1,28 +1,5 @@
 import Parser from 'rss-parser';
-import { connectToDatabase } from '@/lib/database/connection';
-import mongoose from 'mongoose';
-
-// Define the RSS item schema for MongoDB
-const RssItemSchema = new mongoose.Schema({
-  source: { type: String, required: true },
-  guid: { type: String, required: true },
-  title: { type: String, required: true },
-  link: { type: String, required: true },
-  pubDate: { type: Date, required: true },
-  contentSnippet: { type: String },
-  categories: [String],
-  creator: String,
-  isoDate: Date,
-  content: String,
-  fetchedAt: { type: Date, default: Date.now },
-});
-
-// Create a compound index on source and guid for uniqueness
-RssItemSchema.index({ source: 1, guid: 1 }, { unique: true });
-
-// Initialize the model (or get it if it already exists)
-export const RssItem =
-  mongoose.models.RssItem || mongoose.model('RssItem', RssItemSchema);
+import { createRSSDatabase, RSSItemInput } from '@/lib/supabase/rss';
 
 // Configure the RSS parser
 const parser = new Parser({
@@ -67,10 +44,8 @@ async function fetchRssFeed(sourceKey: string) {
     console.log(`Fetching ${source.name} RSS feed...`);
     const feed = await parser.parseURL(source.url);
 
-    // Connect to MongoDB if not already connected
-    await connectToDatabase();
-
-    const insertedItems = [];
+    const rssDb = createRSSDatabase();
+    const itemsToInsert: RSSItemInput[] = [];
 
     // Process each item in the feed
     for (const item of feed.items) {
@@ -152,28 +127,29 @@ async function fetchRssFeed(sourceKey: string) {
           fetchedAt: new Date(),
         };
 
-        // Use findOneAndUpdate with upsert to avoid duplicates
-        const result = await RssItem.findOneAndUpdate(
-          { source: rssItem.source, guid: rssItem.guid },
-          rssItem,
-          { upsert: true, new: true }
-        );
-
-        // Check if this was a new insertion (not an update)
-        if (
-          result &&
-          result.fetchedAt?.getTime() === rssItem.fetchedAt.getTime()
-        ) {
-          insertedItems.push(result);
-          console.log(`New RSS item added: ${result.title}`);
-        }
+        // Add to batch for bulk upsert
+        itemsToInsert.push({
+          source: rssItem.source,
+          guid: rssItem.guid,
+          title: rssItem.title,
+          link: rssItem.link,
+          pubDate: rssItem.pubDate,
+          contentSnippet: rssItem.contentSnippet,
+          categories: rssItem.categories,
+          creator: rssItem.creator,
+          isoDate: rssItem.isoDate,
+          content: rssItem.content,
+        });
       } catch (itemError) {
         console.error(`Error processing ${source.name} RSS item:`, itemError);
       }
     }
 
+    // Bulk upsert all items to Supabase
+    const insertedItems = await rssDb.bulkUpsertRSSItems(itemsToInsert);
+
     console.log(
-      `${source.name} RSS fetch complete. Added ${insertedItems.length} new items.`
+      `${source.name} RSS fetch complete. Processed ${insertedItems.length} items.`
     );
     return insertedItems;
   } catch (error) {

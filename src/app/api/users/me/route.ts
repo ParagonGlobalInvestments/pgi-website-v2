@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import User from '@/lib/database/models/User';
-import { syncUserWithMongoDB } from '@/lib/auth/syncUser';
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
+import { syncUserWithSupabase } from '@/lib/supabase/syncUser';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,121 +12,49 @@ const SYNC_COOLDOWN_MS = 5000; // 5 seconds
 export async function GET() {
   try {
     // Check authentication
-    const session = await auth();
-    if (!session?.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: supabaseUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !supabaseUser) {
       return NextResponse.json(
         { error: 'Unauthorized - Authentication required' },
         { status: 401 }
       );
     }
 
-    await connectToDatabase();
-    console.log(`Fetching user data for Clerk ID: ${session.userId}`);
+    console.log(`Fetching user data for Supabase ID: ${supabaseUser.id}`);
 
-    // Find the user in MongoDB by their Clerk ID
-    let user = await User.findOne({
-      'system.clerkId': session.userId,
-    }).populate('org.chapterId');
+    // Find the user by their Supabase ID
+    const db = createDatabase();
+    let user = await db.getUserBySupabaseId(supabaseUser.id);
 
     if (!user) {
       console.log(
-        `User not found for Clerk ID: ${session.userId}, attempting sync`
+        `User not found for Supabase ID: ${supabaseUser.id} - Not a PGI member`
       );
-      // Check if we've tried to sync recently
-      const now = Date.now();
-      const lastAttempt = lastSyncAttempts.get(session.userId);
-
-      if (lastAttempt && now - lastAttempt < SYNC_COOLDOWN_MS) {
-        return NextResponse.json(
-          { error: 'User not found and sync cooldown active' },
-          { status: 404 }
-        );
-      }
-
-      // Track this sync attempt
-      lastSyncAttempts.set(session.userId, now);
-
-      // Attempt to create/sync the user
-      await syncUserWithMongoDB();
-      user = await User.findOne({ 'system.clerkId': session.userId }).populate(
-        'org.chapterId'
+      // Do NOT auto-create users - only PGI members should be in the database
+      return NextResponse.json(
+        { error: 'User not found in database - Not a PGI member' },
+        { status: 404 }
       );
-
-      // If still not found, return error
-      if (!user) {
-        console.log(
-          `User still not found after sync for Clerk ID: ${session.userId}`
-        );
-        return NextResponse.json(
-          { error: 'User not found in database' },
-          { status: 404 }
-        );
-      }
     }
 
     // Log user data for debugging
-    console.log(`User found: ${user._id}`);
+    console.log(`User found: ${user.id}`);
     console.log(`  FirstLogin: ${user.system.firstLogin}`);
     console.log(
-      `  Chapter: ${user.org.chapterId ? user.org.chapterId.name : 'Not set'}`
+      `  Chapter: ${user.org.chapter ? user.org.chapter.name : 'Not set'}`
     );
     console.log(`  Track: ${user.org.track || 'Not set'}`);
     console.log(`  TrackRoles: ${user.org.trackRoles.join(', ') || 'Not set'}`);
 
-    // Return user data without sensitive info
+    // Return user data - already formatted correctly
     return NextResponse.json({
       success: true,
-      user: {
-        id: user._id,
-        personal: {
-          name: user.personal.name,
-          email: user.personal.email,
-          bio: user.personal.bio || '',
-          major: user.personal.major || '',
-          gradYear: user.personal.gradYear,
-          isAlumni: user.personal.isAlumni,
-          phone: user.personal.phone || '',
-        },
-        org: {
-          chapter: user.org.chapterId
-            ? {
-                id: user.org.chapterId._id,
-                name: user.org.chapterId.name,
-                slug: user.org.chapterId.slug,
-                logoUrl: user.org.chapterId.logoUrl,
-              }
-            : null,
-          permissionLevel: user.org.permissionLevel,
-          track: user.org.track,
-          trackRoles: user.org.trackRoles || [],
-          execRoles: user.org.execRoles || [],
-          status: user.org.status,
-        },
-        profile: {
-          skills: user.profile.skills || [],
-          projects: user.profile.projects || [],
-          experiences: user.profile.experiences || [],
-          linkedin: user.profile.linkedin || '',
-          resumeUrl: user.profile.resumeUrl || '',
-          avatarUrl: user.profile.avatarUrl || '',
-          github: user.profile.github || '',
-          interests: user.profile.interests || [],
-          achievements: user.profile.achievements || [],
-        },
-        activity: {
-          lastLogin: user.activity.lastLogin,
-          internshipsPosted: user.activity.internshipsPosted || 0,
-        },
-        system: {
-          firstLogin: user.system.firstLogin,
-          notifications: user.system.notifications || {
-            email: true,
-            platform: true,
-          },
-        },
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
+      user,
     });
   } catch (error: any) {
     console.error('Error fetching user:', error);
@@ -142,21 +69,24 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
-    if (!session?.userId) {
+    const supabase = createClient();
+    const {
+      data: { user: supabaseUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !supabaseUser) {
       return NextResponse.json(
         { error: 'Unauthorized - Authentication required' },
         { status: 401 }
       );
     }
 
-    await connectToDatabase();
-
     // Parse request body for updatable fields
     const body = await req.json();
 
     // Find the user
-    const user = await User.findOne({ 'system.clerkId': session.userId });
+    const db = createDatabase();
+    const user = await db.getUserBySupabaseId(supabaseUser.id);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found in database' },
@@ -164,59 +94,64 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Update fields based on the request
+    // Build update object
+    const updates: any = {};
+
     // Personal information
     if (body.personal) {
       if (body.personal.bio !== undefined)
-        user.personal.bio = body.personal.bio;
+        updates.personal_bio = body.personal.bio;
       if (body.personal.major !== undefined)
-        user.personal.major = body.personal.major;
+        updates.personal_major = body.personal.major;
       if (body.personal.gradYear !== undefined)
-        user.personal.gradYear = body.personal.gradYear;
+        updates.personal_grad_year = body.personal.gradYear;
       if (body.personal.phone !== undefined)
-        user.personal.phone = body.personal.phone;
+        updates.personal_phone = body.personal.phone;
     }
 
     // Profile information
     if (body.profile) {
       if (body.profile.skills !== undefined)
-        user.profile.skills = body.profile.skills;
+        updates.profile_skills = body.profile.skills;
       if (body.profile.linkedin !== undefined)
-        user.profile.linkedin = body.profile.linkedin;
+        updates.profile_linkedin = body.profile.linkedin;
       if (body.profile.resumeUrl !== undefined)
-        user.profile.resumeUrl = body.profile.resumeUrl;
+        updates.profile_resume_url = body.profile.resumeUrl;
       if (body.profile.avatarUrl !== undefined)
-        user.profile.avatarUrl = body.profile.avatarUrl;
+        updates.profile_avatar_url = body.profile.avatarUrl;
       if (body.profile.github !== undefined)
-        user.profile.github = body.profile.github;
+        updates.profile_github = body.profile.github;
       if (body.profile.interests !== undefined)
-        user.profile.interests = body.profile.interests;
+        updates.profile_interests = body.profile.interests;
       if (body.profile.achievements !== undefined)
-        user.profile.achievements = body.profile.achievements;
+        updates.profile_achievements = body.profile.achievements;
 
       // Handle experiences and projects arrays if provided
       if (body.profile.experiences)
-        user.profile.experiences = body.profile.experiences;
-      if (body.profile.projects) user.profile.projects = body.profile.projects;
+        updates.profile_experiences = body.profile.experiences;
+      if (body.profile.projects)
+        updates.profile_projects = body.profile.projects;
     }
 
     // System information
     if (body.system) {
       if (body.system.firstLogin !== undefined)
-        user.system.firstLogin = body.system.firstLogin;
+        updates.system_first_login = body.system.firstLogin;
       if (body.system.notifications) {
         if (body.system.notifications.email !== undefined)
-          user.system.notifications.email = body.system.notifications.email;
+          updates.system_notifications_email = body.system.notifications.email;
         if (body.system.notifications.platform !== undefined)
-          user.system.notifications.platform =
+          updates.system_notifications_platform =
             body.system.notifications.platform;
       }
     }
 
-    // Save updated user
-    await user.save();
+    // Update user if we have changes
+    if (Object.keys(updates).length > 0) {
+      await db.updateUser(user.id, updates);
+    }
 
-    // Return updated user data
+    // Return success response
     return NextResponse.json({
       success: true,
       message: 'User updated successfully',
