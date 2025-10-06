@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { useMongoUser } from '@/hooks/useMongoUser';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
+import { useNewsRefresh } from '@/contexts/NewsRefreshContext';
+import { isDevOrEnabled } from '@/lib/featureFlags';
 import Link from 'next/link';
 import {
   FaBriefcase,
@@ -12,6 +14,8 @@ import {
   FaGraduationCap,
   FaUniversity,
   FaChartPie,
+  FaClock,
+  FaSync,
 } from 'react-icons/fa';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { motion } from 'framer-motion';
@@ -127,9 +131,77 @@ const ActionCard = ({
   </motion.div>
 );
 
+// News Refresh Timer Component
+const NewsRefreshTimer = () => {
+  const { timeUntilRefresh, lastRefreshed, isRefreshing, triggerRefresh } =
+    useNewsRefresh();
+
+  const minutes = Math.floor(timeUntilRefresh / 60);
+  const seconds = timeUntilRefresh % 60;
+
+  const formatRelativeTime = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) {
+      const mins = Math.floor(diffInSeconds / 60);
+      return `${mins} ${mins === 1 ? 'minute' : 'minutes'} ago`;
+    }
+    if (diffInSeconds < 86400) {
+      const hrs = Math.floor(diffInSeconds / 3600);
+      return `${hrs} ${hrs === 1 ? 'hour' : 'hours'} ago`;
+    }
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 text-sm text-blue-700">
+          <FaClock className={`${isRefreshing ? 'animate-pulse' : ''}`} />
+          <span className="font-medium">
+            {isRefreshing ? (
+              'Refreshing news...'
+            ) : (
+              <>
+                Feed will auto-refresh in:{' '}
+                <span className="font-mono">
+                  {String(minutes).padStart(2, '0')}:
+                  {String(seconds).padStart(2, '0')}
+                </span>
+              </>
+            )}
+          </span>
+        </div>
+        {lastRefreshed && !isRefreshing && (
+          <span className="text-xs text-blue-600">
+            Last updated {formatRelativeTime(lastRefreshed)}
+          </span>
+        )}
+      </div>
+      <button
+        onClick={() => triggerRefresh()}
+        disabled={isRefreshing}
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Refresh news now"
+      >
+        <FaSync className={`${isRefreshing ? 'animate-spin' : ''}`} />
+        <span className="hidden sm:inline">Refresh Now</span>
+      </button>
+    </motion.div>
+  );
+};
+
 export default function Dashboard() {
-  const { user, isLoaded } = useUser();
-  const { user: mongoUser, isLoading: isMongoUserLoading } = useMongoUser();
+  const { user: supabaseUserData, isLoading: isSupabaseUserLoading } =
+    useSupabaseUser();
   const [stats, setStats] = useState({
     internships: 0,
     members: 0,
@@ -158,7 +230,7 @@ export default function Dashboard() {
 
   // Fetch real data from the API
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!supabaseUserData) return;
 
     const fetchStats = async () => {
       try {
@@ -219,14 +291,14 @@ export default function Dashboard() {
     };
 
     fetchStats();
-  }, [isLoaded]);
+  }, [supabaseUserData]);
 
-  // Get MongoDB user data instead of Clerk metadata
-  const userRole = mongoUser?.org?.permissionLevel || 'member';
-  const userTrack = mongoUser?.org?.track || 'N/A';
-  const trackRoles = mongoUser?.org?.trackRoles || [];
+  // Get user data from Supabase
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const userTrack = supabaseUserData?.org_track || 'N/A';
+  const trackRoles = supabaseUserData?.org_track_roles || [];
   const primaryRole = trackRoles.length > 0 ? trackRoles[0] : null;
-  const chapter = mongoUser?.org?.chapter?.name || 'N/A';
+  const chapter = supabaseUserData?.org_chapter_name || 'N/A';
 
   // Get formatted track name for display
   const getFormattedTrack = (track: string) => {
@@ -258,10 +330,25 @@ export default function Dashboard() {
     }
   };
 
-  if (!isLoaded || isMongoUserLoading) {
+  // ProtectedPage handles auth checks, so we only need to check if data is loading
+  if (isSupabaseUserLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // If no user data after loading, show error
+  if (!supabaseUserData) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center text-red-500">
+          <p>Unable to load user data. Please try refreshing the page.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            If the issue persists, please contact support.
+          </p>
+        </div>
       </div>
     );
   }
@@ -312,9 +399,7 @@ export default function Dashboard() {
             className="text-3xl font-bold"
           >
             Welcome back,{' '}
-            {mongoUser?.personal?.name?.split(' ')[0] ||
-              user?.firstName ||
-              'Member'}
+            {supabaseUserData?.personal_name?.split(' ')[0] || 'Member'}
           </motion.h1>
           <motion.div
             initial={{ opacity: 0 }}
@@ -378,26 +463,31 @@ export default function Dashboard() {
             animate="visible"
             className="grid grid-cols-1 gap-4"
           >
-            <ActionCard
-              title="Browse Internships"
-              description="View all available internship opportunities"
-              icon={<FaBriefcase className="text-white text-xl" />}
-              href="/portal/dashboard/internships"
-              color="border-blue-100"
-              bgColor="bg-blue-500"
-              delay={0.5}
-            />
+            {/* Hide Internships in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <ActionCard
+                  title="Browse Internships"
+                  description="View all available internship opportunities"
+                  icon={<FaBriefcase className="text-white text-xl" />}
+                  href="/portal/dashboard/internships"
+                  color="border-blue-100"
+                  bgColor="bg-blue-500"
+                  delay={0.5}
+                />
 
-            {(userRole === 'admin' || userRole === 'lead') && (
-              <ActionCard
-                title="Add New Internship"
-                description="Post a new internship opportunity"
-                icon={<FaBriefcase className="text-white text-xl" />}
-                href="/portal/dashboard/internships/new"
-                color="border-green-100"
-                bgColor="bg-green-500"
-                delay={0.6}
-              />
+                {(userRole === 'admin' || userRole === 'lead') && (
+                  <ActionCard
+                    title="Add New Internship"
+                    description="Post a new internship opportunity"
+                    icon={<FaBriefcase className="text-white text-xl" />}
+                    href="/portal/dashboard/internships/new"
+                    color="border-green-100"
+                    bgColor="bg-green-500"
+                    delay={0.6}
+                  />
+                )}
+              </>
             )}
 
             <ActionCard
@@ -423,59 +513,64 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        {/* Stats Cards - Hidden on mobile */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="hidden lg:grid lg:grid-cols-3 gap-6"
-        >
-          <StatCard
-            title="Available Internships"
-            value={stats.loading ? '...' : stats.internships}
-            icon={<FaBriefcase className="text-white text-xl" />}
-            description={
-              stats.loading
-                ? 'Loading...'
-                : `${stats.internships} current opportunities`
-            }
-            color="border-blue-500"
-            bgColor="bg-blue-500"
-            delay={0.1}
-          />
+        {/* Stats Cards - Only show in dev or when feature flag enabled */}
+        {isDevOrEnabled('showStats') && (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="hidden lg:grid lg:grid-cols-3 gap-6"
+          >
+            {/* Internships stat - only if internships feature enabled */}
+            {isDevOrEnabled('enableInternships') && (
+              <StatCard
+                title="Available Internships"
+                value={stats.loading ? '...' : stats.internships}
+                icon={<FaBriefcase className="text-white text-xl" />}
+                description={
+                  stats.loading
+                    ? 'Loading...'
+                    : `${stats.internships} current opportunities`
+                }
+                color="border-blue-500"
+                bgColor="bg-blue-500"
+                delay={0.1}
+              />
+            )}
 
-          {(userRole === 'admin' || userRole === 'lead') && (
-            <StatCard
-              title="Total Members"
-              value={stats.loading ? '...' : stats.members}
-              icon={<FaUsers className="text-white text-xl" />}
-              description={
-                stats.loading
-                  ? 'Loading...'
-                  : `${stats.members} members across all chapters`
-              }
-              color="border-green-500"
-              bgColor="bg-green-500"
-              delay={0.2}
-            />
-          )}
+            {(userRole === 'admin' || userRole === 'lead') && (
+              <StatCard
+                title="Total Members"
+                value={stats.loading ? '...' : stats.members}
+                icon={<FaUsers className="text-white text-xl" />}
+                description={
+                  stats.loading
+                    ? 'Loading...'
+                    : `${stats.members} members across all chapters`
+                }
+                color="border-green-500"
+                bgColor="bg-green-500"
+                delay={0.2}
+              />
+            )}
 
-          {userRole === 'admin' && (
-            <StatCard
-              title="Active Chapters"
-              value={stats.loading ? '...' : stats.chapters}
-              icon={<FaBuilding className="text-white text-xl" />}
-              description={
-                stats.loading
-                  ? 'Loading...'
-                  : `Across ${stats.chapters} universities`
-              }
-              color="border-amber-500"
-              bgColor="bg-amber-500"
-              delay={0.3}
-            />
-          )}
-        </motion.div>
+            {userRole === 'admin' && (
+              <StatCard
+                title="Active Chapters"
+                value={stats.loading ? '...' : stats.chapters}
+                icon={<FaBuilding className="text-white text-xl" />}
+                description={
+                  stats.loading
+                    ? 'Loading...'
+                    : `Across ${stats.chapters} universities`
+                }
+                color="border-amber-500"
+                bgColor="bg-amber-500"
+                delay={0.3}
+              />
+            )}
+          </motion.div>
+        )}
 
         {/* News and Quick Actions Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -489,6 +584,8 @@ export default function Dashboard() {
             >
               News & Updates
             </motion.h2>
+            <NewsRefreshTimer />
+
             <div className="flex lg:flex-row flex-col gap-4">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -526,33 +623,38 @@ export default function Dashboard() {
               animate="visible"
               className="grid grid-cols-1 gap-6"
             >
-              <ActionCard
-                title="Browse Internships"
-                description="View all available internship opportunities"
-                icon={<FaBriefcase className="text-white text-xl" />}
-                href="/portal/dashboard/internships"
-                color="border-blue-100"
-                bgColor="bg-blue-500"
-                delay={0.5}
-              />
+              {/* Internships - Only show in dev or when feature flag enabled */}
+              {isDevOrEnabled('enableInternships') && (
+                <>
+                  <ActionCard
+                    title="Browse Internships"
+                    description="View all available internship opportunities"
+                    icon={<FaBriefcase className="text-white text-xl" />}
+                    href="/portal/dashboard/internships"
+                    color="border-blue-100"
+                    bgColor="bg-blue-500"
+                    delay={0.5}
+                  />
 
-              {(userRole === 'admin' || userRole === 'lead') && (
-                <ActionCard
-                  title="Add New Internship"
-                  description="Post a new internship opportunity"
-                  icon={<FaBriefcase className="text-white text-xl" />}
-                  href="/portal/dashboard/internships/new"
-                  color="border-green-100"
-                  bgColor="bg-green-500"
-                  delay={0.6}
-                />
+                  {(userRole === 'admin' || userRole === 'lead') && (
+                    <ActionCard
+                      title="Add New Internship"
+                      description="Post a new internship opportunity"
+                      icon={<FaBriefcase className="text-white text-xl" />}
+                      href="/portal/dashboard/internships/new"
+                      color="border-green-100"
+                      bgColor="bg-green-500"
+                      delay={0.6}
+                    />
+                  )}
+                </>
               )}
 
               {/* User Profile Summary Card if user has profile data */}
-              {(mongoUser?.personal?.bio ||
-                mongoUser?.personal?.major ||
-                (mongoUser?.profile?.skills &&
-                  mongoUser?.profile?.skills.length > 0)) && (
+              {(supabaseUserData?.personal_bio ||
+                supabaseUserData?.personal_major ||
+                (supabaseUserData?.profile_skills &&
+                  supabaseUserData?.profile_skills.length > 0)) && (
                 <motion.div
                   variants={itemVariants}
                   initial="hidden"
@@ -564,36 +666,36 @@ export default function Dashboard() {
                     Your Profile
                   </h3>
 
-                  {mongoUser?.personal?.major && (
+                  {supabaseUserData?.personal_major && (
                     <div className="flex items-start gap-2 mb-2">
                       <FaGraduationCap className="text-blue-500 mt-1 flex-shrink-0" />
                       <span className="text-sm text-gray-600">
-                        {mongoUser.personal.major}
+                        {supabaseUserData.personal_major}
                       </span>
                     </div>
                   )}
 
-                  {mongoUser?.personal?.gradYear && (
+                  {supabaseUserData?.personal_grad_year && (
                     <div className="flex items-start gap-2 mb-2">
                       <FaUniversity className="text-green-500 mt-1 flex-shrink-0" />
                       <span className="text-sm text-gray-600">
-                        Class of {mongoUser.personal.gradYear}
+                        Class of {supabaseUserData.personal_grad_year}
                       </span>
                     </div>
                   )}
 
-                  {mongoUser?.personal?.bio && (
+                  {supabaseUserData?.personal_bio && (
                     <div className="text-sm text-gray-600 mt-2 line-clamp-3">
-                      {mongoUser.personal.bio}
+                      {supabaseUserData.personal_bio}
                     </div>
                   )}
 
-                  {mongoUser?.profile?.skills &&
-                    mongoUser.profile.skills.length > 0 && (
+                  {supabaseUserData?.profile_skills &&
+                    supabaseUserData.profile_skills.length > 0 && (
                       <div className="mt-3">
                         <div className="text-xs text-gray-500 mb-1">Skills</div>
                         <div className="flex flex-wrap gap-1">
-                          {mongoUser.profile.skills
+                          {supabaseUserData.profile_skills
                             .slice(0, 3)
                             .map((skill, idx) => (
                               <span
@@ -603,9 +705,9 @@ export default function Dashboard() {
                                 {skill}
                               </span>
                             ))}
-                          {mongoUser.profile.skills.length > 3 && (
+                          {supabaseUserData.profile_skills.length > 3 && (
                             <span className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-full">
-                              +{mongoUser.profile.skills.length - 3} more
+                              +{supabaseUserData.profile_skills.length - 3} more
                             </span>
                           )}
                         </div>
