@@ -1,24 +1,26 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   FaExternalLinkAlt,
   FaNewspaper,
   FaClock,
   FaSync,
   FaDatabase,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { useUser } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { useNewsRefresh } from '@/contexts/NewsRefreshContext';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/browser';
 
 // Animation variants
 const containerVariants = {
@@ -37,7 +39,7 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 260,
       damping: 20,
     },
@@ -61,19 +63,21 @@ interface RssItem {
 }
 
 export default function SeekingAlphaNews() {
-  const { user, isLoaded } = useUser();
+  const supabase = createClient();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const { registerRefreshCallback, unregisterRefreshCallback } =
+    useNewsRefresh();
   const [newsItems, setNewsItems] = useState<RssItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [serverRefreshing, setServerRefreshing] = useState(false);
-  const [refreshMessage, setRefreshMessage] = useState("");
+  const [refreshMessage, setRefreshMessage] = useState('');
 
-  // Get user role from metadata
-  const userRole = isLoaded
-    ? (user?.publicMetadata?.role as string) || "member"
-    : "member";
-  const isAdmin = userRole === "admin";
+  // Get user role from Supabase user data
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const isAdmin = userRole === 'admin';
+  const isLoaded = !isLoading;
 
   // Format date relative to now (e.g., "2 hours ago")
   const formatRelativeTime = (dateString: string) => {
@@ -82,16 +86,16 @@ export default function SeekingAlphaNews() {
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return "just now";
+      return 'just now';
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
     } else {
       const days = Math.floor(diffInSeconds / 86400);
-      return `${days} ${days === 1 ? "day" : "days"} ago`;
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
     }
   };
 
@@ -104,17 +108,17 @@ export default function SeekingAlphaNews() {
         setLoading(true);
       }
 
-      const response = await fetch("/api/rss-items?source=seekingalpha-news");
+      const response = await fetch('/api/rss-items?source=seekingalpha-news');
 
       if (!response.ok) {
-        throw new Error("Failed to fetch news items");
+        throw new Error('Failed to fetch news items');
       }
 
       const data = await response.json();
 
       // Compare with existing items to find new ones
       if (isRefresh && newsItems.length > 0) {
-        const existingGuids = new Set(newsItems.map((item) => item.guid));
+        const existingGuids = new Set(newsItems.map(item => item.guid));
         const newItems = data.map((item: RssItem) => {
           if (!existingGuids.has(item.guid)) {
             return { ...item, isNew: true };
@@ -128,12 +132,25 @@ export default function SeekingAlphaNews() {
 
       setLastRefreshed(new Date());
     } catch (error) {
-      console.error("Error fetching news items:", error);
+      console.error('Error fetching news items:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
+
+  // Register refresh callback with context
+  useEffect(() => {
+    const refreshCallback = async () => {
+      await fetchNewsItems(true);
+    };
+
+    registerRefreshCallback('seekingalpha', refreshCallback);
+
+    return () => {
+      unregisterRefreshCallback('seekingalpha');
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback]);
 
   // Initial fetch
   useEffect(() => {
@@ -153,17 +170,17 @@ export default function SeekingAlphaNews() {
 
     try {
       setServerRefreshing(true);
-      setRefreshMessage("");
+      setRefreshMessage('');
 
       const response = await fetch(
-        "/api/rss-items/refresh?role=admin&source=seekingalpha",
+        '/api/rss-items/refresh?role=admin&source=seekingalpha',
         {
-          method: "POST",
+          method: 'POST',
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to trigger RSS feed refresh");
+        throw new Error('Failed to trigger RSS feed refresh');
       }
 
       const data = await response.json();
@@ -176,12 +193,12 @@ export default function SeekingAlphaNews() {
         fetchNewsItems(true);
       }, 1000);
     } catch (error) {
-      console.error("Error refreshing RSS feed:", error);
-      setRefreshMessage("Failed to refresh feed from server");
+      console.error('Error refreshing RSS feed:', error);
+      setRefreshMessage('Failed to refresh feed from server');
     } finally {
       setServerRefreshing(false);
       // Clear message after 5 seconds
-      setTimeout(() => setRefreshMessage(""), 5000);
+      setTimeout(() => setRefreshMessage(''), 5000);
     }
   };
 
@@ -205,7 +222,7 @@ export default function SeekingAlphaNews() {
             title="Refresh from cache"
           >
             <FaSync
-              className={`text-orange-500 ${refreshing ? "animate-spin" : ""}`}
+              className={`text-orange-500 ${refreshing ? 'animate-spin' : ''}`}
             />
           </button>
         </div>
@@ -228,7 +245,7 @@ export default function SeekingAlphaNews() {
                   key={item._id || index}
                   variants={itemVariants}
                   className={`border-b border-gray-100 pb-3 last:border-b-0 ${
-                    item.isNew ? "bg-orange-50 rounded p-2 -m-2" : ""
+                    item.isNew ? 'bg-orange-50 rounded p-2 -m-2' : ''
                   }`}
                 >
                   <Link
@@ -248,7 +265,7 @@ export default function SeekingAlphaNews() {
                     {item.contentSnippet && (
                       <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                         {item.contentSnippet.substring(0, 160)}
-                        {item.contentSnippet.length > 160 ? "..." : ""}
+                        {item.contentSnippet.length > 160 ? '...' : ''}
                       </p>
                     )}
                     <div className="flex items-center mt-1 text-xs text-gray-400">
@@ -278,7 +295,7 @@ export default function SeekingAlphaNews() {
               className="text-xs flex items-center text-gray-700"
             >
               <FaDatabase className="mr-1" />
-              {serverRefreshing ? "Refreshing Feed..." : "Refresh From Source"}
+              {serverRefreshing ? 'Refreshing Feed...' : 'Refresh From Source'}
             </Button>
 
             {refreshMessage && (
