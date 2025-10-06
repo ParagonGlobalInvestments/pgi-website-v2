@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
 import {
   FaSearch,
   FaEdit,
@@ -75,7 +76,27 @@ interface User {
 }
 
 export default function AdminDirectoryPage() {
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +124,7 @@ export default function AdminDirectoryPage() {
 
   // Fetch chapters
   useEffect(() => {
-    if (!isLoaded) return;
+    if (isLoading || !supabaseUser) return;
 
     const fetchChapters = async () => {
       try {
@@ -120,11 +141,11 @@ export default function AdminDirectoryPage() {
     };
 
     fetchChapters();
-  }, [isLoaded]);
+  }, [supabaseUser]);
 
   // Fetch users
   useEffect(() => {
-    if (!isLoaded) return;
+    if (isLoading || !supabaseUser) return;
 
     const fetchUsers = async () => {
       try {
@@ -152,14 +173,14 @@ export default function AdminDirectoryPage() {
     };
 
     fetchUsers();
-  }, [isLoaded]);
+  }, [supabaseUser]);
 
   // Check admin permission
   useEffect(() => {
-    if (isLoaded && clerkUser?.publicMetadata?.role !== 'admin') {
+    if (!isLoading && supabaseUserData?.org_permission_level !== 'admin') {
       router.push('/portal/dashboard/directory');
     }
-  }, [isLoaded, clerkUser, router]);
+  }, [isLoading, supabaseUserData, router]);
 
   // Filter users based on search
   const filteredUsers = useMemo(() => {
@@ -335,7 +356,7 @@ export default function AdminDirectoryPage() {
     }
   };
 
-  if (!isLoaded || loading) {
+  if (isLoading || loading || !supabaseUser) {
     return <div>Loading...</div>;
   }
 

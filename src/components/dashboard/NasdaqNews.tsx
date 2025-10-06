@@ -1,24 +1,26 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   FaExternalLinkAlt,
   FaChartLine,
   FaClock,
   FaSync,
   FaDatabase,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { useUser } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { useNewsRefresh } from '@/contexts/NewsRefreshContext';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/browser';
 
 // Animation variants
 const containerVariants = {
@@ -37,7 +39,7 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 260,
       damping: 20,
     },
@@ -60,20 +62,22 @@ interface RssItem {
 }
 
 export default function NasdaqNews() {
-  const { user, isLoaded } = useUser();
+  const supabase = createClient();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const { registerRefreshCallback, unregisterRefreshCallback } =
+    useNewsRefresh();
   const [newsItems, setNewsItems] = useState<RssItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [serverRefreshing, setServerRefreshing] = useState(false);
-  const [refreshMessage, setRefreshMessage] = useState("");
+  const [refreshMessage, setRefreshMessage] = useState('');
   const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Get user role from metadata
-  const userRole = isLoaded
-    ? (user?.publicMetadata?.role as string) || "member"
-    : "member";
-  const isAdmin = userRole === "admin";
+  // Get user role from Supabase user data
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const isAdmin = userRole === 'admin';
+  const isLoaded = !isLoading;
 
   // Format date relative to now (e.g., "2 hours ago")
   const formatRelativeTime = (dateString: string) => {
@@ -82,16 +86,16 @@ export default function NasdaqNews() {
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return "just now";
+      return 'just now';
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
     } else {
       const days = Math.floor(diffInSeconds / 86400);
-      return `${days} ${days === 1 ? "day" : "days"} ago`;
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
     }
   };
 
@@ -104,17 +108,17 @@ export default function NasdaqNews() {
         setLoading(true);
       }
 
-      const response = await fetch("/api/rss-items?source=nasdaq-news");
+      const response = await fetch('/api/rss-items?source=nasdaq-news');
 
       if (!response.ok) {
-        throw new Error("Failed to fetch news items");
+        throw new Error('Failed to fetch news items');
       }
 
       const data = await response.json();
 
       // Compare with existing items to find new ones
       if (isRefresh && newsItems.length > 0) {
-        const existingGuids = new Set(newsItems.map((item) => item.guid));
+        const existingGuids = new Set(newsItems.map(item => item.guid));
         const newItems = data.map((item: RssItem) => {
           if (!existingGuids.has(item.guid)) {
             return { ...item, isNew: true };
@@ -128,28 +132,30 @@ export default function NasdaqNews() {
 
       setLastRefreshed(new Date());
     } catch (error) {
-      console.error("Error fetching news items:", error);
+      console.error('Error fetching news items:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  // Register refresh callback with context
+  useEffect(() => {
+    const refreshCallback = async () => {
+      await fetchNewsItems(true);
+    };
+
+    registerRefreshCallback('nasdaq', refreshCallback);
+
+    return () => {
+      unregisterRefreshCallback('nasdaq');
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback]);
+
   // Initial fetch
   useEffect(() => {
     if (isLoaded) {
       fetchNewsItems();
-
-      // Set up polling every 30 seconds
-      pollingInterval.current = setInterval(() => {
-        fetchNewsItems(true);
-      }, 30000);
-
-      return () => {
-        if (pollingInterval.current) {
-          clearInterval(pollingInterval.current);
-        }
-      };
     }
   }, [isLoaded]);
 
@@ -164,17 +170,17 @@ export default function NasdaqNews() {
 
     try {
       setServerRefreshing(true);
-      setRefreshMessage("");
+      setRefreshMessage('');
 
       const response = await fetch(
         `/api/rss-items/refresh?role=${userRole}&source=nasdaq`,
         {
-          method: "POST",
+          method: 'POST',
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to trigger RSS feed refresh");
+        throw new Error('Failed to trigger RSS feed refresh');
       }
 
       const data = await response.json();
@@ -187,12 +193,12 @@ export default function NasdaqNews() {
         fetchNewsItems(true);
       }, 1000);
     } catch (error) {
-      console.error("Error refreshing RSS feed:", error);
-      setRefreshMessage("Failed to refresh feed from server");
+      console.error('Error refreshing RSS feed:', error);
+      setRefreshMessage('Failed to refresh feed from server');
     } finally {
       setServerRefreshing(false);
       // Clear message after 5 seconds
-      setTimeout(() => setRefreshMessage(""), 5000);
+      setTimeout(() => setRefreshMessage(''), 5000);
     }
   };
 
@@ -217,7 +223,7 @@ export default function NasdaqNews() {
               title="Refresh from cache"
             >
               <FaSync
-                className={`text-blue-500 ${refreshing ? "animate-spin" : ""}`}
+                className={`text-blue-500 ${refreshing ? 'animate-spin' : ''}`}
               />
             </button>
           )}
@@ -246,7 +252,7 @@ export default function NasdaqNews() {
                 key={item._id || index}
                 variants={itemVariants}
                 className={`border-b border-gray-100 pb-3 last:border-b-0 ${
-                  item.isNew ? "bg-green-50 rounded p-2 -m-2" : ""
+                  item.isNew ? 'bg-green-50 rounded p-2 -m-2' : ''
                 }`}
               >
                 <Link
@@ -286,7 +292,7 @@ export default function NasdaqNews() {
               className="text-xs flex items-center text-gray-700"
             >
               <FaDatabase className="mr-1" />
-              {serverRefreshing ? "Refreshing Feed..." : "Refresh From Source"}
+              {serverRefreshing ? 'Refreshing Feed...' : 'Refresh From Source'}
             </Button>
 
             {refreshMessage && (

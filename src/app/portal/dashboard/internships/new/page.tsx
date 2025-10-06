@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useUser } from '@clerk/nextjs';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
+import { isDevOrEnabled } from '@/lib/featureFlags';
 import Link from 'next/link';
 import {
   FaArrowLeft,
@@ -69,7 +71,27 @@ const internshipSchema = z.object({
 type InternshipFormValues = z.infer<typeof internshipSchema>;
 
 export default function NewInternshipPage() {
-  const { user, isLoaded } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -83,13 +105,12 @@ export default function NewInternshipPage() {
   } = useForm<InternshipFormValues>();
 
   // Get user metadata
-  const userRole = (user?.publicMetadata?.role as UserRole) || 'member';
-  const userChapter =
-    (user?.publicMetadata?.chapter as string) || 'Yale University';
+  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const userChapter = supabaseUserData?.org_chapter_name || 'Yale University';
 
   // Fetch chapters for the dropdown
   useEffect(() => {
-    if (!isLoaded) return;
+    if (isLoading || !supabaseUser) return;
 
     const fetchChapters = async () => {
       try {
@@ -104,11 +125,37 @@ export default function NewInternshipPage() {
     };
 
     fetchChapters();
-  }, [isLoaded]);
+  }, [supabaseUser]);
+
+  // Redirect if feature is disabled or user lacks permission
+  useEffect(() => {
+    if (!isDevOrEnabled('enableInternships')) {
+      router.push('/portal/dashboard');
+      return;
+    }
+
+    if (
+      !isLoading &&
+      supabaseUserData &&
+      supabaseUserData.org_permission_level !== 'admin' &&
+      supabaseUserData.org_permission_level !== 'lead'
+    ) {
+      router.push('/portal/dashboard');
+    }
+  }, [isLoading, supabaseUserData, router]);
+
+  // Don't render if feature is disabled
+  if (!isDevOrEnabled('enableInternships')) {
+    return null;
+  }
 
   // Check if user has permission
-  if (isLoaded && userRole !== 'admin' && userRole !== 'lead') {
-    router.push('/portal/dashboard/internships');
+  if (
+    !isLoading &&
+    supabaseUserData &&
+    supabaseUserData.org_permission_level !== 'admin' &&
+    supabaseUserData.org_permission_level !== 'lead'
+  ) {
     return null;
   }
 
@@ -170,7 +217,7 @@ export default function NewInternshipPage() {
     }
   };
 
-  if (!isLoaded) {
+  if (isLoading || !supabaseUser) {
     return (
       <div className="flex h-full items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#003E6B]"></div>

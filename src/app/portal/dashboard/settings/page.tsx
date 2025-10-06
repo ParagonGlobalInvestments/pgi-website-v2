@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
+import { useSupabaseUser } from '@/hooks/useSupabaseUser';
+import { createClient } from '@/lib/supabase/browser';
 import { FaSave, FaBell, FaUser, FaPalette, FaDesktop } from 'react-icons/fa';
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { motion } from 'framer-motion';
@@ -45,7 +46,27 @@ const staggerContainerVariants = {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const [supabaseUser, setSupabaseUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setSupabaseUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Notification preferences state
   const [notificationPreferences, setNotificationPreferences] = useState({
@@ -120,7 +141,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (!isLoaded) {
+  if (isLoading || !supabaseUser) {
     return null; // Let the layout handle loading
   }
 
