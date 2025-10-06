@@ -1,4 +1,4 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { createClient } from '@/lib/supabase/server';
 import { connectToDatabase } from '@/lib/database/connection';
 import User from '@/lib/database/models/User';
 import Chapter from '@/lib/database/models/Chapter';
@@ -67,37 +67,37 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
   try {
     await connectToDatabase();
 
-    // Get the current user from Clerk
-    const user = await currentUser();
-    if (!user) {
+    // Get the current user from Supabase
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
       throw new Error('User not authenticated');
     }
 
-    // Find the user's primary email
-    const email = user.emailAddresses.find(
-      (email: any) => email.id === user.primaryEmailAddressId
-    )?.emailAddress;
-
+    const email = user.email;
     if (!email) {
       throw new Error('User email not found');
     }
 
-    // Get values from metadata (don't set defaults)
-    let track = (user.publicMetadata.track as string) || options.track;
+    // Get values from user metadata or options
+    let track = user.user_metadata?.track || options.track;
     const trackRoles = options.trackRoles || [];
-    const execRoles = (user.publicMetadata.execRoles as string[]) || [];
+    const execRoles = user.user_metadata?.execRoles || [];
 
     // Validate and remap track if necessary
     if (track === 'both' || (track && !['quant', 'value'].includes(track))) {
       console.warn(
-        `Invalid track value "${track}" found in Clerk metadata or options. Defaulting to "quant".`
+        `Invalid track value "${track}" found in user metadata or options. Defaulting to "quant".`
       );
       track = 'quant'; // Or any other default valid track
     }
 
     // Get chapter name from metadata (don't set a default)
-    let chapterName =
-      (user.publicMetadata.chapter as string) || options.chapterName;
+    let chapterName = user.user_metadata?.chapter || options.chapterName;
     let chapter = null;
 
     // Only process chapter if one is specified
@@ -133,12 +133,11 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
     const isAlumni =
       options.isAlumni !== undefined
         ? options.isAlumni
-        : (user.publicMetadata.isAlumni as boolean) ||
-          new Date().getFullYear() > gradYear;
+        : user.user_metadata?.isAlumni || new Date().getFullYear() > gradYear;
 
-    // Check if user already exists in MongoDB by clerkId or email
+    // Check if user already exists in MongoDB by supabaseId or email
     let mongoUser = await User.findOne({
-      $or: [{ 'system.clerkId': user.id }, { 'personal.email': email }],
+      $or: [{ 'system.supabaseId': user.id }, { 'personal.email': email }],
     });
 
     // Log chapter, track and trackRoles for debugging
@@ -150,12 +149,12 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
     console.log(`Track: ${track}, TrackRoles: ${JSON.stringify(trackRoles)}`);
 
     if (mongoUser) {
-      // If user exists but has a different clerkId, update it
-      if (mongoUser.system.clerkId !== user.id) {
+      // If user exists but has a different supabaseId, update it
+      if (mongoUser.system.supabaseId !== user.id) {
         console.log(
-          `Updating clerkId from ${mongoUser.system.clerkId} to ${user.id}`
+          `Updating supabaseId from ${mongoUser.system.supabaseId} to ${user.id}`
         );
-        mongoUser.system.clerkId = user.id;
+        mongoUser.system.supabaseId = user.id;
       }
 
       // Update existing user
@@ -163,8 +162,12 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
       let hasChanges = false;
 
       // Update personal information
-      if (mongoUser.personal.name !== `${user.firstName} ${user.lastName}`) {
-        mongoUser.personal.name = `${user.firstName} ${user.lastName}`;
+      const fullName =
+        user.user_metadata?.full_name ||
+        user.email?.split('@')[0] ||
+        'Unknown User';
+      if (mongoUser.personal.name !== fullName) {
+        mongoUser.personal.name = fullName;
         hasChanges = true;
       }
 
@@ -276,7 +279,8 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
       }
 
       if (options.avatarUrl !== undefined) {
-        mongoUser.profile.avatarUrl = options.avatarUrl || user.imageUrl;
+        mongoUser.profile.avatarUrl =
+          options.avatarUrl || user.user_metadata?.avatar_url;
         hasChanges = true;
       }
 
@@ -323,9 +327,13 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
       return mongoUser;
     } else {
       // Create new user with required fields
+      const fullName =
+        user.user_metadata?.full_name ||
+        user.email?.split('@')[0] ||
+        'Unknown User';
       const userData = {
         personal: {
-          name: `${user.firstName} ${user.lastName}`,
+          name: fullName,
           email,
           gradYear,
           isAlumni: isAlumni || false,
@@ -346,7 +354,7 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
           skills: options.skills || [],
           linkedin: options.linkedin || '',
           resumeUrl: options.resumeUrl || '',
-          avatarUrl: options.avatarUrl || user.imageUrl,
+          avatarUrl: options.avatarUrl || user.user_metadata?.avatar_url,
           github: options.github || '',
           interests: options.interests || [],
           achievements: options.achievements || [],
@@ -357,7 +365,7 @@ export async function syncUserWithMongoDB(options: SyncUserOptions = {}) {
           internshipsPosted: 0,
         },
         system: {
-          clerkId: user.id,
+          supabaseId: user.id,
           firstLogin:
             options.firstLogin !== undefined ? options.firstLogin : true,
           notifications: {

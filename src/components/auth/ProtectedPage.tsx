@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { ReactNode, useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { UserRole, UserTrack } from "@/lib/auth";
+import { ReactNode, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { UserRole, UserTrack } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/browser';
 
 interface ProtectedPageProps {
   children: ReactNode;
@@ -16,75 +16,94 @@ export default function ProtectedPage({
   children,
   requiredRole,
   requiredTrack,
-  redirectTo = "/portal/dashboard",
+  redirectTo = '/portal/dashboard',
 }: ProtectedPageProps) {
-  const { user, isLoaded } = useUser();
   const router = useRouter();
+  const supabase = createClient();
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    const checkAuthorization = async () => {
+      try {
+        // Get authenticated user
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
 
-    // If the user isn't signed in, redirect to sign-in
-    if (!user) {
-      router.push("/portal/signin");
-      return;
-    }
+        if (authError || !user) {
+          // Middleware will handle redirect to sign-in
+          setIsLoading(false);
+          return;
+        }
 
-    // Get user's permissionLevel and track from metadata
-    const userRole =
-      (user.publicMetadata?.permissionLevel as UserRole) || "member";
-    const userTrack = (user.publicMetadata?.track as UserTrack) || "value";
+        // Query Supabase database for user's role and track
+        const { data: pgiUser, error: dbError } = await supabase
+          .from('users')
+          .select('org_permission_level, org_track')
+          .eq('system_supabase_id', user.id)
+          .single();
 
-    // Check role-based access
-    let hasRequiredRole = true;
-    if (requiredRole) {
-      if (Array.isArray(requiredRole)) {
-        hasRequiredRole = requiredRole.includes(userRole);
-      } else {
-        hasRequiredRole = userRole === requiredRole;
+        if (dbError || !pgiUser) {
+          console.error('User not found in PGI database:', dbError);
+          setIsLoading(false);
+          return;
+        }
+
+        const userRole = pgiUser.org_permission_level || 'member';
+        const userTrack = pgiUser.org_track || 'value';
+
+        // Check role requirement
+        let hasRequiredRole = true;
+        if (requiredRole) {
+          const roles = Array.isArray(requiredRole)
+            ? requiredRole
+            : [requiredRole];
+          hasRequiredRole = roles.includes(userRole) || userRole === 'admin';
+        }
+
+        // Check track requirement
+        let hasRequiredTrack = true;
+        if (requiredTrack) {
+          const tracks = Array.isArray(requiredTrack)
+            ? requiredTrack
+            : [requiredTrack];
+          hasRequiredTrack =
+            tracks.includes(userTrack) ||
+            userRole === 'admin' ||
+            userRole === 'lead';
+        }
+
+        // Redirect if not authorized
+        if (!hasRequiredRole || !hasRequiredTrack) {
+          router.push(redirectTo);
+          return;
+        }
+
+        setIsAuthorized(true);
+      } catch (error) {
+        console.error('Error checking authorization:', error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      // Admin permissionLevel has access to everything
-      if (userRole === "admin") {
-        hasRequiredRole = true;
-      }
-    }
+    checkAuthorization();
+  }, [supabase, requiredRole, requiredTrack, redirectTo, router]);
 
-    // Check track-based access
-    let hasRequiredTrack = true;
-    if (requiredTrack) {
-      if (Array.isArray(requiredTrack)) {
-        hasRequiredTrack = requiredTrack.includes(userTrack);
-      } else {
-        hasRequiredTrack = userTrack === requiredTrack;
-      }
-
-      // Admin and lead permissionLevels can see all tracks
-      if (userRole === "admin" || userRole === "lead") {
-        hasRequiredTrack = true;
-      }
-    }
-
-    // Redirect if the user doesn't have the required permissionLevel or track
-    if (!hasRequiredRole || !hasRequiredTrack) {
-      router.push(redirectTo);
-      return;
-    }
-
-    // User is authorized
-    setIsAuthorized(true);
-  }, [isLoaded, user, requiredRole, requiredTrack, redirectTo, router]);
-
-  // Show loading state if not loaded or while checking authorization
-  if (!isLoaded || !isAuthorized) {
+  // Show loading
+  if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+        <p className="text-white">Loading...</p>
       </div>
     );
   }
 
-  // Render the protected content
+  // Don't render until authorized
+  if (!isAuthorized) return null;
+
   return <>{children}</>;
 }

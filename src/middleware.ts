@@ -1,97 +1,77 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-// This example protects all routes including api/trpc routes
-// Please edit this to allow other routes to be public as needed.
-// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your Middleware
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
 
-const isPublicRoute = createRouteMatcher([
-  // Home page
-  '/',
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
 
-  // Main navigation routes
-  '/who-we-are',
-  '/members',
-  '/members/value-team',
-  '/members/quant-team',
-  '/placements',
-  '/apply',
-  '/contact',
+  // IMPORTANT: Avoid writing any logic between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
 
-  // About section dropdown routes
-  '/investment-strategy',
-  '/education',
-  '/sponsors',
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // National Committee routes
-  '/national-committee',
-  '/national-committee/(.*)',
-  '/national-committee/officers',
-  '/national-committee/founders',
-
-  // Legal pages
-  '/privacy-policy',
-
-  // SEO files
-  '/sitemap.xml',
-  '/robots.txt',
-
-  // API routes
-  '/api/webhooks(.*)',
-
-  // Portal auth routes (for development)
-  '/portal/signin',
-  '/portal/signin/(.*)',
-  '/portal/signup',
-  '/portal/signup/(.*)',
-  '/portal/sign-up',
-  '/portal/sign-up/(.*)',
-]);
-
-// Routes that should redirect to landing page in production
-const isAuthRoute = createRouteMatcher([
-  '/sign-in',
-  '/sign-in/(.*)',
-  '/sign-up',
-  '/sign-up/(.*)',
-  '/sign-up/verify',
-  '/portal',
-  '/portal/(.*)',
-  '/dashboard',
-  '/dashboard/(.*)',
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  console.log(`Middleware: ${req.method} ${req.nextUrl.pathname}`);
-
-  const pathname = req.nextUrl.pathname;
+  const pathname = request.nextUrl.pathname;
 
   // Allow sitemap.xml and robots.txt to pass through immediately
   if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
-    console.log(`Allowing ${pathname} to pass through middleware`);
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
-  // Legacy route handling removed
+  // Protected routes that require authentication
+  const isProtectedRoute =
+    pathname.startsWith('/portal/dashboard') ||
+    pathname.startsWith('/portal/signout');
 
-  // In production, redirect auth/portal routes to landing page
-  if (process.env.NODE_ENV === 'production' && isAuthRoute(req)) {
-    return NextResponse.redirect(new URL('/', req.url));
+  // Auth routes (sign-in, sign-up)
+  const isAuthRoute =
+    pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up');
+
+  // If accessing protected route without authentication, redirect to sign-in
+  if (isProtectedRoute && !user) {
+    const redirectUrl = new URL('/sign-in', request.url);
+    redirectUrl.searchParams.set('redirectTo', pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
-  if (!isPublicRoute(req)) {
-    await auth().protect();
+  // If authenticated user tries to access auth routes, redirect to portal
+  if (isAuthRoute && user) {
+    return NextResponse.redirect(new URL('/portal/dashboard', request.url));
   }
 
-  return NextResponse.next();
-});
+  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  return supabaseResponse;
+}
 
 export const config = {
   matcher: [
-    // Protect APIs
-    '/(api|trpc)(.*)',
-
-    // Protect ONLY your private app areas (adjust as needed)
-    '/portal/(.*)'
+    // Skip all internal paths (_next)
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

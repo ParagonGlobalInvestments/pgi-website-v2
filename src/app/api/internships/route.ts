@@ -1,41 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import Internship from '@/lib/database/models/Internship';
-import User from '@/lib/database/models/User';
-
-// Define interface for session claims
-interface SessionClaims {
-  role?: string;
-  track?: string;
-  chapter?: string;
-  isManager?: boolean;
-  isAlumni?: boolean;
-  [key: string]: any; // Allow other properties
-}
-
-// Helper function to safely parse session claims
-function getSafeSessionClaims(req: NextRequest): SessionClaims {
-  try {
-    const { sessionClaims } = getAuth(req);
-    return (sessionClaims as SessionClaims) || {};
-  } catch (error) {
-    console.error('Error getting session claims:', error);
-    return {};
-  }
-}
+import { createClient } from '@/lib/supabase/server';
+import { createDatabase } from '@/lib/supabase/database';
 
 // GET /api/internships - Get all internships with filtering
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = getAuth(req);
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Connect to the database
-    await connectToDatabase();
+    // Connect to Supabase database
+    const db = createDatabase();
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
@@ -45,28 +26,23 @@ export async function GET(req: NextRequest) {
 
     console.log('Requested filters:', { track, chapter, isClosed });
 
-    // Build filter object - only include isClosed as default filter
-    const filter: any = { isClosed };
+    // Get user data from Supabase
+    const dbUser = await db.getUserBySupabaseId(user.id);
 
-    // Get user data from MongoDB and session claims
-    const sessionClaims = getSafeSessionClaims(req);
-    let userRole = sessionClaims.role || 'member';
-    let userTrack = sessionClaims.track || 'value';
+    let userRole = 'member';
+    let userTrack = 'value';
 
-    // Find user in MongoDB by their Clerk ID
-    const user = await User.findOne({ clerkId: userId });
-
-    if (user) {
-      // If user exists in MongoDB, use their stored values
-      userRole = user.permissionLevel;
-      userTrack = user.track;
+    if (dbUser) {
+      // If user exists in database, use their stored values
+      userRole = dbUser.org?.permissionLevel || 'member';
+      userTrack = dbUser.org?.track || 'value';
       console.log(
-        `Found user in MongoDB: ${user.name}, role: ${userRole}, track: ${userTrack}`
+        `Found user in database: ${dbUser.personal.name}, role: ${userRole}, track: ${userTrack}`
       );
     } else {
-      // If user not found in MongoDB, log that we're using session claims
+      // If user not found in database, log that we're using defaults
       console.log(
-        `User not found in MongoDB. Using session claims - role: ${userRole}, track: ${userTrack}`
+        `User not found in database. Using defaults - role: ${userRole}, track: ${userTrack}`
       );
     }
 
@@ -78,35 +54,37 @@ export async function GET(req: NextRequest) {
       userTrack = 'both';
     }
 
+    // Build filter object based on user permissions
+    const filters: any = { is_closed: isClosed };
+
     // Handle track filtering based on role and selected filter
     if (userRole === 'admin' || userRole === 'lead') {
       // For admin/lead users, only apply track filter if specific track selected
       if (track && track !== 'all') {
-        filter.track = track;
+        filters.track = track;
       }
       // No track filter applied if "all" is selected - they see everything
     } else {
       // Regular members can only see internships from their track or "both"
       if (track && track !== 'all' && track === userTrack) {
         // If they selected a specific track that matches their own
-        filter.track = track;
+        filters.track = track;
       } else {
         // Otherwise show their assigned track and "both" track internships
-        filter.track = { $in: [userTrack, 'both'] };
+        // For now, just show their track - the database method may need enhancement for "both"
+        filters.track = userTrack;
       }
     }
 
     // If a specific chapter is requested
     if (chapter && chapter !== 'all') {
-      filter.chapter = chapter;
+      filters.chapter = chapter;
     }
 
-    console.log('Filter applied:', JSON.stringify(filter)); // Debug the actual filter being used
+    console.log('Filter applied:', JSON.stringify(filters));
 
-    // Get internships matching the filter
-    const internships = await Internship.find(filter)
-      .sort({ deadline: 1, createdAt: -1 })
-      .limit(100);
+    // Get internships matching the filter from Supabase
+    const internships = await db.getInternships(filters);
 
     console.log(`Found ${internships.length} matching internships`);
 
@@ -131,21 +109,24 @@ export async function GET(req: NextRequest) {
 // POST /api/internships - Create a new internship
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = getAuth(req);
+    const supabase = createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    // Check if user is authenticated
-    if (!userId) {
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Connect to database
-    await connectToDatabase();
+    // Connect to Supabase database
+    const db = createDatabase();
 
     // Check if user has permission to create internships
-    const user = await User.findOne({ clerkId: userId });
-    const userRole = user?.role || 'member';
+    const dbUser = await db.getUserBySupabaseId(user.id);
+    const userRole = dbUser?.org?.permissionLevel || 'member';
 
-    if (userRole !== 'admin' && userRole !== 'lead') {
+    if (!['admin', 'moderator', 'officer'].includes(userRole)) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
@@ -155,10 +136,10 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const data = await req.json();
 
-    // Create the internship
-    const internship = await Internship.create({
+    // Create the internship using Supabase
+    const internship = await db.createInternship({
       ...data,
-      createdBy: userId,
+      createdBy: user.id,
     });
 
     return NextResponse.json(internship, { status: 201 });

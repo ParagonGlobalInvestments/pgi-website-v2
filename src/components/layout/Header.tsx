@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { SignedIn, SignedOut } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { trackEvent } from '@/lib/posthog';
+import { createClient } from '@/lib/supabase/browser';
 
 // Animation variants
 const navbarAnimation = {
@@ -156,9 +156,70 @@ const Header = () => {
   const [expandedNationalCommittee, setExpandedNationalCommittee] =
     useState(false);
   const [expandedMembers, setExpandedMembers] = useState(false);
+  // Authentication state
+  const [user, setUser] = useState<any>(null);
+  const [isPGIMember, setIsPGIMember] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   // Get current pathname for navigation events
   const pathname = usePathname();
+  const supabase = createClient();
+
+  // Check authentication state and PGI membership
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+
+      // If user is authenticated, check if they're a PGI member
+      if (user) {
+        try {
+          const response = await fetch('/api/users/me');
+          if (response.ok) {
+            setIsPGIMember(true);
+          } else {
+            setIsPGIMember(false);
+          }
+        } catch (error) {
+          console.error('Error checking PGI membership:', error);
+          setIsPGIMember(false);
+        }
+      } else {
+        setIsPGIMember(false);
+      }
+
+      setLoading(false);
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const sessionUser = session?.user || null;
+      setUser(sessionUser);
+
+      // Check PGI membership when auth state changes
+      if (sessionUser) {
+        try {
+          const response = await fetch('/api/users/me');
+          if (response.ok) {
+            setIsPGIMember(true);
+          } else {
+            setIsPGIMember(false);
+          }
+        } catch (error) {
+          setIsPGIMember(false);
+        }
+      } else {
+        setIsPGIMember(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   // Close mobile menu when navigating to a new page
   useEffect(() => {
@@ -237,6 +298,7 @@ const Header = () => {
     { name: 'Placements', url: '/placements' },
     { name: 'Apply', url: '/apply' },
     { name: 'Contact', url: '/contact' },
+    { name: 'Resources', url: '/resources' },
   ];
 
   // Define About submenu items for consistency
@@ -283,7 +345,7 @@ const Header = () => {
         </motion.div>
 
         <motion.nav
-          className="hidden md:flex items-center space-x-4 lg:space-x-8 font-semibold"
+          className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-8 font-normal text-xs lg:text-base"
           variants={staggerNavItems}
         >
           {/* About dropdown container */}
@@ -478,30 +540,59 @@ const Header = () => {
             </Link>
           </motion.div>
 
-          {/* Only show Portal in development */}
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+          >
+            <Link
+              href="/resources"
+              className="text-white hover:text-secondary transition-colors duration-300"
+            >
+              Resources
+            </Link>
+          </motion.div>
+
+          {/* Authentication Links - Only show in development */}
           {process.env.NODE_ENV !== 'production' && (
             <motion.div
               variants={navItemAnimation}
               whileHover="hover"
               whileTap="tap"
+              className=""
             >
-              <SignedIn>
+              {loading ? (
+                <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
+                  Loading...
+                </div>
+              ) : user && isPGIMember ? (
+                <div className="flex items-center pl-1 lg:pl-0">
+                  <Link
+                    href="/portal"
+                    className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                  >
+                    <span className="block lg:hidden">Portal</span>
+                    <span className="hidden lg:block">Dashboard</span>
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      const supabase = createClient();
+                      await supabase.auth.signOut();
+                      window.location.reload();
+                    }}
+                    className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
                 <Link
-                  href="/dashboard"
-                  className="bg-white text-black py-2 px-4 rounded hover:bg-opacity-90 transition-colors  font-bold"
+                  href="/sign-in"
+                  className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
                 >
-                  Dashboard
+                  Sign In
                 </Link>
-                {/* <UserButton /> */}
-              </SignedIn>
-              <SignedOut>
-                <Link
-                  href="/portal"
-                  className=" py-2 px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
-                >
-                  Portal
-                </Link>
-              </SignedOut>
+              )}
             </motion.div>
           )}
         </motion.nav>
@@ -712,28 +803,40 @@ const Header = () => {
                 </motion.div>
               ))}
 
-              {/* Authentication links - Only show Portal in development */}
+              {/* Authentication links - Only show in development */}
               {process.env.NODE_ENV !== 'production' && (
                 <motion.div variants={mobileItemVariants} className="pt-2">
-                  <SignedIn>
+                  {loading ? (
+                    <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
+                      Loading...
+                    </div>
+                  ) : user && isPGIMember ? (
+                    <div className="space-y-2">
+                      <Link
+                        href="/portal"
+                        className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          const supabase = createClient();
+                          await supabase.auth.signOut();
+                          window.location.reload();
+                        }}
+                        className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
                     <Link
-                      href="/dashboard"
-                      className="block py-3 px-4 mb-3 bg-primary text-white font-semibold rounded-lg text-center hover:bg-primary/90 transition-all duration-200 active:scale-[0.98]"
-                    >
-                      Dashboard
-                    </Link>
-                    {/* <div className="flex justify-center">
-                      <UserButton />
-                    </div> */}
-                  </SignedIn>
-                  <SignedOut>
-                    <Link
-                      href="/portal"
+                      href="/sign-in"
                       className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
                     >
-                      Portal
+                      Sign In
                     </Link>
-                  </SignedOut>
+                  )}
                 </motion.div>
               )}
             </div>
