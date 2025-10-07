@@ -35,13 +35,39 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is a PGI member by querying Supabase database directly
-    const { data: pgiUser, error: dbError } = await supabase
+    // First try by system_supabase_id
+    let { data: pgiUser, error: dbError } = await supabase
       .from('users')
-      .select('id, full_name, personal_email')
+      .select('id, personal_name, personal_email, system_supabase_id')
       .eq('system_supabase_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (dbError || !pgiUser) {
+    // If not found by supabase_id, try by email (for migrated users)
+    if (!pgiUser && user.email) {
+      const { data: userByEmail, error: emailError } = await supabase
+        .from('users')
+        .select('id, personal_name, personal_email, system_supabase_id')
+        .eq('personal_email', user.email)
+        .maybeSingle();
+
+      if (userByEmail) {
+        pgiUser = userByEmail;
+        
+        // Update the system_supabase_id for this user
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({ system_supabase_id: user.id })
+          .eq('id', userByEmail.id);
+
+        if (updateError) {
+          console.error('Error updating system_supabase_id:', updateError);
+        } else {
+          console.log(`Updated system_supabase_id for user ${userByEmail.personal_email}`);
+        }
+      }
+    }
+
+    if (!pgiUser) {
       console.log('User not found in PGI database:', user.email);
       // User authenticated but not a PGI member - sign them out
       await supabase.auth.signOut();
