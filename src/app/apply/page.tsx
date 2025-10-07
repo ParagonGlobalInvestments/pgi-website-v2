@@ -11,8 +11,11 @@ import { handleFormClick } from '@/components/analytics/FormTracker';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const UCHICAGO_APPLY_URL =
-  'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
-const applicationsOpen = true; // set to true when applications open
+  'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486';
+const applicationsOpen = true;
+
+const ZOOM_LINK_URL =
+  'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
 
 /** Animation variants (unchanged) */
 const fadeIn = {
@@ -449,6 +452,10 @@ function GeneralRecruitment() {
     </>
   );
 }
+
+const baseBtn =
+  "inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]";
+
 function UChicagoRecruitment() {
   return (
     <>
@@ -471,15 +478,34 @@ function UChicagoRecruitment() {
               The UChicago-specific cycle is starting now. See the on-campus
               schedule, application window, and interview dates below.
             </p>
-            <div className="mt-8">
+
+            {/* Buttons row: Zoom (left) + Apply (right) */}
+            <div className="mt-8 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+              <motion.a
+                href={ZOOM_LINK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${baseBtn} bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <span className="leading-tight">
+                  <span className="text-sm md:text-base block">
+                    Information Session Zoom Link
+                  </span>
+                  <span className="text-xs md:text-sm opacity-80 block">
+                    October 8th at 6 PM CT
+                  </span>
+                </span>
+              </motion.a>
               {applicationsOpen ? (
                 <motion.a
                   href={UCHICAGO_APPLY_URL}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold
-                            bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  target="_blank"
                 >
                   Apply Now — UChicago
                 </motion.a>
@@ -487,8 +513,7 @@ function UChicagoRecruitment() {
                 <button
                   disabled
                   title="Applications opening soon"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold
-                            bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white shadow-lg"
+                  className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
                 >
                   Apply (coming soon)
                 </button>
