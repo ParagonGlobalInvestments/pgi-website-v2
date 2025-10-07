@@ -42,13 +42,16 @@ function SignUpPageContent() {
     setLoading(true);
     setError('');
 
-    const redirectTo =
-      searchParams.get('redirectTo') || window.location.origin + '/resources';
+    // Get the intended final destination after auth
+    const next = searchParams.get('redirectTo') || '/portal/dashboard';
+    
+    // Supabase callback URL - must match what's configured in Supabase dashboard
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectTo,
+        redirectTo,
         queryParams: {
           hd: '*.edu', // Hint to Google to prefer .edu accounts
           access_type: 'offline',
