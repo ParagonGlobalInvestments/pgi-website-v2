@@ -454,7 +454,7 @@ function GeneralRecruitment() {
 }
 
 const baseBtn =
-  "inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]";
+  'inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]';
 
 function UChicagoRecruitment() {
   return (
