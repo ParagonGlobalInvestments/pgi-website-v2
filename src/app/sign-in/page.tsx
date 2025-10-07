@@ -72,7 +72,7 @@ function SignInPageContent() {
 
     // Get the intended final destination after auth
     const next = searchParams?.get('redirectTo') || '/portal/dashboard';
-    
+
     // Supabase callback URL - must match what's configured in Supabase dashboard
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
