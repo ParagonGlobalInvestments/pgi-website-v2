@@ -173,10 +173,13 @@ function ResourcesPageContent() {
       action: 'google_signin_initiated',
     });
 
+    // Supabase callback URL with intended destination
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/resources')}`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/resources',
+        redirectTo,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
