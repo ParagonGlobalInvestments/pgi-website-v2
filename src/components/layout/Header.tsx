@@ -553,48 +553,46 @@ const Header = () => {
             </Link>
           </motion.div>
 
-          {/* Authentication Links - Only show in development */}
-          {process.env.NODE_ENV !== 'production' && (
-            <motion.div
-              variants={navItemAnimation}
-              whileHover="hover"
-              whileTap="tap"
-              className=""
-            >
-              {loading ? (
-                <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
-                  Loading...
-                </div>
-              ) : user && isPGIMember ? (
-                <div className="flex items-center pl-1 lg:pl-0">
-                  <Link
-                    href="/portal"
-                    className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
-                  >
-                    <span className="block lg:hidden">Portal</span>
-                    <span className="hidden lg:block">Dashboard</span>
-                  </Link>
-                  <button
-                    onClick={async () => {
-                      const supabase = createClient();
-                      await supabase.auth.signOut();
-                      window.location.reload();
-                    }}
-                    className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              ) : (
+          {/* Authentication Links */}
+          <motion.div
+            variants={navItemAnimation}
+            whileHover="hover"
+            whileTap="tap"
+            className=""
+          >
+            {loading ? (
+              <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
+                Loading...
+              </div>
+            ) : user && isPGIMember ? (
+              <div className="flex items-center pl-1 lg:pl-0">
                 <Link
-                  href="/sign-in"
-                  className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                  href="/portal"
+                  className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
                 >
-                  Sign In
+                  <span className="block lg:hidden">Portal</span>
+                  <span className="hidden lg:block">Dashboard</span>
                 </Link>
-              )}
-            </motion.div>
-          )}
+                <button
+                  onClick={async () => {
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                  }}
+                  className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+              >
+                Sign In
+              </Link>
+            )}
+          </motion.div>
         </motion.nav>
 
         {/* Mobile Menu Button */}
@@ -803,42 +801,40 @@ const Header = () => {
                 </motion.div>
               ))}
 
-              {/* Authentication links - Only show in development */}
-              {process.env.NODE_ENV !== 'production' && (
-                <motion.div variants={mobileItemVariants} className="pt-2">
-                  {loading ? (
-                    <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
-                      Loading...
-                    </div>
-                  ) : user && isPGIMember ? (
-                    <div className="space-y-2">
-                      <Link
-                        href="/portal"
-                        className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
-                      >
-                        Dashboard
-                      </Link>
-                      <button
-                        onClick={async () => {
-                          const supabase = createClient();
-                          await supabase.auth.signOut();
-                          window.location.reload();
-                        }}
-                        className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
-                      >
-                        Sign out
-                      </button>
-                    </div>
-                  ) : (
+              {/* Authentication links */}
+              <motion.div variants={mobileItemVariants} className="pt-2">
+                {loading ? (
+                  <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
+                    Loading...
+                  </div>
+                ) : user && isPGIMember ? (
+                  <div className="space-y-2">
                     <Link
-                      href="/sign-in"
+                      href="/portal"
                       className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
                     >
-                      Sign In
+                      Dashboard
                     </Link>
-                  )}
-                </motion.div>
-              )}
+                    <button
+                      onClick={async () => {
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        window.location.reload();
+                      }}
+                      className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/sign-in"
+                    className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                  >
+                    Sign In
+                  </Link>
+                )}
+              </motion.div>
             </div>
           </motion.div>
         )}
