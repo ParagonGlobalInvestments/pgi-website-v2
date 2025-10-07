@@ -12,10 +12,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migrate:emails": "tsx scripts/migrate-user-emails.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -60,6 +60,7 @@
     "lucide-react": "^0.395.0",
     "mongoose": "^8.4.1",
     "next": "14.2.5",
+    "next-auth": "^4.24.11",
     "next-themes": "^0.3.0",
     "node-cron": "^3.0.3",
     "ogl": "^1.0.11",
@@ -98,6 +99,7 @@
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
     "autoprefixer": "^10.4.19",
+    "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
     "eslint-config-prettier": "^9.1.0",
@@ -112,6 +114,7 @@
     "prettier-plugin-tailwindcss": "^0.6.4",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.4.5"
   }
 }
