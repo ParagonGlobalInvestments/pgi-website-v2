@@ -1,0 +1,435 @@
+{
+  "timestamp": "2025-10-05T18:25:05.549Z",
+  "summary": {
+    "totalDirectoryMembers": 157,
+    "totalSupabaseUsersBefore": 241,
+    "matched": 157,
+    "emailsUpdated": 0,
+    "newUsersCreated": 0,
+    "unmatchedSupabase": 84
+  },
+  "unmatchedSupabaseUsers": [
+    {
+      "name": "Sarah Johnson",
+      "email": "sarah.j@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Michael Chen",
+      "email": "mchen@columbia.edu",
+      "gradYear": 2024
+    },
+    {
+      "name": "Dominic Olaguera-Delogu",
+      "email": "placeholder_6@placeholder.com",
+      "gradYear": 2029
+    },
+    {
+      "name": "William Vietor",
+      "email": "placeholder_2@placeholder.com",
+      "gradYear": 2029
+    },
+    {
+      "name": "Matthew Neissen",
+      "email": "placeholder_7@placeholder.com",
+      "gradYear": 2025
+    },
+    {
+      "name": "Benjamin Weber",
+      "email": "placeholder_16@placeholder.com",
+      "gradYear": 2028
+    },
+    {
+      "name": "Pranav Mishra",
+      "email": "placeholder_35@placeholder.com",
+      "gradYear": 2025
+    },
+    {
+      "name": "Connor Brown",
+      "email": "placeholder_19@placeholder.com",
+      "gradYear": 2028
+    },
+    {
+      "name": "Anupam Bhakta",
+      "email": "placeholder_31@placeholder.com",
+      "gradYear": 2025
+    },
+    {
+      "name": "Rohan Sabu",
+      "email": "placeholder_26@placeholder.com",
+      "gradYear": 2025
+    },
+    {
+      "name": "Sohini Banerjee",
+      "email": "placeholder_34@placeholder.com",
+      "gradYear": 2028
+    },
+    {
+      "name": "Lucas Tucker",
+      "email": "placeholder_33@placeholder.com",
+      "gradYear": 2026
+    },
+    {
+      "name": "Robert Liu",
+      "email": "placeholder_29@placeholder.com",
+      "gradYear": 2026
+    },
+    {
+      "name": "Kaiji Uno",
+      "email": "placeholder_32@placeholder.com",
+      "gradYear": 2026
+    },
+    {
+      "name": "Anthony Wong",
+      "email": "placeholder_13@placeholder.com",
+      "gradYear": 2028
+    },
+    {
+      "name": "Helen Ho",
+      "email": "placeholder_36@placeholder.com",
+      "gradYear": 2027
+    },
+    {
+      "name": "Flynn Kelleher",
+      "email": "placeholder_30@placeholder.com",
+      "gradYear": 2028
+    },
+    {
+      "name": "Jason Ciptonugroho",
+      "email": "placeholder_60@placeholder.com",
+      "gradYear": 2029
+    },
+    {
+      "name": "Ashish Pothireddy",
+      "email": "placeholder_56@placeholder.com",
+      "gradYear": 2025
+    },
+    {
+      "name": "Joshua Donovan",
+      "email": "placeholder_67@placeholder.com",
+      "gradYear": 2029
+    },
+    {
+      "name": "Jay Sivadas",
+      "email": "jay.sivadas@uchicago.edu",
+      "gradYear": 2024
+    },
+    {
+      "name": "Daniel Labrador-Plata",
+      "email": "daniel.labrador@uchicago.edu",
+      "gradYear": 2024
+    },
+    {
+      "name": "Arman Ashaboglu",
+      "email": "arman.ashaboglu@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Erin Ku",
+      "email": "erin.ku@uchicago.edu",
+      "gradYear": 2024
+    },
+    {
+      "name": "Bradley Yu",
+      "email": "bradley.yu@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Advay Mohindra",
+      "email": "advay.mohindra@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Harrison Wang",
+      "email": "harrison.wang@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Harrison Du",
+      "email": "harrison.du@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Souptik De",
+      "email": "souptik.de@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Lucas Mantovani",
+      "email": "lucas.mantovani@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "John Hahn",
+      "email": "john.hahn@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Brianna Liu",
+      "email": "brianna.liu@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Raphael Jimenez",
+      "email": "raphael.jimenez@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Silvia Aydinyan",
+      "email": "silvia.aydinyan@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Jeffrey Kao",
+      "email": "jeffrey.kao@uchicago.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Arjun Neervanan",
+      "email": "arjun.neervanan@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Saahil Kamulkar",
+      "email": "saahil.kamulkar@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Ria Sharma",
+      "email": "ria.sharma@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Daniel Barra",
+      "email": "daniel.barra@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Nicole Rong",
+      "email": "nicole.rong@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Olgierd Fudali",
+      "email": "olgierd.fudali@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Aryan Singh",
+      "email": "aryan.singh@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Anthony Steimle",
+      "email": "anthony.steimle@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Andy Mei",
+      "email": "andy.mei@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Grant Mao",
+      "email": "grant.mao@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Prithvi Bale",
+      "email": "prithvi.bale@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Manya Gauba",
+      "email": "manya.gauba@upenn.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Christopher Rosa",
+      "email": "christopher.rosa@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Elizabeth Grayfer",
+      "email": "elizabeth.grayfer@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Rishi Subbaraya",
+      "email": "rishi.subbaraya@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Yihao Zhong",
+      "email": "yihao.zhong@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Justin Singh",
+      "email": "justin.singh@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Arthur Chen",
+      "email": "arthur.chen@nyu.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Colby Cox",
+      "email": "colby.cox@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Robert Stankard",
+      "email": "robert.stankard@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Nischal Chennuru",
+      "email": "nischal.chennuru@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Olivia Stevens",
+      "email": "olivia.stevens@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Kenny Zhu",
+      "email": "kenny.zhu@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Emma Liu",
+      "email": "emma.liu@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Tony Chen",
+      "email": "tony.chen@columbia.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Sandra Martinez",
+      "email": "sandra.martinez@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Nick Klatsky",
+      "email": "nick.klatsky@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Tianyu Zhou",
+      "email": "tianyu.zhou@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Advay Mansingka",
+      "email": "advay.mansingka@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Luke Briody",
+      "email": "luke.briody@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Angela Osei-Ampadu",
+      "email": "angela.oseiampadu@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Raymundo Chapa Ponce",
+      "email": "raymundo.chapaponce@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Erica Li",
+      "email": "erica.li@brown.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Kate Michelini",
+      "email": "kate.michelini@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Max Koster",
+      "email": "max.koster@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Michael Negrea",
+      "email": "michael.negrea@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Leopold Home",
+      "email": "leopold.home@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Caroline Duthie",
+      "email": "caroline.duthie@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Benjamin Collins",
+      "email": "benjamin.collins@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Corey Wang",
+      "email": "corey.wang@cornell.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Brandon Hwang",
+      "email": "brandon.hwang@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Brandon Cheng",
+      "email": "brandon.cheng@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Jack Deschenes",
+      "email": "jack.deschenes@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Rebecca Zhu",
+      "email": "rebecca.zhu@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Michael Deschenes",
+      "email": "michael.deschenes@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Ellie Mueller",
+      "email": "ellie.mueller@princeton.edu",
+      "gradYear": 2025
+    },
+    {
+      "name": "Alejandro Alonso",
+      "email": "aalonso20@uchicago.edu",
+      "gradYear": 2026
+    },
+    {
+      "name": "Ani Pottammal",
+      "email": "ap7564@nyu.edu",
+      "gradYear": 2024
+    },
+    {
+      "name": "Anirudh Pottammal",
+      "email": "anirudh.pottammal@gmail.com",
+      "gradYear": 2026
+    }
+  ],
+  "updatedEmails": [],
+  "createdUsers": []
+}

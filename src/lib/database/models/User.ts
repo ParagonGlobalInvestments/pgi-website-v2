@@ -54,7 +54,8 @@ export interface UserDocument extends Document {
     internshipsPosted: number;
   };
   system: {
-    clerkId: string;
+    clerkId?: string; // Keep for migration compatibility
+    supabaseId?: string;
     firstLogin: boolean;
     notifications?: {
       email: boolean;
@@ -161,7 +162,8 @@ const UserSchema = new Schema(
     },
 
     system: {
-      clerkId: { type: String, required: true, unique: true },
+      clerkId: { type: String, unique: true, sparse: true }, // Keep for migration compatibility
+      supabaseId: { type: String, unique: true, sparse: true },
       firstLogin: { type: Boolean, default: true },
       notifications: {
         email: { type: Boolean, default: true },
@@ -195,18 +197,11 @@ UserSchema.pre('save', function (next) {
   next();
 });
 
-// Indexes for common queries
+// Indexes for common queries (clerkId and supabaseId already have unique indexes from field definition)
 UserSchema.index({ 'personal.email': 1 });
-UserSchema.index({ 'system.clerkId': 1 });
 UserSchema.index({ 'org.chapterId': 1, 'org.permissionLevel': 1 });
 UserSchema.index({ 'org.track': 1, 'personal.isAlumni': 1 });
 UserSchema.index({ 'profile.skills': 1 });
-
-// Compound unique index for email and clerkId
-UserSchema.index(
-  { 'personal.email': 1, 'system.clerkId': 1 },
-  { unique: true, sparse: true }
-);
 
 export default mongoose.models.User ||
   mongoose.model<UserDocument>('User', UserSchema);
