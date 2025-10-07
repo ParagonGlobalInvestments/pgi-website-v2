@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/browser';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '@/lib/posthog';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
@@ -88,7 +88,7 @@ const PLACEHOLDER_FOLDERS = [
   },
 ];
 
-export default function ResourcesPage() {
+function ResourcesPageContent() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isPGIMember, setIsPGIMember] = useState<boolean | null>(null);
@@ -437,5 +437,26 @@ export default function ResourcesPage() {
         </div>
       </motion.main>
     </div>
+  );
+}
+
+export default function ResourcesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-pgi-dark-blue text-white min-h-screen flex items-center justify-center">
+          <div className="text-center" role="status" aria-live="polite">
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"
+              aria-hidden="true"
+            ></div>
+            <p className="text-gray-300">Loading resources page...</p>
+            <span className="sr-only">Please wait while the page loads</span>
+          </div>
+        </div>
+      }
+    >
+      <ResourcesPageContent />
+    </Suspense>
   );
 }
