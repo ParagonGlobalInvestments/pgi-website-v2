@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
-import { createClient } from '@/lib/supabase/browser';
 import { useNewsRefresh } from '@/contexts/NewsRefreshContext';
 import { isDevOrEnabled } from '@/lib/featureFlags';
 import Link from 'next/link';
