@@ -15,8 +15,11 @@ const UCHICAGO_APPLY_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486';
 const applicationsOpen = true;
 
-const ZOOM_LINK_URL =
-  'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
+const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
+const applicationsOpen = true;  // set to true when applications open
+
+const ZOOM_LINK_URL = 'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
+
 
 /** Animation variants (unchanged) */
 const fadeIn = {
@@ -203,43 +206,41 @@ export const uchicagoRecruitmentTeam: TeamMember[] = [
 
 // Reusable section
 function RecruitmentTeamSection({
-  members,
-  title = 'Recruitment Team',
+    members,
+    title = 'Recruitment Team',
 }: {
-  members: TeamMember[];
-  title?: string;
+    members: TeamMember[];
+    title?: string;
 }) {
-  return (
-    <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
-      <div className="container mx-auto max-w-7xl">
-        <motion.h2
-          className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-10 text-center text-white"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-        >
-          <ShinyText
-            text={title}
-            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
-          />
-        </motion.h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-          {members.map((m, i) => (
-            <motion.div
-              key={`${m.name}-${i}`}
-              className="bg-darkNavy rounded-2xl p-6 border border-gray-700 hover:border-pgi-light-blue transition"
-              variants={cardItem}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              <div>
-                <p className="text-white font-semibold text-lg">{m.name}</p>
-                <p className="text-gray-300 text-sm mt-1">{m.role}</p>
-                <p className="text-gray-400 text-sm mt-2 italic">
-                  {m.university}
-                </p>
+    return (
+      <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
+        <div className="container mx-auto max-w-7xl">
+          <motion.h2
+            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-10 text-center text-white"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            <ShinyText
+              text={title}
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+            />
+          </motion.h2>
+  
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+            {members.map((m, i) => (
+              <motion.div
+                key={`${m.name}-${i}`}
+                className="bg-darkNavy rounded-2xl p-6 border border-gray-700 hover:border-pgi-light-blue transition"
+                variants={cardItem}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <div>
+                    <p className="text-white font-semibold text-lg">{m.name}</p>
+                    <p className="text-gray-300 text-sm mt-1">{m.role}</p>
+                    <p className="text-gray-400 text-sm mt-2 italic">{m.university}</p>
 
                 {m.linkedin && (
                   <div className="mt-4">
@@ -492,9 +493,9 @@ function GeneralRecruitment() {
 }
 
 const baseBtn =
-  'inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]';
+  "inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]";
 
-export function UChicagoRecruitment() {
+function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
@@ -519,43 +520,39 @@ export function UChicagoRecruitment() {
 
             {/* Buttons row: Zoom (left) + Apply (right) */}
             <div className="mt-8 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
-              <motion.a
+            <motion.a
                 href={ZOOM_LINK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${baseBtn} bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-              >
+                >
                 <span className="leading-tight">
-                  <span className="text-sm md:text-base block">
-                    Information Session Zoom Link
-                  </span>
-                  <span className="text-xs md:text-sm opacity-80 block">
-                    October 8th at 6 PM CT
-                  </span>
+                    <span className="text-sm md:text-base block">Information Session Zoom Link</span>
+                    <span className="text-xs md:text-sm opacity-80 block">October 8th at 6 PM CT</span>
                 </span>
-              </motion.a>
-              {applicationsOpen ? (
-                <motion.a
-                  href={UCHICAGO_APPLY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  Apply Now — UChicago
-                </motion.a>
-              ) : (
-                <button
-                  disabled
-                  title="Applications opening soon"
-                  className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
-                >
-                  Apply (coming soon)
-                </button>
-              )}
+            </motion.a>
+            {applicationsOpen ? (
+            <motion.a
+                href={UCHICAGO_APPLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+            >
+                Apply Now — UChicago
+            </motion.a>
+            ) : (
+            <button
+                disabled
+                title="Applications opening soon"
+                className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
+            >
+                Apply (coming soon)
+            </button>
+            )}
             </div>
           </motion.div>
         </div>
@@ -601,41 +598,8 @@ export function UChicagoRecruitment() {
   );
 }
 
-function TabSwitch({
-  value,
-  onChange,
-}: {
-  value: 'general' | 'uchicago';
-  onChange: (v: 'general' | 'uchicago') => void;
-}) {
-  const options: { key: 'general' | 'uchicago'; label: string }[] = [
-    { key: 'general', label: 'General (National)' },
-    { key: 'uchicago', label: 'UChicago' },
-  ];
-
-  return (
-    <div className="sticky top-0 z-20 bg-pgi-dark-blue">
-      <div className="container mx-auto px-4">
-        <div
-          role="tablist"
-          aria-label="Recruitment tabs"
-          className="mx-auto max-w-xl relative py-3"
-        >
-          <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
-            {options.map(opt => {
-              const isActive = value === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`panel-${opt.key}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => onChange(opt.key)}
-                  className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
-
   
-export function TabSwitch({
+  function TabSwitch({
     value,
     onChange,
   }: {
