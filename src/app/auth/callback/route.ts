@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -34,9 +35,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user is a PGI member by querying Supabase database directly
+    // Use admin client to check if user is a PGI member (bypasses RLS)
+    const adminClient = createAdminClient();
+    
     // First try by system_supabase_id
-    let { data: pgiUser, error: dbError } = await supabase
+    let { data: pgiUser, error: dbError } = await adminClient
       .from('users')
       .select('id, personal_name, personal_email, system_supabase_id')
       .eq('system_supabase_id', user.id)
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // If not found by supabase_id, try by email (for migrated users)
     if (!pgiUser && user.email) {
-      const { data: userByEmail, error: emailError } = await supabase
+      const { data: userByEmail, error: emailError } = await adminClient
         .from('users')
         .select('id, personal_name, personal_email, system_supabase_id')
         .eq('personal_email', user.email)
@@ -52,9 +55,9 @@ export async function GET(request: NextRequest) {
 
       if (userByEmail) {
         pgiUser = userByEmail;
-        
+
         // Update the system_supabase_id for this user
-        const { error: updateError } = await supabase
+        const { error: updateError } = await adminClient
           .from('users')
           .update({ system_supabase_id: user.id })
           .eq('id', userByEmail.id);
@@ -62,7 +65,9 @@ export async function GET(request: NextRequest) {
         if (updateError) {
           console.error('Error updating system_supabase_id:', updateError);
         } else {
-          console.log(`Updated system_supabase_id for user ${userByEmail.personal_email}`);
+          console.log(
+            `Updated system_supabase_id for user ${userByEmail.personal_email}`
+          );
         }
       }
     }
