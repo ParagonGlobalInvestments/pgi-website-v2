@@ -90,9 +90,7 @@ function SignInPageContent() {
     });
 
     if (error) {
-      setError(
-        'Please sign in with your university Google account (.edu email required)'
-      );
+      setError('Failed to sign in. Please try again or contact support.');
     }
     setLoading(false);
   };

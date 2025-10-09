@@ -39,8 +39,13 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Allow sitemap.xml and robots.txt to pass through immediately
-  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+  // Allow sitemap.xml, robots.txt, and site.webmanifest to pass through immediately
+  if (
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname === '/site.webmanifest' ||
+    pathname === '/browserconfig.xml'
+  ) {
     return supabaseResponse;
   }
 

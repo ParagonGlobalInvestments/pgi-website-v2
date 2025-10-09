@@ -44,7 +44,7 @@ function SignUpPageContent() {
 
     // Get the intended final destination after auth
     const next = searchParams.get('redirectTo') || '/portal/dashboard';
-    
+
     // Supabase callback URL - must match what's configured in Supabase dashboard
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
@@ -53,7 +53,6 @@ function SignUpPageContent() {
       options: {
         redirectTo,
         queryParams: {
-          hd: '*.edu', // Hint to Google to prefer .edu accounts
           access_type: 'offline',
           prompt: 'consent',
         },
@@ -63,9 +62,7 @@ function SignUpPageContent() {
     });
 
     if (error) {
-      setError(
-        'Please sign up with your university Google account (.edu email required)'
-      );
+      setError('Failed to sign up. Please try again or contact support.');
     }
     setLoading(false);
   };
