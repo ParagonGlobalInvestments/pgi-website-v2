@@ -8,11 +8,7 @@ import Link from 'next/link';
 import {
   FaBriefcase,
   FaUsers,
-  FaArrowRight,
   FaBuilding,
-  FaGraduationCap,
-  FaUniversity,
-  FaChartPie,
   FaClock,
   FaSync,
 } from 'react-icons/fa';
@@ -21,6 +17,7 @@ import { motion } from 'framer-motion';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import MarketWatchNews from '@/components/dashboard/MarketWatchNews';
 import SeekingAlphaNews from '@/components/dashboard/SeekingAlphaNews';
+import NasdaqNews from '@/components/dashboard/NasdaqNews';
 // Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -82,54 +79,6 @@ const StatCard = ({
   </motion.div>
 );
 
-interface ActionCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  href: string;
-  color: string;
-  bgColor: string;
-  delay?: number;
-}
-
-const ActionCard = ({
-  title,
-  description,
-  icon,
-  href,
-  color,
-  bgColor,
-  delay = 0,
-}: ActionCardProps) => (
-  <motion.div
-    variants={itemVariants}
-    initial="hidden"
-    animate="visible"
-    transition={{ delay }}
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-  >
-    <Link href={href} className="block">
-      <div
-        className={`bg-white p-6 rounded-xl shadow-lg border border-gray-100 ${color} hover:shadow-xl transition-all group`}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-4 rounded-full ${bgColor} shadow-md`}>{icon}</div>
-          <motion.div
-            animate={{ x: 0 }}
-            whileHover={{ x: 5 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-          >
-            <FaArrowRight className="text-gray-400 group-hover:text-gray-600 transition-colors" />
-          </motion.div>
-        </div>
-        <h3 className="font-semibold text-xl text-gray-800">{title}</h3>
-        <p className="text-sm text-gray-500 mt-2">{description}</p>
-      </div>
-    </Link>
-  </motion.div>
-);
-
 // News Refresh Timer Component
 const NewsRefreshTimer = () => {
   const { timeUntilRefresh, lastRefreshed, isRefreshing, triggerRefresh } =
@@ -170,7 +119,7 @@ const NewsRefreshTimer = () => {
               'Refreshing news...'
             ) : (
               <>
-                Feed will auto-refresh in:{' '}
+                Auto-refresh in:{' '}
                 <span className="font-mono">
                   {String(minutes).padStart(2, '0')}:
                   {String(seconds).padStart(2, '0')}
@@ -194,6 +143,233 @@ const NewsRefreshTimer = () => {
         <FaSync className={`${isRefreshing ? 'animate-spin' : ''}`} />
         <span className="hidden sm:inline">Refresh Now</span>
       </button>
+    </motion.div>
+  );
+};
+
+// University color mapping
+const universityColors: { [key: string]: string } = {
+  'Brown University': '#4E3629',
+  'Columbia University': '#9BD1E5',
+  'Cornell University': '#B31B1B',
+  'University of Pennsylvania': '#011F5B',
+  'University of Chicago': '#800000',
+  'Princeton University': '#E77500',
+  'New York University': '#57068C',
+  'Yale University': '#00356B',
+};
+
+// Profile Card Component
+interface ProfileCardProps {
+  userData: any;
+}
+
+const ProfileCard = ({ userData }: ProfileCardProps) => {
+  // Calculate profile completion
+  const calculateCompletion = () => {
+    const fields = {
+      track: userData?.org_track,
+      chapter: userData?.org_chapter_name,
+      major: userData?.personal_major,
+      gradYear: userData?.personal_grad_year,
+      skills: userData?.profile_skills?.length > 0,
+      bio: userData?.personal_bio,
+    };
+
+    const completed = Object.values(fields).filter(Boolean).length;
+    const total = Object.keys(fields).length;
+    const percentage = Math.round((completed / total) * 100);
+
+    return { percentage, fields, completed, total };
+  };
+
+  const { percentage, fields } = calculateCompletion();
+  const isComplete = percentage === 100;
+
+  const missingFields = [];
+  if (!fields.track) missingFields.push({ label: 'Track role' });
+  if (!fields.chapter) missingFields.push({ label: 'Chapter' });
+  if (!fields.major) missingFields.push({ label: 'Major' });
+  if (!fields.gradYear) missingFields.push({ label: 'Graduation year' });
+  if (!fields.skills) missingFields.push({ label: 'Skills' });
+
+  // Format track roles
+  const getFormattedTrack = () => {
+    if (!userData?.org_track_roles || userData.org_track_roles.length === 0)
+      return null;
+    return userData.org_track_roles.join(' / ');
+  };
+
+  const formattedTrack = getFormattedTrack();
+
+  // Get university color
+  const getUniversityColor = () => {
+    if (!userData?.org_chapter_name) return '#9CA3AF'; // Gray-400 if no chapter
+    return universityColors[userData.org_chapter_name] || '#9CA3AF';
+  };
+
+  const borderColor = getUniversityColor();
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      initial="hidden"
+      animate="visible"
+      transition={{ delay: 0.5 }}
+      className="bg-white rounded-xl shadow-lg border-l-4 p-6"
+      style={{ borderLeftColor: borderColor }}
+    >
+      {/* Header with completion percentage */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-gray-500">Your Profile</p>
+        {!isComplete && (
+          <span className="text-xs font-semibold text-blue-600">
+            {percentage}%
+          </span>
+        )}
+      </div>
+
+      {/* Main Content Value - matching stats card hierarchy */}
+      <div className="mb-3">
+        {isComplete ? (
+          <>
+            {/* Desktop: Single Row Layout */}
+            <div className="hidden lg:block">
+              <p className="text-xl text-blue-950 font-bold mb-1">
+                {formattedTrack || 'Member'}
+                {userData?.org_chapter_name &&
+                  ` at ${userData.org_chapter_name}`}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                {userData?.personal_major && (
+                  <>
+                    <span>{userData.personal_major}</span>
+                    {userData?.personal_grad_year && <span>•</span>}
+                  </>
+                )}
+                {userData?.personal_grad_year && (
+                  <span>Class of {userData.personal_grad_year}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile: Stacked Layout */}
+            <div className="lg:hidden">
+              <p className="text-lg text-blue-950 font-bold mb-1">
+                {formattedTrack || 'Member'}
+              </p>
+              <div className="space-y-0.5 text-sm text-gray-500">
+                {userData?.org_chapter_name && (
+                  <p>{userData.org_chapter_name}</p>
+                )}
+                {userData?.personal_major && <p>{userData.personal_major}</p>}
+                {userData?.personal_grad_year && (
+                  <p>Class of {userData.personal_grad_year}</p>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Incomplete Profile Display */}
+            <p className="text-xl text-blue-950 font-bold mb-1">
+              Complete Your Profile
+            </p>
+            <div className="mb-2">
+              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percentage}%` }}
+                  transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
+                  className="bg-blue-600 h-full rounded-full"
+                />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mb-3">
+              {missingFields.length} field
+              {missingFields.length !== 1 ? 's' : ''} remaining
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Additional Details */}
+      {isComplete && (
+        <div className="space-y-2 pt-2 border-t border-gray-100">
+          {/* Skills */}
+          {userData?.profile_skills && userData.profile_skills.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-500 mb-1.5">Skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {userData.profile_skills.map((skill: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Social Links */}
+          {(userData?.profile_linkedin || userData?.profile_github) && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {userData?.profile_linkedin && (
+                <a
+                  href={userData.profile_linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2 py-1 text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+                >
+                  LinkedIn →
+                </a>
+              )}
+              {userData?.profile_github && (
+                <a
+                  href={userData.profile_github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2 py-1 text-[11px] font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                >
+                  GitHub →
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Incomplete Fields Grid */}
+      {!isComplete && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5 pt-2 border-t border-gray-100">
+          {missingFields.map((field, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
+            >
+              <div className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
+              <span className="text-[11px] font-medium truncate">
+                {field.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Action Button */}
+      <div className="mt-3">
+        <Link href="/portal/dashboard/settings">
+          <motion.button
+            whileHover={{ scale: 1.005 }}
+            whileTap={{ scale: 0.995 }}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg text-sm transition-colors shadow-sm"
+          >
+            {isComplete ? 'Edit Profile' : 'Complete Profile'}
+          </motion.button>
+        </Link>
+      </div>
     </motion.div>
   );
 };
@@ -294,22 +470,8 @@ export default function Dashboard() {
 
   // Get user data from Supabase
   const userRole = supabaseUserData?.org_permission_level || 'member';
-  const userTrack = supabaseUserData?.org_track || 'N/A';
   const trackRoles = supabaseUserData?.org_track_roles || [];
-  const primaryRole = trackRoles.length > 0 ? trackRoles[0] : null;
   const chapter = supabaseUserData?.org_chapter_name || 'N/A';
-
-  // Get formatted track name for display
-  const getFormattedTrack = (track: string) => {
-    switch (track) {
-      case 'quant':
-        return 'Quantitative Investing';
-      case 'value':
-        return 'Value Investing';
-      default:
-        return 'N/A';
-    }
-  };
 
   // Get formatted role name for display
   const getFormattedRole = (role: string) => {
@@ -357,7 +519,7 @@ export default function Dashboard() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0 text-navy"
+        className="space-y-4 lg:space-y-8 pt-4 lg:pt-0 text-navy"
       >
         {justCompletedOnboarding && (
           <motion.div
@@ -404,112 +566,70 @@ export default function Dashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="mt-1 space-y-1"
+            className="mt-1"
           >
             {userRole === 'admin' ? (
               <p className="text-gray-500">
                 Here's an overview of Paragon Global Investments
               </p>
+            ) : trackRoles.length > 0 && chapter !== 'N/A' ? (
+              <p className="text-gray-600 font-medium">
+                {trackRoles.map(getFormattedRole).join(' / ')} at {chapter}
+              </p>
             ) : (
-              <div className="flex flex-row gap-2">
-                <div className="flex items-center gap-2">
-                  <FaUniversity className="text-blue-600" />
-                  <span className="text-gray-700 font-medium">{chapter}</span>
-                </div>
-
-                {userTrack !== 'N/A' && (
-                  <div className="flex items-center gap-2">
-                    <FaChartPie
-                      className={
-                        userTrack === 'quant'
-                          ? 'text-blue-600'
-                          : 'text-purple-600'
-                      }
-                    />
-                    <span className="text-gray-700">
-                      {getFormattedTrack(userTrack)}
-                    </span>
-                  </div>
-                )}
-
-                {primaryRole && (
-                  <div className="flex items-center gap-2">
-                    <FaGraduationCap className="text-green-600" />
-                    <span className="text-gray-700">
-                      {getFormattedRole(primaryRole)}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <Link
+                href="/portal/dashboard/settings/profile"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Complete your profile →
+              </Link>
             )}
           </motion.div>
         </div>
 
-        {/* Quick Actions - Shown at top on mobile */}
-        <div className="lg:hidden">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-xl font-semibold text-gray-800 mb-4"
-          >
-            Quick Actions
-          </motion.h2>
+        {/* Desktop: Two-column layout for Quick Actions, Mobile: stacked */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Quick Actions on mobile */}
+          <div className="lg:col-span-2 lg:hidden">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-xl font-semibold text-gray-800 mb-4"
+            >
+              Quick Actions
+            </motion.h2>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 gap-4"
-          >
-            {/* Hide Internships in production */}
-            {process.env.NODE_ENV === 'development' && (
-              <>
-                <ActionCard
-                  title="Browse Internships"
-                  description="View all available internship opportunities"
-                  icon={<FaBriefcase className="text-white text-xl" />}
-                  href="/portal/dashboard/internships"
-                  color="border-blue-100"
-                  bgColor="bg-blue-500"
-                  delay={0.5}
-                />
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 gap-4"
+            >
+              <ProfileCard userData={supabaseUserData} />
+            </motion.div>
+          </div>
 
-                {(userRole === 'admin' || userRole === 'lead') && (
-                  <ActionCard
-                    title="Add New Internship"
-                    description="Post a new internship opportunity"
-                    icon={<FaBriefcase className="text-white text-xl" />}
-                    href="/portal/dashboard/internships/new"
-                    color="border-green-100"
-                    bgColor="bg-green-500"
-                    delay={0.6}
-                  />
-                )}
-              </>
-            )}
+          {/* Desktop: Quick Actions sidebar */}
+          <div className="hidden lg:block lg:col-span-3">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-xl font-semibold text-gray-800 mb-4"
+            >
+              Quick Actions
+            </motion.h2>
 
-            <ActionCard
-              title="View Members"
-              description="See all members in the network"
-              icon={<FaUsers className="text-white text-xl" />}
-              href="/portal/dashboard/directory"
-              color="border-purple-100"
-              bgColor="bg-purple-500"
-              delay={0.7}
-            />
-
-            {/* Settings Action */}
-            <ActionCard
-              title="Update Profile"
-              description="Edit your profile information"
-              icon={<FaGraduationCap className="text-white text-xl" />}
-              href="/portal/dashboard/settings"
-              color="border-amber-100"
-              bgColor="bg-amber-500"
-              delay={0.8}
-            />
-          </motion.div>
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-4"
+            >
+              <ProfileCard userData={supabaseUserData} />
+            </motion.div>
+          </div>
         </div>
 
         {/* Stats Cards - Only show in dev or when feature flag enabled */}
@@ -521,21 +641,22 @@ export default function Dashboard() {
             className="hidden lg:grid lg:grid-cols-3 gap-6"
           >
             {/* Internships stat - only if internships feature enabled */}
-            {isDevOrEnabled('enableInternships') && (
-              <StatCard
-                title="Available Internships"
-                value={stats.loading ? '...' : stats.internships}
-                icon={<FaBriefcase className="text-white text-xl" />}
-                description={
-                  stats.loading
-                    ? 'Loading...'
-                    : `${stats.internships} current opportunities`
-                }
-                color="border-blue-500"
-                bgColor="bg-blue-500"
-                delay={0.1}
-              />
-            )}
+            {isDevOrEnabled('enableInternships') &&
+              (userRole === 'admin' || userRole === 'lead') && (
+                <StatCard
+                  title="Available Internships"
+                  value={stats.loading ? '...' : stats.internships}
+                  icon={<FaBriefcase className="text-white text-xl" />}
+                  description={
+                    stats.loading
+                      ? 'Loading...'
+                      : `${stats.internships} current opportunities`
+                  }
+                  color="border-blue-500"
+                  bgColor="bg-blue-500"
+                  delay={0.1}
+                />
+              )}
 
             {(userRole === 'admin' || userRole === 'lead') && (
               <StatCard
@@ -571,151 +692,34 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* News and Quick Actions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Market Watch News Feed */}
-          <div className="lg:col-span-2">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xl font-semibold text-gray-800 mb-4"
-            >
-              News & Updates
-            </motion.h2>
-            <NewsRefreshTimer />
+        {/* News & Updates Section */}
+        <div>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="text-xl font-semibold text-gray-800 mb-4"
+          >
+            News & Updates
+          </motion.h2>
+          <NewsRefreshTimer />
 
-            <div className="flex lg:flex-row flex-col gap-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="lg:w-1/2"
-              >
-                <MarketWatchNews />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="lg:w-1/2"
-              >
-                <SeekingAlphaNews />
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Quick Actions - Only shown on desktop */}
-          <div className="hidden lg:block lg:col-span-1">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xl font-semibold text-gray-800 mb-4"
-            >
-              Quick Actions
-            </motion.h2>
-
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-1 gap-6"
-            >
-              {/* Internships - Only show in dev or when feature flag enabled */}
-              {isDevOrEnabled('enableInternships') && (
-                <>
-                  <ActionCard
-                    title="Browse Internships"
-                    description="View all available internship opportunities"
-                    icon={<FaBriefcase className="text-white text-xl" />}
-                    href="/portal/dashboard/internships"
-                    color="border-blue-100"
-                    bgColor="bg-blue-500"
-                    delay={0.5}
-                  />
-
-                  {(userRole === 'admin' || userRole === 'lead') && (
-                    <ActionCard
-                      title="Add New Internship"
-                      description="Post a new internship opportunity"
-                      icon={<FaBriefcase className="text-white text-xl" />}
-                      href="/portal/dashboard/internships/new"
-                      color="border-green-100"
-                      bgColor="bg-green-500"
-                      delay={0.6}
-                    />
-                  )}
-                </>
-              )}
-
-              {/* User Profile Summary Card if user has profile data */}
-              {(supabaseUserData?.personal_bio ||
-                supabaseUserData?.personal_major ||
-                (supabaseUserData?.profile_skills &&
-                  supabaseUserData?.profile_skills.length > 0)) && (
-                <motion.div
-                  variants={itemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  transition={{ delay: 0.9 }}
-                  className="bg-white p-5 rounded-xl shadow-md border border-gray-100 mt-4"
-                >
-                  <h3 className="font-medium text-gray-800 mb-2">
-                    Your Profile
-                  </h3>
-
-                  {supabaseUserData?.personal_major && (
-                    <div className="flex items-start gap-2 mb-2">
-                      <FaGraduationCap className="text-blue-500 mt-1 flex-shrink-0" />
-                      <span className="text-sm text-gray-600">
-                        {supabaseUserData.personal_major}
-                      </span>
-                    </div>
-                  )}
-
-                  {supabaseUserData?.personal_grad_year && (
-                    <div className="flex items-start gap-2 mb-2">
-                      <FaUniversity className="text-green-500 mt-1 flex-shrink-0" />
-                      <span className="text-sm text-gray-600">
-                        Class of {supabaseUserData.personal_grad_year}
-                      </span>
-                    </div>
-                  )}
-
-                  {supabaseUserData?.personal_bio && (
-                    <div className="text-sm text-gray-600 mt-2 line-clamp-3">
-                      {supabaseUserData.personal_bio}
-                    </div>
-                  )}
-
-                  {supabaseUserData?.profile_skills &&
-                    supabaseUserData.profile_skills.length > 0 && (
-                      <div className="mt-3">
-                        <div className="text-xs text-gray-500 mb-1">Skills</div>
-                        <div className="flex flex-wrap gap-1">
-                          {supabaseUserData.profile_skills
-                            .slice(0, 3)
-                            .map((skill, idx) => (
-                              <span
-                                key={idx}
-                                className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                          {supabaseUserData.profile_skills.length > 3 && (
-                            <span className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-full">
-                              +{supabaseUserData.profile_skills.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                </motion.div>
-              )}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <motion.div variants={itemVariants} className="h-full">
+              <MarketWatchNews />
             </motion.div>
-          </div>
+            <motion.div variants={itemVariants} className="h-full">
+              <SeekingAlphaNews />
+            </motion.div>
+            <motion.div variants={itemVariants} className="h-full">
+              <NasdaqNews />
+            </motion.div>
+          </motion.div>
         </div>
       </SmoothTransition>
     </ProtectedPage>

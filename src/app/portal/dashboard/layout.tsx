@@ -155,50 +155,74 @@ const mobileNavItemVariants = {
   },
 };
 
-// Update the OnboardingBanner component to use FaRocket icon instead of emoji
-const OnboardingBanner = ({
-  onStartOnboarding,
+// Profile completion banner component
+const ProfileCompletionBanner = ({
+  onCompleteProfile,
   isCollapsed,
+  completionPercentage,
+  missingFields,
 }: {
-  onStartOnboarding: () => void;
+  onCompleteProfile: () => void;
   isCollapsed: boolean;
+  completionPercentage: number;
+  missingFields: string[];
 }) => (
   <motion.div
     initial={{ height: 0, opacity: 0 }}
     animate={{ height: 'auto', opacity: 1 }}
     exit={{ height: 0, opacity: 0 }}
-    className={`${
+    className={`sticky top-0 lg:top-0 z-40 ${
       isCollapsed
-        ? 'bg-transparent text-blue-600'
+        ? 'bg-blue-50 text-blue-900'
         : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
-    } border-b ${isCollapsed ? 'border-none' : 'border-blue-800'}`}
+    } border-b ${isCollapsed ? 'border-blue-200' : 'border-blue-800'} shadow-sm`}
   >
     <div
-      className={`mx-auto px-4 pt-4 pb-3 flex items-center ${
+      className={`mx-auto px-4 py-3 flex items-center ${
         !isCollapsed ? 'justify-between' : 'justify-end gap-2'
-      }`}
+      } flex-wrap gap-2`}
     >
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <FaRocket
           className={`${
-            isCollapsed ? 'text-blue-500/80' : 'text-white'
-          } text-lg`}
+            isCollapsed ? 'text-blue-600' : 'text-white'
+          } text-base flex-shrink-0`}
         />
-        <span className="text-sm font-medium">
-          Complete your profile setup to access all features
-        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-semibold">
+              {completionPercentage}% Complete
+            </span>
+            <div className="hidden sm:flex items-center gap-1 text-xs opacity-90">
+              <span>·</span>
+              <span>
+                {missingFields.length} field{missingFields.length !== 1 ? 's' : ''} remaining
+              </span>
+            </div>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden max-w-xs">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${completionPercentage}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className={`h-full rounded-full ${
+                isCollapsed ? 'bg-blue-600' : 'bg-white'
+              }`}
+            />
+          </div>
+        </div>
       </div>
       <Button
         variant="secondary"
         size="sm"
-        onClick={onStartOnboarding}
+        onClick={onCompleteProfile}
         className={`${
           isCollapsed
-            ? 'bg-blue-500/50 hover:bg-blue-500/30 text-white'
+            ? 'bg-blue-600 hover:bg-blue-700 text-white'
             : 'bg-white/20 hover:bg-white/30 text-white'
-        } border-0`}
+        } border-0 flex-shrink-0`}
       >
-        Finish Profile
+        Complete Profile
       </Button>
     </div>
   </motion.div>
@@ -274,6 +298,37 @@ export default function DashboardLayout({
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Calculate profile completion
+  const calculateProfileCompletion = () => {
+    if (!supabaseUserData) return { percentage: 0, missingFields: [] };
+
+    const fields = {
+      track: supabaseUserData.org_track,
+      chapter: supabaseUserData.org_chapter_name,
+      major: supabaseUserData.personal_major,
+      gradYear: supabaseUserData.personal_grad_year,
+      skills: supabaseUserData.profile_skills?.length > 0,
+      bio: supabaseUserData.personal_bio,
+    };
+
+    const missingFieldLabels = [];
+    if (!fields.track) missingFieldLabels.push('Track role');
+    if (!fields.chapter) missingFieldLabels.push('Chapter');
+    if (!fields.major) missingFieldLabels.push('Major');
+    if (!fields.gradYear) missingFieldLabels.push('Graduation year');
+    if (!fields.skills) missingFieldLabels.push('Skills');
+    if (!fields.bio) missingFieldLabels.push('Bio');
+
+    const completed = Object.values(fields).filter(Boolean).length;
+    const total = Object.keys(fields).length;
+    const percentage = Math.round((completed / total) * 100);
+
+    return { percentage, missingFields: missingFieldLabels };
+  };
+
+  const profileCompletion = calculateProfileCompletion();
+  const hasIncompleteProfile = profileCompletion.percentage < 100;
 
   // Update needsOnboarding when supabaseUserData changes
   useEffect(() => {
@@ -636,26 +691,28 @@ export default function DashboardLayout({
                 )}
               </Link>
             )}
-            <Link
-              href="/portal/dashboard/directory"
-              className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
-                activeLink === 'directory'
-                  ? 'bg-[#003E6B]'
-                  : 'hover:bg-[#002C4D]'
-              }`}
-              onClick={() => {
-                setActiveLink('directory');
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              <FaUsers className="h-5 w-5" />
-              <span>Directory</span>
-              {userCount > 0 && (
-                <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
-                  {userCount}
-                </span>
-              )}
-            </Link>
+            {isDevOrEnabled('enableDirectory') && (
+              <Link
+                href="/portal/dashboard/directory"
+                className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
+                  activeLink === 'directory'
+                    ? 'bg-[#003E6B]'
+                    : 'hover:bg-[#002C4D]'
+                }`}
+                onClick={() => {
+                  setActiveLink('directory');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <FaUsers className="h-5 w-5" />
+                <span>Directory</span>
+                {userCount > 0 && (
+                  <span className="ml-auto bg-[#003E6B] text-xs px-2 py-1 rounded-full">
+                    {userCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <Link
               href="/portal/dashboard/news"
               className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
@@ -825,15 +882,17 @@ export default function DashboardLayout({
                 isCollapsed={isCollapsed}
               />
             )}
-            <NavItem
-              href="/portal/dashboard/directory"
-              icon={<FaUsers />}
-              label="Directory"
-              isActive={activeLink === 'directory'}
-              onClick={() => setActiveLink('directory')}
-              count={userCount}
-              isCollapsed={isCollapsed}
-            />
+            {isDevOrEnabled('enableDirectory') && (
+              <NavItem
+                href="/portal/dashboard/directory"
+                icon={<FaUsers />}
+                label="Directory"
+                isActive={activeLink === 'directory'}
+                onClick={() => setActiveLink('directory')}
+                count={userCount}
+                isCollapsed={isCollapsed}
+              />
+            )}
             <NavItem
               href="/portal/dashboard/news"
               icon={<FaNewspaper />}
@@ -1073,13 +1132,22 @@ export default function DashboardLayout({
 
       {/* Main Content - Add padding top on mobile and adjust for absolute positioned sidebar */}
       <div className="flex-1 min-w-0 bg-white">
-        {needsOnboarding && (
-          <OnboardingBanner
-            onStartOnboarding={() => setShowOnboardingWizard(true)}
+        {hasIncompleteProfile && (
+          <ProfileCompletionBanner
+            onCompleteProfile={() => {
+              if (needsOnboarding) {
+                setShowOnboardingWizard(true);
+              } else {
+                // Navigate to settings
+                window.location.href = '/portal/dashboard/settings';
+              }
+            }}
             isCollapsed={isCollapsed}
+            completionPercentage={profileCompletion.percentage}
+            missingFields={profileCompletion.missingFields}
           />
         )}
-        <div className="lg:p-8 p-4 pt-16 lg:pt-8">
+        <div className={`lg:p-8 p-4 ${hasIncompleteProfile ? 'pt-2 lg:pt-8' : 'pt-16 lg:pt-8'}`}>
           <NewsRefreshProvider>{children}</NewsRefreshProvider>
         </div>
       </div>
