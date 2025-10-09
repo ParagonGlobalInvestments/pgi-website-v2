@@ -15,6 +15,8 @@ interface SupabaseUserData {
   personal_major?: string;
   personal_bio?: string;
   profile_skills: string[];
+  profile_linkedin?: string;
+  profile_github?: string;
   personal_is_alumni: boolean;
 }
 
@@ -66,6 +68,8 @@ export function useSupabaseUser(): UseSupabaseUserReturn {
             personal_major,
             personal_bio,
             profile_skills,
+            profile_linkedin,
+            profile_github,
             personal_is_alumni,
             chapters:org_chapter_id (
               name

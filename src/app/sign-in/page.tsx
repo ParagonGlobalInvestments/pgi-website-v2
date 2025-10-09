@@ -123,14 +123,14 @@ function SignInPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4">
+    <div className="min-h-[calc(100vh-4rem)] bg-navy flex items-center justify-center px-4 py-8">
       <motion.div
         className="max-w-md w-full bg-darkNavy rounded-xl shadow-xl overflow-hidden border border-gray-700"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <div className="p-6 bg-[#00172B] text-white text-center">
+        <div className="p-5 bg-[#00172B] text-white text-center">
           <div className="flex justify-center mb-4">
             <Image
               src="/logos/pgiLogoTransparent.png"
@@ -146,7 +146,7 @@ function SignInPageContent() {
           </p>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-5 space-y-5">
           {/* Google Sign In */}
           <Button
             onClick={handleGoogleSignIn}

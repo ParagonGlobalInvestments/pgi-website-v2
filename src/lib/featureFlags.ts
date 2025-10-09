@@ -12,6 +12,9 @@ export const featureFlags = {
   // Internships feature (pages, buttons, etc)
   enableInternships: process.env.NEXT_PUBLIC_ENABLE_INTERNSHIPS === 'true',
 
+  // Directory feature (member directory access)
+  enableDirectory: process.env.NEXT_PUBLIC_ENABLE_DIRECTORY === 'true',
+
   // Admin features (for testing/debugging)
   enableAdminFeatures:
     process.env.NEXT_PUBLIC_ENABLE_ADMIN_FEATURES !== 'false', // Default true
@@ -33,7 +36,7 @@ export const isFeatureEnabled = (
  * Combined check for features that should work in both dev mode OR when explicitly enabled
  */
 export const isDevOrEnabled = (
-  feature: 'showStats' | 'enableInternships'
+  feature: 'showStats' | 'enableInternships' | 'enableDirectory'
 ): boolean => {
   return featureFlags.isDevelopment || featureFlags[feature];
 };
