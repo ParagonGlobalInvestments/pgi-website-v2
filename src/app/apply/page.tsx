@@ -134,10 +134,10 @@ const uchicagoRecruitmentTeam: TeamMember[] = [
       linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
     },
     {
-      name: 'Riley Gilsenan',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/rileygilsenan/',
+        name: 'Heath Winter',
+        role: 'Recruiter',
+        university: 'University of Chicago',
+        linkedin: 'https://www.linkedin.com/in/heath-winter/',
     },
     {
       name: 'Noor Kaur',
