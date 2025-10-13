@@ -196,7 +196,8 @@ const ProfileCompletionBanner = ({
             <div className="hidden sm:flex items-center gap-1 text-xs opacity-90">
               <span>·</span>
               <span>
-                {missingFields.length} field{missingFields.length !== 1 ? 's' : ''} remaining
+                {missingFields.length} field
+                {missingFields.length !== 1 ? 's' : ''} remaining
               </span>
             </div>
           </div>
@@ -1147,7 +1148,9 @@ export default function DashboardLayout({
             missingFields={profileCompletion.missingFields}
           />
         )}
-        <div className={`lg:p-8 p-4 ${hasIncompleteProfile ? 'pt-2 lg:pt-8' : 'pt-16 lg:pt-8'}`}>
+        <div
+          className={`lg:p-8 p-4 ${hasIncompleteProfile ? 'pt-2 lg:pt-8' : 'pt-16 lg:pt-8'}`}
+        >
           <NewsRefreshProvider>{children}</NewsRefreshProvider>
         </div>
       </div>
