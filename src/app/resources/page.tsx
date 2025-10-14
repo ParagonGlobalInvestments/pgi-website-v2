@@ -1,5 +1,10 @@
 'use client';
 
+// TODO: Remove Google Drive integration, migrate to self-hosted resources
+// Follow same pattern as portal pages: /public/resources/ folder structure
+// The portal pages (Pitches, Education, Recruitment) now use self-hosted files
+// This public resources page should be updated to match that approach
+
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/browser';
 import { useState, useEffect, Suspense } from 'react';

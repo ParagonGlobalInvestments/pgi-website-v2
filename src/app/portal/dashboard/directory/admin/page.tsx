@@ -107,6 +107,9 @@ export default function AdminDirectoryPage() {
   const [chapters, setChapters] = useState<
     Array<{ _id: string; name: string }>
   >([]);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<string | null>(null);
+  const [showPending, setShowPending] = useState(true);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState<Partial<User>>({
     personal: {
@@ -182,9 +185,18 @@ export default function AdminDirectoryPage() {
     }
   }, [isLoading, supabaseUserData, router]);
 
+  // Separate pending and active users
+  const pendingUsers = useMemo(() => {
+    return users.filter(user => user.org?.status === 'pending');
+  }, [users]);
+
+  const activeUsers = useMemo(() => {
+    return users.filter(user => user.org?.status !== 'pending');
+  }, [users]);
+
   // Filter users based on search
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+    return activeUsers.filter(user => {
       const searchFields = [
         user.personal?.name,
         user.personal?.email,
@@ -199,7 +211,7 @@ export default function AdminDirectoryPage() {
 
       return searchFields.includes(searchTerm.toLowerCase());
     });
-  }, [users, searchTerm]);
+  }, [activeUsers, searchTerm]);
 
   const handleEdit = (user: User) => {
     setEditingUser(user.id);
@@ -356,6 +368,136 @@ export default function AdminDirectoryPage() {
     }
   };
 
+  // Bulk action handlers
+  const toggleUserSelection = (userId: string) => {
+    const newSelection = new Set(selectedUsers);
+    if (newSelection.has(userId)) {
+      newSelection.delete(userId);
+    } else {
+      newSelection.add(userId);
+    }
+    setSelectedUsers(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUsers.size === filteredUsers.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(filteredUsers.map(u => u.id)));
+    }
+  };
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedUsers.size === 0) {
+      toast.error('No users selected');
+      return;
+    }
+
+    setBulkAction(action);
+    const userIds = Array.from(selectedUsers);
+
+    try {
+      let updates: Partial<User> = {};
+      let actionName = '';
+
+      switch (action) {
+        case 'promote-lead':
+          updates = { org: { permissionLevel: 'lead' } as any };
+          actionName = 'promoted to Lead';
+          break;
+        case 'demote-member':
+          updates = { org: { permissionLevel: 'member' } as any };
+          actionName = 'demoted to Member';
+          break;
+        case 'set-active':
+          updates = { org: { status: 'active' } as any };
+          actionName = 'set to Active';
+          break;
+        case 'set-inactive':
+          updates = { org: { status: 'inactive' } as any };
+          actionName = 'set to Inactive';
+          break;
+        default:
+          toast.error('Invalid action');
+          return;
+      }
+
+      // Update each user
+      await Promise.all(
+        userIds.map(userId =>
+          fetch(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates),
+          })
+        )
+      );
+
+      // Update local state
+      setUsers(
+        users.map(u => {
+          if (userIds.includes(u.id)) {
+            return { ...u, ...updates };
+          }
+          return u;
+        })
+      );
+
+      toast.success(`${userIds.length} users ${actionName}`);
+      setSelectedUsers(new Set());
+    } catch (error) {
+      console.error('Bulk action error:', error);
+      toast.error('Failed to perform bulk action');
+    } finally {
+      setBulkAction(null);
+    }
+  };
+
+  // Pending user actions
+  const handleApprovePending = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org: { status: 'active' } }),
+      });
+
+      if (!response.ok) throw new Error('Failed to approve user');
+
+      setUsers(
+        users.map(u =>
+          u.id === userId ? { ...u, org: { ...u.org, status: 'active' } } : u
+        )
+      );
+      toast.success('User approved');
+    } catch (error) {
+      console.error('Error approving user:', error);
+      toast.error('Failed to approve user');
+    }
+  };
+
+  const handleRejectPending = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org: { status: 'inactive' } }),
+      });
+
+      if (!response.ok) throw new Error('Failed to reject user');
+
+      setUsers(
+        users.map(u =>
+          u.id === userId ? { ...u, org: { ...u.org, status: 'inactive' } } : u
+        )
+      );
+      toast.success('User rejected');
+    } catch (error) {
+      console.error('Error rejecting user:', error);
+      toast.error('Failed to reject user');
+    }
+  };
+
   if (isLoading || loading || !supabaseUser) {
     return <div>Loading...</div>;
   }
@@ -382,6 +524,135 @@ export default function AdminDirectoryPage() {
             Add User
           </Button>
         </div>
+
+        {/* Pending Members Section */}
+        {pendingUsers.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setShowPending(!showPending)}
+              className="w-full p-4 flex justify-between items-center hover:bg-amber-100 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <FaUsers className="text-amber-600" size={20} />
+                <h2 className="text-lg font-semibold text-amber-900">
+                  Pending Approvals
+                </h2>
+                <Badge className="bg-amber-600 text-white">
+                  {pendingUsers.length}
+                </Badge>
+              </div>
+              <FaArrowLeft
+                className={`text-amber-600 transform transition-transform ${showPending ? 'rotate-90' : '-rotate-90'}`}
+              />
+            </button>
+
+            {showPending && (
+              <div className="p-4 border-t border-amber-200 space-y-3">
+                {pendingUsers.map(user => (
+                  <div
+                    key={user.id}
+                    className="bg-white p-4 rounded-lg border border-amber-200 flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {user.personal?.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {user.personal?.email}
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        {user.org?.track && (
+                          <Badge variant="outline">{user.org.track}</Badge>
+                        )}
+                        {user.org?.permissionLevel && (
+                          <Badge variant="secondary">
+                            {user.org.permissionLevel}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleApprovePending(user.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <FaCheck className="mr-2" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRejectPending(user.id)}
+                      >
+                        <FaTimes className="mr-2" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bulk Actions Bar */}
+        {selectedUsers.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-blue-900">
+                  {selectedUsers.size} user{selectedUsers.size !== 1 ? 's' : ''}{' '}
+                  selected
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSelectedUsers(new Set())}
+                  className="text-blue-600"
+                >
+                  Clear Selection
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkAction('promote-lead')}
+                  disabled={!!bulkAction}
+                >
+                  Promote to Lead
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkAction('demote-member')}
+                  disabled={!!bulkAction}
+                >
+                  Demote to Member
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkAction('set-active')}
+                  disabled={!!bulkAction}
+                  className="border-green-600 text-green-600 hover:bg-green-50"
+                >
+                  Set Active
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkAction('set-inactive')}
+                  disabled={!!bulkAction}
+                  className="border-red-600 text-red-600 hover:bg-red-50"
+                >
+                  Set Inactive
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Add User Dialog */}
         <Dialog
@@ -583,10 +854,21 @@ export default function AdminDirectoryPage() {
         </AlertDialog>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedUsers.size === filteredUsers.length &&
+                      filteredUsers.length > 0
+                    }
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
@@ -604,6 +886,14 @@ export default function AdminDirectoryPage() {
             <TableBody>
               {filteredUsers.map(user => (
                 <TableRow key={user.id}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.has(user.id)}
+                      onChange={() => toggleUserSelection(user.id)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </TableCell>
                   <TableCell>
                     {editingUser === user.id ? (
                       <Input

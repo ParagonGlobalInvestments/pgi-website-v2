@@ -130,3 +130,75 @@ h6 {
     line-height: 2rem;
   }
 }
+
+/* Scrollbar hiding for PWA - universal application */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* WebKit (Safari/Chrome) */
+}
+
+:root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:root::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: auto;
+  scroll-behavior: smooth;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#__next,
+[data-overlay-container='true'] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#__next::-webkit-scrollbar,
+[data-overlay-container='true']::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar-none utility class */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+/* Mobile-specific overscroll prevention */
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-overscroll-behavior-y: contain;
+  }
+}

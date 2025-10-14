@@ -11,6 +11,7 @@ import { FaNewspaper, FaChartLine, FaGlobeAmericas } from 'react-icons/fa';
 import MarketWatchNews from '@/components/dashboard/MarketWatchNews';
 import NasdaqNews from '@/components/dashboard/NasdaqNews';
 import SeekingAlphaNews from '@/components/dashboard/SeekingAlphaNews';
+import MarketIndicatorsExpanded from '@/components/dashboard/MarketIndicatorsExpanded';
 
 // Animation variants
 const containerVariants = {
@@ -47,7 +48,7 @@ interface NewsSource {
 }
 
 export default function NewsPage() {
-  const { user: supabaseUserData, isLoading } = useSupabaseUser();
+  const { isLoading } = useSupabaseUser();
   const [supabaseUser, setSupabaseUser] = useState<any>(null);
   const supabase = createClient();
 
@@ -111,27 +112,8 @@ export default function NewsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-8 pt-4 lg:pt-0 text-navy"
+        className="space-y-8 pt-20 lg:pt-0 text-pgi-dark-blue"
       >
-        <div>
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-bold text-gray-800"
-          >
-            Financial News
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-gray-500 mt-1"
-          >
-            Latest financial news from multiple sources
-          </motion.p>
-        </div>
-
         <Tabs
           defaultValue="all"
           value={activeTab}
@@ -143,7 +125,7 @@ export default function NewsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <TabsList className="mb-6">
+            <TabsList className="mb-4 w-full justify-between lg:w-auto lg:justify-start">
               <TabsTrigger value="all" className="flex items-center gap-2">
                 <FaNewspaper />
                 All Sources
@@ -170,7 +152,7 @@ export default function NewsPage() {
               animate="visible"
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {newsSources.map((source, index) => (
+              {newsSources.map(source => (
                 <motion.div
                   key={source.id}
                   variants={itemVariants}
@@ -179,6 +161,16 @@ export default function NewsPage() {
                   {source.component}
                 </motion.div>
               ))}
+            </motion.div>
+
+            {/* Market Indicators - Desktop only, below the news feeds */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="hidden lg:block mt-6"
+            >
+              <MarketIndicatorsExpanded />
             </motion.div>
           </TabsContent>
 

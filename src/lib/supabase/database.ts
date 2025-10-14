@@ -72,6 +72,19 @@ export interface Internship {
   updated_at: string;
 }
 
+export interface Pitch {
+  id: string;
+  ticker: string;
+  team: 'value' | 'quant';
+  pitch_date: string;
+  exchange?: 'NASDAQ' | 'NYSE';
+  excel_model_path?: string;
+  pdf_report_path?: string;
+  github_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Formatted user type for API responses (matches the MongoDB format)
 export interface FormattedUser {
   id: string;
