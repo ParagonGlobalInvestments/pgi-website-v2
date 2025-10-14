@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
-export const dynamic = 'force-dynamic';
+// Enable ISR with 60-second revalidation for better performance
+export const revalidate = 60;
 
 // Get all users for the directory
 export async function GET(req: NextRequest) {
@@ -51,8 +52,16 @@ export async function GET(req: NextRequest) {
       JSON.stringify(filters)
     );
 
-    // Get all users from Supabase with filters
-    const users = await db.getUsers(filters);
+    // Parallel fetch: Get users and chapters simultaneously
+    const [users, chaptersResponse] = await Promise.all([
+      db.getUsers(filters),
+      fetch(`${req.nextUrl.origin}/api/chapters`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch(() => null),
+    ]);
+
     console.log(`Found ${users.length} users matching query`);
 
     if (users.length === 0) {
@@ -73,11 +82,26 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Users are already formatted from the database layer
-    return NextResponse.json({
-      success: true,
-      users,
-    });
+    // Parse chapters if available
+    let chapters = [];
+    if (chaptersResponse && chaptersResponse.ok) {
+      chapters = await chaptersResponse.json();
+    }
+
+    // Return combined payload with cache headers
+    return NextResponse.json(
+      {
+        success: true,
+        users,
+        chapters,
+        timestamp,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
+    );
   } catch (error: any) {
     console.error('Error fetching users:', error);
     return NextResponse.json(

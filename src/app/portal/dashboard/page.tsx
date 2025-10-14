@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { useNewsRefresh } from '@/contexts/NewsRefreshContext';
 import { isDevOrEnabled } from '@/lib/featureFlags';
-import Link from 'next/link';
 import {
   FaBriefcase,
   FaUsers,
@@ -18,6 +17,7 @@ import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import MarketWatchNews from '@/components/dashboard/MarketWatchNews';
 import SeekingAlphaNews from '@/components/dashboard/SeekingAlphaNews';
 import NasdaqNews from '@/components/dashboard/NasdaqNews';
+import MarketIndicators from '@/components/dashboard/MarketIndicators';
 // Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -147,233 +147,6 @@ const NewsRefreshTimer = () => {
   );
 };
 
-// University color mapping
-const universityColors: { [key: string]: string } = {
-  'Brown University': '#4E3629',
-  'Columbia University': '#9BD1E5',
-  'Cornell University': '#B31B1B',
-  'University of Pennsylvania': '#011F5B',
-  'University of Chicago': '#800000',
-  'Princeton University': '#E77500',
-  'New York University': '#57068C',
-  'Yale University': '#00356B',
-};
-
-// Profile Card Component
-interface ProfileCardProps {
-  userData: any;
-}
-
-const ProfileCard = ({ userData }: ProfileCardProps) => {
-  // Calculate profile completion
-  const calculateCompletion = () => {
-    const fields = {
-      track: userData?.org_track,
-      chapter: userData?.org_chapter_name,
-      major: userData?.personal_major,
-      gradYear: userData?.personal_grad_year,
-      skills: userData?.profile_skills?.length > 0,
-      bio: userData?.personal_bio,
-    };
-
-    const completed = Object.values(fields).filter(Boolean).length;
-    const total = Object.keys(fields).length;
-    const percentage = Math.round((completed / total) * 100);
-
-    return { percentage, fields, completed, total };
-  };
-
-  const { percentage, fields } = calculateCompletion();
-  const isComplete = percentage === 100;
-
-  const missingFields = [];
-  if (!fields.track) missingFields.push({ label: 'Track role' });
-  if (!fields.chapter) missingFields.push({ label: 'Chapter' });
-  if (!fields.major) missingFields.push({ label: 'Major' });
-  if (!fields.gradYear) missingFields.push({ label: 'Graduation year' });
-  if (!fields.skills) missingFields.push({ label: 'Skills' });
-
-  // Format track roles
-  const getFormattedTrack = () => {
-    if (!userData?.org_track_roles || userData.org_track_roles.length === 0)
-      return null;
-    return userData.org_track_roles.join(' / ');
-  };
-
-  const formattedTrack = getFormattedTrack();
-
-  // Get university color
-  const getUniversityColor = () => {
-    if (!userData?.org_chapter_name) return '#9CA3AF'; // Gray-400 if no chapter
-    return universityColors[userData.org_chapter_name] || '#9CA3AF';
-  };
-
-  const borderColor = getUniversityColor();
-
-  return (
-    <motion.div
-      variants={itemVariants}
-      initial="hidden"
-      animate="visible"
-      transition={{ delay: 0.5 }}
-      className="bg-white rounded-xl shadow-lg border-l-4 p-6"
-      style={{ borderLeftColor: borderColor }}
-    >
-      {/* Header with completion percentage */}
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium text-gray-500">Your Profile</p>
-        {!isComplete && (
-          <span className="text-xs font-semibold text-blue-600">
-            {percentage}%
-          </span>
-        )}
-      </div>
-
-      {/* Main Content Value - matching stats card hierarchy */}
-      <div className="mb-3">
-        {isComplete ? (
-          <>
-            {/* Desktop: Single Row Layout */}
-            <div className="hidden lg:block">
-              <p className="text-xl text-blue-950 font-bold mb-1">
-                {formattedTrack || 'Member'}
-                {userData?.org_chapter_name &&
-                  ` at ${userData.org_chapter_name}`}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
-                {userData?.personal_major && (
-                  <>
-                    <span>{userData.personal_major}</span>
-                    {userData?.personal_grad_year && <span>•</span>}
-                  </>
-                )}
-                {userData?.personal_grad_year && (
-                  <span>Class of {userData.personal_grad_year}</span>
-                )}
-              </div>
-            </div>
-
-            {/* Mobile: Stacked Layout */}
-            <div className="lg:hidden">
-              <p className="text-lg text-blue-950 font-bold mb-1">
-                {formattedTrack || 'Member'}
-              </p>
-              <div className="space-y-0.5 text-sm text-gray-500">
-                {userData?.org_chapter_name && (
-                  <p>{userData.org_chapter_name}</p>
-                )}
-                {userData?.personal_major && <p>{userData.personal_major}</p>}
-                {userData?.personal_grad_year && (
-                  <p>Class of {userData.personal_grad_year}</p>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Incomplete Profile Display */}
-            <p className="text-xl text-blue-950 font-bold mb-1">
-              Complete Your Profile
-            </p>
-            <div className="mb-2">
-              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
-                  className="bg-blue-600 h-full rounded-full"
-                />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500 mb-3">
-              {missingFields.length} field
-              {missingFields.length !== 1 ? 's' : ''} remaining
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* Additional Details */}
-      {isComplete && (
-        <div className="space-y-2 pt-2 border-t border-gray-100">
-          {/* Skills */}
-          {userData?.profile_skills && userData.profile_skills.length > 0 && (
-            <div>
-              <p className="text-xs text-gray-500 mb-1.5">Skills</p>
-              <div className="flex flex-wrap gap-1.5">
-                {userData.profile_skills.map((skill: string, idx: number) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Social Links */}
-          {(userData?.profile_linkedin || userData?.profile_github) && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {userData?.profile_linkedin && (
-                <a
-                  href={userData.profile_linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-2 py-1 text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
-                >
-                  LinkedIn →
-                </a>
-              )}
-              {userData?.profile_github && (
-                <a
-                  href={userData.profile_github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-2 py-1 text-[11px] font-medium text-gray-700 bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
-                >
-                  GitHub →
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Incomplete Fields Grid */}
-      {!isComplete && (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5 pt-2 border-t border-gray-100">
-          {missingFields.map((field, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-1.5 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700"
-            >
-              <div className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
-              <span className="text-[11px] font-medium truncate">
-                {field.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Action Button */}
-      <div className="mt-3">
-        <Link href="/portal/dashboard/settings">
-          <motion.button
-            whileHover={{ scale: 1.005 }}
-            whileTap={{ scale: 0.995 }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg text-sm transition-colors shadow-sm"
-          >
-            {isComplete ? 'Edit Profile' : 'Complete Profile'}
-          </motion.button>
-        </Link>
-      </div>
-    </motion.div>
-  );
-};
-
 export default function Dashboard() {
   const { user: supabaseUserData, isLoading: isSupabaseUserLoading } =
     useSupabaseUser();
@@ -470,26 +243,6 @@ export default function Dashboard() {
 
   // Get user data from Supabase
   const userRole = supabaseUserData?.org_permission_level || 'member';
-  const trackRoles = supabaseUserData?.org_track_roles || [];
-  const chapter = supabaseUserData?.org_chapter_name || 'N/A';
-
-  // Get formatted role name for display
-  const getFormattedRole = (role: string) => {
-    switch (role) {
-      case 'QuantitativeAnalyst':
-        return 'Quantitative Analyst';
-      case 'QuantitativeResearchCommittee':
-        return 'Quantitative Research Committee';
-      case 'ValueAnalyst':
-        return 'Value Analyst';
-      case 'InvestmentCommittee':
-        return 'Investment Committee';
-      case 'PortfolioManager':
-        return 'Portfolio Manager';
-      default:
-        return role;
-    }
-  };
 
   // ProtectedPage handles auth checks, so we only need to check if data is loading
   if (isSupabaseUserLoading) {
@@ -519,7 +272,7 @@ export default function Dashboard() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-4 lg:space-y-8 pt-4 lg:pt-0 text-navy"
+        className="space-y-4 lg:space-y-8 pt-20 lg:pt-0 text-pgi-dark-blue"
       >
         {justCompletedOnboarding && (
           <motion.div
@@ -551,86 +304,6 @@ export default function Dashboard() {
             </div>
           </motion.div>
         )}
-
-        <div>
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-bold"
-          >
-            Welcome back,{' '}
-            {supabaseUserData?.personal_name?.split(' ')[0] || 'Member'}
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mt-1"
-          >
-            {userRole === 'admin' ? (
-              <p className="text-gray-500">
-                Here's an overview of Paragon Global Investments
-              </p>
-            ) : trackRoles.length > 0 && chapter !== 'N/A' ? (
-              <p className="text-gray-600 font-medium">
-                {trackRoles.map(getFormattedRole).join(' / ')} at {chapter}
-              </p>
-            ) : (
-              <Link
-                href="/portal/dashboard/settings/profile"
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                Complete your profile →
-              </Link>
-            )}
-          </motion.div>
-        </div>
-
-        {/* Desktop: Two-column layout for Quick Actions, Mobile: stacked */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Actions on mobile */}
-          <div className="lg:col-span-2 lg:hidden">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xl font-semibold text-gray-800 mb-4"
-            >
-              Quick Actions
-            </motion.h2>
-
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-1 gap-4"
-            >
-              <ProfileCard userData={supabaseUserData} />
-            </motion.div>
-          </div>
-
-          {/* Desktop: Quick Actions sidebar */}
-          <div className="hidden lg:block lg:col-span-3">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-xl font-semibold text-gray-800 mb-4"
-            >
-              Quick Actions
-            </motion.h2>
-
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-4"
-            >
-              <ProfileCard userData={supabaseUserData} />
-            </motion.div>
-          </div>
-        </div>
 
         {/* Stats Cards - Only show in dev or when feature flag enabled */}
         {isDevOrEnabled('showStats') && (
@@ -693,8 +366,8 @@ export default function Dashboard() {
         )}
 
         {/* News & Updates Section */}
-        <div>
-          <motion.h2
+        <div className="mt-16 lg:mt-0">
+          {/* <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
@@ -702,13 +375,15 @@ export default function Dashboard() {
           >
             News & Updates
           </motion.h2>
-          <NewsRefreshTimer />
+          <NewsRefreshTimer /> */}
+
+          <MarketIndicators />
 
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"
           >
             <motion.div variants={itemVariants} className="h-full">
               <MarketWatchNews />

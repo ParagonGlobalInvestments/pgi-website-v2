@@ -261,15 +261,8 @@ export default function SettingsPage() {
       <SmoothTransition
         isVisible={true}
         direction="vertical"
-        className="space-y-6 pt-4 lg:pt-0 text-navy"
+        className="space-y-6 pt-20 lg:pt-0 text-pgi-dark-blue"
       >
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Settings</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your account, profile, and preferences
-          </p>
-        </div>
-
         {saveMessage.message && (
           <AnimatePresence>
             <motion.div

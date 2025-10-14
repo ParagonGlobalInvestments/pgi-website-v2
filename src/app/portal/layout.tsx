@@ -9,5 +9,9 @@ export default function PortalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className={`${GeistSans.variable} antialiased`}>{children}</div>;
+  return (
+    <div className={`${GeistSans.variable} antialiased bg-white min-h-screen`}>
+      {children}
+    </div>
+  );
 }
