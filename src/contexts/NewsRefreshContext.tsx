@@ -104,15 +104,11 @@ export function NewsRefreshProvider({ children }: { children: ReactNode }) {
 
   // Initial refresh on mount (after components register)
   useEffect(() => {
-    // Wait a bit for components to register their callbacks
-    const initialRefreshTimer = setTimeout(() => {
-      if (refreshCallbacks.size > 0) {
-        triggerRefresh();
-      }
-    }, 1000);
-
-    return () => clearTimeout(initialRefreshTimer);
-  }, [refreshCallbacks.size]); // Only trigger when first component registers
+    // Trigger immediately when first component registers
+    if (refreshCallbacks.size > 0 && !lastRefreshed) {
+      triggerRefresh();
+    }
+  }, [refreshCallbacks.size, lastRefreshed, triggerRefresh]); // Trigger when first component registers
 
   // Handle page visibility changes (pause when tab is hidden)
   useEffect(() => {

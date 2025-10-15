@@ -87,7 +87,7 @@ export default function PitchDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8 text-pgi-dark-blue">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-10 w-32 mb-6" />
           <Skeleton className="h-24 w-full mb-8" />
@@ -102,7 +102,7 @@ export default function PitchDetailPage() {
 
   if (!pitch) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8 text-pgi-dark-blue">
         <div className="max-w-7xl mx-auto">
           <Button
             onClick={() => router.push('/portal/dashboard/pitches')}
@@ -128,7 +128,7 @@ export default function PitchDetailPage() {
   const performanceColor = isPositive ? 'text-green-600' : 'text-red-600';
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 text-pgi-dark-blue">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <Button

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import yahooFinance from 'yahoo-finance2';
 
-// In-memory cache to avoid rate limiting
+// Enhanced in-memory cache with LRU-like behavior
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 1000; // Prevent memory bloat
 
 interface StockPerformance {
   ticker: string;
@@ -12,6 +13,21 @@ interface StockPerformance {
   pointsChange: number | null;
   percentChange: number | null;
   error?: string;
+}
+
+// Helper function to manage cache size
+function pruneCache() {
+  if (cache.size > MAX_CACHE_SIZE) {
+    const sortedEntries = Array.from(cache.entries()).sort(
+      (a, b) => a[1].timestamp - b[1].timestamp
+    );
+    // Remove oldest 20% of entries
+    const toRemove = Math.floor(MAX_CACHE_SIZE * 0.2);
+    for (let i = 0; i < toRemove; i++) {
+      cache.delete(sortedEntries[i][0]);
+    }
+    console.log(`[Stock API] Cache pruned: removed ${toRemove} old entries`);
+  }
 }
 
 /**
@@ -42,8 +58,12 @@ export async function GET(request: NextRequest) {
     const cached = cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`[Stock API] Cache hit for ${cacheKey}`);
       return NextResponse.json(cached.data);
     }
+
+    // Prune cache periodically
+    pruneCache();
 
     // Parse pitch date
     const pitchDateTime = new Date(pitchDate);
@@ -55,26 +75,51 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Fetch historical price at pitch date
-      const historicalResult = await yahooFinance.historical(ticker, {
-        period1: pitchDate,
-        period2: pitchDate,
-      });
-
       // Fetch current quote
       const currentQuote = await yahooFinance.quote(ticker);
+      const currentPrice = currentQuote.regularMarketPrice || null;
+      
+      // Calculate date range for historical data
+      const pitchDateTime = new Date(pitchDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      pitchDateTime.setHours(0, 0, 0, 0);
+      
+      let pitchPrice: number | null = null;
+      
+      // Only fetch historical data if pitch date is in the past
+      if (pitchDateTime < today) {
+        try {
+          // Get historical data with a date range to avoid period1 === period2 error
+          const nextDay = new Date(pitchDateTime);
+          nextDay.setDate(nextDay.getDate() + 1);
+          
+          const historicalResult = await yahooFinance.historical(ticker, {
+            period1: pitchDate,
+            period2: nextDay.toISOString().split('T')[0],
+          });
+          
+          pitchPrice = historicalResult.length > 0 ? historicalResult[0].close : null;
+        } catch (historicalError) {
+          console.warn(`[Stock API] Could not fetch historical price for ${ticker} on ${pitchDate}, using current price as fallback`);
+          pitchPrice = currentPrice;
+        }
+      } else {
+        // If pitch date is today or in the future, use current price
+        pitchPrice = currentPrice;
+      }
 
       // Calculate performance
-      const pitchPrice =
-        historicalResult.length > 0 ? historicalResult[0].close : null;
-      const currentPrice = currentQuote.regularMarketPrice || null;
-
       let pointsChange: number | null = null;
       let percentChange: number | null = null;
 
-      if (pitchPrice !== null && currentPrice !== null) {
+      if (pitchPrice !== null && currentPrice !== null && pitchPrice !== currentPrice) {
         pointsChange = currentPrice - pitchPrice;
         percentChange = ((currentPrice - pitchPrice) / pitchPrice) * 100;
+      } else if (pitchPrice === currentPrice) {
+        // Same price means 0% change
+        pointsChange = 0;
+        percentChange = 0;
       }
 
       const response: StockPerformance = {

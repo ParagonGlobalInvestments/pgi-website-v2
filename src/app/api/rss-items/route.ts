@@ -5,6 +5,11 @@ import { createRSSDatabase } from '@/lib/supabase/rss';
 // Ensure dynamic rendering for this route
 export const dynamic = 'force-dynamic';
 
+// Add response caching headers
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+};
+
 // GET handler for the RSS items
 export async function GET(req: NextRequest) {
   try {
@@ -24,11 +29,11 @@ export async function GET(req: NextRequest) {
     const source = searchParams.get('source');
     const limit = searchParams.get('limit');
 
-    // Get RSS items from Supabase
+    // Get RSS items from Supabase with optimized limit
     const rssDb = createRSSDatabase();
     const items = await rssDb.getRSSItems({
       source: source || undefined,
-      limit: limit ? parseInt(limit) : 50,
+      limit: limit ? Math.min(parseInt(limit), 100) : 50, // Cap at 100 items max
     });
 
     // Transform snake_case to camelCase for frontend compatibility
@@ -46,9 +51,11 @@ export async function GET(req: NextRequest) {
       fetchedAt: item.fetched_at || item.created_at,
     }));
 
-    return NextResponse.json(transformedItems);
+    return NextResponse.json(transformedItems, {
+      headers: CACHE_HEADERS,
+    });
   } catch (error) {
-    console.error('Error fetching RSS items:', error);
+    console.error('[RSS API] Error fetching RSS items:', error);
     return NextResponse.json(
       { error: 'Failed to fetch RSS items' },
       { status: 500 }
