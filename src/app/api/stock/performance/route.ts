@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import yahooFinance from 'yahoo-finance2';
 
+// Mark this route as dynamic (required for API routes that use request params)
+export const dynamic = 'force-dynamic';
+
 // Enhanced in-memory cache with LRU-like behavior
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
