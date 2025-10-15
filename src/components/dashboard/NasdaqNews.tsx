@@ -210,23 +210,18 @@ export default function NasdaqNews() {
           NASDAQ
         </CardTitle>
         <div className="flex items-center text-xs text-gray-500">
-          {lastRefreshed && newsItems.length > 0 && (
-            <span className="mr-2">
-              Updated {formatRelativeTime(lastRefreshed.toISOString())}
-            </span>
-          )}
-          {newsItems.length > 0 && (
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-              title="Refresh from cache"
-            >
-              <FaSync
-                className={`text-blue-500 ${refreshing ? 'animate-spin' : ''}`}
-              />
-            </button>
-          )}
+          <Button
+            onClick={handleServerRefresh}
+            disabled={serverRefreshing}
+            variant="outline"
+            size="sm"
+            className="text-xs flex items-center gap-2 text-gray-700"
+          >
+            <FaSync
+              className={`text-blue-500 ${refreshing ? 'animate-spin' : ''}`}
+            />
+            {serverRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -280,27 +275,6 @@ export default function NasdaqNews() {
           </motion.div>
         )}
       </CardContent>
-
-      {isAdmin && newsItems.length > 0 && (
-        <CardFooter className="flex flex-col items-start pt-2">
-          <div className="w-full flex items-center justify-between">
-            <Button
-              onClick={handleServerRefresh}
-              disabled={serverRefreshing}
-              variant="outline"
-              size="sm"
-              className="text-xs flex items-center text-gray-700"
-            >
-              <FaDatabase className="mr-1" />
-              {serverRefreshing ? 'Refreshing Feed...' : 'Refresh From Source'}
-            </Button>
-
-            {refreshMessage && (
-              <span className="text-xs text-green-600">{refreshMessage}</span>
-            )}
-          </div>
-        </CardFooter>
-      )}
     </Card>
   );
 }

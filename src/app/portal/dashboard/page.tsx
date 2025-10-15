@@ -366,17 +366,7 @@ export default function Dashboard() {
         )}
 
         {/* News & Updates Section */}
-        <div className="mt-16 lg:mt-0">
-          {/* <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-xl font-semibold text-gray-800 mb-4"
-          >
-            News & Updates
-          </motion.h2>
-          <NewsRefreshTimer /> */}
-
+        <div className="">
           <MarketIndicators />
 
           <motion.div

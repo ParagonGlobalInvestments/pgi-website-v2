@@ -207,21 +207,18 @@ export default function MarketWatchNews() {
           MarketWatch
         </CardTitle>
         <div className="flex items-center text-xs text-gray-500">
-          {lastRefreshed && (
-            <span className="mr-2">
-              Updated {formatRelativeTime(lastRefreshed.toISOString())}
-            </span>
-          )}
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-            title="Refresh from cache"
+          <Button
+            onClick={handleServerRefresh}
+            disabled={serverRefreshing}
+            variant="outline"
+            size="sm"
+            className="text-xs flex items-center gap-2 text-gray-700"
           >
             <FaSync
               className={`text-green-500 ${refreshing ? 'animate-spin' : ''}`}
             />
-          </button>
+            {serverRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -275,27 +272,6 @@ export default function MarketWatchNews() {
           </motion.div>
         )}
       </CardContent>
-
-      {isAdmin && (
-        <CardFooter className="flex flex-col items-start pt-2">
-          <div className="w-full flex items-center justify-between">
-            <Button
-              onClick={handleServerRefresh}
-              disabled={serverRefreshing}
-              variant="outline"
-              size="sm"
-              className="text-xs flex items-center text-gray-700"
-            >
-              <FaDatabase className="mr-1" />
-              {serverRefreshing ? 'Refreshing Feed...' : 'Refresh From Source'}
-            </Button>
-
-            {refreshMessage && (
-              <span className="text-xs text-green-600">{refreshMessage}</span>
-            )}
-          </div>
-        </CardFooter>
-      )}
     </Card>
   );
 }
