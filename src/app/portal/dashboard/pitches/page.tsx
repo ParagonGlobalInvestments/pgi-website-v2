@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown, ExternalLink, Settings } from 'lucide-react';
+import { TrendingUp, TrendingDown, ExternalLink, Settings, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useSupabaseUser } from '@/hooks/useSupabaseUser';
 import { downloadMultipleFiles } from '@/lib/utils/fileHelpers';
+import { PitchReturnSparkline } from '@/components/portal/PitchReturnSparkline';
 
 interface Pitch {
   id: string;
@@ -178,42 +179,33 @@ export default function PitchesPage() {
   const renderPerformance = (pitchId: string) => {
     const perf = performances.get(pitchId);
 
-    if (!perf || perf.percentChange === null) {
-      return <span className="text-gray-500">Loading...</span>;
+    if (!perf) {
+      return <span className="text-gray-500 text-sm">Loading...</span>;
     }
 
-    if (perf.error) {
+    if (perf.error || perf.percentChange === null) {
       return <span className="text-gray-500 text-sm">N/A</span>;
     }
 
-    const isPositive = perf.percentChange >= 0;
-    const Icon = isPositive ? TrendingUp : TrendingDown;
-    const colorClass = isPositive ? 'text-green-600' : 'text-red-600';
-
     return (
-      <div className={`flex items-center gap-2 ${colorClass} font-semibold`}>
-        <Icon className="h-4 w-4" />
-        <span>
-          {isPositive ? '+' : ''}
-          {perf.pointsChange?.toFixed(2)} ({isPositive ? '+' : ''}
-          {perf.percentChange?.toFixed(2)}%)
-        </span>
-      </div>
+      <PitchReturnSparkline
+        percentChange={perf.percentChange}
+        pitchPrice={perf.pitchPrice}
+        currentPrice={perf.currentPrice}
+      />
     );
   };
 
   const renderPitchRow = (pitch: Pitch) => (
     <tr
       key={pitch.id}
-      onClick={() => router.push(`/portal/dashboard/pitches/${pitch.id}`)}
-      className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+      className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
     >
       <td className="px-6 py-4">
         <Link
           href={`https://finance.yahoo.com/quote/${pitch.ticker}`}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={e => e.stopPropagation()}
           className="text-[#003E6B] hover:text-[#002C4D] font-semibold flex items-center gap-1"
         >
           {pitch.ticker}
@@ -224,14 +216,24 @@ export default function PitchesPage() {
         {formatDate(pitch.pitch_date)}
       </td>
       <td className="px-6 py-4">{renderPerformance(pitch.id)}</td>
+      <td className="px-6 py-4">
+        <Button
+          onClick={() => router.push(`/portal/dashboard/pitches/${pitch.id}`)}
+          size="sm"
+          variant="outline"
+          className="gap-2"
+        >
+          <Eye className="h-4 w-4" />
+          View
+        </Button>
+      </td>
     </tr>
   );
 
   const renderPitchCard = (pitch: Pitch) => (
     <Card
       key={pitch.id}
-      onClick={() => router.push(`/portal/dashboard/pitches/${pitch.id}`)}
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      className="hover:shadow-md transition-shadow"
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
@@ -239,7 +241,6 @@ export default function PitchesPage() {
             href={`https://finance.yahoo.com/quote/${pitch.ticker}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
             className="text-lg font-bold text-[#003E6B] hover:text-[#002C4D] flex items-center gap-1"
           >
             {pitch.ticker}
@@ -249,7 +250,16 @@ export default function PitchesPage() {
         <div className="text-sm text-gray-600 mb-2">
           Pitched: {formatDate(pitch.pitch_date)}
         </div>
-        <div className="mt-2">{renderPerformance(pitch.id)}</div>
+        <div className="mt-2 mb-3">{renderPerformance(pitch.id)}</div>
+        <Button
+          onClick={() => router.push(`/portal/dashboard/pitches/${pitch.id}`)}
+          size="sm"
+          variant="outline"
+          className="w-full gap-2"
+        >
+          <Eye className="h-4 w-4" />
+          View Pitch
+        </Button>
       </CardContent>
     </Card>
   );
@@ -288,6 +298,9 @@ export default function PitchesPage() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Live Return to Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
                 </th>
               </tr>
             </thead>

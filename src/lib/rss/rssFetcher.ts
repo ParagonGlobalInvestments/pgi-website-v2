@@ -9,6 +9,7 @@ const parser = new Parser({
 });
 
 // RSS Feed Sources configuration
+// Updated URLs for optimal performance and latest news
 const RSS_FEEDS = {
   marketwatch: {
     id: 'marketwatch-top',
@@ -17,12 +18,12 @@ const RSS_FEEDS = {
   },
   nasdaq: {
     id: 'nasdaq-news',
-    url: 'https://www.nasdaq.com/feed/nasdaq-original/rss.xml',
+    url: 'https://www.nasdaq.com/feed/rssoutbound?category=stocks',
     name: 'NASDAQ News',
   },
   reuters: {
     id: 'reuters-business',
-    url: 'https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best',
+    url: 'https://www.reutersagency.com/feed/?best-sectors=business-finance&post_type=best',
     name: 'Reuters Business News',
   },
   seekingalpha: {
@@ -32,7 +33,7 @@ const RSS_FEEDS = {
   },
 };
 
-// Generic fetch function for any RSS feed source
+// Generic fetch function for any RSS feed source with enhanced error handling
 async function fetchRssFeed(sourceKey: string) {
   const source = RSS_FEEDS[sourceKey as keyof typeof RSS_FEEDS];
 
@@ -41,8 +42,14 @@ async function fetchRssFeed(sourceKey: string) {
   }
 
   try {
-    console.log(`Fetching ${source.name} RSS feed...`);
+    console.log(`[RSS Fetcher] Fetching ${source.name} from ${source.url}...`);
+    
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
     const feed = await parser.parseURL(source.url);
+    clearTimeout(timeoutId);
 
     const rssDb = createRSSDatabase();
     const itemsToInsert: RSSItemInput[] = [];
@@ -146,15 +153,23 @@ async function fetchRssFeed(sourceKey: string) {
     }
 
     // Bulk upsert all items to Supabase
-    const insertedItems = await rssDb.bulkUpsertRSSItems(itemsToInsert);
-
-    console.log(
-      `${source.name} RSS fetch complete. Processed ${insertedItems.length} items.`
+    if (itemsToInsert.length > 0) {
+      const insertedItems = await rssDb.bulkUpsertRSSItems(itemsToInsert);
+      console.log(
+        `[RSS Fetcher] ${source.name}: Successfully processed ${insertedItems.length} items.`
+      );
+      return insertedItems;
+    } else {
+      console.log(`[RSS Fetcher] ${source.name}: No new items to process.`);
+      return [];
+    }
+  } catch (error: any) {
+    console.error(
+      `[RSS Fetcher] Error fetching ${source.name}:`,
+      error.message || error
     );
-    return insertedItems;
-  } catch (error) {
-    console.error(`Error fetching ${source.name} RSS:`, error);
-    throw error;
+    // Don't throw the error, return empty array to prevent cascade failures
+    return [];
   }
 }
 

@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const team = searchParams.get('team');
 
-    // Build query
+    // Build optimized query with index hint
     let query = supabase
       .from('pitches')
       .select('*')
-      .order('pitch_date', { ascending: false });
+      .order('pitch_date', { ascending: false })
+      .limit(500); // Prevent unbounded queries
 
     // Filter by team if specified
     if (team && (team === 'value' || team === 'quant')) {

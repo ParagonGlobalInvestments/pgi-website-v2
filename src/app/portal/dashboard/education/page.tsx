@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { FileText, Download, ExternalLink } from 'lucide-react';
+import MobileRestrictionModal from '@/components/portal/MobileRestrictionModal';
 
 // Define education resources from /public/portal-resources/education/
 const educationResources = {
@@ -90,10 +91,25 @@ export default function EducationPage() {
     null
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileModal, setShowMobileModal] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleViewResource = (resource: Resource) => {
-    setSelectedResource(resource);
-    setIsDialogOpen(true);
+    if (isMobile) {
+      setShowMobileModal(true);
+    } else {
+      setSelectedResource(resource);
+      setIsDialogOpen(true);
+    }
   };
 
   const handleDownload = (resource: Resource) => {
@@ -199,6 +215,13 @@ export default function EducationPage() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Mobile Restriction Modal */}
+        <MobileRestrictionModal
+          isOpen={showMobileModal}
+          onClose={() => setShowMobileModal(false)}
+          message="We are still working on previewing documents on mobile. For now, please view all education resources from the website."
+        />
       </div>
     </div>
   );

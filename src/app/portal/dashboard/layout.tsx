@@ -67,7 +67,8 @@ interface ProfileCompletionBannerProps {
   missingFields: string[];
   isComplete: boolean;
   displayName?: string;
-  displayRole?: string;
+  displayExecRole?: string | null;
+  displayPermissionLevel?: string;
   displayTrack?: string;
   displayChapter?: string;
   displayMajor?: string;
@@ -89,7 +90,8 @@ interface MobileMenuProps {
   internships: any[];
   userCount: number;
   displayTrack: string;
-  displayRole: string;
+  displayExecRole: string | null;
+  displayPermissionLevel: string;
   onShowOnboarding: () => void;
 }
 
@@ -105,7 +107,8 @@ interface DesktopSidebarProps {
   displayName: string;
   displayChapter: string;
   displayTrack: string;
-  displayRole: string;
+  displayExecRole: string | null;
+  displayPermissionLevel: string;
   initials: string;
   onShowOnboarding: () => void;
 }
@@ -194,6 +197,38 @@ const getTrackColor = (track: string | undefined) => {
   }
 };
 
+// Role display formatting (matches directory page)
+const getRoleDisplayName = (role: string) => {
+  const roleMap: Record<string, string> = {
+    admin: 'Admin',
+    lead: 'Chapter Lead',
+    member: 'Member',
+  };
+  return roleMap[role] || role;
+};
+
+const getExecRoleDisplayName = (role: string) => {
+  const roleMap: Record<string, string> = {
+    chairman: 'Chairman',
+    ceo: 'Chief Executive Officer',
+    coo: 'Chief Operating Officer',
+    cio: 'Chief Investment Officer',
+    cqr: 'Chief Quantitative Researcher',
+    cto: 'Chief Technology Officer',
+    'Chapter Founder': 'Founder',
+    Founder: 'PGI Founder',
+    'Alumni Board': 'Alumni Board',
+  };
+  return roleMap[role.toLowerCase()] || roleMap[role] || role;
+};
+
+const getFormattedRole = (execRole: string | null, permissionLevel: string) => {
+  if (execRole) {
+    return getExecRoleDisplayName(execRole);
+  }
+  return getRoleDisplayName(permissionLevel);
+};
+
 // ============================================================================
 // SUBCOMPONENTS
 // ============================================================================
@@ -246,7 +281,8 @@ const ProfileCompletionBanner = ({
   missingFields,
   isComplete,
   displayName,
-  displayRole,
+  displayExecRole,
+  displayPermissionLevel,
   displayTrack,
   displayChapter,
   displayMajor,
@@ -283,8 +319,8 @@ const ProfileCompletionBanner = ({
                       {displayTrack}
                     </span>
                     {' / '}
-                    <span className="capitalize font-medium">
-                      {displayRole}
+                    <span className="font-medium">
+                      {getFormattedRole(displayExecRole, displayPermissionLevel)}
                     </span>
                   </div>
                 </div>
@@ -292,9 +328,22 @@ const ProfileCompletionBanner = ({
               <div className="h-8 w-px bg-gray-400 mx-2" />
               <div className="flex items-center gap-2">
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-700">
-                    {displayChapter}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {displayChapter}
+                    </span>
+                    <span
+                      className={`text-xs px-2 rounded font-medium ${
+                        displayPermissionLevel === 'admin'
+                          ? 'bg-red-100 text-red-700 border border-red-300'
+                          : displayPermissionLevel === 'lead'
+                            ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                            : 'bg-gray-100 text-gray-700 border border-gray-300'
+                      }`}
+                    >
+                      {displayPermissionLevel?.toUpperCase()}
+                    </span>
+                  </div>
                   {displayMajor && displayGradYear && (
                     <span className="text-xs font-medium text-gray-500">
                       {displayMajor} {' / '} {displayGradYear}
@@ -329,7 +378,9 @@ const ProfileCompletionBanner = ({
                     {displayTrack}
                   </span>
                   {' / '}
-                  <span className="capitalize">{displayRole}</span>
+                  <span>
+                    {getFormattedRole(displayExecRole, displayPermissionLevel)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -451,7 +502,8 @@ const MobileMenu = ({
   internships,
   userCount,
   displayTrack,
-  displayRole,
+  displayExecRole,
+  displayPermissionLevel,
   onShowOnboarding,
 }: MobileMenuProps) => (
   <div
@@ -784,7 +836,8 @@ const DesktopSidebar = ({
   displayName,
   displayChapter,
   displayTrack,
-  displayRole,
+  displayExecRole,
+  displayPermissionLevel,
   initials,
   onShowOnboarding,
 }: DesktopSidebarProps) => (
@@ -942,7 +995,8 @@ const DesktopSidebar = ({
         displayName={displayName}
         initials={initials}
         displayTrack={displayTrack}
-        displayRole={displayRole}
+        displayExecRole={displayExecRole}
+        displayPermissionLevel={displayPermissionLevel}
         displayChapter={displayChapter}
         onShowOnboarding={onShowOnboarding}
       /> */}
@@ -1189,7 +1243,9 @@ export default function DashboardLayout({
     supabaseUser?.user_metadata?.full_name ||
     supabaseUser?.email?.split('@')[0] ||
     '';
-  const displayRole = supabaseUserData?.org_permission_level || 'member';
+  const displayExecRole = supabaseUserData?.org_exec_roles?.[0] || null;
+  const displayPermissionLevel =
+    supabaseUserData?.org_permission_level || 'member';
   const displayTrack = supabaseUserData?.org_track || 'value';
   const displayChapter =
     supabaseUserData?.org_chapter_name || selectedChapter?.name || 'N/A';
@@ -1314,7 +1370,8 @@ export default function DashboardLayout({
         internships={internships}
         userCount={userCount}
         displayTrack={displayTrack}
-        displayRole={displayRole}
+        displayExecRole={displayExecRole}
+        displayPermissionLevel={displayPermissionLevel}
         onShowOnboarding={() => setShowOnboardingWizard(true)}
       />
 
@@ -1331,7 +1388,8 @@ export default function DashboardLayout({
         displayName={displayName}
         displayChapter={displayChapter}
         displayTrack={displayTrack}
-        displayRole={displayRole}
+        displayExecRole={displayExecRole}
+        displayPermissionLevel={displayPermissionLevel}
         initials={initials}
         onShowOnboarding={() => setShowOnboardingWizard(true)}
       />
@@ -1351,7 +1409,8 @@ export default function DashboardLayout({
           missingFields={profileCompletion.missingFields}
           isComplete={!hasIncompleteProfile}
           displayName={displayName}
-          displayRole={displayRole}
+          displayExecRole={displayExecRole}
+          displayPermissionLevel={displayPermissionLevel}
           displayTrack={displayTrack}
           displayChapter={displayChapter}
           displayMajor={displayMajor}

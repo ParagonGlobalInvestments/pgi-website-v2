@@ -54,7 +54,8 @@ export class SupabaseRSS {
       let query = this.supabase
         .from('rss_items')
         .select('*')
-        .order('pub_date', { ascending: false });
+        .order('pub_date', { ascending: false })
+        .order('created_at', { ascending: false }); // Secondary sort by created_at
 
       if (filters?.source) {
         query = query.eq('source', filters.source);
@@ -63,16 +64,20 @@ export class SupabaseRSS {
       if (filters?.limit) {
         query = query.limit(filters.limit);
       } else {
-        query = query.limit(50); // Default limit
+        query = query.limit(100); // Increased default limit for better news coverage
       }
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('[RSS DB] Error fetching RSS items:', error);
+        throw error;
+      }
 
+      console.log(`[RSS DB] Successfully fetched ${data?.length || 0} items for source: ${filters?.source || 'all'}`);
       return data || [];
     } catch (error) {
-      console.error('Error fetching RSS items:', error);
+      console.error('[RSS DB] Error in getRSSItems:', error);
       throw error;
     }
   }

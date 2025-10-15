@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileTypeIcon } from '@/components/portal/FileTypeIcon';
 import { Download, ExternalLink } from 'lucide-react';
 import { downloadFile, getOfficeOnlineUrl } from '@/lib/utils/fileHelpers';
+import MobileRestrictionModal from '@/components/portal/MobileRestrictionModal';
 
 // Define recruitment resources from /public/portal-resources/recruitment/
 interface Resource {
@@ -207,12 +208,27 @@ export default function RecruitmentPage() {
     'networking' | 'resumes' | 'technicals' | 'interviewQuestions'
   >('networking');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileModal, setShowMobileModal] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleDownload = (resource: Resource) => {
     downloadFile(resource.path, resource.path.split('/').pop());
   };
 
   const handleOpenInBrowser = (resource: Resource) => {
+    if (isMobile) {
+      setShowMobileModal(true);
+      return;
+    }
     if (resource.type === 'excel') {
       window.open(getOfficeOnlineUrl(resource.path), '_blank');
     } else {
@@ -418,6 +434,13 @@ export default function RecruitmentPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Mobile Restriction Modal */}
+        <MobileRestrictionModal
+          isOpen={showMobileModal}
+          onClose={() => setShowMobileModal(false)}
+          message="We are still working on previewing documents on mobile. For now, please view all recruitment resources from the website."
+        />
       </div>
     </div>
   );
