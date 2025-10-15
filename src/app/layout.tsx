@@ -55,14 +55,22 @@ export const metadata: Metadata = {
   category: 'finance',
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    other: [{ rel: 'mask-icon', url: '/icons/icon-192.png', color: '#00172B' }],
+    shortcut: [{ url: '/favicon.ico' }],
+    other: [
+      { rel: 'mask-icon', url: '/icons/icon-192.png', color: '#00172B' },
+      { rel: 'icon', url: '/favicon.ico', type: 'image/x-icon' },
+    ],
   },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
