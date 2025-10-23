@@ -321,8 +321,8 @@ const ProfileCompletionBanner = ({
                     {' / '}
                     <span className="font-medium">
                       {getFormattedRole(
-                        displayExecRole,
-                        displayPermissionLevel
+                        displayExecRole || null,
+                        displayPermissionLevel || ''
                       )}
                     </span>
                   </div>
@@ -382,7 +382,10 @@ const ProfileCompletionBanner = ({
                   </span>
                   {' / '}
                   <span>
-                    {getFormattedRole(displayExecRole, displayPermissionLevel)}
+                    {getFormattedRole(
+                      displayExecRole || null,
+                      displayPermissionLevel || ''
+                    )}
                   </span>
                 </div>
               </div>
