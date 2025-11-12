@@ -21,20 +21,21 @@ Built with Next.js (App Router), TypeScript, Tailwind CSS, Clerk for authenticat
 
 ## Tech Stack
 
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **UI Components**: Shadcn UI (built on Radix UI primitives)
-- **Authentication**: Clerk
-- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: Supabase Auth
+- **Database**: Supabase (PostgreSQL)
 - **State Management**: SWR for data fetching
 - **Form Handling**: React Hook Form with Zod validation
 - **Real-time Updates**: Socket.IO
 - **Linting/Formatting**: ESLint, Prettier
+- **Additional**: NextAuth (Google OAuth for Drive access on resources page only)
 
 ## Key Features
 
-- Secure user authentication (sign-in, sign-up, profile management) via Clerk
+- Secure user authentication (sign-in, sign-up, profile management) via Supabase
 - Role-based access control (Admin, Lead, Member)
 - Internship board with search and filtering
 - Member portal/dashboard with protected resources
@@ -133,12 +134,13 @@ pgi/
 │   │       └── use-toast.ts       # Toast hook
 │   ├── hooks/              # Custom React hooks
 │   ├── lib/                # Core application modules and services
-│   │   ├── auth/           # Authentication helpers, user synchronization
-│   │   ├── database/       # MongoDB connection and model definitions
-│   │   │   ├── models/     # Mongoose schema definitions:
-│   │   │   │   ├── User.ts         # User model
-│   │   │   │   ├── Internship.ts   # Internship listing model
-│   │   │   │   └── Chapter.ts      # Chapter organization model
+│   │   ├── auth/           # Authentication type definitions
+│   │   ├── supabase/       # Supabase client and database layer
+│   │   │   ├── admin.ts          # Admin client (service role)
+│   │   │   ├── browser.ts        # Browser client
+│   │   │   ├── server.ts         # Server-side client (SSR)
+│   │   │   ├── database.ts       # Database operations layer
+│   │   │   └── syncUser.ts       # User synchronization
 │   │   └── rss/            # RSS feed utilities
 │   ├── server/             # Custom server logic (Socket.IO, cron jobs)
 │   ├── types/              # TypeScript type definitions and interfaces
@@ -163,10 +165,10 @@ pgi/
 
 ### Prerequisites
 
-- Node.js (LTS version)
+- Node.js 20+ (LTS version)
 - npm (comes with Node.js)
-- MongoDB database (local instance or MongoDB Atlas)
-- A Clerk account for authentication ([Clerk Dashboard](https://dashboard.clerk.com/))
+- A Supabase account and project ([Supabase Dashboard](https://supabase.com/dashboard))
+- (Optional) Google Cloud project with OAuth credentials for resources page
 
 ### Installation
 
@@ -184,19 +186,25 @@ pgi/
    ```
 
 3. **Set up environment variables:**
-   Create a `.env.local` file with the following variables:
+   Create a `.env.local` file based on `docs/env.example`:
 
-   ```
-   # Clerk Authentication
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
+   ```bash
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-   # MongoDB
-   MONGODB_URI=mongodb+srv://...
-
+   # Google OAuth (for resources page only)
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-secret
+   NEXTAUTH_SECRET=your-secret
+   NEXTAUTH_URL=http://localhost:3000
+   
    # Application
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
+   
+   See `docs/env.example` for all available environment variables.
 
 ### Running Locally
 
@@ -208,9 +216,10 @@ The application will be available at `http://localhost:3000`.
 
 ## Authentication & Authorization
 
-- Authentication is managed by [Clerk](https://clerk.com/).
-- Middleware in `src/middleware.ts` protects routes and handles public/private access.
-- User roles and permissions are synchronized between Clerk and MongoDB for consistent authorization.
+- Authentication is managed by [Supabase Auth](https://supabase.com/auth).
+- Middleware in `src/middleware.ts` protects routes using Supabase SSR and handles public/private access.
+- User roles and permissions are stored in Supabase `users` table with role-based access control.
+- NextAuth is used separately for Google OAuth (Drive access on resources page only).
 
 ## Deployment
 
