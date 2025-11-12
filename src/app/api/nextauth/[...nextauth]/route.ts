@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    // Keep auth pages under NextAuth's control, don't interfere with Clerk
+    // NextAuth pages for Google OAuth (used only for resources/Drive access)
     signIn: '/api/nextauth/signin',
     error: '/api/nextauth/error',
   },

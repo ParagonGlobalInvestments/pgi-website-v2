@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { connectToDatabase } from '@/lib/database/connection';
-import Internship from '@/lib/database/models/Internship';
+import { createDatabase } from '@/lib/supabase/database';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const supabase = createClient();
     const {
@@ -17,27 +16,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Connect to the database
-    await connectToDatabase();
-
-    // Get total internships
-    const total = await Internship.countDocuments({ isClosed: false });
-
-    // Count internships by track
-    const quantCount = await Internship.countDocuments({
-      track: 'quant',
-      isClosed: false,
-    });
-
-    const valueCount = await Internship.countDocuments({
-      track: 'value',
-      isClosed: false,
-    });
-
-    const bothCount = await Internship.countDocuments({
-      track: 'both',
-      isClosed: false,
-    });
+    // Use Supabase database layer
+    const db = createDatabase();
+    
+    // Get all non-closed internships and calculate stats
+    const internships = await db.getInternships({ isClosed: false });
+    
+    const total = internships.length;
+    const quantCount = internships.filter(i => i.track === 'quant').length;
+    const valueCount = internships.filter(i => i.track === 'value').length;
+    const bothCount = internships.filter(i => i.track === 'both').length;
 
     // Return stats
     return NextResponse.json({

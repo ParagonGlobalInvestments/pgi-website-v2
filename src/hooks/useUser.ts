@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 
-interface MongoUserChapter {
+interface UserChapter {
   id: string;
   name: string;
   slug: string;
   logoUrl: string;
 }
 
-interface MongoUser {
+interface User {
   id: string;
   personal: {
     name: string;
@@ -20,7 +20,7 @@ interface MongoUser {
     phone?: string;
   };
   org: {
-    chapter?: MongoUserChapter;
+    chapter?: UserChapter;
     permissionLevel: 'admin' | 'lead' | 'member';
     track?: 'quant' | 'value';
     trackRoles: string[];
@@ -123,10 +123,10 @@ interface UpdateUserData {
 /**
  * Hook return value interface
  */
-interface UseMongoUserReturn {
-  /** MongoDB user data */
-  user: MongoUser | null;
-  /** Whether the MongoDB user data is being loaded */
+interface UseUserReturn {
+  /** User data from Supabase */
+  user: User | null;
+  /** Whether the user data is being loaded */
   isLoading: boolean;
   /** Error that occurred during the fetch, if any */
   error: string | null;
@@ -143,10 +143,10 @@ interface UseMongoUserReturn {
  * and our user records. It fetches the user data
  * corresponding to the currently authenticated Supabase user.
  *
- * @returns {UseMongoUserReturn} The user data, loading state, error state, and sync function
+ * @returns {UseUserReturn} The user data, loading state, error state, and sync function
  */
-export function useMongoUser(): UseMongoUserReturn {
-  const [user, setUser] = useState<MongoUser | null>(null);
+export function useUser(): UseUserReturn {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<any>(null);
