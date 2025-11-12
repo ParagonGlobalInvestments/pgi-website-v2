@@ -19,6 +19,8 @@
 
 - ✅ Added `exchange` field to Pitch TypeScript interface
 - ✅ Created migration documentation in `/docs/EXCHANGE_FIELD_MIGRATION.md`
+- ✅ Ran Supabase migration for `pitches` table
+- ✅ Ran Supabase migration for `exchange` field
 
 ### 4. Import Script Created
 
@@ -99,14 +101,14 @@ File: `/src/app/portal/dashboard/pitches/admin/page.tsx`
 
 ### 4. Run Database Migration
 
-**Manual Step Required:**
+**Status: ✅ COMPLETED**
 
-```sql
--- Run in Supabase SQL Editor
-ALTER TABLE pitches ADD COLUMN IF NOT EXISTS exchange VARCHAR(10);
-ALTER TABLE pitches ADD CONSTRAINT check_exchange
-  CHECK (exchange IN ('NASDAQ', 'NYSE') OR exchange IS NULL);
-```
+The following migrations have been run in Supabase:
+
+- ✅ Created `pitches` table with all fields
+- ✅ Added `exchange` column with constraints
+- ✅ Configured Row Level Security policies
+- ✅ Set up auto-update triggers
 
 ### 5. Run Import Script
 
@@ -142,7 +144,7 @@ This will populate the database with all 10 VALUE pitches from the folder struct
 1. **Finish Pitches Page UI** - Add search bar, sort buttons, exchange badges, download all
 2. **Enhance Pitches Detail Page** - Add exchange, download both, better previews
 3. **Enhance Pitches Admin Page** - Add auto-import button, exchange field
-4. **Run DB Migration** - Add exchange column in Supabase
+4. ~~**Run DB Migration** - Add exchange column in Supabase~~ ✅ **COMPLETED**
 5. **Run Import Script** - Populate database with pitch data
 6. **Test All Pages** - Verify all file paths work, downloads work, mobile responsive
 7. **Add Progress Tracking to Education** - Implement checkbox and progress bar
