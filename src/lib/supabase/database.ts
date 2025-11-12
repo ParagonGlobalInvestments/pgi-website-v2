@@ -39,7 +39,6 @@ export interface User {
   profile_achievements: string[];
   activity_last_login?: string;
   activity_internships_posted: number;
-  system_clerk_id?: string;
   system_supabase_id?: string;
   system_first_login: boolean;
   system_notifications_email: boolean;
@@ -85,7 +84,7 @@ export interface Pitch {
   updated_at: string;
 }
 
-// Formatted user type for API responses (matches the MongoDB format)
+// Formatted user type for API responses (nested structure for better DX)
 export interface FormattedUser {
   id: string;
   personal: {
@@ -515,7 +514,7 @@ export class SupabaseDatabase {
   // =====================================================
 
   /**
-   * Format user data from Supabase to match MongoDB format
+   * Format user data from Supabase flat structure to nested API format
    */
   private formatUser(user: any): FormattedUser {
     return {

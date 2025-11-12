@@ -96,7 +96,8 @@ export interface UserSystemNotifications {
  * User system information
  */
 export interface UserSystem {
-  clerkId: string;
+  clerkId?: string; // Legacy field, not used in Supabase-only architecture
+  supabaseId?: string;
   firstLogin: boolean;
   notifications?: UserSystemNotifications;
 }

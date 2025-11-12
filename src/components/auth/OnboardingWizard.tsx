@@ -26,7 +26,7 @@ import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
-// Updated to match the nested MongoDB schema
+// User data structure matching the Supabase API format
 interface UserData {
   personal?: {
     name?: string;
@@ -244,7 +244,7 @@ export default function OnboardingWizard({
     }
   }, [supabaseUser]);
 
-  // Form data with nested structure to match MongoDB schema - initialize with useEffect
+  // Form data with nested structure to match API format - initialize with useEffect
   const [formData, setFormData] = useState<UserData>({
     personal: {
       name: '',
@@ -337,7 +337,7 @@ export default function OnboardingWizard({
       [roleId]: checked,
     }));
 
-    // Update the trackRoles array for MongoDB
+    // Update the trackRoles array
     const newRoles = [...(formData.org?.trackRoles || [])];
 
     // Add or remove the role
