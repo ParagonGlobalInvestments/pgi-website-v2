@@ -28,7 +28,7 @@ interface UseSupabaseUserReturn {
 
 /**
  * Hook to fetch user data directly from Supabase database
- * This is a simpler alternative to useMongoUser that queries Supabase directly
+ * This is a simpler alternative to useUser that queries Supabase directly
  */
 export function useSupabaseUser(): UseSupabaseUserReturn {
   const [user, setUser] = useState<SupabaseUserData | null>(null);
