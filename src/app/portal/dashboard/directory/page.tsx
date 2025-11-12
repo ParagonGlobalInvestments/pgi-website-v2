@@ -29,7 +29,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 
-// Updated User interface that matches the MongoDB schema
+// User interface matching the Supabase API response format
 interface User {
   id: string;
   personal: {
