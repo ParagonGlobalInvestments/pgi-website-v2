@@ -12,11 +12,12 @@ The PGI platform provides:
 
 ## Technical Stack
 
-- **Framework**: Next.js (App Router), React, TypeScript
+- **Framework**: Next.js 14 (App Router), React, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui components
-- **Authentication**: Clerk
-- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: Supabase Auth
+- **Database**: Supabase (PostgreSQL)
 - **Hosting**: Vercel
+- **Additional**: NextAuth (Google OAuth for Drive access on resources page only)
 
 ## Architecture Layers
 
@@ -31,20 +32,27 @@ The PGI platform provides:
 
 ### 2. Application Logic Layer
 
-- **`src/app/api/`**: Backend API route handlers
+- **`src/app/api/`**: Backend API route handlers (Next.js Route Handlers)
 - **`src/lib/`**: Core application modules
-  - **`auth/`**: Authentication helpers
-  - **`database/`**: MongoDB connection and Mongoose schemas
-  - **`context/`**: React Context providers
+  - **`auth/`**: Authentication type definitions
+  - **`supabase/`**: Supabase clients and database layer
+    - `admin.ts` - Service role client (bypasses RLS)
+    - `browser.ts` - Browser-side client
+    - `server.ts` - Server-side SSR client
+    - `database.ts` - Complete database operations layer
+    - `syncUser.ts` - User synchronization logic
   - **`rss/`**: RSS feed processing logic
 - **`src/utils.ts`**: General utility functions
 - **`src/hooks/`**: Custom React hooks
-- **`src/middleware.ts`**: Route protection via Clerk
+- **`src/middleware.ts`**: Route protection using `@supabase/ssr`
 
 ### 3. Data Layer
 
-- **MongoDB**: Primary database (users, internships, chapters)
-- **Mongoose**: ODM for database interactions
+- **Supabase (PostgreSQL)**: Primary database for all data
+  - Users, chapters, internships, pitches tables
+  - Row Level Security (RLS) for authorization
+  - Database operations through `SupabaseDatabase` class
+- **Supabase Auth**: Built-in authentication with session management
 
 ## Directory Structure
 
@@ -62,9 +70,11 @@ pgi/
 │   │   ├── ui/         # Core UI elements
 │   ├── hooks/          # Custom React hooks
 │   ├── lib/            # Core modules
-│   │   ├── auth/       # Auth helpers
-│   │   ├── database/   # Database connection
-│   │   │   └── models/ # Mongoose schemas
+│   │   ├── auth/       # Auth type definitions
+│   │   ├── supabase/   # Supabase clients & DB layer
+│   │   │   ├── admin.ts, browser.ts, server.ts
+│   │   │   ├── database.ts  # Main DB operations
+│   │   │   └── syncUser.ts  # User sync logic
 │   ├── server/         # Custom server logic
 │   ├── types/          # TypeScript definitions
 │   ├── utils.ts        # Utility functions
@@ -78,25 +88,30 @@ pgi/
 
 ### Authentication
 
-1. Users authenticate via Clerk's UI
-2. `syncUserWithMongoDB` creates/updates a MongoDB user profile
-3. `middleware.ts` enforces route protection
-4. Components display content based on user roles
+1. Users authenticate via Supabase Auth (sign-up/sign-in UI)
+2. `syncUserWithSupabase` creates/updates user record in Supabase `users` table
+3. `middleware.ts` enforces route protection using `@supabase/ssr`
+4. Components display content based on user roles from Supabase
 
 ### Data Flow (Example: Internships)
 
 1. Component requests data via `fetch` to API route
-2. API route connects to MongoDB via Mongoose models
-3. Data is returned to client and rendered
+2. API route uses `createDatabase()` to get Supabase database instance
+3. Database layer queries Supabase with RLS automatically enforced
+4. Data is returned to client and rendered
 
 ## Performance Considerations
 
-- Next.js features (Server Components, code splitting)
-- Efficient MongoDB queries with proper indexes
+- Next.js 14 features (Server Components, code splitting, streaming)
+- Efficient Supabase queries with database indexes
+- Row Level Security (RLS) for automatic authorization
 - React memoization where appropriate
+- SWR for client-side caching
 
 ## Security Model
 
-- Authentication via Clerk
-- Authorization in middleware and API routes
-- Environment variables for sensitive credentials
+- **Authentication**: Supabase Auth with secure session management
+- **Authorization**: Row Level Security (RLS) policies in Supabase
+- **API Protection**: Middleware checks authentication before allowing access
+- **Environment Variables**: Secure credential storage (never in client bundle)
+- **Service Role Key**: Admin operations only, never exposed to client
