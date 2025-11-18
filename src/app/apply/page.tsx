@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+// import { useState } from 'react';
+// import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaUserGraduate, FaChartLine, FaClipboardList } from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { handleFormClick } from '@/components/analytics/FormTracker';
 
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+// import { useEffect } from 'react';
+// import { useRouter, useSearchParams } from 'next/navigation';
 
 
 const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
@@ -126,7 +126,7 @@ const nationalRecruitmentTeam: TeamMember[] = [
     },
 ];
 
-const uchicagoRecruitmentTeam: TeamMember[] = [
+export const uchicagoRecruitmentTeam: TeamMember[] = [
     {
       name: 'Nicolas Tchkotoua',
       role: 'Recruiter',
@@ -429,7 +429,7 @@ function GeneralRecruitment() {
 const baseBtn =
   "inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]";
 
-function UChicagoRecruitment() {
+export function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
@@ -527,7 +527,7 @@ function UChicagoRecruitment() {
 }
 
   
-  function TabSwitch({
+export function TabSwitch({
     value,
     onChange,
   }: {
@@ -583,11 +583,12 @@ function UChicagoRecruitment() {
   
 
   export default function ApplyPage() {
-    const router = useRouter();
-    const search = useSearchParams();
-    const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
-    const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
+    // const router = useRouter();
+    // const search = useSearchParams();
+    // const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
+    // const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
   
+    /*
     useEffect(() => {
       const current = search.get('tab');
       if (current !== tab) {
@@ -597,14 +598,15 @@ function UChicagoRecruitment() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
+    */
   
     return (
       <div className="bg-pgi-dark-blue text-white min-h-screen">
         {/* Minimal underline nav */}
-        <TabSwitch value={tab} onChange={setTab} />
+        {/* <TabSwitch value={tab} onChange={setTab} /> */}
   
         {/* Tab Content */}
-        {tab === 'general' ? (
+        {/* {tab === 'general' ? (
           <>
             <GeneralRecruitment />
             <RecruitmentTeamSection
@@ -620,7 +622,14 @@ function UChicagoRecruitment() {
               title="UChicago Recruitment Team"
             />
           </>
-        )}
+        )} */}
+
+        {/* Temporarily limit to general recruitment while UChicago hiring is closed */}
+        <GeneralRecruitment />
+        <RecruitmentTeamSection
+          members={nationalRecruitmentTeam}
+          title="National Recruitment Team"
+        />
       </div>
     );
   }
