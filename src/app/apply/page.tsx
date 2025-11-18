@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
+// import { useState } from 'react';
+// import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaUserGraduate, FaChartLine, FaClipboardList } from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { handleFormClick } from '@/components/analytics/FormTracker';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+// import { useEffect } from 'react';
+// import { useRouter, useSearchParams } from 'next/navigation';
 
 const UCHICAGO_APPLY_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486';
@@ -161,6 +162,43 @@ const uchicagoRecruitmentTeam: TeamMember[] = [
     university: 'University of Chicago',
     linkedin: 'https://www.linkedin.com/in/lars-barth/',
   },
+export const uchicagoRecruitmentTeam: TeamMember[] = [
+    {
+      name: 'Nicolas Tchkotoua',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
+    },
+    {
+        name: 'Heath Winter',
+        role: 'Recruiter',
+        university: 'University of Chicago',
+        linkedin: 'https://www.linkedin.com/in/heath-winter/',
+    },
+    {
+      name: 'Noor Kaur',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/noor-kaur-738867272/'
+    },
+    {
+      name: 'Glen Cahilly',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/glen-cahilly/'
+    },
+    {
+      name: 'Ishaan Sareen',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/ishaansareen/'
+    },
+    {
+      name: 'Lars Barth',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+      linkedin: 'https://www.linkedin.com/in/lars-barth/'
+    },
 ];
 
 // Reusable section
@@ -456,7 +494,7 @@ function GeneralRecruitment() {
 const baseBtn =
   'inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]';
 
-function UChicagoRecruitment() {
+export function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
@@ -595,94 +633,112 @@ function TabSwitch({
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => onChange(opt.key)}
                   className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
+
+  
+export function TabSwitch({
+    value,
+    onChange,
+  }: {
+    value: 'general' | 'uchicago';
+    onChange: (v: 'general' | 'uchicago') => void;
+  }) {
+    const options: { key: 'general' | 'uchicago'; label: string }[] = [
+      { key: 'general', label: 'General (National)' },
+      { key: 'uchicago', label: 'UChicago' },
+    ];
+  
+    return (
+        <div className="sticky top-0 z-20 bg-pgi-dark-blue">
+        <div className="container mx-auto px-4">
+          <div
+            role="tablist"
+            aria-label="Recruitment tabs"
+            className="mx-auto max-w-xl relative py-3"
+          >
+            <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
+              {options.map((opt) => {
+                const isActive = value === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`panel-${opt.key}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => onChange(opt.key)}
+                    className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
                       ${isActive ? 'text-white' : 'text-gray-200 hover:text-white'}`}
-                >
-                  {/* Animated pill background */}
-                  {isActive && (
-                    <motion.span
-                      layoutId="seg-pill"
-                      className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 450,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                  <span className="relative">{opt.label}</span>
-                </button>
-              );
-            })}
+                  >
+                    {/* Animated pill background */}
+                    {isActive && (
+                      <motion.span
+                        layoutId="seg-pill"
+                        className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
+                        transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative">{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+  
 
-function ApplyPageContent() {
-  const router = useRouter();
-  const search = useSearchParams();
-  const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
-  const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
-
-  useEffect(() => {
-    const current = search.get('tab');
-    if (current !== tab) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('tab', tab);
-      router.push(`${url.pathname}?${url.searchParams.toString()}`, {
-        scroll: false,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
-
-  return (
-    <div className="bg-pgi-dark-blue text-white min-h-screen">
-      {/* Minimal underline nav */}
-      <TabSwitch value={tab} onChange={setTab} />
-
-      {/* Tab Content */}
-      {tab === 'general' ? (
-        <>
-          <GeneralRecruitment />
-          <RecruitmentTeamSection
-            members={nationalRecruitmentTeam}
-            title="National Recruitment Team"
-          />
-        </>
-      ) : (
-        <>
-          <UChicagoRecruitment />
-          <RecruitmentTeamSection
-            members={uchicagoRecruitmentTeam}
-            title="UChicago Recruitment Team"
-          />
-        </>
-      )}
-    </div>
-  );
-}
-
-export default function ApplyPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-pgi-dark-blue text-white min-h-screen flex items-center justify-center">
-          <div className="text-center" role="status" aria-live="polite">
-            <div
-              className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"
-              aria-hidden="true"
-            ></div>
-            <p className="text-gray-300">Loading application page...</p>
-            <span className="sr-only">Please wait while the page loads</span>
-          </div>
-        </div>
+  export default function ApplyPage() {
+    // const router = useRouter();
+    // const search = useSearchParams();
+    // const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
+    // const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
+  
+    /*
+    useEffect(() => {
+      const current = search.get('tab');
+      if (current !== tab) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        router.push(`${url.pathname}?${url.searchParams.toString()}`, { scroll: false });
       }
-    >
-      <ApplyPageContent />
-    </Suspense>
-  );
-}
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab]);
+    */
+  
+    return (
+      <div className="bg-pgi-dark-blue text-white min-h-screen">
+        {/* Minimal underline nav */}
+        {/* <TabSwitch value={tab} onChange={setTab} /> */}
+  
+        {/* Tab Content */}
+        {/* {tab === 'general' ? (
+          <>
+            <GeneralRecruitment />
+            <RecruitmentTeamSection
+              members={nationalRecruitmentTeam}
+              title="National Recruitment Team"
+            />
+          </>
+        ) : (
+          <>
+            <UChicagoRecruitment />
+            <RecruitmentTeamSection
+              members={uchicagoRecruitmentTeam}
+              title="UChicago Recruitment Team"
+            />
+          </>
+        )} */}
+
+        {/* Temporarily limit to general recruitment while UChicago hiring is closed */}
+        <GeneralRecruitment />
+        <RecruitmentTeamSection
+          members={nationalRecruitmentTeam}
+          title="National Recruitment Team"
+        />
+      </div>
+    );
+  }
+  
