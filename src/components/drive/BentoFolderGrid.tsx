@@ -7,6 +7,8 @@ import {
   FileText,
   ArrowUpRight as ArrowUpRightIcon,
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 
 interface BentoFolderGridProps {
   parentFolderId: string;
@@ -26,6 +28,13 @@ export default function BentoFolderGrid({
   const [items, setItems] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // mobile document viewer state
+  const isMobile = useIsMobile();
+  const [showMobileViewer, setShowMobileViewer] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState('');
+  const [viewerTitle, setViewerTitle] = useState('');
+  const [viewerType, setViewerType] = useState<'pdf' | 'excel' | 'auto'>('auto');
 
   useEffect(() => {
     const fetchDriveItems = async () => {
@@ -54,7 +63,31 @@ export default function BentoFolderGrid({
     }
   }, [parentFolderId]);
 
-  // Simplified PGI-style grid - no complex bento patterns needed
+  /**
+   * handles clicking on a drive item
+   * mobile: opens in mobile viewer for better UX
+   * desktop: opens in new window (existing behavior)
+   */
+  const handleItemClick = (item: DriveItem) => {
+    if (!item.webViewLink) return;
+
+    // don't use mobile viewer for folders - always open in new window
+    if (isFolder(item.mimeType)) {
+      window.open(item.webViewLink, '_blank');
+      return;
+    }
+
+    // mobile: use optimized viewer
+    if (isMobile) {
+      setViewerUrl(item.webViewLink);
+      setViewerTitle(item.name);
+      setViewerType('auto'); // auto-detect file type
+      setShowMobileViewer(true);
+    } else {
+      // desktop: keep existing behavior
+      window.open(item.webViewLink, '_blank');
+    }
+  };
 
   const isFolder = (mimeType: string) => {
     return mimeType === 'application/vnd.google-apps.folder';
@@ -149,9 +182,7 @@ export default function BentoFolderGrid({
                 scale: 1.02,
                 transition: { duration: 0.3 },
               }}
-              onClick={() =>
-                item.webViewLink && window.open(item.webViewLink, '_blank')
-              }
+              onClick={() => handleItemClick(item)}
             >
               {/* Icon */}
               <div className="bg-pgi-light-blue p-3 rounded-full mb-4 w-fit">
@@ -181,6 +212,15 @@ export default function BentoFolderGrid({
           );
         })}
       </motion.div>
+
+      {/* mobile document viewer dialog */}
+      <MobileDocumentViewer
+        isOpen={showMobileViewer}
+        onClose={() => setShowMobileViewer(false)}
+        url={viewerUrl}
+        title={viewerTitle}
+        type={viewerType}
+      />
     </div>
   );
 }

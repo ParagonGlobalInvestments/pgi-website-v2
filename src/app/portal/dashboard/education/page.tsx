@@ -11,7 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { FileText, Download, ExternalLink } from 'lucide-react';
-import MobileRestrictionModal from '@/components/portal/MobileRestrictionModal';
+import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Define education resources from /public/portal-resources/education/
 const educationResources = {
@@ -86,30 +87,16 @@ interface Resource {
 }
 
 export default function EducationPage() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<'value' | 'quant'>('value');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMobileModal, setShowMobileModal] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const [showViewer, setShowViewer] = useState(false);
 
   const handleViewResource = (resource: Resource) => {
-    if (isMobile) {
-      setShowMobileModal(true);
-    } else {
-      setSelectedResource(resource);
-      setIsDialogOpen(true);
-    }
+    setSelectedResource(resource);
+    setShowViewer(true);
   };
 
   const handleDownload = (resource: Resource) => {
@@ -198,29 +185,13 @@ export default function EducationPage() {
           </TabsContent>
         </Tabs>
 
-        {/* PDF Viewer Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-6xl h-[90vh]">
-            <DialogHeader>
-              <DialogTitle>{selectedResource?.title}</DialogTitle>
-            </DialogHeader>
-            {selectedResource && (
-              <div className="flex-1 h-[calc(90vh-100px)]">
-                <iframe
-                  src={selectedResource.path}
-                  className="w-full h-full border-0 rounded"
-                  title={selectedResource.title}
-                />
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Mobile Restriction Modal */}
-        <MobileRestrictionModal
-          isOpen={showMobileModal}
-          onClose={() => setShowMobileModal(false)}
-          message="We are still working on previewing documents on mobile. For now, please view all education resources from the website."
+        {/* Document Viewer */}
+        <MobileDocumentViewer
+          isOpen={showViewer}
+          onClose={() => setShowViewer(false)}
+          url={selectedResource?.path || ''}
+          title={selectedResource?.title || ''}
+          type="pdf"
         />
       </div>
     </div>
