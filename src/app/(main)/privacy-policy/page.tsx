@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
           </h2>
           <p>
             We respect your privacy. This page explains what limited info we
-            collect and how it's used.
+            collect and how it&apos;s used.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
 
         <div>
           <h2 className="text-2xl text-white font-semibold mb-4">
-            3. How It's Used
+            3. How It&apos;s Used
           </h2>
           <ul className="list-disc pl-6 space-y-2">
             <li>To communicate with you</li>

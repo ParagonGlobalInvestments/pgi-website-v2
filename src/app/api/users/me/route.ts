@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
-import { syncUserWithSupabase } from '@/lib/supabase/syncUser';
 
 export const dynamic = 'force-dynamic';
-
-// Track last sync attempts to prevent excessive syncs
-const lastSyncAttempts = new Map<string, number>();
-const SYNC_COOLDOWN_MS = 5000; // 5 seconds
 
 export async function GET() {
   try {
@@ -29,7 +24,7 @@ export async function GET() {
 
     // Find the user by their Supabase ID
     const db = createDatabase();
-    let user = await db.getUserBySupabaseId(supabaseUser.id);
+    const user = await db.getUserBySupabaseId(supabaseUser.id);
 
     if (!user) {
       console.log(

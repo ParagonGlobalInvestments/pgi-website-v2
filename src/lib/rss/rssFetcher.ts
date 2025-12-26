@@ -88,8 +88,7 @@ async function fetchRssFeed(sourceKey: string) {
           processedCategories.length > 0 &&
           typeof processedCategories[0] === 'string'
         ) {
-          // If it's already a string array, use as is
-          processedCategories = processedCategories;
+          // If it's already a string array, use as is (no assignment needed)
         } else if (processedCategories.length > 0) {
           try {
             // Log the original categories for debugging

@@ -452,7 +452,7 @@ export default function PitchesAdminPage() {
 
               {pitches.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
-                  <p>No pitches found. Click "Add Pitch" to create one.</p>
+                  <p>No pitches found. Click &quot;Add Pitch&quot; to create one.</p>
                 </div>
               )}
             </div>

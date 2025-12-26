@@ -22,7 +22,6 @@ import {
 } from 'react-icons/fa';
 import { z } from 'zod';
 import ProtectedPage from '@/components/auth/ProtectedPage';
-import type { UserRole } from '@/lib/auth';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
@@ -105,7 +104,7 @@ export default function NewInternshipPage() {
   } = useForm<InternshipFormValues>();
 
   // Get user metadata
-  const userRole = supabaseUserData?.org_permission_level || 'member';
+  const _userRole = supabaseUserData?.org_permission_level || 'member';
   const userChapter = supabaseUserData?.org_chapter_name || 'Yale University';
 
   // Fetch chapters for the dropdown
