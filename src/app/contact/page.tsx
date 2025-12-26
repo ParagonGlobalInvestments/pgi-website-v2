@@ -104,8 +104,8 @@ export default function Contact() {
             />
           </h1>
           <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-            We would love to hear from you. If you're interested or have any
-            questions, send us a message through the form below.
+            We would love to hear from you. If you&apos;re interested or have
+            any questions, send us a message through the form below.
           </p>
         </motion.section>
 
@@ -161,7 +161,7 @@ export default function Contact() {
                   transition={{ duration: 0.3 }}
                 >
                   <p className="text-green-400 text-sm md:text-base">
-                    Thank you for your message! We'll get back to you soon.
+                    Thank you for your message! We&apos;ll get back to you soon.
                   </p>
                 </motion.div>
               )}
@@ -356,9 +356,9 @@ export default function Contact() {
                   />
                 </h2>
                 <p className="text-gray-300 mb-6 md:mb-8 text-sm md:text-base font-light leading-relaxed">
-                  If you're interested in starting a Paragon chapter at your
-                  school, please fill out the form with your school, graduation
-                  year, and contact info and we will get back to you!
+                  If you&apos;re interested in starting a Paragon chapter at
+                  your school, please fill out the form with your school,
+                  graduation year, and contact info and we will get back to you!
                 </p>
                 <motion.button
                   onClick={() => setIsChapterRequest(true)}

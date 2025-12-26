@@ -101,8 +101,8 @@ export default function InvestmentStrategy() {
               className="text-base md:text-lg lg:text-xl mb-12 md:mb-16 text-gray-300 font-light leading-relaxed"
               variants={itemFadeIn}
             >
-              Paragon's investment funds provide students with real-world
-              opportunities to apply what they are taught in Paragon's
+              Paragon&apos;s investment funds provide students with real-world
+              opportunities to apply what they are taught in Paragon&apos;s
               education. Students can apply both fundamental analysis and
               systematic algorithms to identify potential asset upside and
               optimize returns.

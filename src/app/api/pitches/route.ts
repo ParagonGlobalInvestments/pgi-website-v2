@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { Pitch } from '@/lib/supabase/database';
 
 /**
  * GET /api/pitches

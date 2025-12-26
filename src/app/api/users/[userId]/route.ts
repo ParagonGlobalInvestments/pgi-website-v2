@@ -38,7 +38,7 @@ export async function PUT(
       );
     }
 
-    const updateData = await request.json();
+    const _updateData = await request.json();
 
     // For now, return not implemented - this needs the updateUser method enhanced
     return NextResponse.json(
