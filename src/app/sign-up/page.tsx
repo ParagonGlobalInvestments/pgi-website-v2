@@ -88,7 +88,7 @@ function SignUpPageContent() {
             />
           </div>
           <h2 className="text-2xl font-semibold text-white mb-4">
-            You're already signed in!
+            You&apos;re already signed in!
           </h2>
           <p className="text-gray-300 mb-6">
             Welcome, {user.user_metadata?.full_name || user.email}

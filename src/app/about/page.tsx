@@ -81,8 +81,8 @@ export default function AboutPage() {
             <p className="text-lg mb-6">
               Paragon Global Investments is always looking for talented and
               motivated students who are passionate about finance and investing.
-              Whether you're interested in value investing, algorithmic trading,
-              or both, there's a place for you in our community.
+              Whether you&apos;re interested in value investing, algorithmic trading,
+              or both, there&apos;s a place for you in our community.
             </p>
             <p className="text-lg mb-6">
               To learn more about joining Paragon Global Investments or to

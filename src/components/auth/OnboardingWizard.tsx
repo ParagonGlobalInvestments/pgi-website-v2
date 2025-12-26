@@ -642,7 +642,7 @@ export default function OnboardingWizard({
                 />
               </h3>
               <p className="text-gray-600">
-                Let's set up your profile. This will only take a few minutes, I
+                Let&apos;s set up your profile. This will only take a few minutes, I
                 promise.
               </p>
             </div>
