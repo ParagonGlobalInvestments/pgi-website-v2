@@ -103,7 +103,7 @@ export default function NationalCommitteePage() {
               />
             </h2>
             <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-              Learn about our organization's founders and chapter founders.
+              Learn about our organization&apos;s founders and chapter founders.
             </p>
           </motion.div>
         </Link>

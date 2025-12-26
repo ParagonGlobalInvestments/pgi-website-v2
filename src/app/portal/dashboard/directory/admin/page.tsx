@@ -12,6 +12,7 @@ import {
   FaCheck,
   FaTrash,
   FaPlus,
+  FaUsers,
 } from 'react-icons/fa';
 import {
   Input,

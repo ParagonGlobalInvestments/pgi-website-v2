@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 }
 
 // GET endpoint for admin stats
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Check if user is authenticated and admin
     const supabase = createClient();

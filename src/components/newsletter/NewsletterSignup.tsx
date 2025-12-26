@@ -63,7 +63,7 @@ export default function NewsletterSignup({
           🎉 Successfully Subscribed!
         </div>
         <p className="text-gray-300 text-sm">
-          We'll keep you updated on PGI news and opportunities.
+          We&apos;ll keep you updated on PGI news and opportunities.
         </p>
       </motion.div>
     );

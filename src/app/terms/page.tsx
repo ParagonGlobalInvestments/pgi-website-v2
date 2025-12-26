@@ -139,7 +139,7 @@ export default function TermsPage() {
             </h2>
             <p className="text-gray-300 leading-relaxed">
               We use Google OAuth for authentication. By signing in, you agree
-              to Google's Terms of Service and Privacy Policy. We request
+              to Google&apos;s Terms of Service and Privacy Policy. We request
               read-only access to Google Drive metadata solely to display member
               resources. You can revoke this access at any time through your
               Google Account settings.
@@ -153,7 +153,7 @@ export default function TermsPage() {
             </h2>
             <p className="text-gray-300 leading-relaxed">
               This website and all information, content, materials, and services
-              are provided "as is" and "as available" without warranties of any
+              are provided &quot;as is&quot; and &quot;as available&quot; without warranties of any
               kind, either express or implied. PGI does not warrant that the
               website will be uninterrupted, timely, secure, or error-free.
             </p>
@@ -190,7 +190,7 @@ export default function TermsPage() {
             <p className="text-gray-300 leading-relaxed">
               We reserve the right to modify these Terms of Service at any time.
               We will notify users of any material changes by posting the new
-              Terms of Service on this page and updating the "Last Updated"
+              Terms of Service on this page and updating the &quot;Last Updated&quot;
               date. Your continued use of the website after changes constitutes
               acceptance of the modified terms.
             </p>

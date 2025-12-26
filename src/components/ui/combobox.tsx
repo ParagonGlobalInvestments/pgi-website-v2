@@ -158,7 +158,7 @@ export function MultiSelect({
                     }
                   }}
                 >
-                  + Add "{inputValue}"
+                  + Add &quot;{inputValue}&quot;
                 </Button>
               )}
             </CommandEmpty>
