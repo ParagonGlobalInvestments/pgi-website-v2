@@ -85,6 +85,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",
     "vercel": "^46.0.2",
+    "xlsx": "^0.18.5",
     "yahoo-finance2": "^2.13.3",
     "zod": "^3.23.8"
   },
