@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { syncUserWithSupabase } from '@/lib/supabase/syncUser';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,10 @@ const lastSyncTimes = new Map<string, number>();
 const SYNC_COOLDOWN_MS = 0; // Temporarily disable cooldown to allow all sync attempts
 
 export async function POST(req: NextRequest) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     // Check authentication
     const supabase = requireSupabaseServerClient();

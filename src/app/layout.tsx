@@ -81,13 +81,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={GeistSans.className}>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link
-          rel="icon"
-          href="/icons/icon-192.png"
-          type="image/png"
-          sizes="192x192"
-        />
+        {/* Favicon is automatically served from public/favicon.ico by Next.js */}
+        {/* Explicit link tag ensures proper serving */}
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#00172B" />
