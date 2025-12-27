@@ -17,10 +17,24 @@ import { NextResponse } from 'next/server';
 export const isProd = process.env.NODE_ENV === 'production';
 
 /**
- * Whether the portal is enabled (dev-only)
+ * Whether we're on a Vercel preview deployment (preview or development)
+ * Vercel sets VERCEL_ENV to 'preview', 'development', or 'production'
+ */
+const isVercelPreview =
+  process.env.VERCEL_ENV === 'preview' ||
+  process.env.VERCEL_ENV === 'development';
+
+/**
+ * Whether the portal is enabled.
+ * Enabled in:
+ * - Local development (NODE_ENV !== 'production')
+ * - Vercel preview deployments (VERCEL_ENV === 'preview' or 'development')
+ * Disabled in:
+ * - Production deployments (NODE_ENV === 'production' AND VERCEL_ENV === 'production')
+ * 
  * This is the SINGLE SOURCE OF TRUTH for portal availability
  */
-export const portalEnabled = !isProd;
+export const portalEnabled = !isProd || isVercelPreview;
 
 /**
  * Whether QA/test routes are enabled (dev-only)
