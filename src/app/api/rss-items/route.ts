@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createRSSDatabase } from '@/lib/supabase/rss';
 
 // Ensure dynamic rendering for this route
@@ -14,7 +14,7 @@ const CACHE_HEADERS = {
 export async function GET(req: NextRequest) {
   try {
     // Authenticate the user
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,

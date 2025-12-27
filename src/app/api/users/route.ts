@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 // Enable ISR with 60-second revalidation for better performance
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
     console.log(`[${timestamp}] API Request: /api/users`);
 
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error: authError,
@@ -117,7 +118,7 @@ export async function GET(req: NextRequest) {
 export async function POST(request: Request) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error: authError,

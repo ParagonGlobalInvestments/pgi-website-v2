@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 export async function PUT(
@@ -15,7 +15,7 @@ export async function PUT(
       );
     }
 
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,
@@ -67,7 +67,7 @@ export async function DELETE(
       );
     }
 
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,
@@ -95,6 +95,7 @@ export async function DELETE(
       { success: false, error: 'User deletion not yet implemented' },
       { status: 501 }
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Error type from Supabase/Next.js
   } catch (error: any) {
     console.error('Error deleting user:', error);
     return NextResponse.json(

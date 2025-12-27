@@ -66,6 +66,7 @@ export interface UserExperience {
  */
 export interface UserProfile {
   skills?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: Define project structure type
   projects?: any[]; // Define project structure if known, using 'any' for now
   experiences?: UserExperience[];
   linkedin?: string;

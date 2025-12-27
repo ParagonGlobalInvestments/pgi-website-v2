@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: supabaseUser },
       error: authError,
@@ -64,7 +65,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: supabaseUser },
       error: authError,
@@ -90,6 +91,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Build update object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic update object structure
     const updates: any = {};
 
     // Personal information

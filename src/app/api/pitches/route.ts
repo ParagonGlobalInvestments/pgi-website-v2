@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 
 /**
  * GET /api/pitches
@@ -11,7 +12,7 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = requireSupabaseServerClient();
 
     // Check authentication
     const {
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(pitches || []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Error type from Supabase/Next.js
   } catch (error: any) {
     console.error('Pitches API error:', error);
     return NextResponse.json(
@@ -64,7 +66,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = requireSupabaseServerClient();
 
     // Check authentication
     const {
@@ -143,6 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(pitch, { status: 201 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Error type from Supabase/Next.js
   } catch (error: any) {
     console.error('Create pitch API error:', error);
     return NextResponse.json(

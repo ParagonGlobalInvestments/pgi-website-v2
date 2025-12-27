@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const referrer = req.headers.get('referer') || null;
 
     // Use Supabase function to add signup
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const { data, error } = await supabase.rpc('add_newsletter_signup', {
       p_email: email,
       p_signup_source: source,
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 export async function GET(_req: NextRequest) {
   try {
     // Check if user is authenticated and admin
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error: authError,

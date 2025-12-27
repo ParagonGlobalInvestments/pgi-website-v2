@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { syncUserWithSupabase } from '@/lib/supabase/syncUser';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,7 @@ const SYNC_COOLDOWN_MS = 0; // Temporarily disable cooldown to allow all sync at
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: supabaseUser },
       error: authError,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: supabaseUser },
       error: authError,

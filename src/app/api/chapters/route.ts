@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 // GET /api/chapters - Get all chapters
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,
@@ -32,7 +32,7 @@ export async function GET() {
 // POST /api/chapters - Create a new chapter (admin only)
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,
@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
     console.error('Error creating chapter:', error);
 
     // Check if it's a unique constraint violation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Postgres error code type is not easily typed
     if ((error as any).code === '23505') {
       return NextResponse.json(
         { error: 'A chapter with this name or slug already exists' },
