@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { FileTypeIcon } from '@/components/portal/FileTypeIcon';
 import { Download, ExternalLink } from 'lucide-react';
 import { downloadFile, getOfficeOnlineUrl } from '@/lib/utils/fileHelpers';
-import MobileRestrictionModal from '@/components/portal/MobileRestrictionModal';
+import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Define recruitment resources from /public/portal-resources/recruitment/
 interface Resource {
@@ -204,36 +205,21 @@ const recruitmentResources = {
 };
 
 export default function RecruitmentPage() {
+  const isMobile = useIsMobile();
   const [ibSubTab, setIbSubTab] = useState<
     'networking' | 'resumes' | 'technicals' | 'interviewQuestions'
   >('networking');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMobileModal, setShowMobileModal] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const [showViewer, setShowViewer] = useState(false);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   const handleDownload = (resource: Resource) => {
     downloadFile(resource.path, resource.path.split('/').pop());
   };
 
   const handleOpenInBrowser = (resource: Resource) => {
-    if (isMobile) {
-      setShowMobileModal(true);
-      return;
-    }
-    if (resource.type === 'excel') {
-      window.open(getOfficeOnlineUrl(resource.path), '_blank');
-    } else {
-      window.open(resource.path, '_blank');
-    }
+    setSelectedResource(resource);
+    setShowViewer(true);
   };
 
   const renderResourceCard = (resource: Resource) => (
@@ -435,11 +421,13 @@ export default function RecruitmentPage() {
           </TabsContent>
         </Tabs>
 
-        {/* Mobile Restriction Modal */}
-        <MobileRestrictionModal
-          isOpen={showMobileModal}
-          onClose={() => setShowMobileModal(false)}
-          message="We are still working on previewing documents on mobile. For now, please view all recruitment resources from the website."
+        {/* Document Viewer */}
+        <MobileDocumentViewer
+          isOpen={showViewer}
+          onClose={() => setShowViewer(false)}
+          url={selectedResource?.path || ''}
+          title={selectedResource?.title || ''}
+          type={selectedResource?.type === 'pdf' ? 'pdf' : 'excel'}
         />
       </div>
     </div>

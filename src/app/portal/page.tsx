@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function PortalPage() {
+  // Portal availability is checked in layout.tsx (server-side)
   const router = useRouter();
 
   useEffect(() => {

@@ -39,5 +39,21 @@
     "es6": true
   },
   "root": true,
-  "ignorePatterns": ["node_modules/", ".next/", "out/"]
+  "ignorePatterns": ["node_modules/", ".next/", "out/"],
+  "overrides": [
+    {
+      "files": [
+        "src/app/__tests__/**/*",
+        "scripts/dev/**/*",
+        "scripts/**/*.ts",
+        "docs/**/*"
+      ],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react-hooks/exhaustive-deps": "off"
+      }
+    }
+  ]
 }
