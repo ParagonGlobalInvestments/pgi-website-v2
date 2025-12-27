@@ -1,7 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+/* eslint-disable no-console */
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
+// This route must be dynamic - it handles OAuth callbacks
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -9,7 +13,7 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get('next') || '/portal/dashboard';
 
   if (code) {
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
 
     // Exchange code for session
     const { error: exchangeError } =
@@ -41,7 +45,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
     });
 
-    const adminClient = createAdminClient();
+    const adminClient = requireSupabaseAdminClient();
     
     // First try by system_supabase_id
     console.log('[AUTH CALLBACK] Looking up by system_supabase_id:', user.id);

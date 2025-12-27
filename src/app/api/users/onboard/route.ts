@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+/* eslint-disable no-console */
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createDatabase } from '@/lib/supabase/database';
 
@@ -7,7 +8,7 @@ export async function POST(request: Request) {
     console.log('Starting onboarding process...');
 
     // Get authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error: authError,

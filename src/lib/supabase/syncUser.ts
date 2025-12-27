@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase, FormattedUser } from './database';
 
 // Valid chapter names from our database
@@ -66,7 +66,7 @@ export async function syncUserWithSupabase(
 ): Promise<FormattedUser> {
   try {
     // Get the current user from Supabase
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,

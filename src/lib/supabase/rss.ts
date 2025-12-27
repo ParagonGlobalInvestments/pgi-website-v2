@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // RSS Item type matching Supabase schema
@@ -40,7 +40,7 @@ export class SupabaseRSS {
   private supabase: SupabaseClient;
 
   constructor(supabase?: SupabaseClient) {
-    this.supabase = supabase || createClient();
+    this.supabase = supabase || requireSupabaseServerClient();
   }
 
   /**

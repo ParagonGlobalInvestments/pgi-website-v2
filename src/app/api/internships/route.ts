@@ -1,11 +1,12 @@
+/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 
 // GET /api/internships - Get all internships with filtering
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,
@@ -55,6 +56,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build filter object based on user permissions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic filter object structure
     const filters: any = { is_closed: isClosed };
 
     // Handle track filtering based on role and selected filter
@@ -109,7 +111,7 @@ export async function GET(req: NextRequest) {
 // POST /api/internships - Create a new internship
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user },
       error,

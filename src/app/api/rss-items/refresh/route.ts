@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
 import {
   fetchMarketWatchRSS,
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user from Supabase
-    const supabase = createClient();
+    const supabase = requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error,

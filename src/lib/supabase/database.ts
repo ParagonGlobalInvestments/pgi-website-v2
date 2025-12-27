@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 // Types matching our Supabase schema
@@ -143,7 +143,7 @@ export class SupabaseDatabase {
   private supabase: SupabaseClient;
 
   constructor(supabase?: SupabaseClient) {
-    this.supabase = supabase || createClient();
+    this.supabase = supabase || requireSupabaseServerClient();
   }
 
   // =====================================================

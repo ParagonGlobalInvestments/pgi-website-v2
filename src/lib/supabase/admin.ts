@@ -1,18 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * Admin client with service role key - bypasses RLS
- * ONLY use this for server-side operations that require admin access
- * NEVER expose this client to the browser
+ * Build-safe admin client factory.
+ * Returns null if env vars are missing (prevents build-time crashes).
  */
-export function createAdminClient() {
+export function getSupabaseAdminClient(): SupabaseClient | null {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  // Return null if env vars are missing (build-safe)
   if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error(
-      'Missing Supabase admin credentials. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.'
-    );
+    return null;
   }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
@@ -21,4 +20,27 @@ export function createAdminClient() {
       persistSession: false,
     },
   });
+}
+
+/**
+ * Require admin client - throws runtime error if env vars are missing.
+ * ONLY use this for server-side operations that require admin access.
+ * NEVER expose this client to the browser.
+ */
+export function requireSupabaseAdminClient(): SupabaseClient {
+  const client = getSupabaseAdminClient();
+  if (!client) {
+    throw new Error(
+      'Supabase admin client unavailable: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set'
+    );
+  }
+  return client;
+}
+
+/**
+ * Legacy export for backward compatibility.
+ * @deprecated Use getSupabaseAdminClient() or requireSupabaseAdminClient() instead
+ */
+export function createAdminClient() {
+  return requireSupabaseAdminClient();
 }
