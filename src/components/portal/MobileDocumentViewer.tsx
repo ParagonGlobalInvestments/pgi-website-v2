@@ -45,7 +45,15 @@ function extractDriveFileId(url: string): string | null {
 }
 
 /**
+ * checks if url is a google drive url
+ */
+function isGoogleDriveUrl(url: string): boolean {
+  return extractDriveFileId(url) !== null || url.includes('drive.google.com');
+}
+
+/**
  * converts google drive url to direct access or embed url
+ * for local files, returns the url as-is
  */
 function getDriveDirectUrl(url: string, forDownload: boolean = false): string {
   const fileId = extractDriveFileId(url);
@@ -59,6 +67,28 @@ function getDriveDirectUrl(url: string, forDownload: boolean = false): string {
     // embed preview url (works better in iframes)
     return `https://drive.google.com/file/d/${fileId}/preview`;
   }
+}
+
+/**
+ * converts relative url to absolute url for local files
+ */
+function getAbsoluteUrl(url: string): string {
+  // if already absolute (starts with http:// or https://), return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // if relative, make it absolute using current origin
+  // ensure it starts with /
+  const absolutePath = url.startsWith('/') ? url : `/${url}`;
+  
+  // safety check for window (should always be available in client components)
+  if (typeof window === 'undefined') {
+    // fallback for SSR (shouldn't happen in 'use client' but be safe)
+    return absolutePath;
+  }
+  
+  return `${window.location.origin}${absolutePath}`;
 }
 
 /**
@@ -84,15 +114,17 @@ function detectFileType(url: string): 'pdf' | 'excel' | 'unknown' {
 }
 
 /**
- * mobile-optimized document viewer for google drive files
+ * mobile-optimized document viewer for google drive files and local files
  *
  * approach:
- * - pdf: uses google drive's embedded viewer (mobile-optimized iframe)
+ * - pdf (google drive): uses google drive's embedded viewer (mobile-optimized iframe)
+ * - pdf (local files): uses object tag (bypasses X-Frame-Options, native browser viewer)
  * - excel: parses and displays as native html table with sheet selection
  *
  * why not react-pdf?
  * - has webpack/ssr compatibility issues with next.js
  * - google's viewer is already mobile-optimized
+ * - object tag for local files works natively and bypasses frame restrictions
  * - simpler, more reliable, faster to load
  */
 export default function MobileDocumentViewer({
@@ -113,22 +145,29 @@ export default function MobileDocumentViewer({
   const [excelData, setExcelData] = useState<ExcelData | null>(null);
   const [selectedSheet, setSelectedSheet] = useState<number>(0);
 
-  // convert drive url to appropriate format
-  const embedUrl = getDriveDirectUrl(url, false); // for iframe embedding
-  const downloadUrl = getDriveDirectUrl(url, true); // for downloading
+  // determine if this is a google drive url or local file
+  const isDriveUrl = isGoogleDriveUrl(url);
+  
+  // convert drive url to appropriate format, or get absolute url for local files
+  const embedUrl = isDriveUrl 
+    ? getDriveDirectUrl(url, false) // for google drive iframe embedding
+    : getAbsoluteUrl(url); // for local files
+  const downloadUrl = isDriveUrl 
+    ? getDriveDirectUrl(url, true) // for google drive downloads
+    : getAbsoluteUrl(url); // for local files
 
   // load excel file when dialog opens
   useEffect(() => {
     if (isOpen && fileType === 'excel') {
       loadExcelFile();
     } else if (isOpen && fileType === 'pdf') {
-      // for pdfs, we just use iframe - no loading needed
+      // for pdfs, loading handled by onLoad/onError handlers
       setIsLoading(false);
     }
   }, [isOpen, fileType, url]);
 
   /**
-   * fetches and parses excel file from google drive
+   * fetches and parses excel file (from google drive or local path)
    */
   const loadExcelFile = async () => {
     try {
@@ -164,36 +203,84 @@ export default function MobileDocumentViewer({
   };
 
   const handleOpenInDrive = () => {
-    // open original drive url in new tab
+    // open original url in new tab
+    // for google drive, opens in drive; for local files, opens in browser
     window.open(url, '_blank');
   };
 
   /**
-   * renders pdf viewer using google drive's embedded viewer
-   * cleaner, simpler - just the document
+   * renders pdf viewer
+   * - google drive: uses iframe with drive's embedded viewer
+   * - local files: uses object tag (bypasses X-Frame-Options)
    */
-  const renderPDFViewer = () => (
-    <div className="w-full h-full bg-gray-100">
-      {/* pdf iframe - google drive handles the rendering */}
-      <div className="relative w-full h-full">
-        <iframe
-          src={embedUrl}
-          className="absolute inset-0 w-full h-full border-0"
-          title={title}
-          allow="autoplay"
-          onLoad={() => setIsLoading(false)}
-        />
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
-            <div className="flex flex-col items-center gap-3">
-              <Skeleton className="w-[300px] h-[400px]" />
-              <p className="text-sm text-gray-600">loading...</p>
-            </div>
+  const renderPDFViewer = () => {
+    if (isDriveUrl) {
+      // google drive: use iframe
+      return (
+        <div className="w-full h-full bg-gray-100">
+          <div className="relative w-full h-full">
+            <iframe
+              src={embedUrl}
+              className="absolute inset-0 w-full h-full border-0"
+              title={title}
+              allow="autoplay"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setError('failed to load pdf from google drive');
+                setIsLoading(false);
+              }}
+            />
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                <div className="flex flex-col items-center gap-3">
+                  <Skeleton className="w-[300px] h-[400px]" />
+                  <p className="text-sm text-gray-600">loading...</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+      );
+    } else {
+      // local file: use object tag (bypasses X-Frame-Options)
+      return (
+        <div className="w-full h-full bg-gray-100">
+          <div className="relative w-full h-full">
+            <object
+              data={embedUrl}
+              type="application/pdf"
+              className="absolute inset-0 w-full h-full border-0"
+              aria-label={title}
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setError('failed to load pdf file');
+                setIsLoading(false);
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 p-8 text-center">
+                <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-gray-600 mb-4">
+                  your browser doesn't support pdf preview.
+                </p>
+                <Button onClick={handleDownload} variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  download pdf
+                </Button>
+              </div>
+            </object>
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                <div className="flex flex-col items-center gap-3">
+                  <Skeleton className="w-[300px] h-[400px]" />
+                  <p className="text-sm text-gray-600">loading...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+  };
 
   /**
    * renders excel viewer with sheet selector and native table
