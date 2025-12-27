@@ -244,6 +244,22 @@ AI code assistants (like Cursor, GitHub Copilot, etc.) can be helpful for this c
 - **Test changes locally** - especially authentication flows and API routes
 - **Check for Supabase patterns** - ensure generated code follows existing patterns for database access and auth
 
+### Example: Adding a New Feature
+
+When contributing a new feature, follow this structure:
+
+1. **Create production components** in `src/components/` or `src/hooks/`
+2. **Add internal QA routes** under `src/app/__tests__/[feature-name]/` for testing (these routes are automatically disabled in production)
+3. **Add deployment documentation** in `docs/deploy/[feature-name].md` if needed
+4. **Add helper scripts** in `scripts/dev/[feature-name]/` for development tooling
+
+**Example:** The mobile document viewer feature demonstrates this pattern:
+
+- Production code: `src/components/portal/MobileDocumentViewer.tsx`, `src/hooks/useIsMobile.ts`
+- QA routes: `src/app/__tests__/mobile-document-viewer/*` (dev only)
+- Deployment guide: `docs/deploy/mobile-document-viewer.md`
+- Helper script: `scripts/dev/mobile-document-viewer/add-test-pitch-urls.ts`
+
 ## Production Build
 
 ### Building

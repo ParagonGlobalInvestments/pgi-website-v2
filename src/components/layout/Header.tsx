@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { trackEvent } from '@/lib/posthog';
 import { createClient } from '@/lib/supabase/browser';
+import { portalEnabled } from '@/lib/runtime';
 
 // Animation variants
 const navbarAnimation = {
@@ -564,7 +565,7 @@ const Header = () => {
               <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
                 Loading...
               </div>
-            ) : user && isPGIMember ? (
+            ) : user && isPGIMember && portalEnabled ? (
               <div className="flex items-center pl-1 lg:pl-0">
                 <Link
                   href="/portal"
@@ -807,7 +808,7 @@ const Header = () => {
                   <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
                     Loading...
                   </div>
-                ) : user && isPGIMember ? (
+                ) : user && isPGIMember && portalEnabled ? (
                   <div className="space-y-2">
                     <Link
                       href="/portal"

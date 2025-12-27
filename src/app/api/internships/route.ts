@@ -2,9 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 // GET /api/internships - Get all internships with filtering
 export async function GET(req: NextRequest) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
     const {
