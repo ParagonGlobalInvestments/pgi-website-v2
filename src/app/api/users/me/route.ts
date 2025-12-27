@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
@@ -21,16 +20,11 @@ export async function GET() {
       );
     }
 
-    console.log(`Fetching user data for Supabase ID: ${supabaseUser.id}`);
-
     // Find the user by their Supabase ID
     const db = createDatabase();
     const user = await db.getUserBySupabaseId(supabaseUser.id);
 
     if (!user) {
-      console.log(
-        `User not found for Supabase ID: ${supabaseUser.id} - Not a PGI member`
-      );
       // Do NOT auto-create users - only PGI members should be in the database
       return NextResponse.json(
         { error: 'User not found in database - Not a PGI member' },
@@ -38,24 +32,15 @@ export async function GET() {
       );
     }
 
-    // Log user data for debugging
-    console.log(`User found: ${user.id}`);
-    console.log(`  FirstLogin: ${user.system.firstLogin}`);
-    console.log(
-      `  Chapter: ${user.org.chapter ? user.org.chapter.name : 'Not set'}`
-    );
-    console.log(`  Track: ${user.org.track || 'Not set'}`);
-    console.log(`  TrackRoles: ${user.org.trackRoles.join(', ') || 'Not set'}`);
-
     // Return user data - already formatted correctly
     return NextResponse.json({
       success: true,
       user,
     });
-  } catch (error: any) {
-    console.error('Error fetching user:', error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user data';
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch user data' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
@@ -91,8 +76,25 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Build update object
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic update object structure
-    const updates: any = {};
+    interface UserUpdates {
+      personal_bio?: string;
+      personal_major?: string;
+      personal_grad_year?: number;
+      personal_phone?: string;
+      profile_skills?: string[];
+      profile_linkedin?: string;
+      profile_resume_url?: string;
+      profile_avatar_url?: string;
+      profile_github?: string;
+      profile_interests?: string[];
+      profile_achievements?: string[];
+      profile_experiences?: unknown[];
+      profile_projects?: unknown[];
+      system_first_login?: boolean;
+      system_notifications_email?: boolean;
+      system_notifications_platform?: boolean;
+    }
+    const updates: UserUpdates = {};
 
     // Personal information
     if (body.personal) {
@@ -153,10 +155,10 @@ export async function PATCH(req: NextRequest) {
       success: true,
       message: 'User updated successfully',
     });
-  } catch (error: any) {
-    console.error('Error updating user:', error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update user data';
     return NextResponse.json(
-      { error: error.message || 'Failed to update user data' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

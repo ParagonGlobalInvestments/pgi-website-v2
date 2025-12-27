@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import yahooFinance from 'yahoo-finance2';
 
@@ -6,7 +5,7 @@ import yahooFinance from 'yahoo-finance2';
 export const dynamic = 'force-dynamic';
 
 // Enhanced in-memory cache with LRU-like behavior
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: StockPerformance; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 1000; // Prevent memory bloat
 
@@ -30,7 +29,6 @@ function pruneCache() {
     for (let i = 0; i < toRemove; i++) {
       cache.delete(sortedEntries[i][0]);
     }
-    console.log(`[Stock API] Cache pruned: removed ${toRemove} old entries`);
   }
 }
 
@@ -62,7 +60,6 @@ export async function GET(request: NextRequest) {
     const cached = cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`[Stock API] Cache hit for ${cacheKey}`);
       return NextResponse.json(cached.data);
     }
 
@@ -104,8 +101,7 @@ export async function GET(request: NextRequest) {
           });
           
           pitchPrice = historicalResult.length > 0 ? historicalResult[0].close : null;
-        } catch (historicalError) {
-          console.warn(`[Stock API] Could not fetch historical price for ${ticker} on ${pitchDate}, using current price as fallback`);
+        } catch {
           pitchPrice = currentPrice;
         }
       } else {
@@ -143,23 +139,21 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json(response);
-    } catch (error: any) {
-      console.error('Yahoo Finance API error:', error);
-
+    } catch (error) {
       // Return a structured error response
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch stock data';
       const errorResponse: StockPerformance = {
         ticker: ticker.toUpperCase(),
         currentPrice: null,
         pitchPrice: null,
         pointsChange: null,
         percentChange: null,
-        error: error.message || 'Failed to fetch stock data',
+        error: errorMessage,
       };
 
       return NextResponse.json(errorResponse, { status: 200 }); // Return 200 to allow graceful handling
     }
-  } catch (error: any) {
-    console.error('Stock performance API error:', error);
+  } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

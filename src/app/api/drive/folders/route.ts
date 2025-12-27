@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
 
     if (!driveResponse.ok) {
       const errorText = await driveResponse.text();
-      console.error('Drive API Error:', errorText);
 
       if (driveResponse.status === 401) {
         return NextResponse.json(
@@ -62,9 +61,23 @@ export async function GET(request: NextRequest) {
     const data = await driveResponse.json();
 
     // Add some metadata to items for better display
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Google Drive API response type
-    const enrichedItems = (data.files || []).map(
-      (item: any, index: number) => ({
+    interface DriveFile {
+      id: string;
+      name: string;
+      mimeType: string;
+      parents?: string[];
+      createdTime: string;
+      modifiedTime: string;
+      description?: string;
+      webViewLink?: string;
+    }
+
+    interface DriveResponse {
+      files?: DriveFile[];
+    }
+
+    const enrichedItems = ((data as DriveResponse).files || []).map(
+      (item: DriveFile, index: number) => ({
         ...item,
         displayIndex: index,
         lastModified: new Date(item.modifiedTime).toLocaleDateString(),
@@ -78,7 +91,6 @@ export async function GET(request: NextRequest) {
       parentFolderId: folderId,
     });
   } catch (error) {
-    console.error('API Route Error:', error);
     return NextResponse.json(
       {
         error: 'Internal server error',

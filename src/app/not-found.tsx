@@ -14,7 +14,6 @@ export default function NotFound() {
 
     if (isLegacyRoute) {
       // Redirect legacy routes to homepage immediately
-      console.log(`404 page redirecting legacy route: ${pathname} -> /`);
       // Use both methods for maximum compatibility
       window.location.replace('/');
       router.replace('/');
@@ -35,7 +34,6 @@ export default function NotFound() {
             __html: `
               // Immediate redirect for legacy routes
               (function() {
-                console.log('Immediate redirect from 404 page for legacy route');
                 window.location.replace('/');
               })();
             `,

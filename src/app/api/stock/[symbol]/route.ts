@@ -24,9 +24,14 @@ export async function GET(
     const meta = result.meta;
 
     // Format chart data
-    const chartData = quotes
-      .filter((quote: any) => quote.close !== null)
-      .map((quote: any) => ({
+    interface Quote {
+      date: Date;
+      close: number | null;
+    }
+
+    const chartData = (quotes as Quote[])
+      .filter((quote) => quote.close !== null)
+      .map((quote) => ({
         time: quote.date,
         price: quote.close,
       }));
@@ -55,7 +60,6 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error('Error fetching stock data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch stock data' },
       { status: 500 }

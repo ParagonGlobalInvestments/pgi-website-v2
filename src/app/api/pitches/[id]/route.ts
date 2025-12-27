@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 
@@ -34,8 +33,7 @@ export async function GET(
     }
 
     return NextResponse.json(pitch);
-  } catch (error: any) {
-    console.error('Get pitch API error:', error);
+  } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -94,7 +92,16 @@ export async function PUT(
     } = body;
 
     // Build update object with only provided fields
-    const updates: any = { updated_at: new Date().toISOString() };
+    interface PitchUpdates {
+      updated_at: string;
+      ticker?: string;
+      team?: 'value' | 'quant';
+      pitch_date?: string;
+      excel_model_path?: string | null;
+      pdf_report_path?: string | null;
+      github_url?: string | null;
+    }
+    const updates: PitchUpdates = { updated_at: new Date().toISOString() };
 
     if (ticker) updates.ticker = ticker.toUpperCase();
     if (team) {
@@ -122,7 +129,6 @@ export async function PUT(
       .single();
 
     if (updateError || !pitch) {
-      console.error('Error updating pitch:', updateError);
       return NextResponse.json(
         { error: 'Failed to update pitch' },
         { status: 500 }
@@ -130,8 +136,7 @@ export async function PUT(
     }
 
     return NextResponse.json(pitch);
-  } catch (error: any) {
-    console.error('Update pitch API error:', error);
+  } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -185,7 +190,6 @@ export async function DELETE(
       .eq('id', params.id);
 
     if (deleteError) {
-      console.error('Error deleting pitch:', deleteError);
       return NextResponse.json(
         { error: 'Failed to delete pitch' },
         { status: 500 }
@@ -193,8 +197,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Delete pitch API error:', error);
+  } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
