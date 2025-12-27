@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -10,6 +10,7 @@ import {
   Table,
   AlertCircle,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -114,6 +115,19 @@ function detectFileType(url: string): 'pdf' | 'excel' | 'unknown' {
 }
 
 /**
+ * detects if user is on iOS Safari
+ */
+function isIOSSafari(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const ua = window.navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS/.test(ua);
+  
+  return isIOS && isSafari;
+}
+
+/**
  * mobile-optimized document viewer for google drive files and local files
  *
  * approach:
@@ -145,8 +159,16 @@ export default function MobileDocumentViewer({
   const [excelData, setExcelData] = useState<ExcelData | null>(null);
   const [selectedSheet, setSelectedSheet] = useState<number>(0);
 
+  // detect iOS Safari for special handling
+  const [isIOS, setIsIOS] = useState(false);
+
   // determine if this is a google drive url or local file
   const isDriveUrl = isGoogleDriveUrl(url);
+
+  // detect iOS on mount
+  useEffect(() => {
+    setIsIOS(isIOSSafari());
+  }, []);
   
   // convert drive url to appropriate format, or get absolute url for local files
   const embedUrl = isDriveUrl 
@@ -212,18 +234,29 @@ export default function MobileDocumentViewer({
    * renders pdf viewer
    * - google drive: uses iframe with drive's embedded viewer
    * - local files: uses object tag (bypasses X-Frame-Options)
+   * - iOS Safari: special scrollable wrapper for iframe scrolling
    */
   const renderPDFViewer = () => {
-    if (isDriveUrl) {
-      // google drive: use iframe
+    // iOS Safari fallback: show button to open in new tab if iframe scrolling fails
+    if (isIOS && isDriveUrl) {
       return (
-        <div className="w-full h-full bg-gray-100">
-          <div className="relative w-full h-full">
+        <div className="w-full h-full bg-gray-100 flex flex-col relative">
+          {/* iOS Safari scrollable wrapper */}
+          <div 
+            className="flex-1 min-h-0 overflow-y-auto relative"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              touchAction: 'pan-y',
+            }}
+          >
             <iframe
               src={embedUrl}
-              className="absolute inset-0 w-full h-full border-0"
+              className="w-full h-full border-0"
+              style={{ minHeight: '100dvh' }}
               title={title}
               allow="autoplay"
+              scrolling="yes"
               onLoad={() => setIsLoading(false)}
               onError={() => {
                 setError('failed to load pdf from google drive');
@@ -231,7 +264,55 @@ export default function MobileDocumentViewer({
               }}
             />
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-white z-10 pointer-events-none">
+                <div className="flex flex-col items-center gap-3">
+                  <Skeleton className="w-[300px] h-[400px]" />
+                  <p className="text-sm text-gray-600">loading...</p>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* iOS fallback button */}
+          <div className="p-4 bg-white border-t flex-shrink-0">
+            <Button 
+              onClick={handleOpenInDrive} 
+              variant="outline" 
+              className="w-full"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              open in new tab
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (isDriveUrl) {
+      // google drive: use iframe with scrollable wrapper
+      return (
+        <div className="w-full h-full bg-gray-100 flex flex-col relative">
+          <div 
+            className="flex-1 min-h-0 overflow-y-auto relative"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              touchAction: 'pan-y',
+            }}
+          >
+            <iframe
+              src={embedUrl}
+              className="w-full h-full border-0"
+              title={title}
+              allow="autoplay"
+              scrolling="yes"
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setError('failed to load pdf from google drive');
+                setIsLoading(false);
+              }}
+            />
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white z-10 pointer-events-none">
                 <div className="flex flex-col items-center gap-3">
                   <Skeleton className="w-[300px] h-[400px]" />
                   <p className="text-sm text-gray-600">loading...</p>
@@ -244,12 +325,19 @@ export default function MobileDocumentViewer({
     } else {
       // local file: use object tag (bypasses X-Frame-Options)
       return (
-        <div className="w-full h-full bg-gray-100">
-          <div className="relative w-full h-full">
+        <div className="w-full h-full bg-gray-100 flex flex-col relative">
+          <div 
+            className="flex-1 min-h-0 overflow-y-auto relative"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              touchAction: 'pan-y',
+            }}
+          >
             <object
               data={embedUrl}
               type="application/pdf"
-              className="absolute inset-0 w-full h-full border-0"
+              className="w-full h-full border-0"
               aria-label={title}
               onLoad={() => setIsLoading(false)}
               onError={() => {
@@ -257,7 +345,7 @@ export default function MobileDocumentViewer({
                 setIsLoading(false);
               }}
             >
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 p-8 text-center">
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
                 <p className="text-gray-600 mb-4">
                   your browser doesn't support pdf preview.
@@ -269,7 +357,7 @@ export default function MobileDocumentViewer({
               </div>
             </object>
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-white z-10 pointer-events-none">
                 <div className="flex flex-col items-center gap-3">
                   <Skeleton className="w-[300px] h-[400px]" />
                   <p className="text-sm text-gray-600">loading...</p>
@@ -318,7 +406,14 @@ export default function MobileDocumentViewer({
         )}
 
         {/* excel table - scrollable horizontally and vertically */}
-        <div className="flex-1 overflow-auto p-4 bg-white">
+        <div 
+          className="flex-1 overflow-auto p-4 bg-white min-h-0"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-x pan-y',
+          }}
+        >
           <div className="inline-block min-w-full">
             <table className="border-collapse border border-gray-300 text-sm">
               <tbody>
@@ -369,10 +464,10 @@ export default function MobileDocumentViewer({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-full w-full h-screen md:max-w-4xl md:h-[90vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-full w-full h-[100dvh] md:max-w-4xl md:h-[90vh] p-0 gap-0 flex flex-col">
         {/* header with title and actions */}
         <DialogHeader className="p-4 border-b bg-white flex-shrink-0">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {fileType === 'pdf' ? (
                 <FileText className="h-5 w-5 text-gray-600 flex-shrink-0" />
@@ -381,7 +476,18 @@ export default function MobileDocumentViewer({
               )}
               <DialogTitle className="text-base md:text-lg truncate">{title}</DialogTitle>
             </div>
-            {/* close button handled by dialog component */}
+            {/* explicit close button for mobile */}
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 flex-shrink-0"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogClose>
           </div>
         </DialogHeader>
 
