@@ -75,7 +75,7 @@ export default function Contact() {
 
   const onSubmit = async (data: FormData) => {
     // Add form submission logic here
-    console.log(data);
+    // Form data submitted
 
     // For now, just simulate a successful submission
     setSubmitted(true);

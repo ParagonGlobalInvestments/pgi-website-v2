@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
@@ -11,7 +10,6 @@ export async function GET(req: NextRequest) {
   try {
     // Add timestamp for better logging
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] API Request: /api/users`);
 
     // Check authentication
     const supabase = requireSupabaseServerClient();
@@ -21,18 +19,14 @@ export async function GET(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.log(`[${timestamp}] Unauthorized request to /api/users`);
       return NextResponse.json(
         { error: 'Unauthorized - Authentication required' },
         { status: 401 }
       );
     }
 
-    console.log(`[${timestamp}] User ${user.id} requested directory data`);
-
     // Connect to Supabase database
     const db = createDatabase();
-    console.log(`[${timestamp}] Connected to Supabase database`);
 
     // Get filters from query params
     const searchParams = req.nextUrl.searchParams;
@@ -40,18 +34,16 @@ export async function GET(req: NextRequest) {
     const track = searchParams.get('track');
     const chapter = searchParams.get('chapter');
 
-    console.log(`[${timestamp}] Directory filters:`, { role, track, chapter });
-
     // Build filter object for Supabase
-    const filters: any = {};
+    interface UserFilters {
+      permissionLevel?: string;
+      track?: string;
+      chapterName?: string;
+    }
+    const filters: UserFilters = {};
     if (role && role !== 'all') filters.permissionLevel = role;
     if (track && track !== 'all') filters.track = track;
     if (chapter && chapter !== 'all') filters.chapterName = chapter;
-
-    console.log(
-      `[${timestamp}] Using Supabase filters:`,
-      JSON.stringify(filters)
-    );
 
     // Parallel fetch: Get users and chapters simultaneously
     const [users, chaptersResponse] = await Promise.all([
@@ -62,26 +54,6 @@ export async function GET(req: NextRequest) {
         },
       }).catch(() => null),
     ]);
-
-    console.log(`Found ${users.length} users matching query`);
-
-    if (users.length === 0) {
-      console.log(`[${timestamp}] WARNING: No users found in the database!`);
-    } else {
-      // Log a sample of the first user to see its structure
-      console.log(
-        `[${timestamp}] First user sample:`,
-        JSON.stringify(
-          {
-            id: users[0].id,
-            personal: users[0].personal,
-            org: users[0].org,
-          },
-          null,
-          2
-        )
-      );
-    }
 
     // Parse chapters if available
     let chapters = [];
@@ -103,12 +75,13 @@ export async function GET(req: NextRequest) {
         },
       }
     );
-  } catch (error: any) {
-    console.error('Error fetching users:', error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch users';
+    const errorStack = error instanceof Error && process.env.NODE_ENV === 'development' ? error.stack : undefined;
     return NextResponse.json(
       {
-        error: error.message || 'Failed to fetch users',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        error: errorMessage,
+        stack: errorStack,
       },
       { status: 500 }
     );
@@ -189,12 +162,12 @@ export async function POST(request: Request) {
       message: 'User created successfully',
       user: newUser,
     });
-  } catch (error: any) {
-    console.error('Error creating user:', error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to create user',
+        error: errorMessage,
       },
       { status: 500 }
     );

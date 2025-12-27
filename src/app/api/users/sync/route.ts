@@ -24,11 +24,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse request body first for logging
+    // Parse request body
     const body = await req.json();
-
-    // Log full request body for debugging
-    console.log('FULL SYNC REQUEST BODY:', JSON.stringify(body, null, 2));
 
     // Update sync time
     const now = Date.now();
@@ -53,21 +50,6 @@ export async function POST(req: NextRequest) {
       achievements: body.achievements,
       phone: body.phone,
     };
-
-    // Log the sync options for debugging
-    console.log(
-      'Syncing user with options:',
-      JSON.stringify(
-        {
-          track: syncOptions.track,
-          chapterName: syncOptions.chapterName,
-          trackRoles: syncOptions.trackRoles,
-          firstLogin: syncOptions.firstLogin,
-        },
-        null,
-        2
-      )
-    );
 
     // Sync user with Supabase
     const user = await syncUserWithSupabase(syncOptions);
@@ -111,7 +93,6 @@ export async function GET() {
       const existingUser = await db.getUserBySupabaseId(supabaseUser.id);
 
       if (existingUser) {
-        console.log('Using cached user data - sync skipped (cooldown active)');
         return NextResponse.json({
           success: true,
           user: existingUser,
@@ -131,10 +112,10 @@ export async function GET() {
       success: true,
       user,
     });
-  } catch (error: any) {
-    console.error('Error syncing user:', error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sync user';
     return NextResponse.json(
-      { error: error.message || 'Failed to sync user' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
