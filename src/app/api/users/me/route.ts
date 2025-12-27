@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     // Check authentication
     const supabase = requireSupabaseServerClient();
@@ -48,6 +53,10 @@ export async function GET() {
 
 // Update user data
 export async function PATCH(req: NextRequest) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     // Check authentication
     const supabase = requireSupabaseServerClient();

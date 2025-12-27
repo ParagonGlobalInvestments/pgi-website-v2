@@ -11,8 +11,11 @@ import {
   TrendingDown,
   ExternalLink,
   Github,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 
 interface Pitch {
   id: string;
@@ -43,6 +46,13 @@ export default function PitchDetailPage() {
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [performance, setPerformance] = useState<StockPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // mobile document viewer state
+  const isMobile = useIsMobile(); // detect if user is on mobile
+  const [showMobileViewer, setShowMobileViewer] = useState(false); // controls viewer dialog
+  const [viewerUrl, setViewerUrl] = useState(''); // current document url
+  const [viewerTitle, setViewerTitle] = useState(''); // current document title
+  const [viewerType, setViewerType] = useState<'pdf' | 'excel'>('pdf'); // document type
 
   useEffect(() => {
     if (pitchId) {
@@ -83,6 +93,26 @@ export default function PitchDetailPage() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  // opens pdf in mobile viewer
+  const openPdfViewer = () => {
+    if (pitch?.pdf_report_path) {
+      setViewerUrl(pitch.pdf_report_path);
+      setViewerTitle(`${pitch.ticker} - investment thesis`);
+      setViewerType('pdf');
+      setShowMobileViewer(true);
+    }
+  };
+
+  // opens excel model in mobile viewer
+  const openExcelViewer = () => {
+    if (pitch?.excel_model_path) {
+      setViewerUrl(pitch.excel_model_path);
+      setViewerTitle(`${pitch.ticker} - excel model`);
+      setViewerType('excel');
+      setShowMobileViewer(true);
+    }
   };
 
   if (isLoading) {
@@ -210,51 +240,94 @@ export default function PitchDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Content Grid */}
+        {/* content grid - responsive document display */}
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Investment Thesis / Report */}
+          {/* investment thesis / report */}
           {pitch.pdf_report_path && (
             <Card className="h-[600px] md:h-[800px]">
               <CardHeader>
-                <CardTitle>Investment Thesis</CardTitle>
+                <CardTitle>investment thesis</CardTitle>
               </CardHeader>
               <CardContent className="h-[calc(100%-80px)]">
-                <iframe
-                  src={pitch.pdf_report_path}
-                  className="w-full h-full border-0 rounded"
-                  title="Investment Thesis PDF"
-                />
+                {isMobile ? (
+                  // mobile: show button to open in viewer
+                  <div className="flex flex-col items-center justify-center h-full gap-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Eye className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="text-center text-gray-600">
+                      tap below to view the investment thesis in a mobile-optimized viewer
+                    </p>
+                    <Button onClick={openPdfViewer} className="gap-2">
+                      <Eye className="h-4 w-4" />
+                      view pdf
+                    </Button>
+                  </div>
+                ) : (
+                  // desktop: keep existing iframe behavior
+                  <iframe
+                    src={pitch.pdf_report_path}
+                    className="w-full h-full border-0 rounded"
+                    title="Investment Thesis PDF"
+                  />
+                )}
               </CardContent>
             </Card>
           )}
 
-          {/* Excel Model (for VALUE team) */}
+          {/* excel model (for value team) */}
           {pitch.team === 'value' && pitch.excel_model_path && (
             <Card className="h-[600px] md:h-[800px]">
               <CardHeader>
-                <CardTitle>Excel Model</CardTitle>
+                <CardTitle>excel model</CardTitle>
               </CardHeader>
               <CardContent className="h-[calc(100%-80px)]">
-                <iframe
-                  src={pitch.excel_model_path}
-                  className="w-full h-full border-0 rounded"
-                  title="Excel Model"
-                />
+                {isMobile ? (
+                  // mobile: show button to open in viewer
+                  <div className="flex flex-col items-center justify-center h-full gap-4">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                      <Eye className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="text-center text-gray-600">
+                      tap below to view the excel model in a mobile-optimized viewer
+                    </p>
+                    <Button onClick={openExcelViewer} className="gap-2">
+                      <Eye className="h-4 w-4" />
+                      view excel
+                    </Button>
+                  </div>
+                ) : (
+                  // desktop: keep existing iframe behavior
+                  <iframe
+                    src={pitch.excel_model_path}
+                    className="w-full h-full border-0 rounded"
+                    title="Excel Model"
+                  />
+                )}
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* No files available message */}
+        {/* no files available message */}
         {!pitch.pdf_report_path && !pitch.excel_model_path && (
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-gray-500">
-                No files available for this pitch.
+                no files available for this pitch.
               </p>
             </CardContent>
           </Card>
         )}
+
+        {/* mobile document viewer dialog */}
+        <MobileDocumentViewer
+          isOpen={showMobileViewer}
+          onClose={() => setShowMobileViewer(false)}
+          url={viewerUrl}
+          title={viewerTitle}
+          type={viewerType}
+        />
       </div>
     </div>
   );

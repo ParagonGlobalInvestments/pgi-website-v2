@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 /**
  * GET /api/pitches
@@ -11,6 +12,10 @@ import { requireSupabaseServerClient } from '@/lib/supabase/server';
  * - team: 'value' | 'quant' (optional)
  */
 export async function GET(request: NextRequest) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
 
@@ -65,6 +70,10 @@ export async function GET(request: NextRequest) {
  * Create a new pitch (admin only)
  */
 export async function POST(request: NextRequest) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
 

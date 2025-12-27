@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
+import { portalEnabled } from '@/lib/runtime';
 
 export default function DashboardPage() {
-  // In production, redirect to home page instead of portal
-  if (process.env.NODE_ENV === 'production') {
+  // Use single source of truth for portal availability
+  if (!portalEnabled) {
     redirect('/');
   }
 

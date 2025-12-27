@@ -36,7 +36,8 @@ Agents may perform the following actions:
 
 Agents must NOT perform the following actions:
 
-- **Creating new markdown files**: Only README.md and AGENTS.md may exist
+- **Creating new markdown files**: Only README.md and AGENTS.md may exist (deployment guides go in `docs/deploy/`)
+- **Creating QA/test routes outside `__tests__` namespace**: All internal QA and testing routes must be under `src/app/__tests__/[feature-name]/` and must include production guards
 - **Silent architectural changes**: No changes to auth system, database schema, or core architecture without explicit approval
 - **Auth system modifications**: No changes to Supabase Auth setup, middleware logic, or NextAuth configuration without human sign-off
 - **Database schema changes**: No SQL migrations, table alterations, or RLS policy changes without human review
@@ -272,6 +273,34 @@ Validation:
 - Authentication enforced (if needed)
 - Responsive design works
 - Lint passes
+```
+
+### Adding Internal QA Routes for a Feature
+
+```
+Create QA/test routes for [feature-name] under src/app/__tests__/[feature-name]/.
+
+Scope:
+- Create test pages under `src/app/__tests__/[feature-name]/`
+- Add production guard: check `process.env.NODE_ENV === 'production'` and call `notFound()` if true
+- Create index page at `src/app/__tests__/[feature-name]/page.tsx` for discoverability
+
+Constraints:
+- All QA routes MUST be under `__tests__` namespace (double underscore)
+- All QA routes MUST include production guards (use `useEffect` in client components)
+- Routes should be clearly labeled as internal/testing only
+- Use `'use client'` directive for interactive test pages
+
+Example structure:
+- src/app/__tests__/[feature-name]/page.tsx (index)
+- src/app/__tests__/[feature-name]/[test-name]/page.tsx (test pages)
+
+Validation:
+- Routes work in development mode
+- Routes return 404/notFound in production builds
+- Production guard properly implemented
+- Lint passes
+- Build succeeds
 ```
 
 ### Cleaning Technical Debt

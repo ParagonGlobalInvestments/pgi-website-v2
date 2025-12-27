@@ -77,7 +77,7 @@ export interface Pitch {
   team: 'value' | 'quant';
   pitch_date: string;
   exchange?: 'NASDAQ' | 'NYSE';
-  excel_model_path?: string;
+  excel_model_path?: string; // pitch type
   pdf_report_path?: string;
   github_url?: string;
   created_at: string;

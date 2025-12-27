@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 /**
  * GET /api/pitches/[id]
@@ -10,6 +11,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
 
@@ -50,6 +55,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
 
@@ -153,6 +162,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Portal-only API - block in production
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
 
