@@ -61,5 +61,5 @@ export function requireSupabaseServerClient(): SupabaseClient {
  * @deprecated Use getSupabaseServerClient() or requireSupabaseServerClient() instead
  */
 export function createClient() {
-  return requireSupabaseServerClient();
+  return getSupabaseServerClient() as SupabaseClient;
 }

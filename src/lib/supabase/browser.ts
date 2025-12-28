@@ -38,5 +38,5 @@ export function requireSupabaseBrowserClient(): SupabaseClient {
  * @deprecated Use getSupabaseBrowserClient() or requireSupabaseBrowserClient() instead
  */
 export function createClient() {
-  return requireSupabaseBrowserClient();
+  return getSupabaseBrowserClient() as SupabaseClient;
 }

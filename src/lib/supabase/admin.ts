@@ -42,5 +42,5 @@ export function requireSupabaseAdminClient(): SupabaseClient {
  * @deprecated Use getSupabaseAdminClient() or requireSupabaseAdminClient() instead
  */
 export function createAdminClient() {
-  return requireSupabaseAdminClient();
+  return getSupabaseAdminClient() as SupabaseClient;
 }
