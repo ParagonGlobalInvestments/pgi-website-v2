@@ -340,15 +340,11 @@ export default function MobileDocumentViewer({
               className="w-full h-full border-0"
               aria-label={title}
               onLoad={() => setIsLoading(false)}
-              onError={() => {
-                setError('failed to load pdf file');
-                setIsLoading(false);
-              }}
             >
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
                 <p className="text-gray-600 mb-4">
-                  your browser doesn't support pdf preview.
+                  Your browser doesn&apos;t support pdf preview.
                 </p>
                 <Button onClick={handleDownload} variant="outline">
                   <Download className="h-4 w-4 mr-2" />
