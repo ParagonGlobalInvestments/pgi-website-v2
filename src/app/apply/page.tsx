@@ -3,10 +3,13 @@
 // import { useState } from 'react';
 // import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaUserGraduate, FaChartLine, FaClipboardList } from 'react-icons/fa';
+import {
+  FaUserGraduate,
+  FaChartLine,
+  // FaClipboardList,
+} from 'react-icons/fa';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-import { handleFormClick } from '@/components/analytics/FormTracker';
 
 // import { useEffect } from 'react';
 // import { useRouter, useSearchParams } from 'next/navigation';
@@ -16,6 +19,8 @@ const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3
 const applicationsOpen = true;  // set to true when applications open
 
 const ZOOM_LINK_URL = 'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
+const GENERAL_APPLY_URL = '';
+const generalApplicationsOpen = false;
 
 
 /** Animation variants (unchanged) */
@@ -45,12 +50,16 @@ const cardItem = {
   },
 };
 
-const buttonVariant = {
-  hover: {
-    scale: 1.05,
-    backgroundColor: '#1f4287',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-    transition: { duration: 0.2 },
+const baseBtn =
+  'inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]';
+
+const timelineItemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.6, ease: 'easeOut' },
   },
 };
 
@@ -65,14 +74,19 @@ type TeamMember = {
   
 const nationalRecruitmentTeam: TeamMember[] = [
     {
-      name: 'Sohini Banerjee',
-      role: 'Co-Head of Recruitment',
+      name: 'Aetant Prakash',
+      role: 'Head of Recruitment',
       university: 'University of Chicago',
     },
     {
-      name: 'John Otto',
-      role: 'Co-Head of Recruitment',
-      university: 'University of Pennsylvania',
+      name: 'Heath Winter',
+      role: 'Recruiter',
+      university: 'University of Chicago',
+    },
+    {
+      name: 'Noor Kaur',
+      role: 'Recruiter',
+      university: 'University of Chicago',
     },
     {
       name: 'Ann Li',
@@ -270,6 +284,28 @@ function RecruitmentTeamSection({
   
 
 /** --------------------------
+ *  National Timeline Content
+ *  -------------------------- */
+const generalTimeline = [
+  { date: 'Monday 12th', detail: 'Applications open' },
+  { date: 'Mon 12th – Fri 16th', detail: 'Coffee chats' },
+  {
+    date: 'Wednesday 14th',
+    detail: '1st info session · 7PM ET',
+    link: 'https://uchicago.zoom.us/meetings/93724594264/invitations?signature=HIwjcPthsxZIX0IoQa2mVVVqNtpNgNb5ZXj-QWwWplc',
+    linkLabel: 'Zoom link',
+  },
+  {
+    date: 'Friday 16th',
+    detail: '2nd info session · 5PM ET',
+    link: 'https://uchicago.zoom.us/meetings/97029407547/invitations?signature=N03Z6ZbwFqah1Weq3-kpou---nFrWjNQc-I1WyJxoes',
+    linkLabel: 'Zoom link',
+  },
+  { date: 'Monday 19th', detail: 'Applications close · 11:59 PM' },
+  { date: 'Early February', detail: 'Decisions released' },
+];
+
+/** --------------------------
  *  UChicago Timeline Content
  *  -------------------------- */
 const uchicagoTimeline = [
@@ -291,13 +327,36 @@ function GeneralRecruitment() {
           <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
               <ShinyText
-                text="PGI 2025 National Recruitment"
+                text="PGI 2026 National Recruitment"
                 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
               />
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
               Join Paragon Global Investments and be part of a community dedicated to excellence in finance and investing.
             </p>
+
+            <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
+              {generalApplicationsOpen ? (
+                <motion.a
+                  href={GENERAL_APPLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Apply Now — National
+                </motion.a>
+              ) : (
+                <button
+                  disabled
+                  title="Applications opening soon"
+                  className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
+                >
+                  Apply (coming soon)
+                </button>
+              )}
+            </div>
           </motion.div>
         </div>
       </section>
@@ -380,8 +439,122 @@ function GeneralRecruitment() {
         </div>
       </section>
 
+      {/* National Recruitment Timeline */}
+      <section className="pt-10 md:pt-12 pb-16 md:pb-20 px-4 bg-navy">
+        <div className="container mx-auto">
+          <motion.div
+            className="text-center mb-10 md:mb-14"
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+          >
+            <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-gray-400/80 mb-3">
+              Key Dates
+            </p>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-white">
+              <ShinyText
+                text="National Recruitment Timeline"
+                className="text-xl md:text-2xl lg:text-3xl font-normal"
+              />
+            </h2>
+            <p className="text-sm md:text-base text-gray-400 mt-4 max-w-2xl mx-auto font-light">
+              A bird&apos;s-eye view of the general recruitment cycle, modeled
+              after our origin story timeline.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="relative max-w-5xl mx-auto"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
+            <div className="absolute left-7 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-pgi-light-blue via-white/20 to-transparent md:-translate-x-px" />
+
+            {generalTimeline.map((item, index) => {
+              const isLeft = index % 2 === 0;
+              return (
+                <motion.div
+                  key={`${item.date}-${index}`}
+                  className="relative mb-10 md:mb-14 flex flex-col md:flex-row"
+                  variants={timelineItemVariants}
+                >
+                  <div
+                    className={`w-full md:w-1/2 ${isLeft ? 'md:pr-10 lg:pr-16' : 'md:pl-10 lg:pl-16 md:ml-auto'}`}
+                  >
+                    <div className="bg-darkNavy/90 border border-white/10 rounded-2xl p-5 md:p-6 shadow-2xl transition-all duration-300 hover:border-pgi-light-blue/70 hover:shadow-pgi-light-blue/30">
+                      <div className="flex items-center text-xs uppercase tracking-[0.4em] text-gray-400 gap-3">
+                        <span className="flex items-center gap-2 text-blue-200 tracking-[0.2em]">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4"
+                            aria-hidden="true"
+                          >
+                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                          </svg>
+                          Phase {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span className="h-px w-8 bg-white/30" aria-hidden="true" />
+                        <span>{item.date}</span>
+                      </div>
+
+                      <p className="text-lg md:text-xl text-white font-semibold mt-4">
+                        {item.detail}
+                      </p>
+
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm font-medium text-white/90 bg-gradient-to-r from-pgi-light-blue/30 to-cyan-400/20 border border-pgi-light-blue/40 rounded-lg px-4 py-2 mt-4 hover:from-pgi-light-blue/40 hover:to-cyan-400/30 transition"
+                        >
+                          {item.linkLabel || 'Join Session'}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M7 17 17 7" />
+                            <path d="m7 7h10v10" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="absolute left-7 md:left-1/2 top-6 w-4 h-4 md:w-5 md:h-5 rounded-full bg-pgi-light-blue shadow-[0_0_15px_rgba(56,189,248,0.8)] border-4 border-navy transform -translate-x-1/2">
+                    <span className="absolute inset-0 rounded-full bg-pgi-light-blue/60 animate-ping" />
+                  </div>
+
+                  <div
+                    className={`hidden md:block absolute top-9 w-12 h-px bg-gradient-to-r ${
+                      isLeft ? 'right-1/2 from-transparent to-pgi-light-blue/60' : 'left-1/2 from-pgi-light-blue/60 to-transparent'
+                    }`}
+                  />
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Interest Form */}
-      <section className="py-20 px-4 bg-navy">
+      {/* <section className="py-20 px-4 bg-navy">
         <div className="container mx-auto max-w-4xl">
           <motion.div className="flex justify-center" variants={staggerContainer} initial="hidden" animate="visible">
             <motion.div
@@ -398,7 +571,7 @@ function GeneralRecruitment() {
               <p className="text-gray-300 mb-8 text-base md:text-lg font-light leading-relaxed">
                 Fill out this form to be notified of updates, events, and important recruitment information.
               </p>
-              <motion.a
+              {/* <motion.a
                 href="https://docs.google.com/forms/d/e/1FAIpQLSe5Fz3UnIf9S_p5scoFVi5WUL4mhpGWLkG8RG21NXUSgx8-Zw/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -421,13 +594,10 @@ function GeneralRecruitment() {
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
     </>
   );
 }
-
-const baseBtn =
-  "inline-flex flex-col items-center justify-center px-6 py-3 rounded-lg font-semibold shadow-lg text-center min-h-[64px] md:min-h-[64px]";
 
 export function UChicagoRecruitment() {
   return (
