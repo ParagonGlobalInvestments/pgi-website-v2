@@ -353,7 +353,7 @@ function GeneralRecruitment() {
                   title="Applications opening soon"
                   className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
                 >
-                  Apply (coming soon)
+                  Apply (Coming 1/12)
                 </button>
               )}
             </div>
