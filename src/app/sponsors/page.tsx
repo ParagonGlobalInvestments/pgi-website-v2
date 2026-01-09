@@ -96,6 +96,12 @@ export default function Sponsors() {
       'Hireflix is a leading one-way video interview software platform. Hireflix has partnered with PGI to support our national recruitment efforts.',
     portfolio123:
       'Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.',
+    koyfin:
+      'Koyfin delivers institutional-grade market dashboards, charting, and analytics in an intuitive interface, helping PGI members monitor macro trends and single-name fundamentals fast.',
+    onefinnet:
+      'OneFinnet aggregates global financial statements, consensus estimates, and ESG metrics into a single API so students can enrich research models with consistent, ready-to-use data.',
+    recruitu:
+      'RecruitU is a modern recruiting platform focused on business and finance roles, giving PGI talent teams streamlined tools to manage candidate pipelines and campus outreach.',
   };
 
   return (
