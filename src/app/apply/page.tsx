@@ -89,54 +89,9 @@ const nationalRecruitmentTeam: TeamMember[] = [
       university: 'University of Chicago',
     },
     {
-      name: 'Ann Li',
+      name: 'Krish Khanna',
       role: 'Recruiter',
-      university: 'New York University',
-    },
-    {
-      name: 'Aurora Wang',
-      role: 'Recruiter',
-      university: 'Columbia University',
-    },
-    {
-      name: 'David Chen',
-      role: 'Recruiter',
-      university: 'Columbia University',
-    },
-    {
-      name: 'Lucas Lu',
-      role: 'Recruiter',
-      university: 'Cornell University',
-    },
-    {
-      name: 'Nana Agyeman',
-      role: 'Recruiter',
-      university: 'Princeton University',
-    },
-    {
-      name: 'Daniel Kim',
-      role: 'Recruiter',
-      university: 'Princeton University',
-    },
-    {
-      name: 'Flynn Kelleher',
-      role: 'Recruiter',
-      university: 'Cornell University',
-    },
-    {
-      name: 'Jack Stemerman',
-      role: 'Recruiter',
-      university: 'Yale University',
-    },
-    {
-      name: 'John Yi',
-      role: 'Recruiter',
-      university: 'New York University',
-    },
-    {
-      name: 'Joshua Donovan',
-      role: 'Recruiter',
-      university: 'Yale University',
+      university: 'University of Chicago',
     },
 ];
 
