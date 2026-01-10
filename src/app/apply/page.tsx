@@ -248,13 +248,13 @@ const generalTimeline = [
     date: 'Wednesday 14th',
     detail: '1st info session · 7PM ET',
     link: 'https://uchicago.zoom.us/meetings/93724594264/invitations?signature=HIwjcPthsxZIX0IoQa2mVVVqNtpNgNb5ZXj-QWwWplc',
-    linkLabel: 'Zoom link',
+    linkLabel: 'Zoom',
   },
   {
     date: 'Friday 16th',
     detail: '2nd info session · 5PM ET',
     link: 'https://uchicago.zoom.us/meetings/97029407547/invitations?signature=N03Z6ZbwFqah1Weq3-kpou---nFrWjNQc-I1WyJxoes',
-    linkLabel: 'Zoom link',
+    linkLabel: 'Zoom',
   },
   { date: 'Monday 19th', detail: 'Applications close · 11:59 PM' },
   { date: 'Early February', detail: 'Decisions released' },
@@ -437,7 +437,7 @@ function GeneralRecruitment() {
                   variants={timelineItemVariants}
                 >
                   <div
-                    className={`w-full md:w-1/2 ${isLeft ? 'md:pr-10 lg:pr-16' : 'md:pl-10 lg:pl-16 md:ml-auto'}`}
+                    className={`w-full md:w-1/2 pl-10 ${isLeft ? 'md:pr-10 lg:pr-16' : 'md:pl-10 lg:pl-16 md:ml-auto'}`}
                   >
                     <div className="bg-darkNavy/90 border border-white/10 rounded-2xl p-5 md:p-6 shadow-2xl transition-all duration-300 hover:border-pgi-light-blue/70 hover:shadow-pgi-light-blue/30">
                       <div className="flex items-center text-xs uppercase tracking-[0.4em] text-gray-400 gap-3">
