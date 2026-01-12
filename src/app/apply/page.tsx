@@ -19,8 +19,8 @@ const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3
 const applicationsOpen = true;  // set to true when applications open
 
 const ZOOM_LINK_URL = 'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
-const GENERAL_APPLY_URL = '';
-const generalApplicationsOpen = false;
+const GENERAL_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSer1H0nz73Mlhg3x6PgulhJrwt5Qxp-LJOzzHuUqrlRtkFkvw/viewform';
+const generalApplicationsOpen = true;
 
 
 /** Animation variants (unchanged) */
