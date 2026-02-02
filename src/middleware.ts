@@ -14,6 +14,8 @@ export async function middleware(request: NextRequest) {
     const isPortalRoute =
       pathname.startsWith('/portal') ||
       pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/sign-in') ||
+      pathname.startsWith('/sign-up') ||
       pathname.startsWith('/__tests__');
 
     if (isPortalRoute) {

@@ -1,10 +1,10 @@
 /**
  * Runtime Configuration - Single Source of Truth
  *
- * Centralized runtime configuration for portal availability and feature flags.
- * This module provides a single decision point for whether the portal is enabled.
+ * Centralized runtime configuration for portal availability.
+ * Portal is enabled only when NEXT_PUBLIC_PORTAL_ENABLED is explicitly set to 'true'.
  *
- * IMPORTANT: Do not check process.env.NODE_ENV directly for portal gating elsewhere.
+ * IMPORTANT: Do not check process.env directly for portal gating elsewhere.
  * Use the exported constants from this module instead.
  */
 
@@ -12,34 +12,12 @@ import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 /**
- * Whether the application is running in production mode
- */
-export const isProd = process.env.NODE_ENV === 'production';
-
-/**
- * Whether we're on a Vercel preview deployment (preview or development)
- * Vercel sets VERCEL_ENV to 'preview', 'development', or 'production'
- */
-const isVercelPreview =
-  process.env.VERCEL_ENV === 'preview' ||
-  process.env.VERCEL_ENV === 'development';
-
-/**
  * Whether the portal is enabled.
- * Enabled in:
- * - Local development (NODE_ENV !== 'production')
- * - Vercel preview deployments (VERCEL_ENV === 'preview' or 'development')
- * Disabled in:
- * - Production deployments (NODE_ENV === 'production' AND VERCEL_ENV === 'production')
- * 
- * This is the SINGLE SOURCE OF TRUTH for portal availability
+ * Must be explicitly set to 'true' via NEXT_PUBLIC_PORTAL_ENABLED.
+ *
+ * This is the SINGLE SOURCE OF TRUTH for portal availability.
  */
-export const portalEnabled = !isProd || isVercelPreview;
-
-/**
- * Whether QA/test routes are enabled (dev-only)
- */
-export const qaRoutesEnabled = !isProd;
+export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 
 /**
  * Assert that the portal is enabled, or call notFound()
@@ -65,4 +43,3 @@ export function requirePortalEnabledOr404(): NextResponse | null {
   }
   return null;
 }
-
