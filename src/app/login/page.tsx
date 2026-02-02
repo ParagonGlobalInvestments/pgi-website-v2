@@ -18,7 +18,9 @@ const fadeIn = {
 };
 
 function isPortalSubdomain() {
-  return typeof window !== 'undefined' && window.location.host.startsWith('portal.');
+  return (
+    typeof window !== 'undefined' && window.location.host.startsWith('portal.')
+  );
 }
 
 function LoginPageContent() {
@@ -47,7 +49,9 @@ function LoginPageContent() {
             // User exists in PGI database - redirect to portal
             // On portal subdomain, use clean paths (no /portal prefix)
             const onSubdomain = isPortalSubdomain();
-            const defaultDest = onSubdomain ? '/dashboard' : '/portal/dashboard';
+            const defaultDest = onSubdomain
+              ? '/dashboard'
+              : '/portal/dashboard';
             const redirectTo = searchParams?.get('redirectTo') || defaultDest;
 
             if (onSubdomain) {
@@ -147,7 +151,7 @@ function LoginPageContent() {
     >
       <h1 className="text-2xl font-semibold text-gray-900">Log in</h1>
       <p className="text-gray-500 mt-1">
-        Access the PGI Member Portal with your Google account.
+        Access the portal with your school's Gmail.
       </p>
 
       {searchParams?.get('error') === 'auth_failed' && (
@@ -188,10 +192,7 @@ function LoginPageContent() {
           {loading ? 'Logging in...' : 'Continue with Google'}
         </button>
 
-        {error && (
-          <p className="text-red-600 text-sm">{error}</p>
-        )}
-
+        {error && <p className="text-red-600 text-sm">{error}</p>}
       </div>
     </motion.div>
   );
