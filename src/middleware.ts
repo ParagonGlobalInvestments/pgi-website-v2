@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Subdomain detection: portal.paragoninvestments.org or portal.localhost.nip.io:3000
+  // Subdomain detection: portal.paragoninvestments.org or portal.127.0.0.1.sslip.io:3000
   const host = request.headers.get('host') || '';
   const isPortalSubdomain = host.startsWith('portal.');
 
