@@ -12,6 +12,8 @@ import {
 import { Button } from '@/components/ui';
 import { DetailPanel } from '@/components/ui/detail-panel';
 import { RESOURCE_CATEGORIES, type Resource } from '@/lib/constants/resources';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 
 // ============================================================================
 // Constants
@@ -42,10 +44,21 @@ const TYPE_LABELS: Record<string, string> = {
 // Resource Detail Panel Content
 // ============================================================================
 
-function ResourceDetail({ resource, categoryLabel }: { resource: Resource; categoryLabel: string }) {
+function ResourceDetail({
+  resource,
+  categoryLabel,
+  isMobile,
+  onPreview,
+}: {
+  resource: Resource;
+  categoryLabel: string;
+  isMobile: boolean;
+  onPreview: () => void;
+}) {
   const Icon = TYPE_ICONS[resource.type] || FaFilePdf;
   const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url);
+  const canPreview = hasUrl && (resource.type === 'pdf' || resource.type === 'sheet');
 
   return (
     <div className="space-y-6">
@@ -90,17 +103,37 @@ function ResourceDetail({ resource, categoryLabel }: { resource: Resource; categ
 
       {/* Action */}
       {hasUrl ? (
-        <a
-          href={resource.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <Button variant="navy" className="w-full justify-center gap-2">
-            Open Resource
-            <FaExternalLinkAlt className="h-3 w-3" />
-          </Button>
-        </a>
+        isMobile && canPreview ? (
+          <div className="space-y-3">
+            <Button
+              variant="navy"
+              className="w-full justify-center gap-2"
+              onClick={onPreview}
+            >
+              Preview
+            </Button>
+            <a
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Open in New Tab
+            </a>
+          </div>
+        ) : (
+          <a
+            href={resource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <Button variant="navy" className="w-full justify-center gap-2">
+              Open Resource
+              <FaExternalLinkAlt className="h-3 w-3" />
+            </Button>
+          </a>
+        )
       ) : (
         <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-100">
           <p className="text-sm text-gray-500">
@@ -166,8 +199,13 @@ export default function ResourcesPage() {
   const [activeTab, setActiveTab] = useState(RESOURCE_CATEGORIES[0].id);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const activeCategory = RESOURCE_CATEGORIES.find(c => c.id === activeTab)!;
+
+  const isPreviewable = (r: Resource) =>
+    Boolean(r.url) && (r.type === 'pdf' || r.type === 'sheet');
 
   const openPanel = (resource: Resource) => {
     setSelectedResource(resource);
@@ -237,9 +275,22 @@ export default function ResourcesPage() {
           <ResourceDetail
             resource={selectedResource}
             categoryLabel={activeCategory.label}
+            isMobile={isMobile}
+            onPreview={() => setIsViewerOpen(true)}
           />
         )}
       </DetailPanel>
+
+      {/* Mobile Document Viewer (full-screen overlay) */}
+      {selectedResource && isPreviewable(selectedResource) && (
+        <MobileDocumentViewer
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          url={selectedResource.url}
+          title={selectedResource.title}
+          type={selectedResource.type === 'sheet' ? 'sheet' : 'pdf'}
+        />
+      )}
     </div>
   );
 }
