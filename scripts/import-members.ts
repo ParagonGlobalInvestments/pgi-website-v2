@@ -70,6 +70,7 @@ function mapProgram(csvSide: string): string | null {
 
 // ---------------------------------------------------------------------------
 // Dev accounts (added or upgraded from CSV)
+// Loaded from data/admin-accounts.json (gitignored) to keep PII out of VCS
 // ---------------------------------------------------------------------------
 
 interface DevOverride {
@@ -82,42 +83,13 @@ interface DevOverride {
   graduationYear?: number;
 }
 
-const DEV_ACCOUNTS: DevOverride[] = [
-  {
-    email: 'ap7564@nyu.edu',
-    alternateEmails: ['hello@anipotts.com'],
-    role: 'admin',
-    program: null,
-    school: 'nyu',
-    name: 'Ani Potts',
-    graduationYear: 2027,
-  },
-  {
-    email: 'aalonso20@uchicago.edu',
-    alternateEmails: ['axalonso12@gmail.com'],
-    role: 'admin',
-    program: null,
-    school: 'uchicago',
-    name: 'Alejandro Alonso',
-    graduationYear: 2027,
-  },
-  {
-    // Carter Tran exists in CSV — upgrade to admin
-    email: 'cartertran@uchicago.edu',
-    alternateEmails: ['carter.tran@gmail.com'],
-    role: 'admin',
-    program: 'quant', // from CSV
-    school: 'uchicago',
-  },
-  {
-    // Nathan Zhong exists in CSV — upgrade to admin
-    email: 'nathan_zhong@brown.edu',
-    alternateEmails: ['nathanyzhong@gmail.com'],
-    role: 'admin',
-    program: 'quant', // from CSV
-    school: 'brown',
-  },
-];
+const adminPath = resolve(__dirname, '../data/admin-accounts.json');
+let DEV_ACCOUNTS: DevOverride[] = [];
+try {
+  DEV_ACCOUNTS = JSON.parse(readFileSync(adminPath, 'utf-8'));
+} catch {
+  console.warn('No data/admin-accounts.json found — skipping admin overrides');
+}
 
 // ---------------------------------------------------------------------------
 // Parse CSV
