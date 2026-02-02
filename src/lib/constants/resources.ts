@@ -116,13 +116,6 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         url: `${BASE}/recruitment/networking-questions.docx`,
         type: 'doc',
       },
-      {
-        id: 'email-list',
-        title: 'Email List',
-        description: 'Networking contact directory',
-        url: `${BASE}/recruitment/email-list.xlsx`,
-        type: 'sheet',
-      },
       // Resume
       {
         id: 'sample-resume',
