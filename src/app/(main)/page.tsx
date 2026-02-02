@@ -749,7 +749,7 @@ export default function Home() {
               Paragon Global Investments (PGI) is an intercollegiate,
               student-run fund with chapters at 8 top U.S. universities.
               Combining fundamental and systematic strategies, we manage a
-              $60,000 portfolio. With 300+ active members, PGI annually attracts
+              $70,000 portfolio. With 300+ active members, PGI annually attracts
               nearly 2,000 interested students nationwide.
             </motion.p>
 
@@ -762,7 +762,7 @@ export default function Home() {
                 className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
-                  $<CountUp to={60} duration={1} delay={0.3} />K
+                  $<CountUp to={70} duration={1} delay={0.3} />K
                 </p>
                 <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
                   AUM
@@ -773,7 +773,7 @@ export default function Home() {
                 className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
               >
                 <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
-                  <CountUp to={21} duration={1.5} delay={0.5} />
+                  <CountUp to={27} duration={1.5} delay={0.5} />
                 </p>
                 <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
                   Sponsors & Partners
