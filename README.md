@@ -13,6 +13,7 @@ The official web application for Paragon Global Investments. The site provides a
 - [Development Workflow](#development-workflow)
 - [Production Build](#production-build)
 - [Common Gotchas](#common-gotchas)
+- [Portal & Subdomain Routing](#portal--subdomain-routing)
 
 ## Project Overview
 
@@ -60,7 +61,7 @@ npm install
 1. Copy the example environment file:
 
    ```bash
-   cp docs/env.example .env.local
+   cp .env.example .env.local
    ```
 
 2. Fill in your Supabase credentials:
@@ -95,6 +96,7 @@ The application will be available at `http://localhost:3000`.
 **Application:**
 
 - `NEXT_PUBLIC_APP_URL` - Your application URL (e.g., `http://localhost:3000` for dev)
+- `NEXT_PUBLIC_PORTAL_ENABLED` - Must be explicitly set to `'true'` to enable the member portal, sign-in, and sign-up routes. When omitted or any other value, portal routes return 404 and the Sign In button is hidden.
 
 **Google OAuth (required only if using `/resources` page):**
 
@@ -106,6 +108,10 @@ The application will be available at `http://localhost:3000`.
 - `PGI_REQUIRE_EDU` - Require `.edu` email for resources page (default: `true`)
 
 ### Optional Variables
+
+**Portal Subdomain:**
+
+- `NEXT_PUBLIC_PORTAL_URL` - Full URL of the portal subdomain (e.g., `https://portal.paragoninvestments.org`). When set, auth callbacks redirect to this origin with clean URLs. Not needed for local dev or Vercel previews.
 
 **Feature Flags:**
 
@@ -119,13 +125,9 @@ The application will be available at `http://localhost:3000`.
 - `NEXT_PUBLIC_POSTHOG_KEY` - PostHog analytics key
 - `NEXT_PUBLIC_POSTHOG_HOST` - PostHog host URL (default: `https://us.i.posthog.com`)
 
-**Legacy/Unused Variables (may be present but not actively used):**
+**Other:**
 
-- `NEXT_PUBLIC_CLERK_SIGN_IN_URL` - Legacy Clerk variable (not used, codebase uses Supabase Auth)
-- `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - Legacy Clerk variable (not used)
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` - Legacy Clerk variable (not used)
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` - Legacy Clerk variable (not used)
-- `ADMIN_EMAILS` - Comma-separated list of admin emails (currently not used in codebase)
+- `ADMIN_EMAILS` - Comma-separated list of admin emails for the allowlist
 - `NODE_ENV` - Automatically set by Next.js, do not manually set in `.env.local`
 
 ### What Breaks vs. What Degrades
@@ -138,7 +140,7 @@ The application will be available at `http://localhost:3000`.
 
 **Missing analytics:** No analytics tracking, but the application works normally.
 
-See `docs/env.example` for a complete template with all variables listed.
+See `.env.example` in the project root for a complete template with all variables listed.
 
 ## Authentication & Authorization
 
@@ -148,14 +150,15 @@ All user authentication is handled by Supabase Auth. Users sign up and sign in t
 
 ### Middleware
 
-Route protection is handled by `src/middleware.ts`, which:
+Route protection and subdomain routing are handled by `src/middleware.ts`, which:
 
-- Checks authentication status for protected routes
-- Redirects unauthenticated users to `/sign-in`
-- Redirects authenticated users away from auth pages
+- Gates portal routes (404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`)
+- Detects `portal.*` subdomain and rewrites requests to `/portal/*` transparently
+- Exempts auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) from subdomain rewriting
+- Redirects `/portal/*` paths on the subdomain to clean URLs (strips prefix)
 - Allows public routes to pass through
 
-Protected routes include `/portal/dashboard/**` and related member-only areas.
+Protected routes include `/portal/**`, `/dashboard/**`, `/sign-in`, `/sign-up`, and `/__tests__/**`.
 
 ### User Roles
 
@@ -334,3 +337,51 @@ If you're not working on the `/resources` page, you don't need to configure Next
 **Symptom:** Warnings about TypeScript version mismatch with ESLint parser.
 
 **Solution:** TypeScript is pinned to 5.5.4 for compatibility. If you see parser warnings, ensure `npm install` completed successfully and check that `package.json` specifies `typescript: "5.5.4"`.
+
+## Portal & Subdomain Routing
+
+The member portal supports three access patterns. Middleware handles all of them automatically.
+
+### Production
+
+Portal is accessed via subdomain with clean URLs:
+
+```
+portal.paragoninvestments.org/dashboard
+portal.paragoninvestments.org/settings
+```
+
+Middleware detects the `portal.` host prefix and rewrites requests to `/portal/*` internally. Auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) are exempt from rewriting since they live at the root level.
+
+### Local Development
+
+Use [nip.io](https://nip.io) for subdomain testing without hosts file changes:
+
+```
+portal.localhost.nip.io:3000/dashboard
+```
+
+This works because `nip.io` resolves `*.localhost.nip.io` to `127.0.0.1`, and middleware sees the `portal.` prefix in the `host` header.
+
+You can also access the portal via path-based routing at `localhost:3000/portal/dashboard`.
+
+**Important:** `NEXT_PUBLIC_PORTAL_ENABLED=true` must be in your `.env.local` for the portal to be accessible.
+
+### Vercel Preview Deployments
+
+On preview deployments (`*.vercel.app`), subdomain routing does NOT activate — this is a Vercel platform limitation (preview URLs don't support custom subdomains). Access the portal via path-based routing:
+
+```
+your-branch-name.vercel.app/portal/dashboard
+```
+
+### How It Works
+
+| Environment | URL Pattern | Mechanism |
+|---|---|---|
+| Production | `portal.paragoninvestments.org/dashboard` | Middleware rewrites to `/portal/dashboard` |
+| Local dev | `portal.localhost.nip.io:3000/dashboard` | Same middleware rewrite via nip.io |
+| Local dev | `localhost:3000/portal/dashboard` | Direct path, no rewrite needed |
+| Vercel preview | `preview-url.vercel.app/portal/dashboard` | Direct path, no rewrite needed |
+
+If a user visits `portal.paragoninvestments.org/portal/dashboard` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/dashboard` to enforce clean URLs.
