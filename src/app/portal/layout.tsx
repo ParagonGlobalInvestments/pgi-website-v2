@@ -1,9 +1,33 @@
+import type { Metadata } from 'next';
 import { assertPortalEnabledOrNotFound } from '@/lib/runtime';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import '@/tailwind.css';
 import '@/app/globals.css';
 import PortalLayoutClient from './layout-client';
+
+export const metadata: Metadata = {
+  title: 'Portal | Paragon Global Investments',
+  description: 'PGI member portal — directory, resources, and team tools.',
+  openGraph: {
+    title: 'Portal | Paragon Global Investments',
+    description: 'PGI member portal — directory, resources, and team tools.',
+    images: [
+      {
+        url: '/api/og/portal',
+        width: 1200,
+        height: 630,
+        alt: 'Paragon Global Investments Portal',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Portal | Paragon Global Investments',
+    description: 'PGI member portal — directory, resources, and team tools.',
+    images: ['/api/og/portal'],
+  },
+};
 
 /**
  * Server component wrapper - enforces portal availability and authentication.

@@ -35,10 +35,10 @@ export const metadata: Metadata = {
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
     images: [
       {
-        url: '/logos/pgiLogoTransparentDark.png',
+        url: '/api/og',
         width: 1200,
         height: 630,
-        alt: 'Paragon Global Investments Logo',
+        alt: 'Paragon Global Investments',
       },
     ],
   },
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: 'Paragon Global Investments',
     description:
       'Student-run intercollegiate investment fund with value + algorithmic strategies.',
-    images: ['/logos/pgiLogoTransparentDark.png'],
+    images: ['/api/og'],
   },
   robots: {
     index: true,
