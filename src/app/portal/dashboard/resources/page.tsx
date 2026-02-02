@@ -22,7 +22,7 @@ const TYPE_COLORS: Record<string, string> = {
 function ResourceCard({ resource }: { resource: Resource }) {
   const Icon = TYPE_ICONS[resource.type] || FaFilePdf;
   const color = TYPE_COLORS[resource.type] || 'text-gray-500';
-  const hasUrl = Boolean(resource.driveUrl);
+  const hasUrl = Boolean(resource.url);
 
   return (
     <div
@@ -32,7 +32,7 @@ function ResourceCard({ resource }: { resource: Resource }) {
           : 'opacity-60'
       }`}
       onClick={() => {
-        if (hasUrl) window.open(resource.driveUrl, '_blank');
+        if (hasUrl) window.open(resource.url, '_blank');
       }}
     >
       <div className={`flex-shrink-0 ${color}`}>

@@ -2,14 +2,17 @@
  * PGI Portal — Resource definitions
  *
  * Hardcoded resource links organized by category.
- * Replace placeholder URLs with actual Google Drive sharing links.
+ * Files hosted in Supabase Storage (public bucket: resources).
  */
+
+const BASE =
+  'https://mgdwgpjqtzfzirfxaoun.supabase.co/storage/v1/object/public/resources';
 
 export interface Resource {
   id: string;
   title: string;
   description: string;
-  driveUrl: string; // Google Drive sharing link
+  url: string; // Public Supabase Storage URL (empty = "Coming soon")
   type: 'pdf' | 'doc' | 'sheet' | 'folder';
 }
 
@@ -31,64 +34,64 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'value-week-1',
         title: 'Value Education — Week 1',
         description: 'Introduction to value investing fundamentals',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'value-week-2',
         title: 'Value Education — Week 2',
         description: 'Financial statement analysis',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/education/value-week-2.pdf`,
         type: 'pdf',
       },
       {
         id: 'value-week-3',
         title: 'Value Education — Week 3',
         description: 'Valuation methodologies',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/education/value-week-3.pdf`,
         type: 'pdf',
       },
       {
         id: 'value-week-4',
         title: 'Value Education — Week 4',
         description: 'Pitch construction and presentation',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       // Quant Education
       {
         id: 'quant-week-1',
         title: 'Quant Education — Week 1',
-        description: 'Introduction to quantitative finance',
-        driveUrl: '', // TODO: Add Drive URL
+        description: 'Options and derivatives fundamentals',
+        url: `${BASE}/education/quant-week-1.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-week-2',
         title: 'Quant Education — Week 2',
-        description: 'Statistical methods and probability',
-        driveUrl: '', // TODO: Add Drive URL
+        description: 'Linear factor pricing models',
+        url: `${BASE}/education/quant-week-2.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-week-3',
         title: 'Quant Education — Week 3',
-        description: 'Time series analysis',
-        driveUrl: '', // TODO: Add Drive URL
+        description: 'Portfolio optimization',
+        url: `${BASE}/education/quant-week-3.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-week-4',
         title: 'Quant Education — Week 4',
-        description: 'Portfolio optimization',
-        driveUrl: '', // TODO: Add Drive URL
+        description: 'Portfolio construction',
+        url: `${BASE}/education/quant-week-4.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-week-5',
         title: 'Quant Education — Week 5',
-        description: 'Machine learning in finance',
-        driveUrl: '', // TODO: Add Drive URL
+        description: 'Market making',
+        url: `${BASE}/education/quant-week-5.pdf`,
         type: 'pdf',
       },
     ],
@@ -103,21 +106,21 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'networking-emails',
         title: 'Networking Emails Guide',
         description: 'Templates and strategies for IB networking outreach',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/networking-emails.docx`,
         type: 'doc',
       },
       {
         id: 'networking-questions',
         title: 'Networking Questions & Guide',
         description: 'Comprehensive guide for networking conversations',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/networking-questions.docx`,
         type: 'doc',
       },
       {
         id: 'email-list',
         title: 'Email List',
         description: 'Networking contact directory',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/email-list.xlsx`,
         type: 'sheet',
       },
       // Resume
@@ -125,86 +128,79 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'sample-resume',
         title: 'Sample Resume',
         description: 'Example IB resume template',
-        driveUrl: '', // TODO: Add Drive URL
-        type: 'doc',
+        url: `${BASE}/recruitment/sample-resume.pdf`,
+        type: 'pdf',
       },
       // IB Technicals
       {
         id: 'technicals-core-concepts',
         title: 'Core Concepts',
         description: 'Fundamental IB technical concepts',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-accounting',
         title: 'Accounting — 3 Statements',
         description: 'Income statement, balance sheet, and cash flow',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-advanced-accounting',
         title: 'Advanced Accounting & Projecting',
         description: 'Advanced accounting concepts and financial projections',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-ev',
         title: 'Equity, EV, and Valuation Multiples',
         description: 'Enterprise value and comparable company analysis',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-dcf',
         title: 'DCF',
         description: 'Discounted cash flow analysis',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-merger',
         title: 'Merger Model',
         description: 'M&A analysis and accretion/dilution',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-lbo',
         title: 'LBO',
         description: 'Leveraged buyout analysis',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-dcm-ecm',
         title: 'DCM, ECM, Lev Fin',
         description: 'Capital markets and leveraged finance',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'technicals-private',
         title: 'Private Companies',
         description: 'Valuing private companies',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
-      // Interview Questions
+      // Interview Questions (merged into single entry)
       {
-        id: 'interview-q1',
-        title: 'Past Interview Questions — Example 1',
+        id: 'interview-questions',
+        title: 'Past Interview Questions',
         description: 'Real interview questions from past recruiting cycles',
-        driveUrl: '', // TODO: Add Drive URL
-        type: 'pdf',
-      },
-      {
-        id: 'interview-q2',
-        title: 'Past Interview Questions — Example 2',
-        description: 'Additional real interview questions',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       // Financial Modeling
@@ -212,21 +208,21 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'modeling-guide',
         title: '3 Statement Model Guide',
         description: 'Complete guide to building a 3-statement financial model',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       {
         id: 'modeling-notes',
         title: 'Modeling Notes (LBO and General)',
         description: 'LBO modeling and general financial modeling notes',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/modeling-notes.pdf`,
         type: 'pdf',
       },
       {
         id: 'excel-shortcuts',
         title: 'Excel Shortcuts',
         description: 'Essential Excel keyboard shortcuts for finance',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'pdf',
       },
       // Quant Prep
@@ -234,21 +230,21 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'quant-joshi',
         title: 'Quant Job Interview Q&A (Mark Joshi)',
         description: 'Comprehensive quant interview preparation',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/quant-joshi.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-zhou',
         title: 'Practical Guide to Quant Interviews (Xinfeng Zhou)',
         description: 'Practical quant finance interview guide',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/quant-zhou.pdf`,
         type: 'pdf',
       },
       {
         id: 'quant-janestreet',
         title: 'Jane Street Interview Guide',
         description: 'Preparation guide for Jane Street interviews',
-        driveUrl: '', // TODO: Add Drive URL
+        url: `${BASE}/recruitment/quant-janestreet.pdf`,
         type: 'pdf',
       },
     ],
@@ -262,70 +258,70 @@ export const RESOURCE_CATEGORIES: ResourceCategory[] = [
         id: 'pitch-crwd',
         title: 'NASDAQ: CRWD — CrowdStrike',
         description: 'Investment pitch report and model (Dec 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-cytk',
         title: 'NASDAQ: CYTK — Cytokinetics',
         description: 'Investment pitch report and model (Dec 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-frpt',
         title: 'NASDAQ: FRPT — Freshpet',
         description: 'Investment pitch report and model (May 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-hood',
         title: 'NASDAQ: HOOD — Robinhood',
         description: 'Investment pitch report and model (May 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-os',
         title: 'NASDAQ: OS — OneStream',
         description: 'Investment pitch report and model (Dec 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-pinc',
         title: 'NASDAQ: PINC — Premier',
         description: 'Investment pitch report and model (May 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-dlr',
         title: 'NYSE: DLR — Digital Realty',
         description: 'Investment pitch report and model (Dec 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-lea',
         title: 'NYSE: LEA — Lear Corporation',
         description: 'Investment pitch report and model (Dec 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-nke',
         title: 'NYSE: NKE — Nike',
         description: 'Investment pitch report and model (May 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
       {
         id: 'pitch-nvo',
         title: 'NYSE: NVO — Novo Nordisk',
         description: 'Investment pitch report and model (May 2025)',
-        driveUrl: '', // TODO: Add Drive URL
+        url: '',
         type: 'folder',
       },
     ],
