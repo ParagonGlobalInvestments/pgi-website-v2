@@ -72,5 +72,8 @@ Thumbs.db
 # Local development
 .local/
 
+# Member data (PII)
+/data/
+
 # ReactBits/jsrepo configuration
 jsrepo.json

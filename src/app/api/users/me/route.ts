@@ -76,25 +76,25 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (body.linkedinUrl !== undefined) {
-      const url = String(body.linkedinUrl).trim();
+      const url = body.linkedinUrl ? String(body.linkedinUrl).trim() : '';
       if (url && !LINKEDIN_RE.test(url)) {
         return NextResponse.json(
           { error: 'LinkedIn URL must start with https://linkedin.com/in/ or https://www.linkedin.com/in/' },
           { status: 400 }
         );
       }
-      updates.linkedin_url = url || '';
+      updates.linkedin_url = url;
     }
 
     if (body.githubUrl !== undefined) {
-      const url = String(body.githubUrl).trim();
+      const url = body.githubUrl ? String(body.githubUrl).trim() : '';
       if (url && !GITHUB_RE.test(url)) {
         return NextResponse.json(
           { error: 'GitHub URL must start with https://github.com/' },
           { status: 400 }
         );
       }
-      updates.github_url = url || '';
+      updates.github_url = url;
     }
 
     if (Object.keys(updates).length === 0) {
