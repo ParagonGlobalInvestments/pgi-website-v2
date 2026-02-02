@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaSave, FaLinkedin, FaGithub } from 'react-icons/fa';
+import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button, Input, Label, Card, CardHeader, CardContent } from '@/components/ui';
+import { Button, Input, Label } from '@/components/ui';
 import type { User } from '@/types';
 
 const SCHOOL_LABELS: Record<string, string> = {
@@ -29,18 +29,25 @@ const PROGRAM_LABELS: Record<string, string> = {
   quant: 'Quant',
 };
 
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-gray-500 uppercase tracking-wide">{label}</dt>
+      <dd className="mt-1 text-sm font-medium text-gray-900">{value}</dd>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Form state
   const [name, setName] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
 
-  // Fetch user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -107,10 +114,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-xl space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your profile information</p>
+        <p className="text-gray-500 mt-1 text-sm">Manage your profile information</p>
       </div>
 
       {/* Toast */}
@@ -120,7 +127,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`p-3 rounded-md text-sm ${
+            className={`p-3 rounded-lg text-sm ${
               message.type === 'success'
                 ? 'bg-green-50 text-green-800 border border-green-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
@@ -131,110 +138,79 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      {/* Read-only fields */}
-      <Card>
-        <CardHeader className="bg-gray-50 border-b border-gray-200">
-          <h2 className="text-sm font-medium text-gray-700 px-2">Account Details</h2>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
-            <div>
-              <span className="text-gray-500">Email</span>
-              <p className="font-medium text-gray-900 mt-0.5">{user.email}</p>
-            </div>
-            <div>
-              <span className="text-gray-500">School</span>
-              <p className="font-medium text-gray-900 mt-0.5">
-                {SCHOOL_LABELS[user.school] || user.school}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Role</span>
-              <p className="font-medium text-gray-900 mt-0.5">
-                {ROLE_LABELS[user.role] || user.role}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Program</span>
-              <p className="font-medium text-gray-900 mt-0.5">
-                {user.program
-                  ? PROGRAM_LABELS[user.program] || user.program
-                  : 'N/A'}
-              </p>
-            </div>
-            {user.graduationYear && (
-              <div>
-                <span className="text-gray-500">Graduation Year</span>
-                <p className="font-medium text-gray-900 mt-0.5">
-                  {user.graduationYear}
-                </p>
-              </div>
-            )}
+      {/* Account details — read-only */}
+      <section>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4">Account Details</h2>
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-5 bg-gray-50 rounded-lg p-5 border border-gray-100">
+          <DetailItem label="Email" value={user.email} />
+          <DetailItem label="School" value={SCHOOL_LABELS[user.school] || user.school} />
+          <DetailItem label="Role" value={ROLE_LABELS[user.role] || user.role} />
+          <DetailItem
+            label="Program"
+            value={user.program ? (PROGRAM_LABELS[user.program] || user.program) : 'N/A'}
+          />
+          {user.graduationYear && (
+            <DetailItem label="Graduation Year" value={String(user.graduationYear)} />
+          )}
+        </dl>
+      </section>
+
+      {/* Edit profile form */}
+      <section>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4">Edit Profile</h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <Label htmlFor="name" className="text-gray-700">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="mt-1.5"
+              required
+            />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Editable fields */}
-      <Card>
-        <CardHeader className="bg-gray-50 border-b border-gray-200">
-          <h2 className="text-sm font-medium text-gray-700 px-2">Edit Profile</h2>
-        </CardHeader>
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="mt-1"
-                required
-              />
-            </div>
+          <div>
+            <Label htmlFor="linkedin" className="flex items-center gap-2 text-gray-700">
+              <FaLinkedin className="text-[#0077B5]" />
+              LinkedIn URL
+            </Label>
+            <Input
+              id="linkedin"
+              value={linkedinUrl}
+              onChange={e => setLinkedinUrl(e.target.value)}
+              placeholder="https://linkedin.com/in/your-profile"
+              className="mt-1.5"
+            />
+            <p className="text-xs text-gray-500 mt-1.5">
+              Must start with https://linkedin.com/in/ or https://www.linkedin.com/in/
+            </p>
+          </div>
 
-            <div>
-              <Label htmlFor="linkedin" className="flex items-center gap-2">
-                <FaLinkedin className="text-[#0077B5]" />
-                LinkedIn URL
-              </Label>
-              <Input
-                id="linkedin"
-                value={linkedinUrl}
-                onChange={e => setLinkedinUrl(e.target.value)}
-                placeholder="https://linkedin.com/in/your-profile"
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Must start with https://linkedin.com/in/ or https://www.linkedin.com/in/
-              </p>
-            </div>
+          <div>
+            <Label htmlFor="github" className="flex items-center gap-2 text-gray-700">
+              <FaGithub className="text-gray-700" />
+              GitHub URL
+            </Label>
+            <Input
+              id="github"
+              value={githubUrl}
+              onChange={e => setGithubUrl(e.target.value)}
+              placeholder="https://github.com/your-username"
+              className="mt-1.5"
+            />
+            <p className="text-xs text-gray-500 mt-1.5">
+              Must start with https://github.com/
+            </p>
+          </div>
 
-            <div>
-              <Label htmlFor="github" className="flex items-center gap-2">
-                <FaGithub className="text-gray-900" />
-                GitHub URL
-              </Label>
-              <Input
-                id="github"
-                value={githubUrl}
-                onChange={e => setGithubUrl(e.target.value)}
-                placeholder="https://github.com/your-username"
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Must start with https://github.com/
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={saving} variant="navy" className="flex items-center gap-2">
-                <FaSave />
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <div className="flex justify-end pt-3 border-t border-gray-100">
+            <Button type="submit" disabled={saving} variant="navy">
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }

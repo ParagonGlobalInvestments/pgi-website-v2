@@ -5,14 +5,7 @@ import { createClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import {
-  FaUsers,
-  FaCog,
-  FaHome,
-  FaChevronLeft,
-  FaBook,
-} from 'react-icons/fa';
-import { MdDashboard } from 'react-icons/md';
+import { FaChevronLeft } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -46,31 +39,29 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const NAV_ITEMS = [
-  { id: 'dashboard', href: '/portal/dashboard', icon: MdDashboard, label: 'Dashboard' },
-  { id: 'directory', href: '/portal/dashboard/directory', icon: FaUsers, label: 'Directory' },
-  { id: 'resources', href: '/portal/dashboard/resources', icon: FaBook, label: 'Resources' },
-  { id: 'settings', href: '/portal/dashboard/settings', icon: FaCog, label: 'Settings' },
+  { id: 'dashboard', href: '/portal/dashboard', label: 'Dashboard' },
+  { id: 'directory', href: '/portal/dashboard/directory', label: 'Directory' },
+  { id: 'resources', href: '/portal/dashboard/resources', label: 'Resources' },
+  { id: 'settings', href: '/portal/dashboard/settings', label: 'Settings' },
 ];
 
 const SIDEBAR_VARIANTS = {
-  expanded: { width: '16rem', backgroundColor: '#00172B' },
+  expanded: { width: '14rem', backgroundColor: '#00172B' },
   collapsed: { width: '4.5rem', backgroundColor: '#00172B' },
 };
 
 // ============================================================================
-// NavItem
+// NavItem — text-only, active state via left accent bar
 // ============================================================================
 
 function NavItem({
   href,
-  icon: Icon,
   label,
   isActive,
   onClick,
   isCollapsed,
 }: {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
   label: string;
   isActive: boolean;
   onClick: () => void;
@@ -80,18 +71,24 @@ function NavItem({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Link href={href} onClick={onClick} className="w-full">
-            <Button
-              variant={isActive ? 'navy-accent' : 'ghost'}
-              className={`w-full ${
-                isCollapsed ? 'justify-center px-2' : 'justify-start px-3'
-              } transition-all duration-200 text-gray-300 hover:text-white`}
+          <Link href={href} onClick={onClick} className="w-full block">
+            <div
+              className={`relative flex items-center rounded-md text-sm transition-colors duration-200 ${
+                isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
+              } ${
+                isActive
+                  ? 'text-white font-medium'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
             >
-              <span className={`text-sm ${isCollapsed ? 'mx-0' : 'mr-3'}`}>
-                <Icon className="h-4 w-4" />
-              </span>
-              {!isCollapsed && <span className="text-sm">{label}</span>}
-            </Button>
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4A6BB1] rounded-r" />
+              )}
+              {!isCollapsed && <span>{label}</span>}
+              {isCollapsed && (
+                <span className="text-xs font-medium">{label[0]}</span>
+              )}
+            </div>
           </Link>
         </TooltipTrigger>
         {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
@@ -123,12 +120,16 @@ export default function DashboardLayout({
   // Check auth
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setAuthUser(user);
     };
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user || null);
     });
     return () => subscription.unsubscribe();
@@ -163,12 +164,19 @@ export default function DashboardLayout({
   // Mobile menu body overflow
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isMobileMenuOpen]);
 
-  const displayName = portalUser?.name || authUser?.user_metadata?.full_name || '';
-  const displaySchool = portalUser?.school ? (SCHOOL_LABELS[portalUser.school] || portalUser.school) : '';
-  const displayRole = portalUser?.role ? (ROLE_LABELS[portalUser.role] || portalUser.role) : '';
+  const displayName =
+    portalUser?.name || authUser?.user_metadata?.full_name || '';
+  const displaySchool = portalUser?.school
+    ? SCHOOL_LABELS[portalUser.school] || portalUser.school
+    : '';
+  const displayRole = portalUser?.role
+    ? ROLE_LABELS[portalUser.role] || portalUser.role
+    : '';
 
   // Loading
   if (!isClient || !authUser) {
@@ -195,15 +203,35 @@ export default function DashboardLayout({
           />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-white p-2 hover:bg-[#003E6B] rounded-md"
+            className="text-white p-2 hover:bg-[#003E6B] rounded-md min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             {isMobileMenuOpen ? (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             ) : (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             )}
           </button>
@@ -222,7 +250,9 @@ export default function DashboardLayout({
             <div className="flex-1">
               <div className="text-white font-medium">{displayName}</div>
               <div className="text-xs text-gray-400">
-                {displaySchool}{displaySchool && displayRole ? ' / ' : ''}{displayRole}
+                {displaySchool}
+                {displaySchool && displayRole ? ' / ' : ''}
+                {displayRole}
               </div>
             </div>
           </div>
@@ -232,36 +262,35 @@ export default function DashboardLayout({
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-md text-white ${
-                  activeLink === item.id ? 'bg-[#003E6B]' : 'hover:bg-[#002C4D]'
+                className={`flex items-center px-3 py-3 rounded-md text-white min-h-[44px] ${
+                  activeLink === item.id
+                    ? 'bg-[#003E6B] font-medium'
+                    : 'hover:bg-[#002C4D]'
                 }`}
                 onClick={() => {
                   setActiveLink(item.id);
                   setIsMobileMenuOpen(false);
                 }}
               >
-                <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
 
-          <div className="mt-6 space-y-1">
+          <div className="mt-6 pt-4 border-t border-[#003E6B] space-y-1">
             <Link
               href="/"
-              className="flex items-center text-sm space-x-3 px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D]"
+              className="flex items-center text-sm px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D] min-h-[44px]"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <FaHome className="h-5 w-5" />
-              <span>Back to Website</span>
+              Back to Website
             </Link>
             <Link
               href="/portal/signout"
-              className="flex items-center text-sm space-x-3 px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D]"
+              className="flex items-center text-sm px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D] min-h-[44px]"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="h-5 w-5 flex items-center justify-center text-xs">&#x2192;</span>
-              <span>Sign Out</span>
+              Sign Out
             </Link>
           </div>
         </div>
@@ -291,7 +320,11 @@ export default function DashboardLayout({
           </SmoothTransition>
 
           <div className="flex items-center rounded-full">
-            <SmoothTransition isVisible={isCollapsed} direction="scale" className="w-full">
+            <SmoothTransition
+              isVisible={isCollapsed}
+              direction="scale"
+              className="w-full"
+            >
               <div
                 className="w-8 h-8 rounded cursor-pointer"
                 onClick={() => setIsCollapsed(false)}
@@ -329,16 +362,15 @@ export default function DashboardLayout({
         {/* Nav items */}
         <div className="px-3 mt-6 flex-1">
           {!isCollapsed && (
-            <h2 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+            <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
               Main
             </h2>
           )}
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             {NAV_ITEMS.map(item => (
               <NavItem
                 key={item.id}
                 href={item.href}
-                icon={item.icon}
                 label={item.label}
                 isActive={activeLink === item.id}
                 onClick={() => setActiveLink(item.id)}
@@ -353,7 +385,9 @@ export default function DashboardLayout({
           <div className="px-4 py-3 mx-3 mb-3 bg-[#002C4D] rounded-md border border-[#003E6B]/50">
             <div className="font-medium text-white text-sm">{displayName}</div>
             <div className="text-xs text-gray-400 mt-0.5">
-              {displaySchool}{displaySchool && displayRole ? ' / ' : ''}{displayRole}
+              {displaySchool}
+              {displaySchool && displayRole ? ' / ' : ''}
+              {displayRole}
             </div>
             {portalUser.role === 'admin' && (
               <span className="inline-block mt-1 text-xs px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded">
@@ -364,44 +398,34 @@ export default function DashboardLayout({
         )}
 
         {/* Footer */}
-        <div className="px-3 py-3 border-t border-[#003E6B] space-y-1">
+        <div className="px-3 py-3 border-t border-[#003E6B]/50 space-y-0.5">
           {isCollapsed ? (
-            <>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/" className="w-full flex justify-center">
-                      <Button
-                        variant="ghost"
-                        className="text-gray-300 hover:text-white hover:bg-[#003E6B] w-9 h-9 p-0 rounded-full"
-                      >
-                        <FaHome />
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Back to Website</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/"
+                    className="flex items-center justify-center text-gray-400 hover:text-gray-200 py-2 rounded-md text-xs"
+                  >
+                    ←
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">Back to Website</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             <>
-              <Link href="/" className="w-full block">
-                <Button
-                  variant="ghost"
-                  className="text-gray-300 hover:text-white hover:bg-[#003E6B] w-full justify-start px-3"
-                >
-                  <FaHome className="mr-2" />
-                  <span>Back to Website</span>
-                </Button>
+              <Link
+                href="/"
+                className="block px-3 py-2 text-sm text-gray-400 hover:text-gray-200 rounded-md"
+              >
+                Back to Website
               </Link>
-              <Link href="/portal/signout" className="w-full block">
-                <Button
-                  variant="ghost"
-                  className="text-red-400 hover:text-red-300 hover:bg-[#003E6B] w-full justify-start px-3"
-                >
-                  <span className="mr-2">&#x2192;</span>
-                  <span>Sign Out</span>
-                </Button>
+              <Link
+                href="/portal/signout"
+                className="block px-3 py-2 text-sm text-gray-400 hover:text-red-400 rounded-md"
+              >
+                Sign Out
               </Link>
             </>
           )}
@@ -409,10 +433,8 @@ export default function DashboardLayout({
       </motion.aside>
 
       {/* Main Content */}
-      <div className="flex-1 min-w-0 bg-white">
-        <div className="lg:p-8 p-4 pt-20 lg:pt-8">
-          {children}
-        </div>
+      <div className="flex-1 min-w-0 bg-white text-gray-900">
+        <div className="lg:p-8 p-4 pt-20 lg:pt-8 pb-safe">{children}</div>
       </div>
     </div>
   );
