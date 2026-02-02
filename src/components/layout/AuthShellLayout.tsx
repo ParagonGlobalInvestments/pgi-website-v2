@@ -32,7 +32,7 @@ export default function AuthShellLayout({
           </a>
         </div>
       </div>
-      ![1770060832761](image/AuthShellLayout/1770060832761.png)![1770060839398](image/AuthShellLayout/1770060839398.png)
+
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-shrink-0 flex-col h-screen sticky top-0 w-[14rem] bg-[#00172B]">
         {/* Logo */}
