@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import StandaloneLayout from '@/components/layout/StandaloneLayout';
+import AuthShellLayout from '@/components/layout/AuthShellLayout';
 
 export const metadata: Metadata = {
   title: 'Sign Up - PGI Member Portal',
@@ -13,5 +13,5 @@ export default function SignUpLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <StandaloneLayout>{children}</StandaloneLayout>;
+  return <AuthShellLayout>{children}</AuthShellLayout>;
 }
