@@ -35,8 +35,14 @@ export function requireSupabaseBrowserClient(): SupabaseClient {
 
 /**
  * Legacy export for backward compatibility.
- * @deprecated Use getSupabaseBrowserClient() or requireSupabaseBrowserClient() instead
+ * Build-safe: during SSR/prerender (no window), returns null when env vars
+ * are missing. useEffect hooks — where the client is actually consumed —
+ * never run during SSR, so the null is harmless.
+ * In the browser, throws if env vars are missing.
  */
-export function createClient() {
+export function createClient(): SupabaseClient {
+  if (typeof window === 'undefined') {
+    return getSupabaseBrowserClient() as unknown as SupabaseClient;
+  }
   return requireSupabaseBrowserClient();
 }
