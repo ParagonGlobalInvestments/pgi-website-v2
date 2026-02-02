@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -45,6 +46,8 @@ const NAV_ITEMS = [
   { id: 'resources', href: '/portal/dashboard/resources', label: 'Resources' },
   { id: 'settings', href: '/portal/dashboard/settings', label: 'Settings' },
 ];
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://paragoninvestments.org';
 
 const SIDEBAR_VARIANTS = {
   expanded: { width: '14rem', backgroundColor: '#00172B' },
@@ -121,7 +124,6 @@ export default function DashboardLayout({
   const [portalUser, setPortalUser] = useState<User | null>(null);
 
   const pathname = usePathname();
-  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => setIsClient(true), []);
 
@@ -170,14 +172,13 @@ export default function DashboardLayout({
     fetchUser();
   }, [authUser]);
 
-  // Set active link from URL
+  // Sync active link with current pathname
   useEffect(() => {
-    const path = window.location.pathname;
-    if (path.includes('/directory')) setActiveLink('directory');
-    else if (path.includes('/resources')) setActiveLink('resources');
-    else if (path.includes('/settings')) setActiveLink('settings');
+    if (pathname.includes('/directory')) setActiveLink('directory');
+    else if (pathname.includes('/resources')) setActiveLink('resources');
+    else if (pathname.includes('/settings')) setActiveLink('settings');
     else setActiveLink('dashboard');
-  }, []);
+  }, [pathname]);
 
   // Mobile menu body overflow
   useEffect(() => {
@@ -196,19 +197,34 @@ export default function DashboardLayout({
     ? ROLE_LABELS[portalUser.role] || portalUser.role
     : '';
 
-  // Loading
+  // Loading — show skeleton that mirrors the sidebar + content layout
   if (!isClient || !authUser) {
     return (
       <div className="flex min-h-screen bg-white">
-        <div className="flex-1 flex items-center justify-center min-h-[50vh]">
-          <motion.div
-            className="rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
-            animate={{ rotate: 360, scale: [1, 1.05, 1] }}
-            transition={{
-              rotate: { duration: 1, ease: 'linear', repeat: Infinity },
-              scale: { duration: 1, ease: 'easeInOut', repeat: Infinity },
-            }}
-          />
+        {/* Sidebar skeleton (desktop only) */}
+        <div className="hidden lg:flex flex-shrink-0 flex-col w-56 bg-[#00172B] h-screen sticky top-0 p-4">
+          <Skeleton className="h-8 w-32 bg-gray-700/40 mb-8" />
+          <div className="space-y-2 mt-4">
+            <Skeleton className="h-8 w-full bg-gray-700/40 rounded-md" />
+            <Skeleton className="h-8 w-full bg-gray-700/40 rounded-md" />
+            <Skeleton className="h-8 w-full bg-gray-700/40 rounded-md" />
+            <Skeleton className="h-8 w-full bg-gray-700/40 rounded-md" />
+          </div>
+        </div>
+        {/* Content skeleton */}
+        <div className="flex-1 lg:p-8 p-4 pt-24 lg:pt-8">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-32 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-gray-200 p-6">
+                <Skeleton className="h-10 w-10 rounded-lg mb-4" />
+                <Skeleton className="h-5 w-32 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -334,13 +350,13 @@ export default function DashboardLayout({
                 initial="hidden"
                 animate="visible"
               >
-                <Link
-                  href="/"
+                <a
+                  href={SITE_URL}
                   className="flex items-center text-sm px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D] min-h-[44px]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Back to Website
-                </Link>
+                </a>
                 <Link
                   href="/portal/logout"
                   className="flex items-center text-sm px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D] min-h-[44px]"
@@ -461,24 +477,24 @@ export default function DashboardLayout({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
-                    href="/"
+                  <a
+                    href={SITE_URL}
                     className="flex items-center justify-center text-gray-400 hover:text-gray-200 py-2 rounded-md text-xs"
                   >
                     ←
-                  </Link>
+                  </a>
                 </TooltipTrigger>
                 <TooltipContent side="right">Back to Website</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           ) : (
             <>
-              <Link
-                href="/"
+              <a
+                href={SITE_URL}
                 className="block px-3 py-2 text-sm text-gray-400 hover:text-gray-200 rounded-md"
               >
                 Back to Website
-              </Link>
+              </a>
               <Link
                 href="/portal/logout"
                 className="block px-3 py-2 text-sm text-gray-400 hover:text-red-400 rounded-md"
@@ -492,25 +508,9 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 bg-white text-gray-900">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={pathname}
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 8, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4, filter: 'blur(2px)' }}
-            transition={{
-              type: 'tween',
-              ease: [0.25, 0.1, 0.25, 1],
-              duration: 0.35,
-              opacity: { duration: 0.3 },
-              filter: { duration: 0.25 },
-            }}
-            className="lg:p-8 p-4 pt-24 lg:pt-8 pb-safe"
-            style={{ willChange: 'opacity, transform, filter' }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <div className="lg:p-8 p-4 pt-24 lg:pt-8 pb-safe">
+          {children}
+        </div>
       </div>
     </div>
   );
