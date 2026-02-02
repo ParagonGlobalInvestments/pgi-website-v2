@@ -4,15 +4,12 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   FaSearch,
   FaLinkedin,
-  FaUsers,
   FaEnvelope,
   FaGithub,
   FaTimes,
 } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
-import { Badge } from '@/components/ui';
 import {
   Select,
   SelectContent,
@@ -21,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { DetailPanel } from '@/components/ui/detail-panel';
 import type { User } from '@/types';
 import Image from 'next/image';
 
@@ -63,6 +61,124 @@ const PROGRAM_LABELS: Record<string, string> = {
 };
 
 // ============================================================================
+// Member Detail Panel Content
+// ============================================================================
+
+function MemberDetail({ user }: { user: User }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText(user.email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with school logo */}
+      <div className="flex items-start gap-4">
+        {SCHOOL_LOGOS[user.school] && (
+          <div className="w-14 h-14 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <Image
+              src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
+              alt={SCHOOL_LABELS[user.school] || user.school}
+              width={40}
+              height={40}
+              className="w-9 h-9 object-contain"
+            />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+          <div className="flex items-center gap-1.5 mt-1 text-sm">
+            {user.program && (
+              <span
+                className={`font-medium ${
+                  user.program === 'quant' ? 'text-blue-600' : 'text-purple-600'
+                }`}
+              >
+                {PROGRAM_LABELS[user.program]}
+              </span>
+            )}
+            {user.program && user.role && (
+              <span className="text-gray-400">·</span>
+            )}
+            <span className="text-gray-700 font-medium">
+              {ROLE_LABELS[user.role] || user.role}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="space-y-3 text-sm">
+        <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+          <span className="text-gray-500">School</span>
+          <span className="text-gray-900 font-medium">
+            {SCHOOL_LABELS[user.school] || user.school}
+          </span>
+        </div>
+        {user.graduationYear && (
+          <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+            <span className="text-gray-500">Graduation</span>
+            <span className="text-gray-900 font-medium">
+              Class of {user.graduationYear}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Contact & Links */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Contact
+        </h3>
+        <button
+          onClick={copyEmail}
+          className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors text-left"
+        >
+          <FaEnvelope className="text-gray-400 flex-shrink-0" />
+          <span className="flex-1 truncate">{user.email}</span>
+          <span className="text-xs text-gray-400 flex-shrink-0">
+            {copied ? 'Copied' : 'Copy'}
+          </span>
+        </button>
+
+        {user.linkedinUrl && (
+          <a
+            href={user.linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+          >
+            <FaLinkedin className="text-[#0077B5] flex-shrink-0" />
+            <span className="flex-1">LinkedIn Profile</span>
+            <span className="text-xs text-gray-400">↗</span>
+          </a>
+        )}
+
+        {user.githubUrl && (
+          <a
+            href={user.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+          >
+            <FaGithub className="text-gray-700 flex-shrink-0" />
+            <span className="flex-1">GitHub Profile</span>
+            <span className="text-xs text-gray-400">↗</span>
+          </a>
+        )}
+
+        {!user.linkedinUrl && !user.githubUrl && (
+          <p className="text-gray-500 text-sm py-2">No profile links added yet</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Directory Page
 // ============================================================================
 
@@ -73,7 +189,7 @@ export default function DirectoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const [filter, setFilter] = useState({
     school: 'all',
@@ -112,17 +228,13 @@ export default function DirectoryPage() {
   // Filter users
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // Search
       if (debouncedSearch) {
         const term = debouncedSearch.toLowerCase();
         const haystack = `${user.name} ${user.email}`.toLowerCase();
         if (!haystack.includes(term)) return false;
       }
-      // School
       if (filter.school !== 'all' && user.school !== filter.school) return false;
-      // Program
       if (filter.program !== 'all' && user.program !== filter.program) return false;
-      // Role
       if (filter.role !== 'all' && user.role !== filter.role) return false;
       return true;
     });
@@ -138,18 +250,22 @@ export default function DirectoryPage() {
     filter.role !== 'all' ||
     searchTerm !== '';
 
-  const openModal = (user: User) => {
+  const openPanel = (user: User) => {
     setSelectedUser(user);
-    setIsModalOpen(true);
+    setIsPanelOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedUser(null), 300);
-  };
+  const closePanel = useCallback(() => {
+    setIsPanelOpen(false);
+  }, []);
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Directory</h1>
+        <p className="text-gray-500 mt-1 text-sm">Browse and connect with PGI members</p>
+      </div>
+
       {/* Search + Filters */}
       <div>
         <div className="relative mb-3">
@@ -163,12 +279,12 @@ export default function DirectoryPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-wrap">
           <Select
             value={filter.school}
             onValueChange={v => handleFilterChange('school', v)}
           >
-            <SelectTrigger className="h-9 w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
               <SelectValue placeholder="School" />
             </SelectTrigger>
             <SelectContent>
@@ -185,7 +301,7 @@ export default function DirectoryPage() {
             value={filter.program}
             onValueChange={v => handleFilterChange('program', v)}
           >
-            <SelectTrigger className="h-9 w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
@@ -199,7 +315,7 @@ export default function DirectoryPage() {
             value={filter.role}
             onValueChange={v => handleFilterChange('role', v)}
           >
-            <SelectTrigger className="h-9 w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
@@ -227,7 +343,7 @@ export default function DirectoryPage() {
             </Button>
           )}
 
-          <div className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md">
+          <div className="sm:ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-md text-center">
             {filteredUsers.length} of {users.length}
           </div>
         </div>
@@ -258,7 +374,6 @@ export default function DirectoryPage() {
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="bg-gray-50 p-12 rounded-xl text-center text-gray-500">
-          <FaUsers className="text-gray-300 text-5xl mb-4 mx-auto" />
           <p className="text-lg font-medium mb-2">No members found</p>
           <p>
             {debouncedSearch
@@ -271,12 +386,15 @@ export default function DirectoryPage() {
           {filteredUsers.map(user => (
             <Card
               key={user.id}
-              className="border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer group"
-              onClick={() => openModal(user)}
+              className={`border transition-all duration-200 cursor-pointer group ${
+                selectedUser?.id === user.id && isPanelOpen
+                  ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
+                  : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+              }`}
+              onClick={() => openPanel(user)}
             >
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  {/* School logo */}
                   {SCHOOL_LOGOS[user.school] && (
                     <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                       <Image
@@ -329,113 +447,10 @@ export default function DirectoryPage() {
         </div>
       )}
 
-      {/* User Detail Modal */}
-      <AnimatePresence>
-        {isModalOpen && selectedUser && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-            onClick={closeModal}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div
-                className={`relative p-6 text-white ${
-                  selectedUser.program === 'quant'
-                    ? 'bg-gradient-to-br from-blue-600 to-indigo-800'
-                    : 'bg-gradient-to-br from-purple-600 to-indigo-800'
-                }`}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={closeModal}
-                  className="absolute top-3 right-3 text-white hover:bg-white/20 rounded-full h-8 w-8 p-0"
-                >
-                  <FaTimes size={16} />
-                </Button>
-
-                <h2 className="text-2xl font-bold mb-1">{selectedUser.name}</h2>
-                <div className="flex items-center gap-2 text-white/90 text-sm">
-                  {selectedUser.program && (
-                    <span>{PROGRAM_LABELS[selectedUser.program]}</span>
-                  )}
-                  {selectedUser.program && <span className="text-white/60">·</span>}
-                  <span>{ROLE_LABELS[selectedUser.role] || selectedUser.role}</span>
-                  {selectedUser.role === 'admin' && (
-                    <Badge className="bg-yellow-500/30 text-yellow-200 border-yellow-400/50 ml-1">
-                      Admin
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-white/70 text-sm mt-1">
-                  {SCHOOL_LABELS[selectedUser.school] || selectedUser.school}
-                  {selectedUser.graduationYear &&
-                    ` · Class of ${selectedUser.graduationYear}`}
-                </p>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-4">
-                {/* Email */}
-                <div className="flex items-center gap-3 text-sm">
-                  <FaEnvelope className="text-gray-400 flex-shrink-0" />
-                  <span
-                    className="text-gray-800 cursor-pointer hover:text-blue-600 transition-colors"
-                    onClick={() => {
-                      navigator.clipboard.writeText(selectedUser.email);
-                    }}
-                    title="Click to copy"
-                  >
-                    {selectedUser.email}
-                  </span>
-                </div>
-
-                {/* LinkedIn */}
-                {selectedUser.linkedinUrl && (
-                  <a
-                    href={selectedUser.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-                  >
-                    <FaLinkedin className="flex-shrink-0" />
-                    <span>LinkedIn Profile</span>
-                  </a>
-                )}
-
-                {/* GitHub */}
-                {selectedUser.githubUrl && (
-                  <a
-                    href={selectedUser.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-gray-800 hover:text-gray-600 transition-colors"
-                  >
-                    <FaGithub className="flex-shrink-0" />
-                    <span>GitHub Profile</span>
-                  </a>
-                )}
-
-                {!selectedUser.linkedinUrl && !selectedUser.githubUrl && (
-                  <p className="text-gray-400 italic text-sm">
-                    No profile links added yet
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Member Detail Panel */}
+      <DetailPanel isOpen={isPanelOpen} onClose={closePanel}>
+        {selectedUser && <MemberDetail user={selectedUser} />}
+      </DetailPanel>
     </div>
   );
 }
