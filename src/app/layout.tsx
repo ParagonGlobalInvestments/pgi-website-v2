@@ -57,20 +57,11 @@ export const metadata: Metadata = {
   category: 'finance',
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: '48x48' },
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    shortcut: [{ url: '/favicon.ico' }],
-    other: [
-      { rel: 'mask-icon', url: '/icons/icon-192.png', color: '#00172B' },
-      { rel: 'icon', url: '/favicon.ico', type: 'image/x-icon' },
-    ],
+    apple: [{ url: '/icons/icon-192.png' }],
   },
   manifest: '/site.webmanifest',
 };
@@ -83,12 +74,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={GeistSans.className}>
       <head>
-        {/* Favicon is automatically served from public/favicon.ico by Next.js */}
-        {/* Explicit link tag ensures proper serving */}
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-        <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#00172B" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -106,7 +93,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen font-sans antialiased">
         <PHProvider>
           {children}
           <Toaster />
