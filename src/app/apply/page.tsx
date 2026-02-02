@@ -14,14 +14,15 @@ import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/D
 // import { useEffect } from 'react';
 // import { useRouter, useSearchParams } from 'next/navigation';
 
+const UCHICAGO_APPLY_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
+const applicationsOpen = true; // set to true when applications open
 
-const UCHICAGO_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
-const applicationsOpen = true;  // set to true when applications open
-
-const ZOOM_LINK_URL = 'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
-const GENERAL_APPLY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSer1H0nz73Mlhg3x6PgulhJrwt5Qxp-LJOzzHuUqrlRtkFkvw/viewform';
+const ZOOM_LINK_URL =
+  'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
+const GENERAL_APPLY_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSer1H0nz73Mlhg3x6PgulhJrwt5Qxp-LJOzzHuUqrlRtkFkvw/viewform';
 const generalApplicationsOpen = true;
-
 
 /** Animation variants (unchanged) */
 const fadeIn = {
@@ -65,178 +66,178 @@ const timelineItemVariants = {
 
 // ---- Add near the top (below imports) ----
 type TeamMember = {
-    name: string;
-    role: string;
-    university: string;
-    linkedin?: string; // <-- add this
+  name: string;
+  role: string;
+  university: string;
+  linkedin?: string; // <-- add this
 };
-  
-  
+
 const nationalRecruitmentTeam: TeamMember[] = [
-    {
-      name: 'Aetant Prakash',
-      role: 'Head of Recruitment',
-      university: 'University of Chicago',
-    },
-    {
-      name: 'Heath Winter',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-    },
-    {
-      name: 'Noor Kaur',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-    },
-    {
-      name: 'Krish Khanna',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-    },
+  {
+    name: 'Aetant Prakash',
+    role: 'Head of Recruitment',
+    university: 'University of Chicago',
+  },
+  {
+    name: 'Heath Winter',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+  },
+  {
+    name: 'Noor Kaur',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+  },
+  {
+    name: 'Krish Khanna',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+  },
 ];
 
 export const uchicagoRecruitmentTeam: TeamMember[] = [
-    {
-      name: 'Nicolas Tchkotoua',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
-    },
-    {
-        name: 'Heath Winter',
-        role: 'Recruiter',
-        university: 'University of Chicago',
-        linkedin: 'https://www.linkedin.com/in/heath-winter/',
-    },
-    {
-      name: 'Noor Kaur',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/noor-kaur-738867272/'
-    },
-    {
-      name: 'Glen Cahilly',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/glen-cahilly/'
-    },
-    {
-      name: 'Ishaan Sareen',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/ishaansareen/'
-    },
-    {
-      name: 'Lars Barth',
-      role: 'Recruiter',
-      university: 'University of Chicago',
-      linkedin: 'https://www.linkedin.com/in/lars-barth/'
-    },
+  {
+    name: 'Nicolas Tchkotoua',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
+  },
+  {
+    name: 'Heath Winter',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/heath-winter/',
+  },
+  {
+    name: 'Noor Kaur',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/noor-kaur-738867272/',
+  },
+  {
+    name: 'Glen Cahilly',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/glen-cahilly/',
+  },
+  {
+    name: 'Ishaan Sareen',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/ishaansareen/',
+  },
+  {
+    name: 'Lars Barth',
+    role: 'Recruiter',
+    university: 'University of Chicago',
+    linkedin: 'https://www.linkedin.com/in/lars-barth/',
+  },
 ];
 
 // Reusable section
 function RecruitmentTeamSection({
-    members,
-    title = 'Recruitment Team',
+  members,
+  title = 'Recruitment Team',
 }: {
-    members: TeamMember[];
-    title?: string;
+  members: TeamMember[];
+  title?: string;
 }) {
-    return (
-      <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
-        <div className="container mx-auto max-w-7xl">
-          <motion.h2
-            className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-10 text-center text-white"
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-          >
-            <ShinyText
-              text={title}
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
-            />
-          </motion.h2>
-  
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {members.map((m, i) => (
-              <motion.div
-                key={`${m.name}-${i}`}
-                className="bg-darkNavy rounded-2xl p-6 border border-gray-700 hover:border-pgi-light-blue transition"
-                variants={cardItem}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-              >
-                <div>
-                    <p className="text-white font-semibold text-lg">{m.name}</p>
-                    <p className="text-gray-300 text-sm mt-1">{m.role}</p>
-                    <p className="text-gray-400 text-sm mt-2 italic">{m.university}</p>
+  return (
+    <section className="py-20 md:py-28 lg:py-32 px-4 bg-pgi-dark-blue">
+      <div className="container mx-auto max-w-7xl">
+        <motion.h2
+          className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-10 text-center text-white"
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+        >
+          <ShinyText
+            text={title}
+            className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-normal"
+          />
+        </motion.h2>
 
-                    {m.linkedin && (
-                        <div className="mt-4">
-                        <a
-                            href={m.linkedin}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`Open ${m.name}'s LinkedIn`}
-                            className="inline-flex items-center gap-2 rounded-lg border border-pgi-light-blue/60 px-3 py-2 text-sm
-                                    text-white hover:bg-pgi-light-blue hover:text-white transition shadow-md"
-                        >
-                            {/* If you already use react-icons, you can import FaLinkedin */}
-                            {/* import { FaLinkedin } from 'react-icons/fa'; */}
-                            {/* <FaLinkedin className="text-base" /> */}
-                            <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 448 512"
-                            className="h-4 w-4"
-                            aria-hidden="true"
-                            focusable="false"
-                            >
-                            <path
-                                fill="currentColor"
-                                d="M100.28 448H7.4V148.9h92.88zm-46.44-340a53.79 53.79 0 1 1 53.79-53.79 53.79 53.79 0 0 1-53.79 53.8zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.27-79.2-48.3 0-55.7 37.7-55.7 76.6V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.6 42.7-48.5 87.8-48.5 94 0 111.3 61.9 111.3 142.3V448z"
-                            />
-                            </svg>
-                            LinkedIn
-                        </a>
-                        </div>
-                    )}
-                    </div>         
-              </motion.div>
-            ))}
-          </div>
-  
-          {/* Contact CTA */}
-          <motion.div
-            className="text-center mt-16 md:mt-20 lg:mt-24"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            transition={{ delay: 0.4 }}
-          >
-            <p className="text-gray-300 mb-6 text-base md:text-lg font-light">
-              Have questions? Don&apos;t hesitate to reach out!
-            </p>
-            <motion.a
-              href="/contact"
-              className="inline-block bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide shadow-lg"
-              whileHover={{
-                scale: 1.05,
-                backgroundColor: '#1f4287',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-                transition: { duration: 0.2 },
-              }}
-              whileTap={{ scale: 0.95 }}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+          {members.map((m, i) => (
+            <motion.div
+              key={`${m.name}-${i}`}
+              className="bg-darkNavy rounded-2xl p-6 border border-gray-700 hover:border-pgi-light-blue transition"
+              variants={cardItem}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
             >
-              Contact Us
-            </motion.a>
-          </motion.div>
+              <div>
+                <p className="text-white font-semibold text-lg">{m.name}</p>
+                <p className="text-gray-300 text-sm mt-1">{m.role}</p>
+                <p className="text-gray-400 text-sm mt-2 italic">
+                  {m.university}
+                </p>
+
+                {m.linkedin && (
+                  <div className="mt-4">
+                    <a
+                      href={m.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Open ${m.name}'s LinkedIn`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-pgi-light-blue/60 px-3 py-2 text-sm
+                                    text-white hover:bg-pgi-light-blue hover:text-white transition shadow-md"
+                    >
+                      {/* If you already use react-icons, you can import FaLinkedin */}
+                      {/* import { FaLinkedin } from 'react-icons/fa'; */}
+                      {/* <FaLinkedin className="text-base" /> */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M100.28 448H7.4V148.9h92.88zm-46.44-340a53.79 53.79 0 1 1 53.79-53.79 53.79 53.79 0 0 1-53.79 53.8zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.27-79.2-48.3 0-55.7 37.7-55.7 76.6V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.6 42.7-48.5 87.8-48.5 94 0 111.3 61.9 111.3 142.3V448z"
+                        />
+                      </svg>
+                      LinkedIn
+                    </a>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </section>
-    );
-  }
-  
+
+        {/* Contact CTA */}
+        <motion.div
+          className="text-center mt-16 md:mt-20 lg:mt-24"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+          transition={{ delay: 0.4 }}
+        >
+          <p className="text-gray-300 mb-6 text-base md:text-lg font-light">
+            Have questions? Don&apos;t hesitate to reach out!
+          </p>
+          <motion.a
+            href="/contact"
+            className="inline-block bg-pgi-light-blue text-white px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg tracking-wide shadow-lg"
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: '#1f4287',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              transition: { duration: 0.2 },
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Contact Us
+          </motion.a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
 /** --------------------------
  *  National Timeline Content
@@ -279,7 +280,12 @@ function GeneralRecruitment() {
       {/* Hero Section */}
       <section className="pt-10 md:pt-16 lg:pt-20 pb-12 md:pb-16 px-4 bg-navy">
         <div className="container mx-auto">
-          <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
               <ShinyText
                 text="PGI 2026 National Recruitment"
@@ -287,9 +293,11 @@ function GeneralRecruitment() {
               />
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              Join Paragon Global Investments and be part of a community dedicated to excellence in finance and investing.
+              Join Paragon Global Investments and be part of a community
+              dedicated to excellence in finance and investing.
             </p>
 
+            {/*
             <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
               {generalApplicationsOpen ? (
                 <motion.a
@@ -312,6 +320,7 @@ function GeneralRecruitment() {
                 </button>
               )}
             </div>
+            */}
           </motion.div>
         </div>
       </section>
@@ -345,14 +354,20 @@ function GeneralRecruitment() {
                 </h2>
               </div>
               <p className="text-gray-300 mb-6 text-sm md:text-base font-light leading-relaxed">
-                The education application is for admittance to the education portion of Paragon. The education is a 6-week
-                curriculum that covers both fundamental investing and quantitative finance.
+                The education application is for admittance to the education
+                portion of Paragon. The education is a 6-week curriculum that
+                covers both fundamental investing and quantitative finance.
               </p>
               <p className="text-gray-300 mb-6 text-sm md:text-base font-light leading-relaxed">
-                Upon successful completion of the program, students will have the opportunity to join their preferred
-                investment fund. For further details, please refer to the education application below.
+                Upon successful completion of the program, students will have
+                the opportunity to join their preferred investment fund. For
+                further details, please refer to the education application
+                below.
               </p>
-              <p className="text-white font-medium mb-6 text-sm md:text-base">This opportunity is exclusively available to first-year students.</p>
+              <p className="text-white font-medium mb-6 text-sm md:text-base">
+                This opportunity is exclusively available to first-year
+                students.
+              </p>
             </motion.div>
 
             {/* Direct Fund Application */}
@@ -380,15 +395,20 @@ function GeneralRecruitment() {
                 </h2>
               </div>
               <p className="text-gray-300 mb-6 text-sm md:text-base font-light leading-relaxed">
-                The fund application is for direct admission into Paragon&apos;s investment research groups, where you will
-                engage in hands-on research of companies or algorithms that are either invested in or deployed by the
-                investment funds.
+                The fund application is for direct admission into Paragon&apos;s
+                investment research groups, where you will engage in hands-on
+                research of companies or algorithms that are either invested in
+                or deployed by the investment funds.
               </p>
               <p className="text-gray-300 mb-6 text-sm md:text-base font-light leading-relaxed">
-                Applicants may choose to apply directly to the PGI Value Fund or Systematic Fund. Additional information is
-                available on the application form.
+                Applicants may choose to apply directly to the PGI Value Fund or
+                Systematic Fund. Additional information is available on the
+                application form.
               </p>
-              <p className="text-white font-medium mb-6 text-sm md:text-base">This opportunity is exclusively available to second-year students.</p>
+              <p className="text-white font-medium mb-6 text-sm md:text-base">
+                This opportunity is exclusively available to second-year
+                students.
+              </p>
             </motion.div>
           </div>
         </div>
@@ -457,7 +477,10 @@ function GeneralRecruitment() {
                           </svg>
                           Phase {String(index + 1).padStart(2, '0')}
                         </span>
-                        <span className="h-px w-8 bg-white/30" aria-hidden="true" />
+                        <span
+                          className="h-px w-8 bg-white/30"
+                          aria-hidden="true"
+                        />
                         <span>{item.date}</span>
                       </div>
 
@@ -498,7 +521,9 @@ function GeneralRecruitment() {
 
                   <div
                     className={`hidden md:block absolute top-9 w-12 h-px bg-gradient-to-r ${
-                      isLeft ? 'right-1/2 from-transparent to-pgi-light-blue/60' : 'left-1/2 from-pgi-light-blue/60 to-transparent'
+                      isLeft
+                        ? 'right-1/2 from-transparent to-pgi-light-blue/60'
+                        : 'left-1/2 from-pgi-light-blue/60 to-transparent'
                     }`}
                   />
                 </motion.div>
@@ -560,7 +585,12 @@ export function UChicagoRecruitment() {
       {/* Hero */}
       <section className="pt-10 md:pt-16 lg:pt-20 pb-10 md:pb-16 px-4 bg-navy">
         <div className="container mx-auto">
-          <motion.div className="text-center" initial="hidden" animate="visible" variants={fadeIn}>
+          <motion.div
+            className="text-center"
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
               <ShinyText
                 text="PGI @ UChicago — Fall 2025 Recruiting"
@@ -568,44 +598,49 @@ export function UChicagoRecruitment() {
               />
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              The UChicago-specific cycle is starting now. See the on-campus schedule, application window, and interview dates below.
+              The UChicago-specific cycle is starting now. See the on-campus
+              schedule, application window, and interview dates below.
             </p>
 
             {/* Buttons row: Zoom (left) + Apply (right) */}
             <div className="mt-8 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
-            <motion.a
+              <motion.a
                 href={ZOOM_LINK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${baseBtn} bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition`}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                >
+              >
                 <span className="leading-tight">
-                    <span className="text-sm md:text-base block">Information Session Zoom Link</span>
-                    <span className="text-xs md:text-sm opacity-80 block">October 8th at 6 PM CT</span>
+                  <span className="text-sm md:text-base block">
+                    Information Session Zoom Link
+                  </span>
+                  <span className="text-xs md:text-sm opacity-80 block">
+                    October 8th at 6 PM CT
+                  </span>
                 </span>
-            </motion.a>
-            {applicationsOpen ? (
-            <motion.a
-                href={UCHICAGO_APPLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-            >
-                Apply Now — UChicago
-            </motion.a>
-            ) : (
-            <button
-                disabled
-                title="Applications opening soon"
-                className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
-            >
-                Apply (coming soon)
-            </button>
-            )}
+              </motion.a>
+              {applicationsOpen ? (
+                <motion.a
+                  href={UCHICAGO_APPLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Apply Now — UChicago
+                </motion.a>
+              ) : (
+                <button
+                  disabled
+                  title="Applications opening soon"
+                  className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
+                >
+                  Apply (coming soon)
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -651,69 +686,71 @@ export function UChicagoRecruitment() {
   );
 }
 
-  
 export function TabSwitch({
-    value,
-    onChange,
-  }: {
-    value: 'general' | 'uchicago';
-    onChange: (v: 'general' | 'uchicago') => void;
-  }) {
-    const options: { key: 'general' | 'uchicago'; label: string }[] = [
-      { key: 'general', label: 'General (National)' },
-      { key: 'uchicago', label: 'UChicago' },
-    ];
-  
-    return (
-        <div className="sticky top-0 z-20 bg-pgi-dark-blue">
-        <div className="container mx-auto px-4">
-          <div
-            role="tablist"
-            aria-label="Recruitment tabs"
-            className="mx-auto max-w-xl relative py-3"
-          >
-            <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
-              {options.map((opt) => {
-                const isActive = value === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls={`panel-${opt.key}`}
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => onChange(opt.key)}
-                    className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
+  value,
+  onChange,
+}: {
+  value: 'general' | 'uchicago';
+  onChange: (v: 'general' | 'uchicago') => void;
+}) {
+  const options: { key: 'general' | 'uchicago'; label: string }[] = [
+    { key: 'general', label: 'General (National)' },
+    { key: 'uchicago', label: 'UChicago' },
+  ];
+
+  return (
+    <div className="sticky top-0 z-20 bg-pgi-dark-blue">
+      <div className="container mx-auto px-4">
+        <div
+          role="tablist"
+          aria-label="Recruitment tabs"
+          className="mx-auto max-w-xl relative py-3"
+        >
+          <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
+            {options.map(opt => {
+              const isActive = value === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`panel-${opt.key}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => onChange(opt.key)}
+                  className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
                       ${isActive ? 'text-white' : 'text-gray-200 hover:text-white'}`}
-                  >
-                    {/* Animated pill background */}
-                    {isActive && (
-                      <motion.span
-                        layoutId="seg-pill"
-                        className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
-                        transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative">{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+                >
+                  {/* Animated pill background */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="seg-pill"
+                      className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
+                      transition={{
+                        type: 'spring',
+                        stiffness: 450,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                  <span className="relative">{opt.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
-    );
-  }
-  
+    </div>
+  );
+}
 
-  export default function ApplyPage() {
-    // const router = useRouter();
-    // const search = useSearchParams();
-    // const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
-    // const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
-  
-    /*
+export default function ApplyPage() {
+  // const router = useRouter();
+  // const search = useSearchParams();
+  // const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
+  // const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
+
+  /*
     useEffect(() => {
       const current = search.get('tab');
       if (current !== tab) {
@@ -724,14 +761,14 @@ export function TabSwitch({
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
     */
-  
-    return (
-      <div className="bg-pgi-dark-blue text-white min-h-screen">
-        {/* Minimal underline nav */}
-        {/* <TabSwitch value={tab} onChange={setTab} /> */}
-  
-        {/* Tab Content */}
-        {/* {tab === 'general' ? (
+
+  return (
+    <div className="bg-pgi-dark-blue text-white min-h-screen">
+      {/* Minimal underline nav */}
+      {/* <TabSwitch value={tab} onChange={setTab} /> */}
+
+      {/* Tab Content */}
+      {/* {tab === 'general' ? (
           <>
             <GeneralRecruitment />
             <RecruitmentTeamSection
@@ -749,13 +786,12 @@ export function TabSwitch({
           </>
         )} */}
 
-        {/* Temporarily limit to general recruitment while UChicago hiring is closed */}
-        <GeneralRecruitment />
-        <RecruitmentTeamSection
-          members={nationalRecruitmentTeam}
-          title="National Recruitment Team"
-        />
-      </div>
-    );
-  }
-  
+      {/* Temporarily limit to general recruitment while UChicago hiring is closed */}
+      <GeneralRecruitment />
+      <RecruitmentTeamSection
+        members={nationalRecruitmentTeam}
+        title="National Recruitment Team"
+      />
+    </div>
+  );
+}
