@@ -4,6 +4,8 @@
 
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore — gsap types have casing mismatch (Observer.d.ts vs observer.d.ts)
 import { Observer } from 'gsap/Observer';
 import './InfiniteScroll.css';
 

@@ -95,7 +95,7 @@ const nationalRecruitmentTeam: TeamMember[] = [
   },
 ];
 
-export const uchicagoRecruitmentTeam: TeamMember[] = [
+const uchicagoRecruitmentTeam: TeamMember[] = [
   {
     name: 'Nicolas Tchkotoua',
     role: 'Recruiter',
@@ -579,7 +579,7 @@ function GeneralRecruitment() {
   );
 }
 
-export function UChicagoRecruitment() {
+function UChicagoRecruitment() {
   return (
     <>
       {/* Hero */}
@@ -686,7 +686,7 @@ export function UChicagoRecruitment() {
   );
 }
 
-export function TabSwitch({
+function TabSwitch({
   value,
   onChange,
 }: {
@@ -743,6 +743,11 @@ export function TabSwitch({
     </div>
   );
 }
+
+// Kept for when UChicago recruiting re-opens (currently commented out in JSX below)
+void uchicagoRecruitmentTeam;
+void UChicagoRecruitment;
+void TabSwitch;
 
 export default function ApplyPage() {
   // const router = useRouter();

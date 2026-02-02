@@ -9,8 +9,6 @@ export interface Company {
   imagePath: string;
 }
 
-const PLACEHOLDER_COMPANY_LOGO = '/images/companies/placeholder.svg';
-
 // Investment Banking Companies
 export const INVESTMENT_BANKING_COMPANIES: Company[] = [
   {
