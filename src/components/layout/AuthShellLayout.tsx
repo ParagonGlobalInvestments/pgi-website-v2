@@ -29,7 +29,7 @@ export default function AuthShellLayout({
             href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
             className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
           >
-            ← Back to Website
+            Back to Website
           </a>
         </div>
       </div>
