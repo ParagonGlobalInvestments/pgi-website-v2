@@ -29,29 +29,38 @@ jest.mock('next/image', () => ({
   },
 }));
 
-// Mock Clerk auth hooks
-jest.mock('@clerk/nextjs', () => ({
-  useUser: jest.fn(() => ({
-    isLoaded: true,
-    user: {
-      id: 'user_123',
-      firstName: 'John',
-      lastName: 'Doe',
-      imageUrl: 'https://example.com/avatar.jpg',
-      publicMetadata: {
-        role: 'member',
-        track: 'value',
-        chapter: 'Yale University',
-      },
+// Mock Supabase auth
+jest.mock('@/lib/supabase/browser', () => ({
+  createClient: jest.fn(() => ({
+    auth: {
+      getUser: jest.fn(() =>
+        Promise.resolve({
+          data: {
+            user: {
+              id: 'user_123',
+              email: 'john.doe@university.edu',
+              user_metadata: {
+                full_name: 'John Doe',
+                avatar_url: 'https://example.com/avatar.jpg',
+              },
+            },
+          },
+          error: null,
+        })
+      ),
+      getSession: jest.fn(() =>
+        Promise.resolve({
+          data: { session: { access_token: 'mock-token' } },
+          error: null,
+        })
+      ),
+      onAuthStateChange: jest.fn(() => ({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      })),
     },
   })),
-  useAuth: jest.fn(() => ({
-    isLoaded: true,
-    isSignedIn: true,
-  })),
-  UserButton: props => <div data-testid="user-button" {...props} />,
-  SignIn: props => <div data-testid="sign-in" {...props} />,
-  SignUp: props => <div data-testid="sign-up" {...props} />,
+  getSupabaseBrowserClient: jest.fn(),
+  requireSupabaseBrowserClient: jest.fn(),
 }));
 
 // Set up global fetch mock for API calls
