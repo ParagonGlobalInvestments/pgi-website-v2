@@ -1,10 +1,19 @@
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
+import { Montserrat } from 'next/font/google';
 import { PHProvider } from '@/components/providers/PostHogProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
 
@@ -72,7 +81,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={GeistSans.className}>
+    <html lang="en" className={montserrat.variable}>
       <head>
         <meta name="theme-color" content="#00172B" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -99,6 +108,8 @@ export default function RootLayout({
           <Toaster />
           <Sonner position="top-center" richColors closeButton />
         </PHProvider>
+        <Analytics />
+        <SpeedInsights />
         <Script
           id="org-jsonld"
           type="application/ld+json"

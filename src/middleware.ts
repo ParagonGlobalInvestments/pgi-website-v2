@@ -20,7 +20,8 @@ export async function middleware(request: NextRequest) {
     pathname === '/sitemap.xml' ||
     pathname === '/robots.txt' ||
     pathname === '/site.webmanifest' ||
-    pathname === '/browserconfig.xml'
+    pathname === '/browserconfig.xml' ||
+    pathname === '/favicon.ico'
   ) {
     return NextResponse.next();
   }
@@ -30,8 +31,7 @@ export async function middleware(request: NextRequest) {
     const isPortalRoute =
       pathname.startsWith('/portal') ||
       pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/sign-in') ||
-      pathname.startsWith('/sign-up') ||
+      pathname.startsWith('/login') ||
       pathname.startsWith('/__tests__');
 
     if (isPortalRoute) {
@@ -48,8 +48,7 @@ export async function middleware(request: NextRequest) {
   if (!isPortalSubdomain && portalEnabled) {
     const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
     const isPortalRoute =
-      pathname.startsWith('/sign-in') ||
-      pathname.startsWith('/sign-up') ||
+      pathname.startsWith('/login') ||
       pathname.startsWith('/portal');
 
     if (portalUrl && isPortalRoute) {
@@ -66,8 +65,7 @@ export async function middleware(request: NextRequest) {
   if (isPortalSubdomain && portalEnabled) {
     // Auth/API routes live at root level — must NOT be rewritten to /portal/*
     const isRootRoute =
-      pathname.startsWith('/sign-in') ||
-      pathname.startsWith('/sign-up') ||
+      pathname.startsWith('/login') ||
       pathname.startsWith('/auth/') ||
       pathname.startsWith('/api/') ||
       pathname.startsWith('/resources');
@@ -96,6 +94,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip all internal paths (_next) and static assets
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

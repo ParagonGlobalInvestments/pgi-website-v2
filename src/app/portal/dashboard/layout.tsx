@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { FaChevronLeft } from 'react-icons/fa';
+import { ChevronLeft } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -124,6 +124,16 @@ export default function DashboardLayout({
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => setIsClient(true), []);
+
+  // Override body background so iOS safe-area inset shows white, not navy
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = '#ffffff';
+    document.body.style.backgroundColor = '#ffffff';
+    return () => {
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
 
   // Check auth
   useEffect(() => {
@@ -332,11 +342,11 @@ export default function DashboardLayout({
                   Back to Website
                 </Link>
                 <Link
-                  href="/portal/signout"
+                  href="/portal/logout"
                   className="flex items-center text-sm px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D] min-h-[44px]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign Out
+                  Log Out
                 </Link>
               </motion.div>
             </div>
@@ -397,7 +407,7 @@ export default function DashboardLayout({
                       size="icon"
                       className="text-white h-8 w-8 hover:text-white"
                     >
-                      <FaChevronLeft size={14} />
+                      <ChevronLeft size={14} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="right">Collapse</TooltipContent>
@@ -470,10 +480,10 @@ export default function DashboardLayout({
                 Back to Website
               </Link>
               <Link
-                href="/portal/signout"
+                href="/portal/logout"
                 className="block px-3 py-2 text-sm text-gray-400 hover:text-red-400 rounded-md"
               >
-                Sign Out
+                Log Out
               </Link>
             </>
           )}

@@ -2,13 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import {
-  FaExternalLinkAlt,
-  FaFilePdf,
-  FaFileWord,
-  FaFileExcel,
-  FaFolder,
-} from 'react-icons/fa';
+import { ExternalLink, FileText, FileSpreadsheet, Folder } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { DetailPanel } from '@/components/ui/detail-panel';
 import { RESOURCE_CATEGORIES, type Resource } from '@/lib/constants/resources';
@@ -20,10 +14,10 @@ import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 // ============================================================================
 
 const TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  pdf: FaFilePdf,
-  doc: FaFileWord,
-  sheet: FaFileExcel,
-  folder: FaFolder,
+  pdf: FileText,
+  doc: FileText,
+  sheet: FileSpreadsheet,
+  folder: Folder,
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -55,7 +49,7 @@ function ResourceDetail({
   isMobile: boolean;
   onPreview: () => void;
 }) {
-  const Icon = TYPE_ICONS[resource.type] || FaFilePdf;
+  const Icon = TYPE_ICONS[resource.type] || FileText;
   const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url);
   const canPreview = hasUrl && (resource.type === 'pdf' || resource.type === 'sheet');
@@ -130,7 +124,7 @@ function ResourceDetail({
           >
             <Button variant="navy" className="w-full justify-center gap-2">
               Open Resource
-              <FaExternalLinkAlt className="h-3 w-3" />
+              <ExternalLink className="h-3 w-3" />
             </Button>
           </a>
         )
@@ -158,7 +152,7 @@ function ResourceCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const Icon = TYPE_ICONS[resource.type] || FaFilePdf;
+  const Icon = TYPE_ICONS[resource.type] || FileText;
   const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url);
 
@@ -183,7 +177,7 @@ function ResourceCard({
         <p className="text-xs text-gray-500 truncate">{resource.description}</p>
       </div>
       {hasUrl ? (
-        <FaExternalLinkAlt className="text-gray-400 h-3 w-3 flex-shrink-0" />
+        <ExternalLink className="text-gray-400 h-3 w-3 flex-shrink-0" />
       ) : (
         <span className="text-xs text-gray-500 flex-shrink-0">Coming soon</span>
       )}

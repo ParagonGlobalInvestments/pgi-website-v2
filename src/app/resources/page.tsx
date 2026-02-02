@@ -109,7 +109,7 @@ function ResourcesPageContent() {
     checkUserStatus();
   }, [supabase]);
 
-  const handleSignIn = () => {
+  const handleLogin = () => {
     trackEvent('resources_cta_clicked', {
       page: '/resources',
       action: 'google_signin_initiated',
@@ -158,7 +158,7 @@ function ResourcesPageContent() {
             </h1>
             <p className="text-base md:text-lg text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
               Explore our collection of investment and finance resources.
-              Sign in as a PGI member to access the full library.
+              Log in as a PGI member to access the full library.
             </p>
           </motion.div>
 
@@ -203,13 +203,13 @@ function ResourcesPageContent() {
             </motion.div>
           </div>
 
-          {/* Sign in CTA */}
+          {/* Login CTA */}
           <motion.div className="text-center mt-12" variants={itemFadeIn}>
             <button
-              onClick={handleSignIn}
+              onClick={handleLogin}
               className="inline-flex items-center bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:brightness-110 transition"
             >
-              Sign in to access resources
+              Log in to access resources
             </button>
           </motion.div>
         </div>

@@ -4,20 +4,11 @@ import posthog from 'posthog-js';
 if (typeof window !== 'undefined') {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    capture_pageview: 'history_change', // Automatically capture page views
-    capture_pageleave: true, // Track when users leave pages
-    person_profiles: 'identified_only', // Only create profiles for identified users
-    // Enable session replay
-    session_recording: {
-      recordCrossOriginIframes: true,
-      maskAllInputs: false,
-      maskInputOptions: {
-        password: true,
-        email: true,
-      },
-    },
-    // Enhanced tracking
-    capture_performance: true,
+    capture_pageview: 'history_change',
+    capture_pageleave: true,
+    person_profiles: 'identified_only',
+    disable_session_recording: true,
+    capture_performance: false,
     disable_scroll_properties: false,
     scroll_root_selector: 'body',
   });

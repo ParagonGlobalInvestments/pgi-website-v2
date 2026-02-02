@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FaCalendarAlt, FaNewspaper } from 'react-icons/fa';
+import { Calendar, Newspaper } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import AnimatedUniversityMasonry from '@/components/ui/AnimatedUniversityMasonry';
@@ -310,7 +310,7 @@ export default function WhoWeAre() {
               className="flex items-center justify-center"
               variants={itemFadeIn}
             >
-              <FaNewspaper className="text-pgi-light-blue mr-3 text-xl md:text-2xl" />
+              <Newspaper className="text-pgi-light-blue mr-3 text-xl md:text-2xl" />
               <DecryptedText
                 text="Our Journey and Milestones"
                 sequential={true}
@@ -360,7 +360,7 @@ export default function WhoWeAre() {
                     <div
                       className={`flex items-center mb-4 ${index % 2 === 0 ? 'md:justify-end' : 'md:justify-start'}`}
                     >
-                      <FaCalendarAlt className="text-pgi-light-blue mr-2 text-sm md:text-base" />
+                      <Calendar className="text-pgi-light-blue mr-2 text-sm md:text-base" />
                       <span className="text-gray-400 text-sm md:text-base font-medium">
                         {event.date}
                       </span>

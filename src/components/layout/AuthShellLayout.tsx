@@ -1,8 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 /**
- * Portal-style shell for auth pages (sign-in, sign-up).
+ * Portal-style shell for the login page.
  * Mirrors the DashboardLayout visually — navy sidebar / top bar,
  * white content area — but without auth checks or navigation.
  */
@@ -13,9 +12,12 @@ export default function AuthShellLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-white relative">
+      {/* Override body background so iOS safe-area inset shows white, not navy */}
+      <style>{`html, body { background-color: #ffffff; }`}</style>
+
       {/* Mobile Top Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-[60] bg-[#00172B] border-b border-[#003E6B] shadow-lg">
-        <div className="flex items-center px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3">
           <Image
             src="/logos/pgiLogoTransparent.png"
             alt="PGI"
@@ -23,6 +25,12 @@ export default function AuthShellLayout({
             height={24}
             className="h-8 w-auto"
           />
+          <a
+            href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
+            className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
+          >
+            ← Back to Website
+          </a>
         </div>
       </div>
 
@@ -46,12 +54,12 @@ export default function AuthShellLayout({
 
         {/* Footer */}
         <div className="px-3 py-3 border-t border-[#003E6B]/50">
-          <Link
-            href="/"
+          <a
+            href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
             className="block px-3 py-2 text-sm text-gray-400 hover:text-gray-200 rounded-md"
           >
             Back to Website
-          </Link>
+          </a>
         </div>
       </aside>
 

@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError) {
       return NextResponse.redirect(
-        new URL('/sign-in?error=auth_failed', origin)
+        new URL('/login?error=auth_failed', origin)
       );
     }
 
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.redirect(new URL('/sign-in?error=no_user', origin));
+      return NextResponse.redirect(new URL('/login?error=no_user', origin));
     }
 
     const isMember = await isPGIMember(user.email, user.id);
@@ -115,5 +115,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(next, redirectOrigin));
   }
 
-  return NextResponse.redirect(new URL('/sign-in', origin));
+  return NextResponse.redirect(new URL('/login', origin));
 }

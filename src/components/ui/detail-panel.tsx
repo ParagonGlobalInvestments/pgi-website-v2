@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FaTimes } from 'react-icons/fa';
+import { X } from 'lucide-react';
 
 interface DetailPanelProps {
   isOpen: boolean;
@@ -98,7 +98,7 @@ export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
               className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Close panel"
             >
-              <FaTimes className="h-4 w-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -109,7 +109,7 @@ export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
           className="hidden sm:flex absolute top-4 right-4 z-10 p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] items-center justify-center"
           aria-label="Close panel"
         >
-          <FaTimes className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </button>
 
         {/* Content — symmetric padding on mobile, right clearance on desktop */}

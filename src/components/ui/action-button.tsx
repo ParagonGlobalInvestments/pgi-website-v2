@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { cn } from '@/utils';
 import { Button, ButtonProps } from './button';
-import { IconType } from 'react-icons';
+import type { LucideIcon } from 'lucide-react';
 
 interface ActionButtonProps extends ButtonProps {
   icon?: React.ReactNode;
@@ -51,7 +51,7 @@ export function ActionIconButton({
   label,
   ...props
 }: {
-  icon: IconType;
+  icon: LucideIcon;
   label: string;
 } & Omit<ActionButtonProps, 'icon' | 'children'>) {
   return (

@@ -3,11 +3,7 @@
 // import { useState } from 'react';
 // import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  FaUserGraduate,
-  FaChartLine,
-  // FaClipboardList,
-} from 'react-icons/fa';
+import { GraduationCap, TrendingUp } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
@@ -184,9 +180,6 @@ function RecruitmentTeamSection({
                       className="inline-flex items-center gap-2 rounded-lg border border-pgi-light-blue/60 px-3 py-2 text-sm
                                     text-white hover:bg-pgi-light-blue hover:text-white transition shadow-md"
                     >
-                      {/* If you already use react-icons, you can import FaLinkedin */}
-                      {/* import { FaLinkedin } from 'react-icons/fa'; */}
-                      {/* <FaLinkedin className="text-base" /> */}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 448 512"
@@ -339,7 +332,7 @@ function GeneralRecruitment() {
             >
               <div className="flex items-center mb-6">
                 <div className="bg-pgi-light-blue p-3 rounded-full mr-4">
-                  <FaUserGraduate className="text-navy text-xl" />
+                  <GraduationCap className="text-navy text-xl" />
                 </div>
                 <h2 className="text-xl md:text-2xl lg:text-3xl font-medium text-white">
                   <DecryptedText
@@ -380,7 +373,7 @@ function GeneralRecruitment() {
             >
               <div className="flex items-center mb-6">
                 <div className="bg-pgi-light-blue p-3 rounded-full mr-4">
-                  <FaChartLine className="text-navy text-xl" />
+                  <TrendingUp className="text-navy text-xl" />
                 </div>
                 <h2 className="text-xl md:text-2xl lg:text-3xl font-medium text-white">
                   <DecryptedText

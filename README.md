@@ -28,7 +28,7 @@ This is the web platform for Paragon Global Investments, serving both public vis
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL with Row Level Security)
 - **Google OAuth**: NextAuth (used only for Google Drive access on `/resources` page)
-- **Analytics**: PostHog (optional)
+- **Analytics**: Vercel Analytics + Speed Insights, PostHog (optional)
 - **State Management**: SWR for data fetching
 - **Form Handling**: React Hook Form with Zod validation
 - **Real-time Updates**: Socket.IO
@@ -81,7 +81,7 @@ npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
+The application will be available at `https://localhost:3000` (HTTPS with auto-generated local certificate).
 
 ## Environment Variables
 
@@ -96,7 +96,7 @@ The application will be available at `http://localhost:3000`.
 **Application:**
 
 - `NEXT_PUBLIC_APP_URL` - Your application URL (e.g., `http://localhost:3000` for dev)
-- `NEXT_PUBLIC_PORTAL_ENABLED` - Must be explicitly set to `'true'` to enable the member portal, sign-in, and sign-up routes. When omitted or any other value, portal routes return 404 and the Sign In button is hidden.
+- `NEXT_PUBLIC_PORTAL_ENABLED` - Must be explicitly set to `'true'` to enable the member portal and login route. When omitted or any other value, portal routes return 404 and the Log In button is hidden.
 
 **Google OAuth (required only if using `/resources` page):**
 
@@ -146,7 +146,7 @@ See `.env.example` in the project root for a complete template with all variable
 
 ### Supabase Auth
 
-All user authentication is handled by Supabase Auth. Users sign up and sign in through Supabase, and sessions are managed via cookies using `@supabase/ssr`.
+All user authentication is handled by Supabase Auth. Users log in through Supabase (Google OAuth only — there is no self-service sign-up), and sessions are managed via cookies using `@supabase/ssr`. Only pre-existing PGI members in the database can access the portal.
 
 ### Middleware
 
@@ -154,11 +154,11 @@ Route protection and subdomain routing are handled by `src/middleware.ts`, which
 
 - Gates portal routes (404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`)
 - Detects `portal.*` subdomain and rewrites requests to `/portal/*` transparently
-- Exempts auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) from subdomain rewriting
+- Exempts auth routes (`/login`, `/auth/*`, `/api/*`) from subdomain rewriting
 - Redirects `/portal/*` paths on the subdomain to clean URLs (strips prefix)
 - Allows public routes to pass through
 
-Protected routes include `/portal/**`, `/dashboard/**`, `/sign-in`, `/sign-up`, and `/__tests__/**`.
+Protected routes include `/portal/**`, `/dashboard/**`, `/login`, and `/__tests__/**`.
 
 ### User Roles
 
@@ -190,12 +190,13 @@ pgi-website-v2/
 │   │   ├── api/            # Backend API route handlers
 │   │   ├── portal/         # Member portal routes
 │   │   │   └── dashboard/  # Dashboard pages (directory, internships, pitches, etc.)
-│   │   ├── sign-in/        # Authentication pages
-│   │   └── sign-up/
+│   │   ├── login/          # Login page (Google OAuth)
+│   │   ├── auth/           # OAuth callback handler
 │   ├── components/         # React components
 │   │   ├── auth/           # Authentication components
 │   │   ├── dashboard/      # Dashboard-specific components
 │   │   ├── layout/         # Layout components (header, footer)
+│   │   ├── home/           # Homepage section components (client islands)
 │   │   └── ui/             # shadcn/ui components
 │   ├── hooks/              # Custom React hooks
 │   ├── lib/                # Core application modules
@@ -218,7 +219,7 @@ pgi-website-v2/
 
 ### Common Scripts
 
-- `npm run dev` - Start development server at `http://localhost:3000`
+- `npm run dev` - Start dev server with Turbopack + HTTPS at `https://localhost:3000`
 - `npm run build` - Build for production
 - `npm run start` - Start production server (after build)
 - `npm run lint` - Run ESLint (warnings don't block, errors do)
@@ -308,7 +309,7 @@ The build process disables webpack persistent caching in production to prevent d
 
 **Clarification:**
 
-- Supabase Auth handles **all** user authentication (sign-in, sign-up, member portal)
+- Supabase Auth handles **all** user authentication (login, member portal)
 - NextAuth is **only** used for Google OAuth on the `/resources` page to access Google Drive
 - These are completely separate systems with no interaction
 
@@ -351,17 +352,17 @@ portal.paragoninvestments.org/dashboard
 portal.paragoninvestments.org/settings
 ```
 
-Middleware detects the `portal.` host prefix and rewrites requests to `/portal/*` internally. Auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) are exempt from rewriting since they live at the root level.
+Middleware detects the `portal.` host prefix and rewrites requests to `/portal/*` internally. Auth routes (`/login`, `/auth/*`, `/api/*`) are exempt from rewriting since they live at the root level.
 
 ### Local Development
 
-Use [nip.io](https://nip.io) for subdomain testing without hosts file changes:
+Use [sslip.io](https://sslip.io) for subdomain testing without hosts file changes:
 
 ```
-portal.localhost.nip.io:3000/dashboard
+https://portal.127.0.0.1.sslip.io:3000/dashboard
 ```
 
-This works because `nip.io` resolves `*.localhost.nip.io` to `127.0.0.1`, and middleware sees the `portal.` prefix in the `host` header.
+This works because `sslip.io` resolves `*.127.0.0.1.sslip.io` to `127.0.0.1`, and middleware sees the `portal.` prefix in the `host` header. The dev server uses `--experimental-https` for locally-trusted HTTPS certificates.
 
 You can also access the portal via path-based routing at `localhost:3000/portal/dashboard`.
 
@@ -380,7 +381,7 @@ your-branch-name.vercel.app/portal/dashboard
 | Environment | URL Pattern | Mechanism |
 |---|---|---|
 | Production | `portal.paragoninvestments.org/dashboard` | Middleware rewrites to `/portal/dashboard` |
-| Local dev | `portal.localhost.nip.io:3000/dashboard` | Same middleware rewrite via nip.io |
+| Local dev | `portal.127.0.0.1.sslip.io:3000/dashboard` | Same middleware rewrite via sslip.io |
 | Local dev | `localhost:3000/portal/dashboard` | Direct path, no rewrite needed |
 | Vercel preview | `preview-url.vercel.app/portal/dashboard` | Direct path, no rewrite needed |
 

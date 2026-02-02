@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaLinkedin, FaGithub } from 'react-icons/fa';
+import { Linkedin, Github } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Input, Label } from '@/components/ui';
 import type { User } from '@/types';
@@ -172,7 +172,7 @@ export default function SettingsPage() {
 
           <div>
             <Label htmlFor="linkedin" className="flex items-center gap-2 text-gray-700">
-              <FaLinkedin className="text-[#0077B5]" />
+              <Linkedin className="text-[#0077B5]" />
               LinkedIn URL
             </Label>
             <Input
@@ -189,7 +189,7 @@ export default function SettingsPage() {
 
           <div>
             <Label htmlFor="github" className="flex items-center gap-2 text-gray-700">
-              <FaGithub className="text-gray-700" />
+              <Github className="text-gray-700" />
               GitHub URL
             </Label>
             <Input

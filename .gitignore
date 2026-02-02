@@ -77,3 +77,7 @@ Thumbs.db
 
 # ReactBits/jsrepo configuration
 jsrepo.json
+
+# AI assistant local config
+.claude/
+.mcp.json
