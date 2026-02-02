@@ -1,6 +1,8 @@
 // app/robots.ts
 import type { MetadataRoute } from 'next';
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -20,6 +22,6 @@ export default function robots(): MetadataRoute.Robots {
         '/*.php$',
       ],
     },
-    sitemap: 'https://paragoninvestments.org/sitemap.xml',
+    sitemap: `${appUrl}/sitemap.xml`,
   };
 }

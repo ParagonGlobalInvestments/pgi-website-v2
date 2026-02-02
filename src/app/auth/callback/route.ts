@@ -175,8 +175,15 @@ export async function GET(request: NextRequest) {
     }
 
     // User is a PGI member - redirect to intended destination
-    // Construct absolute URL using computed origin
-    const redirectUrl = new URL(next, origin);
+    // If NEXT_PUBLIC_PORTAL_URL is set and destination is a portal route,
+    // redirect to the portal subdomain with a clean URL
+    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
+    let redirectOrigin = origin;
+    if (portalUrl && next.startsWith('/portal/')) {
+      redirectOrigin = portalUrl;
+      next = next.replace(/^\/portal/, '') || '/';
+    }
+    const redirectUrl = new URL(next, redirectOrigin);
     return NextResponse.redirect(redirectUrl);
   }
 
