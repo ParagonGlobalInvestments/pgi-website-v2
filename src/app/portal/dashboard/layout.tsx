@@ -495,7 +495,7 @@ export default function DashboardLayout({
               opacity: { duration: 0.3 },
               filter: { duration: 0.25 },
             }}
-            className="lg:p-8 p-4 pt-20 lg:pt-8 pb-safe"
+            className="lg:p-8 p-4 pt-24 lg:pt-8 pb-safe"
             style={{ willChange: 'opacity, transform, filter' }}
           >
             {children}
