@@ -223,8 +223,8 @@ export default function WhoWeAre() {
               completing the education portion, students will join the
               organization either as investment analysts or quantitative
               analysts, working on stock pitches or designing systematic
-              algorithms that will be invested into or deployed into Paragon&apos;s
-              $60,000 investment funds.
+              algorithms that will be invested into or deployed into Paragon's
+              $70,000 investment funds.
             </motion.p>
 
             <motion.p

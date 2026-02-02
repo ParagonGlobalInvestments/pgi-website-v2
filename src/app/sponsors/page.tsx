@@ -9,6 +9,7 @@ import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/D
 import {
   SPONSORS_COMPANIES,
   PARTNERS_COMPANIES,
+  type Company,
 } from '@/lib/constants/companies';
 
 // Animation variants
@@ -95,6 +96,12 @@ export default function Sponsors() {
       'Hireflix is a leading one-way video interview software platform. Hireflix has partnered with PGI to support our national recruitment efforts.',
     portfolio123:
       'Portfolio123 enables portfolio managers and quantitative investors to develop advanced machine learning-driven quantitative portfolio strategies without writing any code. Combining advanced capabilities with user-friendly design, Portfolio123 significantly lowers R&D costs.',
+    koyfin:
+      'Koyfin delivers institutional-grade market dashboards, charting, and analytics in an intuitive interface, helping PGI members monitor macro trends and single-name fundamentals fast.',
+    onefinnet:
+      'OneFinnet aggregates global financial statements, consensus estimates, and ESG metrics into a single API so students can enrich research models with consistent, ready-to-use data.',
+    recruitu:
+      'RecruitU is a modern recruiting platform focused on business and finance roles, giving PGI talent teams streamlined tools to manage candidate pipelines and campus outreach.',
   };
 
   return (
@@ -125,7 +132,7 @@ export default function Sponsors() {
             Paragon Global Investments is partnered with top firms and
             organizations to provide our students the best access to the top
             firms in finance, tech, and quant across the United States. Sponsors
-            contribute to Paragon&apos;s investment fund, operations, and the growth
+            contribute to Paragon's investment fund, operations, and the growth
             of our members.
           </motion.p>
         </motion.div>
@@ -159,7 +166,7 @@ export default function Sponsors() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-8 max-w-6xl mx-auto"
             variants={staggerContainer}
           >
-            {SPONSORS_COMPANIES.map((sponsor, _index) => (
+            {SPONSORS_COMPANIES.map((sponsor, index) => (
               <motion.div
                 key={sponsor.name}
                 className=" flex items-center justify-center"
@@ -218,7 +225,7 @@ export default function Sponsors() {
           </motion.div>
 
           <div className="max-w-6xl mx-auto">
-            {PARTNERS_COMPANIES.map((partner, _index) => (
+            {PARTNERS_COMPANIES.map((partner, index) => (
               <motion.div
                 key={partner.name}
                 className="bg-navy-light p-6 mb-8 rounded-lg border border-gray-700 hover:border-secondary transition-duration-300"

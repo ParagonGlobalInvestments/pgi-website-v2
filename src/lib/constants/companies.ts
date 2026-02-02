@@ -9,6 +9,8 @@ export interface Company {
   imagePath: string;
 }
 
+const PLACEHOLDER_COMPANY_LOGO = '/images/companies/placeholder.svg';
+
 // Investment Banking Companies
 export const INVESTMENT_BANKING_COMPANIES: Company[] = [
   {
@@ -158,6 +160,13 @@ export const INVESTMENT_BANKING_COMPANIES: Company[] = [
     category: 'investment-banking',
     imagePath: '/images/companies/UBS.png',
   },
+  {
+    name: 'centerview',
+    displayName: 'Centerview Partners',
+    website: 'https://www.centerviewpartners.com/',
+    category: 'investment-banking',
+    imagePath: '/images/companies/Centerview_Partners_white.png',
+  },
 ];
 
 // Quantitative Trading and Technology Companies
@@ -196,6 +205,13 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     website: 'https://optiver.com/',
     category: 'quant-tech',
     imagePath: '/images/companies/Optiver.png',
+  },
+  {
+    name: 'drw',
+    displayName: 'DRW',
+    website: 'https://drw.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/drw.png',
   },
   {
     name: 'aqr',
@@ -677,6 +693,20 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
     category: 'asset-mgmt-consulting',
     imagePath: '/images/companies/PWC.png',
   },
+  {
+    name: 'insight-partners',
+    displayName: 'Insight Partners',
+    website: 'https://www.insightpartners.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Insight-Partners-white-logo.png', 
+  },
+  {
+    name: 'bain-capital',
+    displayName: 'Bain Capital',
+    website: 'https://www.baincapital.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/baincapital-white.png',
+  },
 ];
 
 // Sponsors Companies
@@ -723,6 +753,13 @@ export const SPONSORS_COMPANIES: Company[] = [
     website: 'https://drw.com/',
     category: 'quant-tech',
     imagePath: '/images/companies/drw.png',
+  },
+  {
+    name: 'kalshi',
+    displayName: 'Kalshi',
+    website: 'https://kalshi.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Kalshi_logo.png',
   },
   {
     name: 'kershner',
@@ -841,6 +878,27 @@ export const PARTNERS_COMPANIES: Company[] = [
     website: 'https://www.portfolio123.com/',
     category: 'quant-tech',
     imagePath: '/images/companies/Portfolio123.png',
+  },
+  {
+    name: 'koyfin',
+    displayName: 'Koyfin',
+    website: 'https://www.koyfin.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/Koyfin-removebg-preview.png',
+  },
+  {
+    name: 'onefinnet',
+    displayName: 'OneFinnet',
+    website: 'https://www.onefinnet.com/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/OneFinnet_white.png',
+  },
+  {
+    name: 'recruitu',
+    displayName: 'RecruitU',
+    website: 'https://www.recruitu.ai/',
+    category: 'asset-mgmt-consulting',
+    imagePath: '/images/companies/RecruitU_white_v2.png',
   },
 ];
 
