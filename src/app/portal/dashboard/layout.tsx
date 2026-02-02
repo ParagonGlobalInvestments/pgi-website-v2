@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { FaChevronLeft } from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -78,11 +79,15 @@ function NavItem({
               } ${
                 isActive
                   ? 'text-white font-medium'
-                  : 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
               }`}
             >
               {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4A6BB1] rounded-r" />
+                <motion.span
+                  layoutId="nav-indicator"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4A6BB1] rounded-r"
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                />
               )}
               {!isCollapsed && <span>{label}</span>}
               {isCollapsed && (
@@ -114,6 +119,9 @@ export default function DashboardLayout({
   const [isClient, setIsClient] = useState(false);
   const [authUser, setAuthUser] = useState<any>(null);
   const [portalUser, setPortalUser] = useState<User | null>(null);
+
+  const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => setIsClient(true), []);
 
@@ -183,7 +191,14 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen bg-white">
         <div className="flex-1 flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+          <motion.div
+            className="rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
+            animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+            transition={{
+              rotate: { duration: 1, ease: 'linear', repeat: Infinity },
+              scale: { duration: 1, ease: 'easeInOut', repeat: Infinity },
+            }}
+          />
         </div>
       </div>
     );
@@ -239,69 +254,102 @@ export default function DashboardLayout({
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div
-        className={`fixed inset-0 bg-[#00172B] transition-transform duration-300 ease-in-out z-[55] ${
-          isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
-        } pt-16`}
-      >
-        <div className="p-4">
-          {/* User info */}
-          <div className="flex items-center space-x-3 mb-4 p-3 bg-[#002C4D] rounded-lg">
-            <div className="flex-1">
-              <div className="text-white font-medium">{displayName}</div>
-              <div className="text-xs text-gray-400">
-                {displaySchool}
-                {displaySchool && displayRole ? ' / ' : ''}
-                {displayRole}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ y: '-100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '-100%' }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="fixed inset-0 bg-[#00172B]/95 backdrop-blur-sm z-[55] pt-16"
+          >
+            <div className="p-4">
+              {/* User info */}
+              <div className="flex items-center space-x-3 mb-4 p-3 bg-[#002C4D] rounded-lg">
+                <div className="flex-1">
+                  <div className="text-white font-medium">{displayName}</div>
+                  <div className="text-xs text-gray-400">
+                    {displaySchool}
+                    {displaySchool && displayRole ? ' / ' : ''}
+                    {displayRole}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <nav className="space-y-1 text-sm">
-            {NAV_ITEMS.map(item => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={`flex items-center px-3 py-3 rounded-md text-white min-h-[44px] ${
-                  activeLink === item.id
-                    ? 'bg-[#003E6B] font-medium'
-                    : 'hover:bg-[#002C4D]'
-                }`}
-                onClick={() => {
-                  setActiveLink(item.id);
-                  setIsMobileMenuOpen(false);
+              <motion.nav
+                className="space-y-1 text-sm"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.05 } },
                 }}
+                initial="hidden"
+                animate="visible"
               >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+                {NAV_ITEMS.map(item => (
+                  <motion.div
+                    key={item.id}
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        transition: { type: 'spring', stiffness: 400, damping: 25 },
+                      },
+                    }}
+                  >
+                    <Link
+                      href={item.href}
+                      className={`flex items-center px-3 py-3 rounded-md text-white min-h-[44px] ${
+                        activeLink === item.id
+                          ? 'bg-[#003E6B] font-medium'
+                          : 'hover:bg-[#002C4D]'
+                      }`}
+                      onClick={() => {
+                        setActiveLink(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <span>{item.label}</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.nav>
 
-          <div className="mt-6 pt-4 border-t border-[#003E6B] space-y-1">
-            <Link
-              href="/"
-              className="flex items-center text-sm px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D] min-h-[44px]"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Back to Website
-            </Link>
-            <Link
-              href="/portal/signout"
-              className="flex items-center text-sm px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D] min-h-[44px]"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign Out
-            </Link>
-          </div>
-        </div>
-      </div>
+              <motion.div
+                className="mt-6 pt-4 border-t border-[#003E6B] space-y-1"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { delay: 0.2 } },
+                }}
+                initial="hidden"
+                animate="visible"
+              >
+                <Link
+                  href="/"
+                  className="flex items-center text-sm px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D] min-h-[44px]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Back to Website
+                </Link>
+                <Link
+                  href="/portal/signout"
+                  className="flex items-center text-sm px-3 py-3 rounded-md text-red-400 hover:bg-[#002C4D] min-h-[44px]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Out
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Desktop Sidebar */}
       <motion.aside
         className="hidden lg:flex flex-shrink-0 flex-col h-screen sticky top-0 overflow-hidden z-50"
         variants={SIDEBAR_VARIANTS}
         animate={isCollapsed ? 'collapsed' : 'expanded'}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         {/* Logo + collapse */}
         <div className="px-4 py-4 flex items-center justify-between">
@@ -434,7 +482,25 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 bg-white text-gray-900">
-        <div className="lg:p-8 p-4 pt-20 lg:pt-8 pb-safe">{children}</div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={pathname}
+            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 8, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4, filter: 'blur(2px)' }}
+            transition={{
+              type: 'tween',
+              ease: [0.25, 0.1, 0.25, 1],
+              duration: 0.35,
+              opacity: { duration: 0.3 },
+              filter: { duration: 0.25 },
+            }}
+            className="lg:p-8 p-4 pt-20 lg:pt-8 pb-safe"
+            style={{ willChange: 'opacity, transform, filter' }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

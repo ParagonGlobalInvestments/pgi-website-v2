@@ -21,6 +21,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DetailPanel } from '@/components/ui/detail-panel';
 import type { User } from '@/types';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 // ============================================================================
 // Constants
@@ -58,6 +59,22 @@ const ROLE_LABELS: Record<string, string> = {
 const PROGRAM_LABELS: Record<string, string> = {
   value: 'Value',
   quant: 'Quant',
+};
+
+const gridContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.03 },
+  },
+};
+
+const gridItemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 400, damping: 25 },
+  },
 };
 
 // ============================================================================
@@ -382,14 +399,19 @@ export default function DirectoryPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          variants={gridContainerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {filteredUsers.map(user => (
+            <motion.div key={user.id} variants={gridItemVariants}>
             <Card
-              key={user.id}
-              className={`border transition-all duration-200 cursor-pointer group ${
+              className={`border transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
                 selectedUser?.id === user.id && isPanelOpen
                   ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
-                  : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                  : 'border-gray-200 hover:border-gray-300'
               }`}
               onClick={() => openPanel(user)}
             >
@@ -443,8 +465,9 @@ export default function DirectoryPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Member Detail Panel */}

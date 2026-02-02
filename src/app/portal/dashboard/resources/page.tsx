@@ -164,7 +164,7 @@ function ResourceCard({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 bg-white border rounded-lg transition-all duration-200 cursor-pointer ${
+      className={`flex items-center gap-4 p-4 bg-white border rounded-lg transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${
         isSelected
           ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
           : hasUrl
@@ -256,7 +256,12 @@ export default function ResourcesPage() {
         key={activeTab}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 25,
+          opacity: { duration: 0.15 },
+        }}
         className="grid grid-cols-1 md:grid-cols-2 gap-3"
       >
         {activeCategory.resources.map(resource => (
