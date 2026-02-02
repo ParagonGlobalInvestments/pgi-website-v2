@@ -88,22 +88,32 @@ export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
           }
         `}
       >
-        {/* Mobile drag handle */}
-        <div className="sm:hidden flex justify-center pt-2 pb-1">
+        {/* Mobile: drag handle + close in one row */}
+        <div className="sm:hidden flex items-center px-2 pt-2 pb-1">
+          <div className="flex-1" />
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          <div className="flex-1 flex justify-end">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Close panel"
+            >
+              <FaTimes className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Close button — absolute, shares row with content header */}
+        {/* Desktop: absolute close button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="hidden sm:flex absolute top-4 right-4 z-10 p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] items-center justify-center"
           aria-label="Close panel"
         >
           <FaTimes className="h-4 w-4" />
         </button>
 
-        {/* Content */}
-        <div className="p-4 pr-14 sm:p-5 sm:pr-14 pb-safe text-gray-900">
+        {/* Content — symmetric padding on mobile, right clearance on desktop */}
+        <div className="p-4 sm:p-5 sm:pr-14 pb-safe text-gray-900">
           {children}
         </div>
       </div>

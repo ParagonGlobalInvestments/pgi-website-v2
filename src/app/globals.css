@@ -235,7 +235,8 @@ textarea {
   transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
-/* Safe area padding for notch devices (PWA) */
+/* Safe area padding for notch devices (PWA) — ensures at least 2rem so
+   buttons at the bottom of sheets/panels always have breathing room. */
 .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
 }
