@@ -10,7 +10,7 @@ const cardVariants = {
   visible: (i: number) => ({
     y: 0,
     opacity: 1,
-    transition: { delay: i * 0.1, type: 'spring', stiffness: 260, damping: 20 },
+    transition: { delay: i * 0.1, type: 'spring', stiffness: 400, damping: 25 },
   }),
 };
 
@@ -62,9 +62,9 @@ export default function Dashboard() {
 
       {/* Feature cards — clean, no decorative icons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible">
+        <motion.div custom={0} variants={cardVariants} initial="hidden" animate="visible" whileHover={{ y: -2, transition: { duration: 0.2 } }}>
           <Link href="/portal/dashboard/directory" className="block group">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md hover:border-gray-300 transition-all duration-200">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Member Directory</h2>
               <p className="text-gray-500 text-sm">
                 Browse all PGI members. Search by name, filter by school, program, or role.
@@ -73,9 +73,9 @@ export default function Dashboard() {
           </Link>
         </motion.div>
 
-        <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
+        <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible" whileHover={{ y: -2, transition: { duration: 0.2 } }}>
           <Link href="/portal/dashboard/resources" className="block group">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md hover:border-gray-300 transition-all duration-200">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Resources</h2>
               <p className="text-gray-500 text-sm">
                 Education materials, recruitment guides, and investment pitch reports.
