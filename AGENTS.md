@@ -1,525 +1,413 @@
-# Agent Development Guide
+# AGENTS.md — PGI Portal Codebase Reference
 
-This document is the single source of truth for agentic-assisted development in the PGI Website codebase. All AI coding agents and human developers supervising agents must follow these rules.
+Single source of truth for AI coding agents working in the PGI Website codebase. Human developers supervising agents should also reference this document.
 
-## Purpose of Agent Usage
+---
 
-Agents are used in this repository to:
+## Tech Stack
 
-- Fix linting errors and warnings systematically
-- Refactor code to improve maintainability without changing behavior
-- Scaffold new features following established patterns
-- Update dependencies safely
-- Clean technical debt incrementally
-- Assist with repetitive tasks that follow clear patterns
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript 5.5 (strict mode) |
+| Auth | Supabase Auth (Google OAuth) |
+| Database | Supabase (PostgreSQL + RLS) |
+| Storage | Supabase Storage (resources) |
+| Styling | Tailwind CSS 3 + shadcn/ui + Radix UI |
+| Animation | Framer Motion, GSAP |
+| Analytics | PostHog |
+| Hosting | Vercel |
+| CI | GitHub Actions |
 
-Agents are expected to solve problems that are:
+---
 
-- Repetitive and pattern-based
-- Well-defined with clear success criteria
-- Non-architectural (no auth system changes, no schema changes)
-- Validatable through automated checks (lint, build, tests)
+## Project Structure
 
-## Allowed Agent Actions
+```
+src/
+├── app/                         # Next.js App Router pages
+│   ├── (main)/                  # Route group: public marketing pages (home, privacy)
+│   ├── about/                   # /about
+│   ├── apply/                   # /apply (recruitment — national + UChicago)
+│   ├── auth/callback/           # OAuth callback route (Supabase)
+│   ├── contact/                 # /contact
+│   ├── api/users/               # REST API: /api/users, /api/users/me
+│   ├── education/               # /education
+│   ├── investment-strategy/     # /investment-strategy
+│   ├── members/                 # /members, /members/quant-team, /members/value-team
+│   ├── national-committee/      # /national-committee, /officers, /founders
+│   ├── placements/              # /placements (company logos)
+│   ├── portal/                  # Authenticated portal (directory, resources, settings)
+│   │   ├── dashboard/           # Dashboard pages
+│   │   │   ├── directory/       # Member directory
+│   │   │   ├── resources/       # Resource viewer (PDFs, spreadsheets)
+│   │   │   └── settings/        # Profile settings
+│   │   └── signout/             # Sign-out page
+│   ├── resources/               # /resources (public, non-portal)
+│   ├── sign-in/                 # Sign-in page
+│   ├── sign-up/                 # Sign-up + email verify
+│   ├── sponsors/                # /sponsors
+│   ├── who-we-are/              # /who-we-are
+│   ├── terms/                   # /terms
+│   ├── privacy/                 # /privacy
+│   └── layout.tsx               # Root layout
+├── components/
+│   ├── analytics/               # PostHog trackers (company, form, PDF, university)
+│   ├── layout/                  # Header, Footer, StandaloneLayout
+│   ├── portal/                  # MobileDocumentViewer (PDF/Excel preview)
+│   ├── providers/               # PostHogProvider
+│   ├── reactbits/               # Third-party animation components (CountUp, ShinyText, etc.)
+│   └── ui/                      # shadcn/ui + custom (detail-panel, button, dialog, etc.)
+├── hooks/
+│   ├── useIsMobile.ts           # Mobile viewport detection (768px)
+│   └── useSupabaseUser.ts       # Fetches user via /api/users/me
+├── lib/
+│   ├── auth/                    # Auth type helpers (UserRole, UserTrack)
+│   ├── constants/               # Static data (companies, universities, resources)
+│   ├── supabase/                # Supabase clients (browser, server, admin, database)
+│   ├── featureFlags.ts          # enableAdminFeatures, isDevelopment
+│   ├── posthog.ts               # PostHog initialization
+│   └── runtime.ts               # Portal availability (portalEnabled)
+├── types/
+│   └── index.ts                 # Core types: User, UserRole, UserProgram, ApiResponse
+├── middleware.ts                 # Edge middleware: portal gating + subdomain routing
+├── utils.ts                     # cn(), formatDate(), truncateText()
+└── tailwind.css                 # Tailwind entry point
+```
 
-Agents may perform the following actions:
+---
 
-- **Lint fixes**: Fix ESLint errors and warnings, following existing patterns
-- **Refactors**: Extract repeated code, improve type safety, optimize imports
-- **Feature scaffolding**: Create new API routes, pages, or components following existing patterns
-- **Dependency updates**: Update package versions with proper testing
-- **Documentation edits**: Update README.md or AGENTS.md only
-- **Build safety improvements**: Fix build failures, handle missing env vars gracefully
-- **Code cleanup**: Remove unused code, fix TypeScript errors, improve type definitions
+## Authentication Architecture
 
-## Disallowed Agent Actions
+Authentication uses **Supabase Auth** exclusively. There is no NextAuth in the codebase.
 
-Agents must NOT perform the following actions:
+### Auth Flow
 
-- **Creating new markdown files**: Only README.md and AGENTS.md may exist (deployment guides go in `docs/deploy/`)
-- **Creating QA/test routes outside `__tests__` namespace**: All internal QA and testing routes must be under `src/app/__tests__/[feature-name]/` and must include production guards
-- **Silent architectural changes**: No changes to auth system, database schema, or core architecture without explicit approval
-- **Auth system modifications**: No changes to Supabase Auth setup, middleware logic, or NextAuth configuration without human sign-off
-- **Database schema changes**: No SQL migrations, table alterations, or RLS policy changes without human review
-- **Mass dependency removals**: No removing dependencies without verifying they're unused
-- **Breaking API contracts**: No changes to API route response formats without coordination
-- **Environment variable assumptions**: No code that assumes env vars exist at build time
+1. User clicks "Sign In" → `/sign-in` page
+2. Supabase Auth initiates Google OAuth
+3. Callback → `/auth/callback/route.ts`
+4. Callback checks PGI membership in this order:
+   - `ADMIN_EMAILS` env var allowlist
+   - `users` table by `supabase_id` (already linked)
+   - `users` table by `email` or `alternate_emails` → auto-links `supabase_id`
+5. Non-members: signed out, redirected to `/resources?notMember=true`
+6. Members: redirected to `/portal/dashboard` (or subdomain if configured)
 
-## Core Architectural Rules (Agents Must Follow)
+### Auth Enforcement
 
-### Supabase Auth + RLS
+- **Edge middleware** (`src/middleware.ts`): Hard-blocks portal routes (404) when `NEXT_PUBLIC_PORTAL_ENABLED !== 'true'`. No Supabase imports — runs on Edge runtime.
+- **Portal layout** (`src/app/portal/layout.tsx`): Server-side auth check. Redirects unauthenticated users to `/sign-in?redirectTo=/portal/dashboard`. This is the secure choke point.
+- **API routes**: Each route calls `requireSupabaseServerClient()` + `supabase.auth.getUser()` independently.
 
-- All user authentication uses Supabase Auth
-- Row Level Security (RLS) policies enforce data access at the database layer
-- Never bypass RLS unless using admin client in server-side API routes
-- User roles (`admin`, `lead`, `member`) are stored in `users.org_permission_level`
+### Subdomain Routing
 
-### Middleware-Based Protection
+Middleware detects `portal.*` hostname prefix:
+- Non-portal paths (e.g., `/dashboard`) → rewritten to `/portal/dashboard` (transparent to user)
+- `/portal/*` paths on subdomain → 301 redirect to strip prefix (clean URLs)
+- Auth/API routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) pass through unmodified
 
-- Route protection and subdomain routing are handled by `src/middleware.ts`
-- Portal gating: routes return 404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`
-- Subdomain routing: `portal.*` host prefix rewrites to `/portal/*` transparently
-- Auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) are exempt from subdomain rewriting
-- Protected routes: `/portal/**`, `/dashboard/**`, `/sign-in`, `/sign-up`, `/__tests__/**`
-- Do not add route protection logic in individual pages or components
+---
 
-### Supabase Client Usage Patterns
+## Database Schema
 
-**Browser Components (`'use client'`):**
+Single `users` table in Supabase PostgreSQL:
+
+```sql
+CREATE TABLE users (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            text NOT NULL,
+  email           text NOT NULL UNIQUE,
+  alternate_emails text[] DEFAULT '{}',
+  role            text NOT NULL DEFAULT 'analyst'
+                  CHECK (role IN ('admin', 'committee', 'pm', 'analyst')),
+  program         text CHECK (program IN ('value', 'quant') OR program IS NULL),
+  school          text NOT NULL,
+  graduation_year int,
+  linkedin_url    text,
+  github_url      text,
+  supabase_id     text UNIQUE,
+  created_at      timestamptz DEFAULT now(),
+  updated_at      timestamptz DEFAULT now()
+);
+```
+
+### Roles
+
+| Role | Description |
+|------|-------------|
+| `admin` | Full access |
+| `committee` | National committee member |
+| `pm` | Portfolio manager |
+| `analyst` | Default role for new members |
+
+### Row Level Security (RLS)
+
+- `SELECT`: Any authenticated user can view all members (directory)
+- `UPDATE`: Users can update their own row only (`supabase_id` match)
+- Service role key bypasses RLS (used in API routes with admin client)
+
+### Database Access Pattern
+
+All database operations go through `SupabaseDatabase` class in `src/lib/supabase/database.ts`:
+
+```typescript
+import { createDatabase } from '@/lib/supabase/database';
+
+const db = createDatabase();                          // Uses server client
+const db = createDatabase(requireSupabaseAdminClient()); // Bypasses RLS
+```
+
+Available methods:
+- `getUsers(filters?)` — Directory listing with optional school/program/role/search filters
+- `getUserBySupabaseId(id)` — Auth lookup
+- `getUserByEmail(email)` — Primary email lookup
+- `getUserByAnyEmail(email)` — Primary + alternate emails lookup (returns `dbId` for linking)
+- `updateUserProfile(id, updates)` — Update name, linkedin_url, github_url
+- `linkSupabaseId(userId, supabaseId)` — Link auth ID to user row
+
+---
+
+## Supabase Client Usage
+
+Three client factories, each with a build-safe (`get*`) and runtime-required (`require*`) variant:
+
+### Browser (`'use client'` components)
 
 ```typescript
 import { createClient } from '@/lib/supabase/browser';
-const supabase = createClient();
+const supabase = createClient(); // Build-safe on SSR, throws in browser if env missing
 ```
 
-**Server Components / API Routes:**
+### Server (API routes, server components)
 
 ```typescript
+// Build-safe (returns null if env vars missing):
+import { getSupabaseServerClient } from '@/lib/supabase/server';
+const supabase = getSupabaseServerClient();
+
+// Runtime-required (throws if env vars missing):
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 const supabase = requireSupabaseServerClient();
 ```
 
-**Admin Operations (API Routes Only):**
+### Admin (server-side only, bypasses RLS)
 
 ```typescript
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
-const adminClient = requireSupabaseAdminClient();
+const admin = requireSupabaseAdminClient(); // NEVER use in browser code
 ```
 
-**Never:**
+### Rules
 
-- Use admin client in browser code
-- Use browser client in server components
-- Create Supabase clients directly (always use factory functions)
+- Never create Supabase clients directly — always use factory functions
+- Never use admin client in browser code
+- Never use browser client in server components
+- Use `getSupabase*Client()` in pages/layouts that might be prerendered
+- Use `requireSupabase*Client()` in API routes (safe to throw at runtime)
 
-### NextAuth Scope Limitation
+---
 
-- NextAuth is used **only** for Google OAuth on `/resources` page
-- NextAuth routes: `/api/nextauth/**`
-- NextAuth does NOT handle member portal authentication
-- Do not extend NextAuth to other pages or features
+## API Routes
 
-### Database Operations
+### `GET /api/users/me`
 
-- Use `createDatabase()` from `@/lib/supabase/database` in API routes
-- Database operations go through the `SupabaseDatabase` class
-- Never write raw SQL in application code
-- RLS policies handle authorization automatically
+Returns the current authenticated user's profile. Auto-links `supabase_id` on first login via email/alternate_emails fallback.
 
-## Environment Variable Rules
+### `PATCH /api/users/me`
 
-### Required Variables
+Updates profile fields: `name`, `linkedinUrl`, `githubUrl`. Validates LinkedIn/GitHub URL format. Only the authenticated user can update their own profile.
 
-**Supabase (required for all features):**
+### `GET /api/users`
 
-- `NEXT_PUBLIC_SUPABASE_URL` - Build will fail if missing
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Build will fail if missing
-- `SUPABASE_SERVICE_ROLE_KEY` - Server-only, runtime failure if missing
+Returns all users for the directory. Supports query params: `school`, `program`, `role`, `search`.
 
-**Application:**
-
-- `NEXT_PUBLIC_APP_URL` - Used for redirects and links
-- `NEXT_PUBLIC_PORTAL_ENABLED` - Must be `'true'` to enable portal, sign-in, sign-up routes
-
-**Google OAuth (required only for `/resources` page):**
-
-- `GOOGLE_CLIENT_ID` - Only needed if `/resources` page is used
-- `GOOGLE_CLIENT_SECRET` - Only needed if `/resources` page is used
-- `NEXTAUTH_SECRET` - Only needed if `/resources` page is used
-- `NEXTAUTH_URL` - Only needed if `/resources` page is used
-- `NEXTAUTH_BASE_PATH` - Set to `/api/nextauth`
-- `PGI_REQUIRE_EDU` - Require `.edu` email for resources page (default: `true`)
-
-### Optional Variables
-
-**Portal Subdomain:**
-
-- `NEXT_PUBLIC_PORTAL_URL` - Portal subdomain URL for cross-domain redirects (e.g., `https://portal.paragoninvestments.org`)
-
-**Feature Flags:**
-
-- `NEXT_PUBLIC_SHOW_STATS` - Default: `false`
-- `NEXT_PUBLIC_ENABLE_INTERNSHIPS` - Default: `false`
-- `NEXT_PUBLIC_ENABLE_DIRECTORY` - Default: `false`
-- `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` - Default: `true`
-
-**Analytics:**
-
-- `NEXT_PUBLIC_POSTHOG_KEY` - Optional analytics
-- `NEXT_PUBLIC_POSTHOG_HOST` - Default: `https://us.i.posthog.com`
-
-**Other:**
-
-- `ADMIN_EMAILS` - Comma-separated admin email allowlist
-- `NODE_ENV` - Automatically set by Next.js, do not set manually
-
-### Build-Safe Patterns
-
-**Correct (build-safe):**
+### Response Format
 
 ```typescript
-// Returns null if env vars missing, doesn't throw
-const client = getSupabaseServerClient();
-if (!client) {
-  return <div>Configuration error</div>;
-}
+{ success: boolean; data?: T; error?: string }
+// Or for user endpoints:
+{ success: boolean; user?: User; error?: string }
 ```
 
-**Correct (runtime-only failure):**
+---
 
-```typescript
-// Throws only at runtime, not during build
-const client = requireSupabaseServerClient();
-```
+## Environment Variables
 
-**Incorrect (build failure):**
+### Required
 
-```typescript
-// Throws during build if env var missing
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-```
+| Variable | Context | Purpose |
+|----------|---------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Build + Runtime | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Build + Runtime | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Runtime only | Admin operations (server-side) |
+| `NEXT_PUBLIC_PORTAL_ENABLED` | Build + Runtime | Must be `'true'` to enable portal |
 
-### Environment Variable Handling Rules
+### Optional
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_APP_URL` | Base URL for redirects |
+| `NEXT_PUBLIC_PORTAL_URL` | Subdomain URL (e.g., `https://portal.paragoninvestments.org`) |
+| `ADMIN_EMAILS` | Comma-separated admin email allowlist |
+| `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` | Default `true` — set `'false'` to hide admin UI |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog analytics key |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host (default: `https://us.i.posthog.com`) |
+
+### Build Safety Rules
 
 - Never assume env vars exist at build time
-- Use `getSupabaseServerClient()` in server components (returns null if missing)
-- Use `requireSupabaseServerClient()` in API routes (throws at runtime if missing)
+- `getSupabase*Client()` returns `null` if env vars are missing (safe for prerendering)
+- `requireSupabase*Client()` throws only at runtime (use in API routes)
 - Feature flags degrade gracefully (features hidden, not broken)
-- Missing optional vars should not crash the application
+- `next.config.mjs` has `ignoreBuildErrors: true` and `ignoreDuringBuilds: true` as safety nets
 
-## Prompt Templates
+---
 
-### Fixing Lint/Build Failures
+## Portal Gating
 
-```
-Fix all ESLint errors in the codebase.
+Portal availability is controlled by a single source of truth:
 
-Scope:
-- Fix only errors (not warnings unless explicitly requested)
-- Do not change runtime behavior
-- Follow existing code patterns
-
-Constraints:
-- No new dependencies
-- No architectural changes
-- Preserve existing functionality
-
-Validation:
-- Run `npm run lint` and verify 0 errors
-- Run `npm run build` and verify success
-- No new markdown files created
+```typescript
+// src/lib/runtime.ts
+export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 ```
 
-### Refactoring a Component Safely
+Three enforcement points:
+1. **Middleware**: Returns 404 for `/portal/*`, `/dashboard/*`, `/sign-in`, `/sign-up`, `/__tests__/*` when disabled
+2. **Server layouts**: `assertPortalEnabledOrNotFound()` for page-level enforcement
+3. **API routes**: `requirePortalEnabledOr404()` returns 404 JSON response when disabled
 
-```
-Refactor [component-path] to [specific improvement].
+Never check `process.env.NEXT_PUBLIC_PORTAL_ENABLED` directly — import from `@/lib/runtime`.
 
-Scope:
-- [Specific changes to make]
-- [Files that may be affected]
+---
 
-Constraints:
-- Maintain exact same functionality
-- Preserve all props and behavior
-- Follow existing component patterns
-- Use TypeScript types from `src/types/`
+## CI Pipeline
 
-Validation:
-- Component renders identically
-- All props work as before
-- No TypeScript errors
-- Lint passes
-```
+**File:** `.github/workflows/ci.yml`
+
+Triggers: push to `main`/`develop`, PRs targeting `main`/`develop`
+
+Steps (sequential):
+1. `npm ci` — Install dependencies
+2. `npm run lint` — ESLint (non-blocking, `continue-on-error: true`)
+3. `npm run build` — Next.js build (generates `.next/types` for App Router validation)
+4. `npm run type-check` — `tsc --noEmit` (blocking — must pass)
+
+### TypeScript Strictness
+
+`tsconfig.json` enforces:
+- `strict: true`
+- `noImplicitAny: true`
+- `noImplicitReturns: true`
+- `noUnusedLocals: true`
+- `noUnusedParameters: true`
+- `forceConsistentCasingInFileNames: true`
+
+The `include` array contains `.next/types/**/*.ts`, which means App Router export validation (generated by `next build`) is also checked by `tsc --noEmit`. Page files can only export `default` and Next.js-specific named exports (`metadata`, `generateStaticParams`, etc.).
+
+---
+
+## Key Patterns to Follow
+
+### Adding a New Portal Dashboard Page
+
+1. Create `src/app/portal/dashboard/[feature]/page.tsx`
+2. Mark with `'use client'` if interactive
+3. Use `useSupabaseUser()` hook for user data
+4. Use components from `@/components/ui`
+5. Follow existing styling (Tailwind + PGI brand colors)
 
 ### Adding a New API Route
 
-```
-Create a new API route at `/api/[feature]/route.ts`.
+1. Create `src/app/api/[feature]/route.ts`
+2. Export `const dynamic = 'force-dynamic'`
+3. Call `requirePortalEnabledOr404()` at top of handler
+4. Call `requireSupabaseServerClient()` + `supabase.auth.getUser()`
+5. Return 401 if not authenticated
+6. Use `createDatabase()` for DB operations
+7. Return `{ success: boolean, data?, error? }` format
 
-Scope:
-- Implement [GET/POST/PATCH/DELETE] handler
-- Follow authentication pattern from existing routes
-- Use `requireSupabaseServerClient()` for auth
-- Use `createDatabase()` for database operations
+### Adding a New Public Page
 
-Constraints:
-- Require authentication (check `supabase.auth.getUser()`)
-- Return proper HTTP status codes
-- Handle errors gracefully
-- Follow existing API response format: `{ success: boolean, data?: any, error?: string }`
+1. Create `src/app/[page-name]/page.tsx` and `layout.tsx`
+2. Layout wraps with `StandaloneLayout` or the `(main)` route group layout
+3. Use PGI brand colors: `navy` (#00172B), `darkNavy` (#000F1D), `pgi-dark-blue` (#0A192F), `pgi-light-blue` (#1F2A44)
+4. Use Montserrat font (`font-montserrat` or `font-sans`)
+5. Use Framer Motion for animations (`fadeIn`, `staggerContainer` patterns)
 
-Validation:
-- Route responds correctly
-- Authentication required
-- Error handling works
-- Lint passes
-- No new markdown files
-```
+---
 
-### Adding a New Dashboard Page
+## What Agents Can Do
 
-```
-Create a new dashboard page at `/portal/dashboard/[feature]/page.tsx`.
+- Fix lint, type, and build errors
+- Refactor code without changing behavior
+- Add new pages/routes following existing patterns
+- Update dependencies with proper testing
+- Clean unused code and technical debt
+- Improve type safety
+- Fix build safety issues (missing env var handling)
 
-Scope:
-- Create page component
-- Add navigation link in dashboard layout
-- Follow existing page patterns
+## What Agents Must NOT Do
 
-Constraints:
-- Use `'use client'` if component needs interactivity
-- Use `ProtectedPage` wrapper if auth required
-- Follow existing styling patterns (Tailwind CSS)
-- Use components from `@/components/ui`
+- Modify auth system (Supabase Auth setup, middleware logic, callback route)
+- Change database schema (SQL migrations, RLS policies)
+- Remove dependencies without verifying they're unused
+- Break API response formats
+- Use admin client in browser code
+- Assume env vars exist at build time
+- Create markdown files other than AGENTS.md and README.md
+- Make silent architectural changes without explicit approval
 
-Validation:
-- Page renders correctly
-- Navigation link works
-- Authentication enforced (if needed)
-- Responsive design works
-- Lint passes
-```
+---
 
-### Adding Internal QA Routes for a Feature
+## Validation Checklist
 
-```
-Create QA/test routes for [feature-name] under src/app/__tests__/[feature-name]/.
+Before merging agent-generated code:
 
-Scope:
-- Create test pages under `src/app/__tests__/[feature-name]/`
-- Add production guard: check `process.env.NODE_ENV === 'production'` and call `notFound()` if true
-- Create index page at `src/app/__tests__/[feature-name]/page.tsx` for discoverability
-
-Constraints:
-- All QA routes MUST be under `__tests__` namespace (double underscore)
-- All QA routes MUST include production guards (use `useEffect` in client components)
-- Routes should be clearly labeled as internal/testing only
-- Use `'use client'` directive for interactive test pages
-
-Example structure:
-- src/app/__tests__/[feature-name]/page.tsx (index)
-- src/app/__tests__/[feature-name]/[test-name]/page.tsx (test pages)
-
-Validation:
-- Routes work in development mode
-- Routes return 404/notFound in production builds
-- Production guard properly implemented
-- Lint passes
-- Build succeeds
-```
-
-### Cleaning Technical Debt
-
-```
-Clean up technical debt in [specific area].
-
-Scope:
-- [Specific files or patterns to clean]
-- [What to remove/refactor]
-
-Constraints:
-- Do not change runtime behavior
-- Remove only unused code
-- Improve type safety where possible
-- Follow existing patterns
-
-Validation:
-- No functionality broken
-- Lint passes
-- Build passes
-- No new markdown files
-- No references to MongoDB
-```
-
-## Validation Checklist (Before Merge)
-
-Before any agent-generated code is merged, verify:
-
-- [ ] `npm run lint` passes with 0 errors (warnings acceptable)
 - [ ] `npm run build` completes successfully
-- [ ] `npm run type-check` passes (if applicable)
-- [ ] No new markdown files created (except README.md or AGENTS.md updates)
-- [ ] No references to MongoDB in code or comments
+- [ ] `npm run type-check` (`tsc --noEmit`) passes with 0 errors
+- [ ] `npm run lint` passes (warnings acceptable)
+- [ ] No admin client usage in browser code
+- [ ] Supabase client usage follows factory patterns
 - [ ] Environment variables handled safely (build won't crash if optional vars missing)
-- [ ] Authentication still works (test sign-in/sign-up flow)
-- [ ] Protected routes still protected (test without auth)
-- [ ] No admin client used in browser code
-- [ ] Supabase client usage follows patterns (browser/server/admin)
-- [ ] No silent architectural changes
+- [ ] Portal gating uses `@/lib/runtime` (not direct env var checks)
 - [ ] API routes return expected response format
 - [ ] No breaking changes to existing functionality
 
-## Commit & Branch Conventions
+---
 
-### Branch Naming
+## Resources System
 
-- `fix/[description]` - Bug fixes
-- `feat/[description]` - New features
-- `refactor/[description]` - Code refactoring
-- `chore/[description]` - Maintenance tasks
-- `agent/[description]` - Agent-assisted changes (optional, for clarity)
-
-Examples:
-
-- `fix/lint-errors`
-- `feat/internship-filtering`
-- `refactor/extract-api-client`
-- `agent/cleanup-unused-imports`
-
-### Commit Message Format
-
-Use conventional commits:
-
-- `fix: [description]` - Bug fix
-- `feat: [description]` - New feature
-- `refactor: [description]` - Refactoring
-- `chore: [description]` - Maintenance
-- `docs: [description]` - Documentation updates
-
-Include agent attribution if significant:
+Resources are statically defined in `src/lib/constants/resources.ts` with URLs pointing to Supabase Storage:
 
 ```
-fix: resolve ESLint errors in API routes
-
-Agent-assisted cleanup of no-extra-semi errors.
+Base URL: https://mgdwgpjqtzfzirfxaoun.supabase.co/storage/v1/object/public/resources/
 ```
 
-### When to Squash vs Preserve Commits
+**Categories:** Education (9 items), Recruitment (16 items), Pitches (10 items)
 
-**Squash:**
+**Types:** `'pdf' | 'doc' | 'sheet' | 'folder'`
 
-- Multiple small fixes in one PR
-- Agent-generated cleanup commits
-- Experimental commits that were reverted
+Mobile users get an in-app preview via `MobileDocumentViewer` for PDFs and spreadsheets. Desktop users open resources in a new tab.
 
-**Preserve:**
+---
 
-- Logical feature additions
-- Significant refactors with clear steps
-- Commits that represent meaningful milestones
+## Company & University Data
 
-### Agent Involvement Attribution
+Static constants in `src/lib/constants/`:
+- `companies.ts` — Investment Banking, Quant/Tech, Asset Mgmt/Consulting, Sponsors, Partners
+- `universities.ts` — Chapter data for 8 universities
+- `resources.ts` — Education, Recruitment, and Pitch resources
 
-If an agent performed significant work:
+---
 
-- Mention in PR description: "Agent-assisted: [what was done]"
-- Include in commit message if agent did majority of work
-- Do not attribute minor suggestions or autocomplete
+## Branch & Commit Conventions
 
-## Security & Safety Notes
+**Branches:**
+- `main` — Production source of truth
+- `live-version` — Emergency rollback snapshot
+- Feature branches: `feat/[description]`, `fix/[description]`, `refactor/[description]`
 
-### Service Role Key Handling
+**Commits:** Use conventional commit format (`fix:`, `feat:`, `refactor:`, `chore:`, `docs:`)
 
-- `SUPABASE_SERVICE_ROLE_KEY` is server-only
-- Never expose to client bundle
-- Only use in API routes with `requireSupabaseAdminClient()`
-- Never log or include in error messages
-- Never pass to browser components
-
-### Admin Client Usage
-
-- Admin client bypasses RLS - use with extreme caution
-- Only use in API routes, never in browser code
-- Document why RLS bypass is necessary
-- Prefer RLS policies over admin client when possible
-- Admin client should only be used for:
-  - User lookup by email (migration scenarios)
-  - Bulk operations requiring elevated permissions
-  - Operations that cannot be expressed in RLS
-
-### RLS Expectations
-
-- All tables have RLS enabled
-- Policies enforce read/write permissions based on user roles
-- Application code should assume RLS is active
-- Test with non-admin users to verify RLS works
-- Do not write code that assumes RLS is disabled
-
-### OAuth Scope Limitations
-
-**Google OAuth Scopes (NextAuth on `/resources` page only):**
-
-- `https://www.googleapis.com/auth/drive.metadata.readonly` - Read-only Drive metadata
-- `openid`, `email`, `profile` - Basic user info
-
-**Redirect URIs:**
-
-- Development: `http://localhost:3000/api/nextauth/callback/google`
-- Production: `https://paragoninvestments.org/api/nextauth/callback/google`
-
-**Limitations:**
-
-- NextAuth only used for `/resources` page
-- Does not handle member portal authentication
-- Do not extend OAuth to other features
-- `.edu` email requirement enforced by `PGI_REQUIRE_EDU` flag
-
-### Build Safety
-
-- Build must complete even if optional env vars are missing
-- Use `getSupabaseServerClient()` in server components (returns null)
-- Use `requireSupabaseServerClient()` in API routes (throws at runtime)
-- Feature flags degrade gracefully (hide features, don't crash)
-- Webpack cache disabled in production builds to prevent ENOSPC errors
-
-### Code Safety Patterns
-
-**Safe pattern (server component):**
-
-```typescript
-const client = getSupabaseServerClient();
-if (!client) {
-  return <div>Configuration required</div>;
-}
-```
-
-**Safe pattern (API route):**
-
-```typescript
-const supabase = requireSupabaseServerClient(); // Throws at runtime if missing
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-if (!user) {
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-}
-```
-
-**Unsafe pattern (do not use):**
-
-```typescript
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!; // Crashes build if missing
-```
-
-## Additional Guidelines
-
-### TypeScript Usage
-
-- Use TypeScript for all new code
-- Avoid `any` types - use `unknown` and narrow, or create proper types
-- Types are defined in `src/types/index.ts`
-- Use generated Supabase types when available
-
-### Component Patterns
-
-- Use functional components with hooks
-- Mark client components with `'use client'` directive
-- Use shadcn/ui components from `@/components/ui`
-- Follow existing component structure and naming
-
-### API Route Patterns
-
-- All routes require authentication (check `supabase.auth.getUser()`)
-- Return consistent response format: `{ success: boolean, data?: any, error?: string }`
-- Use proper HTTP status codes (401 for unauthorized, 403 for forbidden, etc.)
-- Handle errors gracefully with try/catch
-- Log errors server-side, never expose sensitive details to client
-
-### Testing Considerations
-
-- Test with authenticated and unauthenticated users
-- Test with different user roles (admin, lead, member)
-- Verify RLS policies work correctly
-- Test feature flags in both dev and production modes
-- Verify build completes with missing optional env vars
+**Agent attribution:** Include `Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>` for significant agent work.
