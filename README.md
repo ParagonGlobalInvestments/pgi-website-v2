@@ -219,7 +219,7 @@ pgi-website-v2/
 
 ### Common Scripts
 
-- `npm run dev` - Start dev server with Turbopack + HTTPS at `https://localhost:3000`
+- `npm run dev` - Start dev server with Turbopack + HTTPS at `https://localhost:3000` (uses `--turbo` flag for Next.js 14; if upgrading to Next.js 15+, change to `--turbopack`)
 - `npm run build` - Build for production
 - `npm run start` - Start production server (after build)
 - `npm run lint` - Run ESLint (warnings don't block, errors do)
@@ -296,6 +296,24 @@ The application is configured for deployment on Vercel:
 The build process disables webpack persistent caching in production to prevent disk space issues during builds.
 
 ## Common Gotchas
+
+### `npm run dev` Fails with "unknown option '--turbo'"
+
+**Symptom:** `error: unknown option '--turbo'` when running `npm run dev`.
+
+**Cause:** The dev script uses `next dev --turbo --experimental-https`. The `--turbo` flag enables Turbopack and is the correct flag for **Next.js 14.x**. If you've upgraded to **Next.js 15+**, the flag was renamed to `--turbopack`.
+
+**Solution:** In `package.json`, change the `dev` script:
+
+```json
+// Next.js 14.x (current)
+"dev": "next dev --turbo --experimental-https"
+
+// Next.js 15+ (after upgrade)
+"dev": "next dev --turbopack --experimental-https"
+```
+
+You can verify available flags with `npx next dev --help`.
 
 ### Missing Environment Variables
 

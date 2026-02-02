@@ -15,9 +15,24 @@ Single source of truth for AI coding agents working in the PGI Website codebase.
 | Storage | Supabase Storage (resources) |
 | Styling | Tailwind CSS 3 + shadcn/ui + Radix UI |
 | Animation | Framer Motion, GSAP |
-| Analytics | PostHog |
+| Analytics | PostHog, Vercel Analytics, Vercel Speed Insights |
 | Hosting | Vercel |
 | CI | GitHub Actions |
+
+---
+
+## Dev Server
+
+```bash
+npm run dev
+# Runs: next dev --turbo --experimental-https
+```
+
+**Important:** The `--turbo` flag is correct for **Next.js 14.x**. Next.js 15+ renamed it to `--turbopack`. If you see `error: unknown option '--turbo'` after a major Next.js upgrade, change the dev script in `package.json` to `--turbopack`.
+
+The `--experimental-https` flag generates a locally-trusted TLS certificate (via built-in mkcert). Required for portal subdomain testing since `portal.127.0.0.1.sslip.io` is not `localhost`.
+
+Dev server runs at `https://localhost:3000`. Portal subdomain at `https://portal.127.0.0.1.sslip.io:3000`.
 
 ---
 
