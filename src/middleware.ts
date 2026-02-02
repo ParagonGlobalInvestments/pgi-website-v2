@@ -43,6 +43,26 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const isPortalSubdomain = host.startsWith('portal.');
 
+  // Redirect portal routes to portal subdomain when not already on it.
+  // /auth/callback stays on the main domain (OAuth requires it).
+  if (!isPortalSubdomain && portalEnabled) {
+    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
+    const isPortalRoute =
+      pathname.startsWith('/sign-in') ||
+      pathname.startsWith('/sign-up') ||
+      pathname.startsWith('/portal');
+
+    if (portalUrl && isPortalRoute) {
+      // Redirect to portal subdomain, preserving path + query string
+      // /portal/* paths get cleaned (middleware on subdomain handles rewrite)
+      const cleanPath = pathname.startsWith('/portal')
+        ? pathname.replace(/^\/portal/, '') || '/'
+        : pathname;
+      const search = request.nextUrl.search;
+      return NextResponse.redirect(`${portalUrl}${cleanPath}${search}`, 307);
+    }
+  }
+
   if (isPortalSubdomain && portalEnabled) {
     // Auth/API routes live at root level — must NOT be rewritten to /portal/*
     const isRootRoute =
