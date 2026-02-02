@@ -3,8 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -43,7 +41,10 @@ function SignUpPageContent() {
     setError('');
 
     // Get the intended final destination after auth
-    const next = searchParams.get('redirectTo') || '/portal/dashboard';
+    // Always use /portal/ prefix for the auth callback route (server-side),
+    // which handles stripping it when redirecting to the portal subdomain.
+    const defaultDest = '/portal/dashboard';
+    const next = searchParams.get('redirectTo') || defaultDest;
 
     // Always route OAuth callback through the main domain so we only need
     // one Supabase redirect URL entry. The auth callback route handles
@@ -76,75 +77,54 @@ function SignUpPageContent() {
   if (user) {
     return (
       <motion.div
-        className="max-w-md w-full bg-white rounded-xl shadow-sm p-6 text-center border border-gray-200 overflow-hidden"
+        className="max-w-lg"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/logos/pgiLogoTransparent.png"
-            alt="PGI Logo"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
-        </div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          You&apos;re already signed in!
-        </h2>
-        <p className="text-gray-600 mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">
+          You&apos;re already signed in
+        </h1>
+        <p className="text-gray-500 mt-1">
           Welcome, {user.user_metadata?.full_name || user.email}
         </p>
-        <Link href="/resources" className="mb-3">
-          <Button variant="navy-accent" className="w-full">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3">
+          <Link
+            href="/resources"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#00172B] text-white text-sm font-medium hover:bg-[#002C4D] transition-colors"
+          >
             Access PGI Resources
-          </Button>
-        </Link>
-        <Link href="/">
-          <Button
-            variant="outline"
-            className="w-full border-gray-300 text-gray-900 mt-3 hover:bg-gray-50"
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors"
           >
             Back to Home
-          </Button>
-        </Link>
+          </Link>
+        </div>
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      className="max-w-md w-full bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200"
+      className="max-w-lg"
       initial="hidden"
       animate="visible"
       variants={fadeIn}
     >
-      <div className="p-5 bg-[#00172B] text-white text-center">
-        <div className="flex justify-center mb-4">
-          <Image
-            src="/logos/pgiLogoTransparent.png"
-            alt="Paragon Global Investments"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
-        </div>
-        <h1 className="text-2xl font-bold">PGI Member Portal</h1>
-        <p className="text-sm text-gray-300 mt-2">
-          Create your account to access resources
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold text-gray-900">Sign up</h1>
+      <p className="text-gray-500 mt-1">
+        Create your account to access PGI resources.
+      </p>
 
-      <div className="p-5 space-y-5">
-        {/* Google Sign Up - Only Option */}
-        <Button
+      <div className="mt-8 space-y-5">
+        <button
           onClick={handleGoogleSignUp}
           disabled={loading}
-          variant="outline"
-          className="w-full border-gray-300 text-gray-900 py-3 text-base hover:bg-gray-50"
+          className="flex items-center w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -163,25 +143,21 @@ function SignUpPageContent() {
             />
           </svg>
           {loading ? 'Signing up...' : 'Continue with Google'}
-        </Button>
+        </button>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">
-            {error}
-          </div>
+          <p className="text-red-600 text-sm">{error}</p>
         )}
 
-        <div className="text-center">
-          <p className="text-gray-500 text-sm">
-            Already have an account?{' '}
-            <Link
-              href="/sign-in"
-              className="text-blue-600 hover:text-blue-500"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
+        <p className="text-gray-400 text-sm">
+          Already have an account?{' '}
+          <Link
+            href="/sign-in"
+            className="text-blue-600 hover:text-blue-500"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </motion.div>
   );
@@ -191,9 +167,7 @@ export default function SignUpPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center">
-          <div className="text-gray-500">Loading...</div>
-        </div>
+        <div className="text-gray-500 text-sm">Loading...</div>
       }
     >
       <SignUpPageContent />
