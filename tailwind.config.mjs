@@ -4,8 +4,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#4A6BB1',
-        secondary: '#adb5bd',
+        /* shadcn semantic tokens */
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        /* PGI brand colors */
         dark: '#354657',
         light: '#f5f5f5',
         navy: '#00172B',
@@ -26,6 +59,11 @@ export default {
         'pgi-dark-blue': '#0A192F',
         'pgi-light-blue': '#1F2A44',
         'pgi-accent-blue': '#1F3A5F',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
         sans: [
@@ -48,6 +86,7 @@ export default {
     },
   },
   plugins: [
+    require('tailwindcss-animate'),
     function ({ addUtilities }) {
       addUtilities({
         '.scrollbar-none': {
