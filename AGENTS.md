@@ -42,10 +42,9 @@ src/
 │   │   │   ├── directory/       # Member directory
 │   │   │   ├── resources/       # Resource viewer (PDFs, spreadsheets)
 │   │   │   └── settings/        # Profile settings
-│   │   └── signout/             # Sign-out page
+│   │   └── logout/              # Logout page
 │   ├── resources/               # /resources (public, non-portal)
-│   ├── sign-in/                 # Sign-in page
-│   ├── sign-up/                 # Sign-up + email verify
+│   ├── login/                   # Login page (Google OAuth)
 │   ├── sponsors/                # /sponsors
 │   ├── who-we-are/              # /who-we-are
 │   ├── terms/                   # /terms
@@ -83,7 +82,7 @@ Authentication uses **Supabase Auth** exclusively. There is no NextAuth in the c
 
 ### Auth Flow
 
-1. User clicks "Sign In" → `/sign-in` page
+1. User clicks "Log In" → `/login` page
 2. Supabase Auth initiates Google OAuth
 3. Callback → `/auth/callback/route.ts`
 4. Callback checks PGI membership in this order:
@@ -96,7 +95,7 @@ Authentication uses **Supabase Auth** exclusively. There is no NextAuth in the c
 ### Auth Enforcement
 
 - **Edge middleware** (`src/middleware.ts`): Hard-blocks portal routes (404) when `NEXT_PUBLIC_PORTAL_ENABLED !== 'true'`. No Supabase imports — runs on Edge runtime.
-- **Portal layout** (`src/app/portal/layout.tsx`): Server-side auth check. Redirects unauthenticated users to `/sign-in?redirectTo=/portal/dashboard`. This is the secure choke point.
+- **Portal layout** (`src/app/portal/layout.tsx`): Server-side auth check. Redirects unauthenticated users to `/login?redirectTo=/portal/dashboard`. This is the secure choke point.
 - **API routes**: Each route calls `requireSupabaseServerClient()` + `supabase.auth.getUser()` independently.
 
 ### Subdomain Routing
@@ -104,7 +103,7 @@ Authentication uses **Supabase Auth** exclusively. There is no NextAuth in the c
 Middleware detects `portal.*` hostname prefix:
 - Non-portal paths (e.g., `/dashboard`) → rewritten to `/portal/dashboard` (transparent to user)
 - `/portal/*` paths on subdomain → 301 redirect to strip prefix (clean URLs)
-- Auth/API routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) pass through unmodified
+- Auth/API routes (`/login`, `/auth/*`, `/api/*`, `/resources`) pass through unmodified
 
 ---
 
@@ -273,7 +272,7 @@ export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 ```
 
 Three enforcement points:
-1. **Middleware**: Returns 404 for `/portal/*`, `/dashboard/*`, `/sign-in`, `/sign-up`, `/__tests__/*` when disabled
+1. **Middleware**: Returns 404 for `/portal/*`, `/dashboard/*`, `/login`, `/__tests__/*` when disabled
 2. **Server layouts**: `assertPortalEnabledOrNotFound()` for page-level enforcement
 3. **API routes**: `requirePortalEnabledOr404()` returns 404 JSON response when disabled
 

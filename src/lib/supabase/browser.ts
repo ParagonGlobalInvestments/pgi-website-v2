@@ -34,15 +34,19 @@ export function requireSupabaseBrowserClient(): SupabaseClient {
 }
 
 /**
- * Legacy export for backward compatibility.
- * Build-safe: during SSR/prerender (no window), returns null when env vars
- * are missing. useEffect hooks — where the client is actually consumed —
- * never run during SSR, so the null is harmless.
- * In the browser, throws if env vars are missing.
+ * Singleton browser client — prevents re-creation on every render.
+ * Consumers like Header.tsx and dashboard/layout.tsx call createClient()
+ * during render; without memoization each call spawns a new WebSocket
+ * and onAuthStateChange listener.
  */
+let browserClient: SupabaseClient | null = null;
+
 export function createClient(): SupabaseClient {
   if (typeof window === 'undefined') {
     return getSupabaseBrowserClient() as unknown as SupabaseClient;
   }
-  return requireSupabaseBrowserClient();
+  if (!browserClient) {
+    browserClient = requireSupabaseBrowserClient();
+  }
+  return browserClient;
 }

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 // import Link from "next/link";
-import { FaHandshake, FaAward } from 'react-icons/fa';
+import { Handshake, Award } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import {
@@ -147,7 +147,7 @@ export default function Sponsors() {
             className="flex items-center justify-center mb-12"
             variants={fadeIn}
           >
-            <FaAward className="text-secondary text-2xl mr-3" />
+            <Award className="text-secondary text-2xl mr-3" />
             <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary">
               <DecryptedText
                 text="Sponsors"
@@ -209,7 +209,7 @@ export default function Sponsors() {
             className="flex items-center justify-center mb-12"
             variants={fadeIn}
           >
-            <FaHandshake className="text-secondary text-2xl mr-3" />
+            <Handshake className="text-secondary text-2xl mr-3" />
             <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary">
               <DecryptedText
                 text="Partners"

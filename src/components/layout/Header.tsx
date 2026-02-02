@@ -329,6 +329,7 @@ const Header = () => {
               alt="Paragon Global Investments"
               width={200}
               height={36}
+              priority
               className="h-9 w-auto rounded-lg"
             />
             {/* <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
@@ -582,15 +583,15 @@ const Header = () => {
                   }}
                   className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
                 >
-                  Sign out
+                  Log out
                 </button>
               </div>
             ) : portalEnabled ? (
               <Link
-                href="/sign-in"
+                href="/login"
                 className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
               >
-                Sign In
+                Log In
               </Link>
             ) : null}
           </motion.div>
@@ -824,15 +825,15 @@ const Header = () => {
                       }}
                       className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
                     >
-                      Sign out
+                      Log out
                     </button>
                   </div>
                 ) : portalEnabled ? (
                   <Link
-                    href="/sign-in"
+                    href="/login"
                     className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
                   >
-                    Sign In
+                    Log In
                   </Link>
                 ) : null}
               </motion.div>

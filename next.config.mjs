@@ -19,8 +19,16 @@ const nextConfig = {
     }
     return config;
   },
-  // Add image configuration
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? { exclude: ['error', 'warn'] }
+        : false,
+  },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'https',
@@ -29,7 +37,7 @@ const nextConfig = {
     ],
     unoptimized: process.env.NODE_ENV === 'development',
   },
-  // Legacy redirects removed
+  allowedDevOrigins: ['portal.127.0.0.1.sslip.io'],
   async headers() {
     return [];
   },

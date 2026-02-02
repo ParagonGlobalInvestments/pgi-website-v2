@@ -1,7 +1,6 @@
 import { assertPortalEnabledOrNotFound } from '@/lib/runtime';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { GeistSans } from 'geist/font/sans';
 import '@/tailwind.css';
 import '@/app/globals.css';
 import PortalLayoutClient from './layout-client';
@@ -28,7 +27,7 @@ export default async function PortalLayout({
     // In production, this should not happen, but during build it's acceptable
     // Protected routes will fail at runtime with proper error handling
     return (
-      <div className={`${GeistSans.variable} antialiased bg-white min-h-screen`}>
+      <div className="antialiased bg-white min-h-screen">
         <PortalLayoutClient>{children}</PortalLayoutClient>
       </div>
     );
@@ -39,16 +38,14 @@ export default async function PortalLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If no authenticated user, redirect to sign-in with redirectTo param
+  // If no authenticated user, redirect to login with redirectTo param
   if (!user) {
-    // Default redirect target - sign-in page will handle the actual redirect
-    // Users accessing any portal route will be redirected to sign-in
-    redirect('/sign-in?redirectTo=/portal/dashboard');
+    redirect('/login?redirectTo=/portal/dashboard');
   }
 
   // User is authenticated - render portal layout
   return (
-    <div className={`${GeistSans.variable} antialiased bg-white min-h-screen`}>
+    <div className="antialiased bg-white min-h-screen">
       <PortalLayoutClient>{children}</PortalLayoutClient>
     </div>
   );

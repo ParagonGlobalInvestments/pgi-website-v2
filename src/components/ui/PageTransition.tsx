@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -64,9 +65,12 @@ const PageTransition = ({ children }: PageTransitionProps) => {
             variants={loadingVariants}
           >
             <div className="flex flex-col items-center">
-              <img
+              <Image
                 src="/logos/pgiLogoTransparent.png"
                 alt="Paragon Global Investments"
+                width={64}
+                height={64}
+                priority
                 className="w-16 h-16 object-contain"
               />
               {/* Simple loading indicator */}

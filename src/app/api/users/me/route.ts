@@ -43,7 +43,14 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ success: true, user });
+    return NextResponse.json(
+      { success: true, user },
+      {
+        headers: {
+          'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+        },
+      }
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Failed to fetch user';
     return NextResponse.json({ error: msg }, { status: 500 });

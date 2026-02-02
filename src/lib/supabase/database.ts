@@ -96,7 +96,7 @@ export class SupabaseDatabase {
     return data ? formatUser(data) : null;
   }
 
-  /** Lookup by email OR alternate_emails (for dev dual-email sign-in) */
+  /** Lookup by email OR alternate_emails (for dev dual-email login) */
   async getUserByAnyEmail(email: string): Promise<(User & { dbId: string }) | null> {
     const normalized = email.toLowerCase();
 

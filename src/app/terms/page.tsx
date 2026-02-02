@@ -138,7 +138,7 @@ export default function TermsPage() {
               Authentication and Google Services
             </h2>
             <p className="text-gray-300 leading-relaxed">
-              We use Google OAuth for authentication. By signing in, you agree
+              We use Google OAuth for authentication. By logging in, you agree
               to Google&apos;s Terms of Service and Privacy Policy. We request
               read-only access to Google Drive metadata solely to display member
               resources. You can revoke this access at any time through your

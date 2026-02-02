@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 import AuthShellLayout from '@/components/layout/AuthShellLayout';
 
 export const metadata: Metadata = {
-  title: 'Sign Up - PGI Member Portal',
+  title: 'Log In - PGI Member Portal',
   description:
-    'Create an account to access the PGI Member Portal and exclusive resources.',
-  alternates: { canonical: '/sign-up' },
+    'Log in to access the PGI Member Portal and exclusive resources.',
+  alternates: { canonical: '/login' },
 };
 
-export default function SignUpLayout({
+export default function LoginLayout({
   children,
 }: {
   children: React.ReactNode;

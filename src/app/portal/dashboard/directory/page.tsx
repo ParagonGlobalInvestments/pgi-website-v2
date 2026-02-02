@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  FaSearch,
-  FaLinkedin,
-  FaEnvelope,
-  FaGithub,
-  FaTimes,
-} from 'react-icons/fa';
+import { Search, Linkedin, Mail, Github, X } from 'lucide-react';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
 import {
@@ -95,13 +89,13 @@ function MemberDetail({ user }: { user: User }) {
       {/* Header with school logo */}
       <div className="flex items-start gap-4">
         {SCHOOL_LOGOS[user.school] && (
-          <div className="w-14 h-14 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
             <Image
               src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
               alt={SCHOOL_LABELS[user.school] || user.school}
-              width={40}
-              height={40}
-              className="w-9 h-9 object-contain"
+              width={48}
+              height={48}
+              className="w-12 h-12 object-contain"
             />
           </div>
         )}
@@ -154,7 +148,7 @@ function MemberDetail({ user }: { user: User }) {
           onClick={copyEmail}
           className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors text-left"
         >
-          <FaEnvelope className="text-gray-400 flex-shrink-0" />
+          <Mail className="text-gray-400 flex-shrink-0" />
           <span className="flex-1 truncate">{user.email}</span>
           <span className="text-xs text-gray-400 flex-shrink-0">
             {copied ? 'Copied' : 'Copy'}
@@ -168,7 +162,7 @@ function MemberDetail({ user }: { user: User }) {
             rel="noopener noreferrer"
             className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
           >
-            <FaLinkedin className="text-[#0077B5] flex-shrink-0" />
+            <Linkedin className="text-[#0077B5] flex-shrink-0" />
             <span className="flex-1">LinkedIn Profile</span>
             <span className="text-xs text-gray-400">↗</span>
           </a>
@@ -181,7 +175,7 @@ function MemberDetail({ user }: { user: User }) {
             rel="noopener noreferrer"
             className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
           >
-            <FaGithub className="text-gray-700 flex-shrink-0" />
+            <Github className="text-gray-700 flex-shrink-0" />
             <span className="flex-1">GitHub Profile</span>
             <span className="text-xs text-gray-400">↗</span>
           </a>
@@ -286,7 +280,7 @@ export default function DirectoryPage() {
       {/* Search + Filters */}
       <div>
         <div className="relative mb-3">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             type="text"
             value={searchTerm}
@@ -355,7 +349,7 @@ export default function DirectoryPage() {
               }}
               className="h-9 text-sm text-gray-600"
             >
-              <FaTimes className="mr-1 h-3 w-3" />
+              <X className="mr-1 h-3 w-3" />
               Clear
             </Button>
           )}
@@ -418,13 +412,13 @@ export default function DirectoryPage() {
               <CardContent className="p-5">
                 <div className="flex items-center gap-3 mb-2">
                   {SCHOOL_LOGOS[user.school] && (
-                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
                       <Image
                         src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
                         alt={SCHOOL_LABELS[user.school] || user.school}
-                        width={32}
-                        height={32}
-                        className="w-7 h-7 object-contain"
+                        width={36}
+                        height={36}
+                        className="w-9 h-9 object-contain"
                       />
                     </div>
                   )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FaLinkedin } from 'react-icons/fa';
+import { Linkedin } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 
@@ -167,7 +167,7 @@ export default function OfficersPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <FaLinkedin className="text-lg md:text-xl mr-2" />
+                  <Linkedin className="text-lg md:text-xl mr-2" />
                   <span>LinkedIn</span>
                 </a>
               </motion.div>
@@ -219,7 +219,7 @@ export default function OfficersPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <FaLinkedin className="text-lg md:text-xl mr-2" />
+                  <Linkedin className="text-lg md:text-xl mr-2" />
                   <span>LinkedIn</span>
                 </a>
               </motion.div>

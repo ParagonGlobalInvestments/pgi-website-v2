@@ -4,19 +4,18 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
 
-export default function SignOutPage() {
+export default function LogoutPage() {
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    // Attempt to sign out when the component mounts
-    const performSignOut = async () => {
+    // Attempt to log out when the component mounts
+    const performLogout = async () => {
       try {
         await supabase.auth.signOut();
         router.push('/');
       } catch (error) {
-        console.error('Error signing out:', error);
-        // Fallback redirect if sign out fails
+        console.error('Error logging out:', error);
         router.push('/');
       }
     };
@@ -26,7 +25,7 @@ export default function SignOutPage() {
       router.push('/');
     }, 3000);
 
-    performSignOut();
+    performLogout();
 
     return () => clearTimeout(timer);
   }, [router, supabase]);
@@ -34,9 +33,9 @@ export default function SignOutPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-navy">
       <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-gray-800">Signing Out</h1>
+        <h1 className="text-2xl font-bold mb-4 text-gray-800">Logging Out</h1>
         <p className="text-gray-600 mb-6">
-          Please wait while we sign you out of your account...
+          Please wait while we log you out...
         </p>
 
         <div className="flex justify-center">
@@ -44,7 +43,7 @@ export default function SignOutPage() {
             onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
             className="bg-primary hover:bg-opacity-90 text-white font-bold py-2 px-6 rounded transition-colors"
           >
-            Sign Out Now
+            Log Out Now
           </button>
         </div>
 

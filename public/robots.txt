@@ -6,8 +6,7 @@ Disallow: /portal/
 Disallow: /dashboard/
 Disallow: /api/
 Disallow: /_next/
-Disallow: /sign-in/
-Disallow: /sign-up/
+Disallow: /login/
 
 # Block PDF files from being primary indexed content
 Disallow: /lectures/*.pdf

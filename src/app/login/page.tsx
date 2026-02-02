@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 const fadeIn = {
@@ -22,7 +21,7 @@ function isPortalSubdomain() {
   return typeof window !== 'undefined' && window.location.host.startsWith('portal.');
 }
 
-function SignInPageContent() {
+function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -31,7 +30,7 @@ function SignInPageContent() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Check if user is already signed in
+    // Check if user is already logged in
     const checkUser = async () => {
       const {
         data: { user },
@@ -83,7 +82,7 @@ function SignInPageContent() {
     checkUser();
   }, [supabase, searchParams]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
 
@@ -111,7 +110,7 @@ function SignInPageContent() {
     });
 
     if (error) {
-      setError('Failed to sign in. Please try again or contact support.');
+      setError('Failed to log in. Please try again or contact support.');
     }
     setLoading(false);
   };
@@ -146,14 +145,25 @@ function SignInPageContent() {
       animate="visible"
       variants={fadeIn}
     >
-      <h1 className="text-2xl font-semibold text-gray-900">Sign in</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Log in</h1>
       <p className="text-gray-500 mt-1">
         Access the PGI Member Portal with your Google account.
       </p>
 
+      {searchParams?.get('error') === 'auth_failed' && (
+        <p className="mt-3 text-sm text-red-600">
+          Authentication failed. Please try again.
+        </p>
+      )}
+      {searchParams?.get('error') === 'no_user' && (
+        <p className="mt-3 text-sm text-red-600">
+          Could not retrieve your account. Please try again.
+        </p>
+      )}
+
       <div className="mt-8 space-y-5">
         <button
-          onClick={handleGoogleSignIn}
+          onClick={handleGoogleLogin}
           disabled={loading}
           className="flex items-center w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -175,28 +185,19 @@ function SignInPageContent() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          {loading ? 'Signing in...' : 'Continue with Google'}
+          {loading ? 'Logging in...' : 'Continue with Google'}
         </button>
 
         {error && (
           <p className="text-red-600 text-sm">{error}</p>
         )}
 
-        <p className="text-gray-400 text-sm">
-          Don&apos;t have an account?{' '}
-          <Link
-            href="/sign-up"
-            className="text-blue-600 hover:text-blue-500"
-          >
-            Sign up
-          </Link>
-        </p>
       </div>
     </motion.div>
   );
 }
 
-export default function SignInPage() {
+export default function LoginPage() {
   return (
     <Suspense
       fallback={
@@ -205,7 +206,7 @@ export default function SignInPage() {
         </div>
       }
     >
-      <SignInPageContent />
+      <LoginPageContent />
     </Suspense>
   );
 }
