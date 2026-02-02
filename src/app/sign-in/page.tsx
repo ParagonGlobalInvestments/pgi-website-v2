@@ -3,8 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -19,6 +17,10 @@ const fadeIn = {
     },
   },
 };
+
+function isPortalSubdomain() {
+  return typeof window !== 'undefined' && window.location.host.startsWith('portal.');
+}
 
 function SignInPageContent() {
   const [loading, setLoading] = useState(false);
@@ -44,15 +46,23 @@ function SignInPageContent() {
           const response = await fetch('/api/users/me');
           if (response.ok) {
             // User exists in PGI database - redirect to portal
-            const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
-            const redirectTo =
-              searchParams?.get('redirectTo') || '/portal/dashboard';
+            // On portal subdomain, use clean paths (no /portal prefix)
+            const onSubdomain = isPortalSubdomain();
+            const defaultDest = onSubdomain ? '/dashboard' : '/portal/dashboard';
+            const redirectTo = searchParams?.get('redirectTo') || defaultDest;
 
-            if (portalUrl && redirectTo.startsWith('/portal/')) {
+            if (onSubdomain) {
+              // Already on portal subdomain — strip /portal prefix if present
               const cleanPath = redirectTo.replace(/^\/portal/, '') || '/';
-              window.location.href = `${portalUrl}${cleanPath}`;
+              window.location.href = cleanPath;
             } else {
-              window.location.href = redirectTo;
+              const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
+              if (portalUrl && redirectTo.startsWith('/portal/')) {
+                const cleanPath = redirectTo.replace(/^\/portal/, '') || '/';
+                window.location.href = `${portalUrl}${cleanPath}`;
+              } else {
+                window.location.href = redirectTo;
+              }
             }
             return;
           } else {
@@ -78,7 +88,10 @@ function SignInPageContent() {
     setError('');
 
     // Get the intended final destination after auth
-    const next = searchParams?.get('redirectTo') || '/portal/dashboard';
+    // Always use /portal/ prefix for the auth callback route (server-side),
+    // which handles stripping it when redirecting to the portal subdomain.
+    const defaultDest = '/portal/dashboard';
+    const next = searchParams?.get('redirectTo') || defaultDest;
 
     // Always route OAuth callback through the main domain so we only need
     // one Supabase redirect URL entry. The auth callback route handles
@@ -111,17 +124,15 @@ function SignInPageContent() {
   if (user && checkingMembership) {
     return (
       <motion.div
-        className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center overflow-hidden"
+        className="max-w-lg"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <div className="flex justify-center mb-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A6BB1]"></div>
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#4A6BB1]"></div>
+          <p className="text-gray-500 text-sm">Checking membership...</p>
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Checking membership...
-        </h2>
       </motion.div>
     );
   }
@@ -133,36 +144,23 @@ function SignInPageContent() {
 
   return (
     <motion.div
-      className="max-w-md w-full bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200"
+      className="max-w-lg"
       initial="hidden"
       animate="visible"
       variants={fadeIn}
     >
-      <div className="p-5 bg-[#00172B] text-white text-center">
-        <div className="flex justify-center mb-4">
-          <Image
-            src="/logos/pgiLogoTransparent.png"
-            alt="Paragon Global Investments"
-            width={80}
-            height={80}
-            className="h-16 w-auto"
-          />
-        </div>
-        <h1 className="text-2xl font-bold">PGI Member Portal</h1>
-        <p className="text-sm text-gray-300 mt-2">
-          Please sign in to continue
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold text-gray-900">Sign in</h1>
+      <p className="text-gray-500 mt-1">
+        Access the PGI Member Portal with your Google account.
+      </p>
 
-      <div className="p-5 space-y-5">
-        {/* Google Sign In */}
-        <Button
+      <div className="mt-8 space-y-5">
+        <button
           onClick={handleGoogleSignIn}
           disabled={loading}
-          variant="outline"
-          className="w-full border-gray-300 text-gray-900 py-3 text-base hover:bg-gray-50"
+          className="flex items-center w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -181,25 +179,21 @@ function SignInPageContent() {
             />
           </svg>
           {loading ? 'Signing in...' : 'Continue with Google'}
-        </Button>
+        </button>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 p-3 rounded border border-red-200">
-            {error}
-          </div>
+          <p className="text-red-600 text-sm">{error}</p>
         )}
 
-        <div className="text-center">
-          <p className="text-gray-500 text-sm">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/sign-up"
-              className="text-blue-600 hover:text-blue-500"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
+        <p className="text-gray-400 text-sm">
+          Don&apos;t have an account?{' '}
+          <Link
+            href="/sign-up"
+            className="text-blue-600 hover:text-blue-500"
+          >
+            Sign up
+          </Link>
+        </p>
       </div>
     </motion.div>
   );

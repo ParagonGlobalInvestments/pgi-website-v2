@@ -57,7 +57,7 @@ export default function AuthShellLayout({
 
       {/* Content Area */}
       <div className="flex-1 min-w-0 bg-white">
-        <div className="lg:p-8 p-4 pt-24 lg:pt-8 flex items-center justify-center min-h-screen">
+        <div className="lg:px-12 lg:py-16 px-6 pt-24 pb-8 lg:pt-16">
           {children}
         </div>
       </div>
