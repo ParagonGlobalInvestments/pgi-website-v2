@@ -585,14 +585,14 @@ const Header = () => {
                   Sign out
                 </button>
               </div>
-            ) : (
+            ) : portalEnabled ? (
               <Link
                 href="/sign-in"
                 className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
               >
                 Sign In
               </Link>
-            )}
+            ) : null}
           </motion.div>
         </motion.nav>
 
@@ -827,14 +827,14 @@ const Header = () => {
                       Sign out
                     </button>
                   </div>
-                ) : (
+                ) : portalEnabled ? (
                   <Link
                     href="/sign-in"
                     className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
                   >
                     Sign In
                   </Link>
-                )}
+                ) : null}
               </motion.div>
             </div>
           </motion.div>
