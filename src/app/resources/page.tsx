@@ -1,17 +1,11 @@
 'use client';
 
-// TODO: Remove Google Drive integration, migrate to self-hosted resources
-// Follow same pattern as portal pages: /public/resources/ folder structure
-// The portal pages (Pitches, Education, Recruitment) now use self-hosted files
-// This public resources page should be updated to match that approach
-
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/browser';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '@/lib/posthog';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
-import BentoFolderGrid from '@/components/drive/BentoFolderGrid';
 import { toast } from 'sonner';
 import {
   BookOpenIcon,
@@ -19,19 +13,14 @@ import {
   GraduationCapIcon,
   BriefcaseIcon,
   LockIcon,
-  ExternalLinkIcon,
 } from 'lucide-react';
 
-// Animation variants
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
+    transition: { duration: 0.6, ease: 'easeOut' },
   },
 };
 
@@ -39,283 +28,111 @@ const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
   },
 };
 
 const itemFadeIn = {
   hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-const DRIVE_FOLDER_ID = '1ArM8sjxfNGaxxTHeTrjd1I-EqJWHvB49';
-const DRIVE_FOLDER_URL = `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}?usp=drive_link`;
-
-// Placeholder folders for non-signed-in users
 const PLACEHOLDER_FOLDERS = [
   {
     id: 'placeholder-1',
     name: 'Educational Materials',
     icon: BookOpenIcon,
     description: 'Access comprehensive learning resources',
-    size: 'large',
   },
   {
     id: 'placeholder-2',
     name: 'Investment Research',
     icon: TrendingUpIcon,
     description: 'Market analysis and research templates',
-    size: 'medium',
   },
   {
     id: 'placeholder-3',
     name: 'Training Resources',
     icon: GraduationCapIcon,
     description: 'Professional development materials',
-    size: 'medium',
   },
   {
     id: 'placeholder-4',
     name: 'Career Resources',
     icon: BriefcaseIcon,
     description: 'Career guidance and opportunities',
-    size: 'wide',
   },
 ];
 
 function ResourcesPageContent() {
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isPGIMember, setIsPGIMember] = useState<boolean | null>(null);
+  const [isPGIMember, setIsPGIMember] = useState(false);
   const searchParams = useSearchParams();
   const supabase = createClient();
 
   useEffect(() => {
-    // Check if we should show the non-member toast
     if (searchParams?.get('notMember') === 'true') {
-      // Show toast notification
       toast.error('Not a PGI Member', {
         description: 'Submit your email to stay updated or apply to join PGI.',
         duration: 6000,
         action: {
           label: 'Apply',
-          onClick: () => {
-            window.location.href = '/apply#interest-form';
-          },
+          onClick: () => { window.location.href = '/apply#interest-form'; },
         },
       });
-      // Clean up the URL parameter
       window.history.replaceState({}, '', '/resources');
     }
   }, [searchParams]);
 
   useEffect(() => {
-    // Check user authentication and PGI membership
     const checkUserStatus = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      setUser(user);
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (user?.email) {
-        // User is authenticated - check if they're in the PGI database
         try {
           const response = await fetch('/api/users/me');
           if (response.ok) {
-            // User exists in PGI database
+            // Member — redirect them to the portal resources page
             setIsPGIMember(true);
+            window.location.href = '/portal/dashboard/resources';
+            return;
           } else {
-            // User authenticated but not a PGI member
-            // Sign them out and show public resources
             await supabase.auth.signOut();
-            setUser(null);
-            setIsPGIMember(null);
-            // Show toast notification
-            toast.error('Not a PGI Member', {
-              description:
-                'Submit your email to stay updated or apply to join PGI.',
-              duration: 6000,
-              action: {
-                label: 'Apply',
-                onClick: () => {
-                  window.location.href = '/apply#interest-form';
-                },
-              },
-            });
           }
-        } catch (error) {
-          console.error('Error checking PGI membership:', error);
-          // On error, assume not a member
+        } catch {
           await supabase.auth.signOut();
-          setUser(null);
-          setIsPGIMember(null);
         }
-      } else {
-        // Not authenticated - show public resources
-        setIsPGIMember(null);
       }
 
       setLoading(false);
     };
-
     checkUserStatus();
   }, [supabase]);
 
-  const handleSignIn = async () => {
+  const handleSignIn = () => {
     trackEvent('resources_cta_clicked', {
       page: '/resources',
       action: 'google_signin_initiated',
     });
 
-    // Supabase callback URL with intended destination
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/resources')}`;
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/portal/dashboard/resources')}`;
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
-        scopes:
-          'openid email profile https://www.googleapis.com/auth/drive.metadata.readonly',
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+        scopes: 'openid email profile',
       },
     });
-
-    if (error) {
-      console.error('Sign in error:', error);
-    }
   };
 
-  const handleDriveButtonClick = () => {
-    trackEvent('resources_access_granted', {
-      page: '/resources',
-      action: 'drive_button_clicked',
-      email: user?.email,
-    });
-  };
-
-  // Simplified: just two cases
-  const renderContent = () => {
-    // Case 1: Authenticated - Show all PGI resources
-    if (isPGIMember === true) {
-      return (
-        <div>
-          <motion.div variants={itemFadeIn}>
-            <BentoFolderGrid parentFolderId={DRIVE_FOLDER_ID} />
-          </motion.div>
-
-          <motion.div className="text-center mt-12" variants={itemFadeIn}>
-            <a
-              href={DRIVE_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleDriveButtonClick}
-              className="inline-flex items-center bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:brightness-110 transition"
-            >
-              <ExternalLinkIcon className="w-4 h-4 mr-2" />
-              View Full Drive Folder
-            </a>
-          </motion.div>
-        </div>
-      );
-    }
-
-    // Case 2: Not authenticated - Show public resources
-    return (
-      <div className="max-w-7xl mx-auto">
-        <motion.div variants={itemFadeIn}>
-          <PlaceholderBentoGrid />
-        </motion.div>
-      </div>
-    );
-  };
-
-  const PlaceholderBentoGrid = () => {
-    const shouldCenterLast = PLACEHOLDER_FOLDERS.length % 3 === 1;
-
-    return (
-      <div className="w-full max-w-7xl mx-auto mb-8">
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          variants={staggerContainer}
-        >
-          {PLACEHOLDER_FOLDERS.map((folder, index) => {
-            const Icon = folder.icon;
-            const isLastItem = index === PLACEHOLDER_FOLDERS.length - 1;
-            const isOnlyItemInRow = shouldCenterLast && isLastItem;
-
-            return (
-              <motion.div
-                key={folder.id}
-                className={`bg-darkNavy p-6 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 shadow-xl relative ${
-                  isOnlyItemInRow ? 'lg:col-start-2' : ''
-                }`}
-                variants={itemFadeIn}
-                whileHover={{
-                  y: -5,
-                  scale: 1.02,
-                  transition: { duration: 0.3 },
-                }}
-              >
-                {/* Lock overlay */}
-                <div className="absolute top-4 right-4 bg-gray-800/80 backdrop-blur-sm rounded-lg p-2 border border-gray-600">
-                  <LockIcon className="w-4 h-4 text-gray-400" />
-                </div>
-
-                {/* Icon */}
-                <div className="bg-pgi-light-blue p-3 rounded-full mb-4 w-fit">
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-
-                {/* Content */}
-                <h3 className="text-white font-medium text-lg mb-2 line-clamp-2">
-                  {folder.name}
-                </h3>
-
-                {folder.description && (
-                  <p className="text-gray-300 text-sm font-light leading-relaxed line-clamp-3 mb-4">
-                    {folder.description}
-                  </p>
-                )}
-
-                {/* Preview label */}
-                <div className="mt-auto pt-4 border-t border-gray-700">
-                  <span className="text-xs text-gray-400 font-medium">
-                    Preview Only
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      </div>
-    );
-  };
-
-  if (loading) {
+  if (loading || isPGIMember) {
     return (
       <div className="bg-pgi-dark-blue text-white min-h-screen flex items-center justify-center">
-        <div className="text-center" role="status" aria-live="polite">
-          <div
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"
-            aria-hidden="true"
-          ></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4" />
           <p className="text-gray-300">Loading resources page...</p>
-          <span className="sr-only">Please wait while the page loads</span>
         </div>
       </div>
     );
@@ -328,31 +145,70 @@ function ResourcesPageContent() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-        role="main"
-        aria-label="PGI Resources Page"
       >
         <div className="container mx-auto max-w-7xl">
           <motion.div className="text-center mb-16" variants={fadeIn}>
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 text-white">
               <ShinyText
-                text={
-                  isPGIMember === true
-                    ? 'PGI Internal Resources'
-                    : 'Our Resources'
-                }
+                text="Our Resources"
                 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
               />
             </h1>
             <p className="text-base md:text-lg text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              {isPGIMember === true
-                ? 'Access your exclusive PGI educational materials and research resources.'
-                : 'Explore our collection of investment and finance resources.'}
+              Explore our collection of investment and finance resources.
+              Sign in as a PGI member to access the full library.
             </p>
           </motion.div>
 
-          {/* Authentication and Content Section */}
-          <motion.div className="w-full" variants={fadeIn}>
-            {renderContent()}
+          {/* Placeholder cards */}
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              variants={staggerContainer}
+            >
+              {PLACEHOLDER_FOLDERS.map((folder, index) => {
+                const Icon = folder.icon;
+                const isLast = index === PLACEHOLDER_FOLDERS.length - 1;
+                const isAlone = PLACEHOLDER_FOLDERS.length % 3 === 1 && isLast;
+
+                return (
+                  <motion.div
+                    key={folder.id}
+                    className={`bg-darkNavy p-6 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 shadow-xl relative ${
+                      isAlone ? 'lg:col-start-2' : ''
+                    }`}
+                    variants={itemFadeIn}
+                    whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.3 } }}
+                  >
+                    <div className="absolute top-4 right-4 bg-gray-800/80 backdrop-blur-sm rounded-lg p-2 border border-gray-600">
+                      <LockIcon className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div className="bg-pgi-light-blue p-3 rounded-full mb-4 w-fit">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-white font-medium text-lg mb-2">{folder.name}</h3>
+                    <p className="text-gray-300 text-sm font-light leading-relaxed mb-4">
+                      {folder.description}
+                    </p>
+                    <div className="mt-auto pt-4 border-t border-gray-700">
+                      <span className="text-xs text-gray-400 font-medium">Members Only</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+
+          {/* Sign in CTA */}
+          <motion.div className="text-center mt-12" variants={itemFadeIn}>
+            <button
+              onClick={handleSignIn}
+              className="inline-flex items-center bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg hover:brightness-110 transition"
+            >
+              Sign in to access resources
+            </button>
           </motion.div>
         </div>
       </motion.main>
@@ -365,13 +221,9 @@ export default function ResourcesPage() {
     <Suspense
       fallback={
         <div className="bg-pgi-dark-blue text-white min-h-screen flex items-center justify-center">
-          <div className="text-center" role="status" aria-live="polite">
-            <div
-              className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"
-              aria-hidden="true"
-            ></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4" />
             <p className="text-gray-300">Loading resources page...</p>
-            <span className="sr-only">Please wait while the page loads</span>
           </div>
         </div>
       }

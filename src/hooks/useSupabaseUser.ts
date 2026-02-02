@@ -1,100 +1,34 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/browser';
-
-interface SupabaseUserData {
-  id: string;
-  personal_name: string;
-  personal_email: string;
-  org_permission_level: 'admin' | 'lead' | 'member';
-  org_track?: 'quant' | 'value';
-  org_chapter_name?: string;
-  org_chapter_id?: string;
-  org_track_roles: string[];
-  org_exec_roles: string[];
-  personal_grad_year?: number;
-  personal_major?: string;
-  personal_bio?: string;
-  profile_skills: string[];
-  profile_linkedin?: string;
-  profile_github?: string;
-  personal_is_alumni: boolean;
-}
+import type { User } from '@/types';
 
 interface UseSupabaseUserReturn {
-  user: SupabaseUserData | null;
+  user: User | null;
   isLoading: boolean;
   error: string | null;
 }
 
 /**
- * Hook to fetch user data directly from Supabase database
- * This is a simpler alternative to useUser that queries Supabase directly
+ * Hook to fetch the current user's portal profile via /api/users/me.
+ * Returns a flat User object matching the new simplified schema.
  */
 export function useSupabaseUser(): UseSupabaseUserReturn {
-  const [user, setUser] = useState<SupabaseUserData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Get authenticated user
-        const {
-          data: { user: authUser },
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError || !authUser) {
-          setIsLoading(false);
+        const res = await fetch('/api/users/me');
+        if (!res.ok) {
           setUser(null);
           return;
         }
-
-        // Query Supabase database for user data with chapter JOIN
-        const { data: userData, error: dbError } = await supabase
-          .from('users')
-          .select(
-            `
-            id,
-            personal_name,
-            personal_email,
-            org_permission_level,
-            org_track,
-            org_chapter_id,
-            org_track_roles,
-            org_exec_roles,
-            personal_grad_year,
-            personal_major,
-            personal_bio,
-            profile_skills,
-            profile_linkedin,
-            profile_github,
-            personal_is_alumni,
-            chapters:org_chapter_id (
-              name
-            )
-          `
-          )
-          .eq('system_supabase_id', authUser.id)
-          .maybeSingle();
-
-        if (dbError || !userData) {
-          console.error('Error fetching user from database:', dbError);
-          setError('Failed to load user data');
-          setUser(null);
-        } else {
-          // Add chapter name from the JOIN
-          const formattedUserData = {
-            ...userData,
-            org_chapter_name: userData.chapters?.name || null,
-          };
-          setUser(formattedUserData);
-          setError(null);
-        }
+        const data = await res.json();
+        setUser(data.user || null);
+        setError(null);
       } catch (err: any) {
-        console.error('Error in useSupabaseUser:', err);
-        setError(err.message || 'An error occurred');
+        setError(err.message || 'Failed to fetch user');
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -102,16 +36,7 @@ export function useSupabaseUser(): UseSupabaseUserReturn {
     };
 
     fetchUser();
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      fetchUser();
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   return { user, isLoading, error };
 }

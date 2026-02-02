@@ -1,42 +1,18 @@
 /**
- * Feature Flags Configuration
+ * Feature Flags — Simplified
  *
- * Centralized feature flag system using environment variables.
- * All flags default to false for production safety.
+ * Directory and resources are always available (core features).
+ * Only admin and development flags remain.
  */
 
 export const featureFlags = {
-  // Stats visibility on dashboard
-  showStats: process.env.NEXT_PUBLIC_SHOW_STATS === 'true',
-
-  // Internships feature (pages, buttons, etc)
-  enableInternships: process.env.NEXT_PUBLIC_ENABLE_INTERNSHIPS === 'true',
-
-  // Directory feature (member directory access)
-  enableDirectory: process.env.NEXT_PUBLIC_ENABLE_DIRECTORY === 'true',
-
-  // Admin features (for testing/debugging)
   enableAdminFeatures:
-    process.env.NEXT_PUBLIC_ENABLE_ADMIN_FEATURES !== 'false', // Default true
-
-  // Development mode (automatically detected)
+    process.env.NEXT_PUBLIC_ENABLE_ADMIN_FEATURES !== 'false',
   isDevelopment: process.env.NODE_ENV === 'development',
 } as const;
 
-/**
- * Helper to check if a feature is enabled
- */
 export const isFeatureEnabled = (
   feature: keyof typeof featureFlags
 ): boolean => {
   return featureFlags[feature] === true;
-};
-
-/**
- * Combined check for features that should work in both dev mode OR when explicitly enabled
- */
-export const isDevOrEnabled = (
-  feature: 'showStats' | 'enableInternships' | 'enableDirectory'
-): boolean => {
-  return featureFlags.isDevelopment || featureFlags[feature];
 };
