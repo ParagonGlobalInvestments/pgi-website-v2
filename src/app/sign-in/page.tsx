@@ -93,12 +93,9 @@ function SignInPageContent() {
     const defaultDest = '/portal/dashboard';
     const next = searchParams?.get('redirectTo') || defaultDest;
 
-    // Always route OAuth callback through the main domain so we only need
-    // one Supabase redirect URL entry. The auth callback route handles
-    // redirecting to the portal subdomain.
-    const siteOrigin =
-      process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-    const redirectTo = `${siteOrigin}/auth/callback?next=${encodeURIComponent(next)}`;
+    // OAuth callback must stay on the same origin where signInWithOAuth is called,
+    // because Supabase stores the PKCE code_verifier in a cookie bound to this domain.
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

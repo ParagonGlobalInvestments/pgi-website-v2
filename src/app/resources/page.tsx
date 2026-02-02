@@ -115,6 +115,8 @@ function ResourcesPageContent() {
       action: 'google_signin_initiated',
     });
 
+    // OAuth callback must stay on the same origin where signInWithOAuth is called,
+    // because Supabase stores the PKCE code_verifier in a cookie bound to this domain.
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/portal/dashboard/resources')}`;
 
     supabase.auth.signInWithOAuth({
