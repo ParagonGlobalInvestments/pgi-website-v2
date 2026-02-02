@@ -56,9 +56,11 @@ Agents must NOT perform the following actions:
 
 ### Middleware-Based Protection
 
-- Route protection is handled by `src/middleware.ts`
-- Protected routes: `/portal/dashboard/**` and related member-only areas
-- Middleware checks authentication and redirects unauthenticated users
+- Route protection and subdomain routing are handled by `src/middleware.ts`
+- Portal gating: routes return 404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`
+- Subdomain routing: `portal.*` host prefix rewrites to `/portal/*` transparently
+- Auth routes (`/sign-in`, `/sign-up`, `/auth/*`, `/api/*`) are exempt from subdomain rewriting
+- Protected routes: `/portal/**`, `/dashboard/**`, `/sign-in`, `/sign-up`, `/__tests__/**`
 - Do not add route protection logic in individual pages or components
 
 ### Supabase Client Usage Patterns
@@ -117,6 +119,7 @@ const adminClient = requireSupabaseAdminClient();
 **Application:**
 
 - `NEXT_PUBLIC_APP_URL` - Used for redirects and links
+- `NEXT_PUBLIC_PORTAL_ENABLED` - Must be `'true'` to enable portal, sign-in, sign-up routes
 
 **Google OAuth (required only for `/resources` page):**
 
@@ -128,6 +131,10 @@ const adminClient = requireSupabaseAdminClient();
 - `PGI_REQUIRE_EDU` - Require `.edu` email for resources page (default: `true`)
 
 ### Optional Variables
+
+**Portal Subdomain:**
+
+- `NEXT_PUBLIC_PORTAL_URL` - Portal subdomain URL for cross-domain redirects (e.g., `https://portal.paragoninvestments.org`)
 
 **Feature Flags:**
 
@@ -141,10 +148,9 @@ const adminClient = requireSupabaseAdminClient();
 - `NEXT_PUBLIC_POSTHOG_KEY` - Optional analytics
 - `NEXT_PUBLIC_POSTHOG_HOST` - Default: `https://us.i.posthog.com`
 
-**Legacy/Unused Variables (may exist in .env.local but not used):**
+**Other:**
 
-- `NEXT_PUBLIC_CLERK_*` - Legacy Clerk variables (codebase uses Supabase Auth)
-- `ADMIN_EMAILS` - Currently not used in codebase
+- `ADMIN_EMAILS` - Comma-separated admin email allowlist
 - `NODE_ENV` - Automatically set by Next.js, do not set manually
 
 ### Build-Safe Patterns
@@ -323,7 +329,7 @@ Validation:
 - Lint passes
 - Build passes
 - No new markdown files
-- No references to MongoDB or Clerk
+- No references to MongoDB
 ```
 
 ## Validation Checklist (Before Merge)
@@ -334,7 +340,7 @@ Before any agent-generated code is merged, verify:
 - [ ] `npm run build` completes successfully
 - [ ] `npm run type-check` passes (if applicable)
 - [ ] No new markdown files created (except README.md or AGENTS.md updates)
-- [ ] No references to MongoDB or Clerk in code or comments
+- [ ] No references to MongoDB in code or comments
 - [ ] Environment variables handled safely (build won't crash if optional vars missing)
 - [ ] Authentication still works (test sign-in/sign-up flow)
 - [ ] Protected routes still protected (test without auth)
