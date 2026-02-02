@@ -35,28 +35,30 @@ async function isPGIMember(
   if (!userEmail) return false;
 
   const normalized = userEmail.trim().toLowerCase();
-
-  // 1. Check ADMIN_EMAILS allowlist
-  const adminEmails = process.env.ADMIN_EMAILS;
-  if (adminEmails) {
+  const isAdmin = (() => {
+    const adminEmails = process.env.ADMIN_EMAILS;
+    if (!adminEmails) return false;
     const allowlist = adminEmails.split(',').map(e => e.trim().toLowerCase());
-    if (allowlist.includes(normalized)) return true;
-  }
+    return allowlist.includes(normalized);
+  })();
 
   // Use admin client (bypasses RLS) for membership checks
   const adminClient = requireSupabaseAdminClient();
   const db = createDatabase(adminClient);
 
-  // 2. Check by supabase_id (already linked)
+  // 1. Check by supabase_id (already linked)
   const bySupabaseId = await db.getUserBySupabaseId(userId);
   if (bySupabaseId) return true;
 
-  // 3. Check by email or alternate_emails, and link supabase_id
+  // 2. Check by email or alternate_emails, and link supabase_id
   const byEmail = await db.getUserByAnyEmail(normalized);
   if (byEmail) {
     await db.linkSupabaseId(byEmail.dbId, userId);
     return true;
   }
+
+  // 3. Admin allowlist (user not in users table but is an admin)
+  if (isAdmin) return true;
 
   return false;
 }

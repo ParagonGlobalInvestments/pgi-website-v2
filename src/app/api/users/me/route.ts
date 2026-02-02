@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
@@ -21,7 +22,18 @@ export async function GET() {
     }
 
     const db = createDatabase();
-    const user = await db.getUserBySupabaseId(authUser.id);
+    let user = await db.getUserBySupabaseId(authUser.id);
+
+    // Fallback: lookup by email and link supabase_id (handles admin users
+    // whose supabase_id wasn't linked during an earlier auth flow)
+    if (!user && authUser.email) {
+      const adminDb = createDatabase(requireSupabaseAdminClient());
+      const byEmail = await adminDb.getUserByAnyEmail(authUser.email);
+      if (byEmail) {
+        await adminDb.linkSupabaseId(byEmail.dbId, authUser.id);
+        user = byEmail;
+      }
+    }
 
     if (!user) {
       return NextResponse.json(
