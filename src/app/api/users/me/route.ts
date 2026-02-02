@@ -30,8 +30,9 @@ export async function GET() {
       const adminDb = createDatabase(requireSupabaseAdminClient());
       const byEmail = await adminDb.getUserByAnyEmail(authUser.email);
       if (byEmail) {
-        await adminDb.linkSupabaseId(byEmail.dbId, authUser.id);
-        user = byEmail;
+        const { dbId, ...userData } = byEmail;
+        await adminDb.linkSupabaseId(dbId, authUser.id);
+        user = userData;
       }
     }
 
