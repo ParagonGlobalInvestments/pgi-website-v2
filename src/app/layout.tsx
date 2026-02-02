@@ -6,8 +6,10 @@ import { Toaster as Sonner } from 'sonner';
 import Script from 'next/script';
 import './globals.css';
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://paragoninvestments.org'),
+  metadataBase: new URL(appUrl),
   title: {
     default: 'Paragon Global Investments',
     template: '%s | Paragon Global Investments',
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
-    url: 'https://paragoninvestments.org/',
+    url: appUrl,
     siteName: 'Paragon Global Investments',
     title: 'Paragon Global Investments',
     description:
@@ -118,8 +120,8 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Paragon Global Investments',
-              url: 'https://paragoninvestments.org/',
-              logo: 'https://paragoninvestments.org/logos/pgiLogoTransparentDark.png',
+              url: appUrl,
+              logo: `${appUrl}/logos/pgiLogoTransparentDark.png`,
               sameAs: [
                 'https://www.linkedin.com/company/paragon-global-investments/',
                 'https://www.instagram.com/paragoninvestmentsglobal/',

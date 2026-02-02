@@ -44,9 +44,16 @@ function SignInPageContent() {
           const response = await fetch('/api/users/me');
           if (response.ok) {
             // User exists in PGI database - redirect to portal
+            const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
             const redirectTo =
               searchParams?.get('redirectTo') || '/portal/dashboard';
-            window.location.href = redirectTo;
+
+            if (portalUrl && redirectTo.startsWith('/portal/')) {
+              const cleanPath = redirectTo.replace(/^\/portal/, '') || '/';
+              window.location.href = `${portalUrl}${cleanPath}`;
+            } else {
+              window.location.href = redirectTo;
+            }
             return;
           } else {
             // User not in PGI database - sign them out and redirect to resources
