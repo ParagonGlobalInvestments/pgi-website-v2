@@ -81,3 +81,5 @@ jsrepo.json
 # AI assistant local config
 .claude/
 .mcp.json
+
+certificates
