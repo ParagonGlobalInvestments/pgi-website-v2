@@ -87,6 +87,18 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if this is an admin allowlist user (synthetic, no database record)
+    const { isAdminAllowlist, user: membershipUser } = await checkMembership(
+      authUser.email,
+      authUser.id
+    );
+    if (isAdminAllowlist && !membershipUser) {
+      return NextResponse.json(
+        { error: 'Admin allowlist accounts cannot update profile settings' },
+        { status: 400 }
+      );
+    }
+
     const db = createDatabase();
     const user = await db.getUserBySupabaseId(authUser.id);
 
