@@ -50,7 +50,7 @@ function LoginPageContent() {
             // On portal subdomain, use clean paths (no /portal prefix)
             const onSubdomain = isPortalSubdomain();
             const defaultDest = onSubdomain
-              ? '/home'
+              ? '/'
               : '/portal';
             const redirectTo = searchParams?.get('redirectTo') || defaultDest;
 
