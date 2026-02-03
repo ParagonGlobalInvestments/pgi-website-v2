@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import { PHProvider } from '@/components/providers/PostHogProvider';
+import { VitalsCollector } from '@/components/observability/VitalsCollector';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
 import Script from 'next/script';
@@ -107,6 +108,7 @@ export default function RootLayout({
           {children}
           <Toaster />
           <Sonner position="top-center" richColors closeButton />
+          <VitalsCollector />
         </PHProvider>
         <Analytics />
         <SpeedInsights />

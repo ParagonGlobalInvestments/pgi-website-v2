@@ -1,0 +1,110 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/requireAdmin';
+import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
+  try {
+    const supabase = requireSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from('cms_recruitment')
+      .select('*')
+      .order('key', { ascending: true });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data ?? []);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch recruitment config';
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  const auth = await requireAdmin();
+  if ('error' in auth) return auth.error;
+
+  try {
+    const body = await req.json();
+    const { items } = body;
+
+    if (!Array.isArray(items)) {
+      return NextResponse.json(
+        { error: 'items must be an array of { key, value }' },
+        { status: 400 }
+      );
+    }
+
+    for (const item of items) {
+      if (!item.key || typeof item.value !== 'string') {
+        return NextResponse.json(
+          { error: 'Each item must have key (string) and value (string)' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const supabase = requireSupabaseAdminClient();
+
+    // Build rows with trimmed keys
+    const rows = items.map((item: { key: string; value: string }) => ({
+      key: String(item.key).trim(),
+      value: String(item.value).trim(),
+    }));
+    const incomingKeys = rows.map(r => r.key);
+
+    // Upsert all items (atomic, preserves row IDs for unchanged keys)
+    if (rows.length > 0) {
+      const { error: upsertError } = await supabase
+        .from('cms_recruitment')
+        .upsert(rows, { onConflict: 'key' });
+
+      if (upsertError) {
+        return NextResponse.json({ error: upsertError.message }, { status: 500 });
+      }
+    }
+
+    // Delete keys that were removed (not in incoming items)
+    if (incomingKeys.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('cms_recruitment')
+        .delete()
+        .not('key', 'in', `(${incomingKeys.map(k => `"${k}"`).join(',')})`);
+
+      if (deleteError) {
+        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      }
+    } else {
+      // No incoming items = delete all
+      const { error: deleteError } = await supabase
+        .from('cms_recruitment')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (deleteError) {
+        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      }
+    }
+
+    // Return the fresh data
+    const { data, error: fetchError } = await supabase
+      .from('cms_recruitment')
+      .select('*')
+      .order('key', { ascending: true });
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data ?? []);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to update recruitment config';
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

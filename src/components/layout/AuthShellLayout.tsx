@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 /**
  * Portal-style shell for the login page.
- * Mirrors the DashboardLayout visually — navy sidebar / top bar,
+ * Mirrors the PortalLayout visually — navy sidebar / top bar,
  * white content area — but without auth checks or navigation.
  */
 export default function AuthShellLayout({

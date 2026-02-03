@@ -3,7 +3,6 @@ Allow: /
 
 # Block admin and authentication pages
 Disallow: /portal/
-Disallow: /dashboard/
 Disallow: /api/
 Disallow: /_next/
 Disallow: /login/

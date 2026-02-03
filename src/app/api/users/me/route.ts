@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
-import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
+import { checkMembership } from '@/lib/auth/checkMembership';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 export const dynamic = 'force-dynamic';
@@ -21,24 +21,23 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = createDatabase();
-    let user = await db.getUserBySupabaseId(authUser.id);
+    // Use consolidated membership check (handles supabase_id + email lookup + linking)
+    const { user, isMember, isAdminAllowlist } = await checkMembership(
+      authUser.email,
+      authUser.id
+    );
 
-    // Fallback: lookup by email and link supabase_id (handles admin users
-    // whose supabase_id wasn't linked during an earlier auth flow)
-    if (!user && authUser.email) {
-      const adminDb = createDatabase(requireSupabaseAdminClient());
-      const byEmail = await adminDb.getUserByAnyEmail(authUser.email);
-      if (byEmail) {
-        const { dbId, ...userData } = byEmail;
-        await adminDb.linkSupabaseId(dbId, authUser.id);
-        user = userData;
-      }
-    }
-
-    if (!user) {
+    if (!isMember) {
       return NextResponse.json(
         { error: 'User not found — not a PGI member' },
+        { status: 404 }
+      );
+    }
+
+    // Admin allowlist users don't have a user record
+    if (isAdminAllowlist && !user) {
+      return NextResponse.json(
+        { error: 'Admin allowlist user — no profile in database' },
         { status: 404 }
       );
     }

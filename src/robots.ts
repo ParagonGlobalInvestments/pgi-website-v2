@@ -10,7 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: [
         '/portal/',
-        '/dashboard/',
         '/api/',
         '/_next/',
         '/login/',

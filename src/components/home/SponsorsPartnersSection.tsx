@@ -8,8 +8,8 @@ import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/D
 import {
   SPONSORS_COMPANIES,
   PARTNERS_COMPANIES,
-  type Company,
 } from '@/lib/constants/companies';
+import type { CmsSponsor } from '@/lib/cms/types';
 import {
   fadeIn,
   staggerContainer,
@@ -17,34 +17,79 @@ import {
   logoAnimation,
 } from './animations';
 
-const EnhancedSponsorLogo = ({ company }: { company: Company }) => (
+interface SponsorLogoProps {
+  name: string;
+  displayName: string;
+  website: string | null;
+  imagePath: string | null;
+}
+
+const EnhancedSponsorLogo = ({ company }: { company: SponsorLogoProps }) => (
   <a
-    href={company.website}
+    href={company.website || '#'}
     target="_blank"
     rel="noopener noreferrer"
     className="block group"
   >
     <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 ">
-      <Image
-        src={company.imagePath}
-        alt={company.displayName}
-        width={120}
-        height={120}
-        className="object-contain max-w-full max-h-full"
-        style={{
-          width: 'auto',
-          height: 'auto',
-          maxWidth: '120px',
-          maxHeight: '80px',
-        }}
-      />
+      {company.imagePath && (
+        <Image
+          src={company.imagePath}
+          alt={company.displayName}
+          width={120}
+          height={120}
+          className="object-contain max-w-full max-h-full"
+          style={{
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '120px',
+            maxHeight: '80px',
+          }}
+        />
+      )}
     </div>
   </a>
 );
 
-export default function SponsorsPartnersSection() {
-  const selectedSponsors = SPONSORS_COMPANIES.slice(0, 5);
-  const selectedPartners = PARTNERS_COMPANIES.slice(0, 5);
+interface SponsorsPartnersSectionProps {
+  sponsors?: CmsSponsor[];
+  partners?: CmsSponsor[];
+}
+
+export default function SponsorsPartnersSection({
+  sponsors,
+  partners,
+}: SponsorsPartnersSectionProps) {
+  // Use CMS data if available, otherwise fall back to constants
+  const displaySponsors: SponsorLogoProps[] =
+    sponsors && sponsors.length > 0
+      ? sponsors.slice(0, 5).map((s) => ({
+          name: s.name,
+          displayName: s.display_name,
+          website: s.website,
+          imagePath: s.image_path,
+        }))
+      : SPONSORS_COMPANIES.slice(0, 5).map((c) => ({
+          name: c.name,
+          displayName: c.displayName,
+          website: c.website,
+          imagePath: c.imagePath,
+        }));
+
+  const displayPartners: SponsorLogoProps[] =
+    partners && partners.length > 0
+      ? partners.slice(0, 5).map((p) => ({
+          name: p.name,
+          displayName: p.display_name,
+          website: p.website,
+          imagePath: p.image_path,
+        }))
+      : PARTNERS_COMPANIES.slice(0, 5).map((c) => ({
+          name: c.name,
+          displayName: c.displayName,
+          website: c.website,
+          imagePath: c.imagePath,
+        }));
 
   return (
     <motion.section
@@ -98,7 +143,7 @@ export default function SponsorsPartnersSection() {
               variants={staggerContainer}
               className="flex flex-wrap justify-center gap-4 md:gap-6 max-w-lg mx-auto"
             >
-              {selectedSponsors.map((sponsor, index) => (
+              {displaySponsors.map((sponsor, index) => (
                 <motion.div
                   key={sponsor.name}
                   variants={logoAnimation}
@@ -153,7 +198,7 @@ export default function SponsorsPartnersSection() {
               variants={staggerContainer}
               className="flex flex-wrap justify-center gap-4 md:gap-6 max-w-lg mx-auto"
             >
-              {selectedPartners.map((partner, index) => (
+              {displayPartners.map((partner, index) => (
                 <motion.div
                   key={partner.name}
                   variants={logoAnimation}

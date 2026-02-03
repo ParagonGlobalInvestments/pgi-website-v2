@@ -35,7 +35,7 @@ export function requireSupabaseBrowserClient(): SupabaseClient {
 
 /**
  * Singleton browser client — prevents re-creation on every render.
- * Consumers like Header.tsx and dashboard/layout.tsx call createClient()
+ * Consumers like Header.tsx and portal/layout.tsx call createClient()
  * during render; without memoization each call spawns a new WebSocket
  * and onAuthStateChange listener.
  */

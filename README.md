@@ -38,12 +38,12 @@ This is the web platform for Paragon Global Investments, serving both public vis
 
 - Node.js 20+ (LTS version recommended)
 - npm (comes with Node.js)
-- A Supabase account and project ([create one here](https://supabase.com/dashboard))
+- A Supabase account and project ([create one here](https://supabase.com/home))
 
 ### Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ParagonGlobalInvestments/pgi-website-v2.git
 cd pgi-website-v2
 ```
 
@@ -63,7 +63,7 @@ npm install
 
 2. Fill in your Supabase credentials:
 
-   - Get your project URL and keys from [Supabase Dashboard](https://supabase.com/dashboard) → Project Settings → API
+   - Get your project URL and keys from [Supabase Dashboard](https://supabase.com/home) → Project Settings → API
    - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - Add `SUPABASE_SERVICE_ROLE_KEY` (keep this secret, server-only)
 
@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-The application will be available at `https://localhost:3000` (HTTPS with auto-generated local certificate).
+The application will be available at `http://localhost:3000`.
 
 ## Environment Variables
 
@@ -98,7 +98,7 @@ The application will be available at `https://localhost:3000` (HTTPS with auto-g
 
 **Feature Flags:**
 
-- `NEXT_PUBLIC_SHOW_STATS` - Show dashboard statistics (default: `false`)
+- `NEXT_PUBLIC_SHOW_STATS` - Show home page statistics (default: `false`)
 - `NEXT_PUBLIC_ENABLE_INTERNSHIPS` - Enable internships feature (default: `false`)
 - `NEXT_PUBLIC_ENABLE_DIRECTORY` - Enable member directory feature (default: `false`)
 - `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` - Enable admin features (default: `true`)
@@ -139,7 +139,7 @@ Route protection and subdomain routing are handled by `src/middleware.ts`, which
 - Redirects `/portal/*` paths on the subdomain to clean URLs (strips prefix)
 - Allows public routes to pass through
 
-Protected routes include `/portal/**`, `/dashboard/**`, `/login`, and `/__tests__/**`.
+Protected routes include `/portal/**`, `/login`, and `/__tests__/**`.
 
 ### User Roles
 
@@ -161,29 +161,33 @@ pgi-website-v2/
 ├── docs/                   # Documentation and environment examples
 ├── public/                 # Static assets (images, icons, PDFs, etc.)
 ├── scripts/                # Utility scripts (migrations, sync, etc.)
+├── supabase/               # Supabase migrations
 ├── src/
 │   ├── app/                # Next.js App Router (pages, layouts, API routes)
-│   │   ├── (main)/         # Public website routes
+│   │   ├── (main)/         # Route group: home page, privacy, terms
+│   │   ├── (site)/         # Route group: all public site pages with shared layout
 │   │   ├── api/            # Backend API route handlers
+│   │   │   ├── cms/        # CMS API (people, sponsors, timeline, upload)
+│   │   │   └── users/      # User API (directory, profile)
 │   │   ├── portal/         # Member portal routes
-│   │   │   └── dashboard/  # Dashboard pages (directory, internships, pitches, etc.)
+│   │   │   ├── (main)/     # Portal pages (directory, resources, content, settings)
+│   │   │   └── logout/     # Logout handler
 │   │   ├── login/          # Login page (Google OAuth)
-│   │   ├── auth/           # OAuth callback handler
+│   │   └── auth/           # OAuth callback handler
 │   ├── components/         # React components
-│   │   ├── auth/           # Authentication components
-│   │   ├── dashboard/      # Dashboard-specific components
+│   │   ├── analytics/      # PostHog trackers
+│   │   ├── cms/            # CMS admin components (forms, editors)
 │   │   ├── layout/         # Layout components (header, footer)
+│   │   ├── portal/         # Portal UI (sidebar, mobile nav, loading skeleton)
 │   │   ├── home/           # Homepage section components (client islands)
 │   │   └── ui/             # shadcn/ui components
 │   ├── hooks/              # Custom React hooks
 │   ├── lib/                # Core application modules
+│   │   ├── auth/           # Auth utilities (checkMembership, requireAdmin)
+│   │   ├── cms/            # CMS data fetching utilities
 │   │   ├── supabase/       # Supabase clients and database layer
-│   │   │   ├── admin.ts    # Service role client (server-only)
-│   │   │   ├── browser.ts  # Browser-side client
-│   │   │   ├── server.ts   # Server-side SSR client
-│   │   │   └── database.ts # Database operations layer
-│   │   └── rss/            # RSS feed utilities
-│   ├── middleware.ts        # Next.js middleware for route protection
+│   │   └── constants/      # Static data (companies, universities, resources)
+│   ├── middleware.ts       # Next.js middleware for route protection
 │   ├── types/              # TypeScript type definitions
 │   └── utils.ts            # General utility functions
 ├── next.config.mjs         # Next.js configuration
@@ -196,7 +200,7 @@ pgi-website-v2/
 
 ### Common Scripts
 
-- `npm run dev` - Start dev server with Turbopack + HTTPS at `https://localhost:3000` (uses `--turbo` flag for Next.js 14; if upgrading to Next.js 15+, change to `--turbopack`)
+- `npm run dev` - Start dev server at `http://localhost:3000`
 - `npm run build` - Build for production
 - `npm run start` - Start production server (after build)
 - `npm run lint` - Run ESLint (warnings don't block, errors do)
@@ -272,25 +276,29 @@ The application is configured for deployment on Vercel:
 
 The build process disables webpack persistent caching in production to prevent disk space issues during builds.
 
-## Common Gotchas
+## Database Migrations
 
-### `npm run dev` Fails with "unknown option '--turbo'"
+SQL migrations are stored in `supabase/migrations/` with numbered prefixes (e.g., `001_`, `002_`).
 
-**Symptom:** `error: unknown option '--turbo'` when running `npm run dev`.
+### Applying Migrations
 
-**Cause:** The dev script uses `next dev --turbo --experimental-https`. The `--turbo` flag enables Turbopack and is the correct flag for **Next.js 14.x**. If you've upgraded to **Next.js 15+**, the flag was renamed to `--turbopack`.
-
-**Solution:** In `package.json`, change the `dev` script:
-
-```json
-// Next.js 14.x (current)
-"dev": "next dev --turbo --experimental-https"
-
-// Next.js 15+ (after upgrade)
-"dev": "next dev --turbopack --experimental-https"
+**Option 1: Supabase CLI (recommended)**
+```bash
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
 ```
 
-You can verify available flags with `npx next dev --help`.
+**Option 2: Manual SQL**
+Copy the migration file contents and run in the Supabase SQL Editor (Dashboard → SQL Editor).
+
+### Current Migrations
+
+| File | Purpose |
+|------|---------|
+| `001_security_performance_fixes.sql` | Users table, RLS policies, performance optimizations |
+| `002_observability_tables.sql` | Analytics tables (obs_vitals, obs_pageviews, obs_errors) |
+
+## Common Gotchas
 
 ### Missing Environment Variables
 
@@ -331,7 +339,7 @@ The member portal supports three access patterns. Middleware handles all of them
 Portal is accessed via subdomain with clean URLs:
 
 ```
-portal.paragoninvestments.org/dashboard
+portal.paragoninvestments.org/home
 portal.paragoninvestments.org/settings
 ```
 
@@ -339,15 +347,13 @@ Middleware detects the `portal.` host prefix and rewrites requests to `/portal/*
 
 ### Local Development
 
-Use [sslip.io](https://sslip.io) for subdomain testing without hosts file changes:
+Access the portal via path-based routing:
 
 ```
-https://portal.127.0.0.1.sslip.io:3000/dashboard
+http://localhost:3000/portal
 ```
 
-This works because `sslip.io` resolves `*.127.0.0.1.sslip.io` to `127.0.0.1`, and middleware sees the `portal.` prefix in the `host` header. The dev server uses `--experimental-https` for locally-trusted HTTPS certificates.
-
-You can also access the portal via path-based routing at `localhost:3000/portal/dashboard`.
+Subdomain routing (`portal.*`) only activates in production.
 
 **Important:** `NEXT_PUBLIC_PORTAL_ENABLED=true` must be in your `.env.local` for the portal to be accessible.
 
@@ -356,16 +362,38 @@ You can also access the portal via path-based routing at `localhost:3000/portal/
 On preview deployments (`*.vercel.app`), subdomain routing does NOT activate — this is a Vercel platform limitation (preview URLs don't support custom subdomains). Access the portal via path-based routing:
 
 ```
-your-branch-name.vercel.app/portal/dashboard
+your-branch-name.vercel.app/portal
 ```
 
 ### How It Works
 
 | Environment | URL Pattern | Mechanism |
 |---|---|---|
-| Production | `portal.paragoninvestments.org/dashboard` | Middleware rewrites to `/portal/dashboard` |
-| Local dev | `portal.127.0.0.1.sslip.io:3000/dashboard` | Same middleware rewrite via sslip.io |
-| Local dev | `localhost:3000/portal/dashboard` | Direct path, no rewrite needed |
-| Vercel preview | `preview-url.vercel.app/portal/dashboard` | Direct path, no rewrite needed |
+| Production | `portal.paragoninvestments.org/home` | Middleware rewrites to `/portal` |
+| Local dev | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
+| Local dev | `localhost:3000/portal` | Direct path, no rewrite needed |
+| Vercel preview | `preview-url.vercel.app/portal` | Direct path, no rewrite needed |
 
-If a user visits `portal.paragoninvestments.org/portal/dashboard` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/dashboard` to enforce clean URLs.
+If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
+
+## Analytics (Admin Only)
+
+Admins can view site performance at `/portal/observability` (labeled "Analytics" in the sidebar). This includes:
+
+- **Page Views & Visitors**: Traffic metrics with daily trends
+- **Core Web Vitals**: LCP, FCP, CLS, TTFB, INP performance metrics
+- **Error Tracking**: Client-side JavaScript errors
+
+Data is collected automatically via the `VitalsCollector` component and stored in Supabase. See `supabase/migrations/002_observability_tables.sql` for the schema.
+
+## CMS (Content Management)
+
+Admins can manage dynamic site content via `/portal/content`. The CMS supports:
+
+- **People**: Team members displayed on public pages (officers, founders, quant/value teams)
+- **Sponsors**: Logo and link management with drag-and-drop image upload
+- **Timeline**: Recruitment timeline events
+- **Recruitment**: Key-value content for the application page
+- **Statistics**: Homepage statistics (member count, AUM, etc.)
+
+All content changes are saved to Supabase and reflected on the public site immediately.

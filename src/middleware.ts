@@ -30,7 +30,6 @@ export async function middleware(request: NextRequest) {
   if (!portalEnabled) {
     const isPortalRoute =
       pathname.startsWith('/portal') ||
-      pathname.startsWith('/dashboard') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/__tests__');
 
@@ -45,13 +44,18 @@ export async function middleware(request: NextRequest) {
 
   // Redirect portal routes to portal subdomain when not already on it.
   // /auth/callback stays on the main domain (OAuth requires it).
+  // Skip redirect if portal URL is same as current host (local dev).
   if (!isPortalSubdomain && portalEnabled) {
     const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
     const isPortalRoute =
       pathname.startsWith('/login') ||
       pathname.startsWith('/portal');
 
-    if (portalUrl && isPortalRoute) {
+    // Don't redirect if portal URL matches current host (prevents loop in local dev)
+    const portalHost = portalUrl ? new URL(portalUrl).host : null;
+    const isSameHost = portalHost === host;
+
+    if (portalUrl && isPortalRoute && !isSameHost) {
       // Redirect to portal subdomain, preserving path + query string
       // /portal/* paths get cleaned (middleware on subdomain handles rewrite)
       const cleanPath = pathname.startsWith('/portal')
