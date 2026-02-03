@@ -162,46 +162,50 @@ function ResourcesPageContent() {
             </p>
           </motion.div>
 
-          {/* Placeholder cards */}
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              variants={staggerContainer}
-            >
-              {PLACEHOLDER_FOLDERS.map((folder, index) => {
-                const Icon = folder.icon;
-                const isLast = index === PLACEHOLDER_FOLDERS.length - 1;
-                const isAlone = PLACEHOLDER_FOLDERS.length % 3 === 1 && isLast;
+          {/* Resource cards - 2x2 balanced grid */}
+          <motion.div
+            className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            {PLACEHOLDER_FOLDERS.map((folder) => {
+              const Icon = folder.icon;
+              return (
+                <motion.div
+                  key={folder.id}
+                  className="group bg-gradient-to-br from-darkNavy to-darkNavy/80 p-6 md:p-8 rounded-2xl border border-gray-700/50 hover:border-pgi-light-blue/50 transition-all duration-300 shadow-lg hover:shadow-pgi-light-blue/10 relative overflow-hidden"
+                  variants={itemFadeIn}
+                  whileHover={{ y: -4, transition: { duration: 0.25 } }}
+                >
+                  {/* Subtle gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-pgi-light-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                return (
-                  <motion.div
-                    key={folder.id}
-                    className={`bg-darkNavy p-6 rounded-xl border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 shadow-xl relative ${
-                      isAlone ? 'lg:col-start-2' : ''
-                    }`}
-                    variants={itemFadeIn}
-                    whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.3 } }}
-                  >
-                    <div className="absolute top-4 right-4 bg-gray-800/80 backdrop-blur-sm rounded-lg p-2 border border-gray-600">
-                      <LockIcon className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div className="bg-pgi-light-blue p-3 rounded-full mb-4 w-fit">
+                  {/* Lock badge */}
+                  <div className="absolute top-4 right-4 bg-gray-800/60 backdrop-blur-sm rounded-full p-2 border border-gray-600/50">
+                    <LockIcon className="w-3.5 h-3.5 text-gray-400" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative">
+                    <div className="bg-pgi-light-blue/90 p-3.5 rounded-xl mb-5 w-fit shadow-lg shadow-pgi-light-blue/20">
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-white font-medium text-lg mb-2">{folder.name}</h3>
-                    <p className="text-gray-300 text-sm font-light leading-relaxed mb-4">
+                    <h3 className="text-white font-medium text-lg md:text-xl mb-2">{folder.name}</h3>
+                    <p className="text-gray-400 text-sm md:text-base font-light leading-relaxed">
                       {folder.description}
                     </p>
-                    <div className="mt-auto pt-4 border-t border-gray-700">
-                      <span className="text-xs text-gray-400 font-medium">Members Only</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="relative mt-6 pt-4 border-t border-gray-700/50 flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-medium tracking-wide uppercase">Members Only</span>
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-pgi-light-blue/50 to-transparent rounded-full" />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
 
           {/* Login CTA */}
           <motion.div className="text-center mt-12" variants={itemFadeIn}>

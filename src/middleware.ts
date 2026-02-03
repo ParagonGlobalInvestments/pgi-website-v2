@@ -71,8 +71,7 @@ export async function middleware(request: NextRequest) {
     const isRootRoute =
       pathname.startsWith('/login') ||
       pathname.startsWith('/auth/') ||
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/resources');
+      pathname.startsWith('/api/');
 
     if (isRootRoute) {
       return NextResponse.next();
