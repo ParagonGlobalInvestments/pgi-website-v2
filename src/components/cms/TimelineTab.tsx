@@ -103,8 +103,13 @@ export default function TimelineTab() {
   };
 
   const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '—';
     try {
-      const date = new Date(dateStr);
+      // Handle formats like "26th Dec, 2021" or "2nd Oct, 2022"
+      // Remove ordinal suffixes (st, nd, rd, th) before parsing
+      const cleaned = dateStr.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+      const date = new Date(cleaned);
+      if (isNaN(date.getTime())) return dateStr; // Fallback to original if still invalid
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
