@@ -123,7 +123,7 @@ function ResourcesPageContent() {
       provider: 'google',
       options: {
         redirectTo,
-        queryParams: { access_type: 'offline', prompt: 'consent' },
+        queryParams: { prompt: 'select_account' },
         scopes: 'openid email profile',
       },
     });

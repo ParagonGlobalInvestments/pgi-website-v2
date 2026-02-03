@@ -1,24 +1,9 @@
 'use client';
 
-// import { useState } from 'react';
-// import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { GraduationCap, TrendingUp } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-
-// import { useEffect } from 'react';
-// import { useRouter, useSearchParams } from 'next/navigation';
-
-const UCHICAGO_APPLY_URL =
-  'https://docs.google.com/forms/d/e/1FAIpQLSdTCznaIPg3wK127dm1LBplS2p34oLpIHJ-vPURjB54U8ap_g/viewform?usp=sharing&ouid=115014572515447649486'; // replace with real URL when ready
-const applicationsOpen = true; // set to true when applications open
-
-const ZOOM_LINK_URL =
-  'https://uchicago.zoom.us/j/97041198738?pwd=yc3JxnOrFBcCEO2OLbe2ro24YprLr6.1';
-// const GENERAL_APPLY_URL =
-//   'https://docs.google.com/forms/d/e/1FAIpQLSer1H0nz73Mlhg3x6PgulhJrwt5Qxp-LJOzzHuUqrlRtkFkvw/viewform';
-// const generalApplicationsOpen = true;
 
 /** Animation variants (unchanged) */
 const fadeIn = {
@@ -88,45 +73,6 @@ const nationalRecruitmentTeam: TeamMember[] = [
     name: 'Krish Khanna',
     role: 'Recruiter',
     university: 'University of Chicago',
-  },
-];
-
-const uchicagoRecruitmentTeam: TeamMember[] = [
-  {
-    name: 'Nicolas Tchkotoua',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/ntchkotoua/',
-  },
-  {
-    name: 'Heath Winter',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/heath-winter/',
-  },
-  {
-    name: 'Noor Kaur',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/noor-kaur-738867272/',
-  },
-  {
-    name: 'Glen Cahilly',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/glen-cahilly/',
-  },
-  {
-    name: 'Ishaan Sareen',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/ishaansareen/',
-  },
-  {
-    name: 'Lars Barth',
-    role: 'Recruiter',
-    university: 'University of Chicago',
-    linkedin: 'https://www.linkedin.com/in/lars-barth/',
   },
 ];
 
@@ -252,19 +198,6 @@ const generalTimeline = [
   },
   { date: 'Monday 19th', detail: 'Applications close · 11:59 PM' },
   { date: 'Early February', detail: 'Decisions released' },
-];
-
-/** --------------------------
- *  UChicago Timeline Content
- *  -------------------------- */
-const uchicagoTimeline = [
-  { date: 'Fri (10/3)', detail: 'Applications Open' },
-  { date: 'Fri (10/3)', detail: 'Engagement Expo @ 3PM — Main Quad' },
-  { date: 'Sat (10/4) – Mon (10/6)', detail: 'Scheduled Coffee Chats' },
-  { date: 'Tues (10/7)', detail: 'Info Session I @ 6PM — Stuart 104' },
-  { date: 'Wed (10/8)', detail: 'Info Session II @ Zoom' },
-  { date: 'Fri (10/10)', detail: 'Applications Close' },
-  { date: 'Wed (10/15)', detail: 'First Round of Interviews Begin' },
 ];
 
 function GeneralRecruitment() {
@@ -572,219 +505,9 @@ function GeneralRecruitment() {
   );
 }
 
-function UChicagoRecruitment() {
-  return (
-    <>
-      {/* Hero */}
-      <section className="pt-10 md:pt-16 lg:pt-20 pb-10 md:pb-16 px-4 bg-navy">
-        <div className="container mx-auto">
-          <motion.div
-            className="text-center"
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-          >
-            <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
-              <ShinyText
-                text="PGI @ UChicago — Fall 2025 Recruiting"
-                className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
-              />
-            </h1>
-            <p className="text-base md:text-lg lg:text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              The UChicago-specific cycle is starting now. See the on-campus
-              schedule, application window, and interview dates below.
-            </p>
-
-            {/* Buttons row: Zoom (left) + Apply (right) */}
-            <div className="mt-8 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
-              <motion.a
-                href={ZOOM_LINK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${baseBtn} bg-pgi-light-blue text-white shadow-lg hover:brightness-110 transition`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <span className="leading-tight">
-                  <span className="text-sm md:text-base block">
-                    Information Session Zoom Link
-                  </span>
-                  <span className="text-xs md:text-sm opacity-80 block">
-                    October 8th at 6 PM CT
-                  </span>
-                </span>
-              </motion.a>
-              {applicationsOpen ? (
-                <motion.a
-                  href={UCHICAGO_APPLY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${baseBtn} bg-white text-navy border border-white shadow-lg hover:brightness-110 transition`}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  Apply Now — UChicago
-                </motion.a>
-              ) : (
-                <button
-                  disabled
-                  title="Applications opening soon"
-                  className={`${baseBtn} bg-white text-navy opacity-40 cursor-not-allowed select-none border border-white`}
-                >
-                  Apply (coming soon)
-                </button>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Timeline only */}
-      <section className="pt-6 md:pt-8 pb-8 md:pb-12 px-4 bg-pgi-dark-blue">
-        <div className="container mx-auto max-w-3xl">
-          <motion.div
-            className="bg-darkNavy p-6 md:p-8 rounded-xl border border-gray-700 shadow-xl"
-            variants={cardItem}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-medium text-white mb-6">
-              <DecryptedText
-                text="Fall 2025 UChicago Timeline"
-                sequential
-                revealDirection="start"
-                animateOn="view"
-                speed={50}
-                useOriginalCharsOnly
-                className="text-xl md:text-2xl lg:text-3xl font-medium text-white"
-              />
-            </h2>
-
-            <ul className="space-y-4">
-              {uchicagoTimeline.map((item, i) => (
-                <li key={i} className="flex items-start">
-                  <span className="mt-1 mr-3 h-2.5 w-2.5 rounded-full bg-pgi-light-blue shrink-0" />
-                  <div>
-                    <p className="text-white font-medium">{item.date}</p>
-                    <p className="text-gray-300">{item.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
-      </section>
-    </>
-  );
-}
-
-function TabSwitch({
-  value,
-  onChange,
-}: {
-  value: 'general' | 'uchicago';
-  onChange: (v: 'general' | 'uchicago') => void;
-}) {
-  const options: { key: 'general' | 'uchicago'; label: string }[] = [
-    { key: 'general', label: 'General (National)' },
-    { key: 'uchicago', label: 'UChicago' },
-  ];
-
-  return (
-    <div className="sticky top-0 z-20 bg-pgi-dark-blue">
-      <div className="container mx-auto px-4">
-        <div
-          role="tablist"
-          aria-label="Recruitment tabs"
-          className="mx-auto max-w-xl relative py-3"
-        >
-          <div className="flex rounded-xl border border-gray-700 bg-darkNavy/70 p-1">
-            {options.map(opt => {
-              const isActive = value === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`panel-${opt.key}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => onChange(opt.key)}
-                  className={`relative flex-1 px-4 py-2 text-sm md:text-base font-medium rounded-lg transition
-                      focus:outline-none focus-visible:ring-2 focus-visible:ring-pgi-light-blue
-                      ${isActive ? 'text-white' : 'text-gray-200 hover:text-white'}`}
-                >
-                  {/* Animated pill background */}
-                  {isActive && (
-                    <motion.span
-                      layoutId="seg-pill"
-                      className="absolute inset-0 rounded-lg bg-pgi-light-blue shadow-lg"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 450,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                  <span className="relative">{opt.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Kept for when UChicago recruiting re-opens (currently commented out in JSX below)
-void uchicagoRecruitmentTeam;
-void UChicagoRecruitment;
-void TabSwitch;
-
 export default function ApplyPage() {
-  // const router = useRouter();
-  // const search = useSearchParams();
-  // const initial = (search.get('tab') as 'general' | 'uchicago') || 'general';
-  // const [tab, setTab] = useState<'general' | 'uchicago'>(initial);
-
-  /*
-    useEffect(() => {
-      const current = search.get('tab');
-      if (current !== tab) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', tab);
-        router.push(`${url.pathname}?${url.searchParams.toString()}`, { scroll: false });
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tab]);
-    */
-
   return (
     <div className="bg-pgi-dark-blue text-white min-h-screen">
-      {/* Minimal underline nav */}
-      {/* <TabSwitch value={tab} onChange={setTab} /> */}
-
-      {/* Tab Content */}
-      {/* {tab === 'general' ? (
-          <>
-            <GeneralRecruitment />
-            <RecruitmentTeamSection
-              members={nationalRecruitmentTeam}
-              title="National Recruitment Team"
-            />
-          </>
-        ) : (
-          <>
-            <UChicagoRecruitment />
-            <RecruitmentTeamSection
-              members={uchicagoRecruitmentTeam}
-              title="UChicago Recruitment Team"
-            />
-          </>
-        )} */}
-
-      {/* Temporarily limit to general recruitment while UChicago hiring is closed */}
       <GeneralRecruitment />
       <RecruitmentTeamSection
         members={nationalRecruitmentTeam}

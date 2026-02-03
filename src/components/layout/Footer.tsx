@@ -218,7 +218,7 @@ const Footer = () => {
             </Link>{' '}
             | {currentYear} |{' '}
             <Link
-              href="/privacy-policy"
+              href="/privacy"
               className="text-gray-400 hover:text-white transition-colors "
             >
               Privacy Policy

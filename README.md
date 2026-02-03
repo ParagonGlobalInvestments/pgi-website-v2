@@ -27,11 +27,9 @@ This is the web platform for Paragon Global Investments, serving both public vis
 - **UI Components**: shadcn/ui (built on Radix UI primitives)
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL with Row Level Security)
-- **Google OAuth**: NextAuth (used only for Google Drive access on `/resources` page)
 - **Analytics**: Vercel Analytics + Speed Insights, PostHog (optional)
 - **State Management**: SWR for data fetching
-- **Form Handling**: React Hook Form with Zod validation
-- **Real-time Updates**: Socket.IO
+- **Form Handling**: React Hook Form
 - **Deployment**: Vercel
 
 ## Getting Started (Local Development)
@@ -41,7 +39,6 @@ This is the web platform for Paragon Global Investments, serving both public vis
 - Node.js 20+ (LTS version recommended)
 - npm (comes with Node.js)
 - A Supabase account and project ([create one here](https://supabase.com/dashboard))
-- (Optional) Google Cloud project with OAuth credentials for the `/resources` page
 
 ### Clone the Repository
 
@@ -70,11 +67,6 @@ npm install
    - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - Add `SUPABASE_SERVICE_ROLE_KEY` (keep this secret, server-only)
 
-3. (Optional) For the `/resources` page, add Google OAuth credentials:
-   - Create OAuth 2.0 credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-   - Add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `NEXTAUTH_SECRET`
-   - Generate `NEXTAUTH_SECRET` with: `openssl rand -base64 32`
-
 ### Running Locally
 
 ```bash
@@ -97,15 +89,6 @@ The application will be available at `https://localhost:3000` (HTTPS with auto-g
 
 - `NEXT_PUBLIC_APP_URL` - Your application URL (e.g., `http://localhost:3000` for dev)
 - `NEXT_PUBLIC_PORTAL_ENABLED` - Must be explicitly set to `'true'` to enable the member portal and login route. When omitted or any other value, portal routes return 404 and the Log In button is hidden.
-
-**Google OAuth (required only if using `/resources` page):**
-
-- `GOOGLE_CLIENT_ID` - Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
-- `NEXTAUTH_SECRET` - Random secret for NextAuth sessions (generate with `openssl rand -base64 32`)
-- `NEXTAUTH_URL` - Your app URL (`http://localhost:3000` for dev, `https://paragoninvestments.org` for prod)
-- `NEXTAUTH_BASE_PATH` - Set to `/api/nextauth`
-- `PGI_REQUIRE_EDU` - Require `.edu` email for resources page (default: `true`)
 
 ### Optional Variables
 
@@ -133,8 +116,6 @@ The application will be available at `https://localhost:3000` (HTTPS with auto-g
 ### What Breaks vs. What Degrades
 
 **Missing Supabase variables:** The application will not function. Authentication and database operations will fail.
-
-**Missing Google OAuth variables:** The `/resources` page will not work, but the rest of the application functions normally.
 
 **Missing feature flags:** Features are hidden in production but automatically enabled in development mode (`NODE_ENV=development`).
 
@@ -171,10 +152,6 @@ User roles are stored in the Supabase `users` table with the `org_permission_lev
 ### Row Level Security (RLS)
 
 Supabase Row Level Security policies enforce data access at the database layer. Users can only access data they're authorized to see based on their role and relationships (e.g., chapter membership). This provides defense-in-depth security beyond application-level checks.
-
-### NextAuth Scope
-
-NextAuth is used **only** for Google OAuth on the `/resources` page to access Google Drive. It is completely isolated from Supabase Auth and does not handle any other authentication. The `/resources` page uses NextAuth to verify users have `.edu` email addresses and grant read-only access to Drive metadata.
 
 ## Project Structure
 
@@ -320,18 +297,6 @@ You can verify available flags with `npx next dev --help`.
 **Symptom:** Build succeeds but app crashes at runtime or features don't work.
 
 **Solution:** Check that all required Supabase variables are set. The build process won't fail if env vars are missing, but runtime will. Check browser console and server logs for specific errors.
-
-### Google OAuth Confusion
-
-**Symptom:** Confusion about when NextAuth vs Supabase Auth is used.
-
-**Clarification:**
-
-- Supabase Auth handles **all** user authentication (login, member portal)
-- NextAuth is **only** used for Google OAuth on the `/resources` page to access Google Drive
-- These are completely separate systems with no interaction
-
-If you're not working on the `/resources` page, you don't need to configure NextAuth.
 
 ### Feature Flags Not Enabling Features
 

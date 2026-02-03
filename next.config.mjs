@@ -38,9 +38,6 @@ const nextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   allowedDevOrigins: ['portal.127.0.0.1.sslip.io'],
-  async headers() {
-    return [];
-  },
 };
 
 export default nextConfig;

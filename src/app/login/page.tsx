@@ -105,11 +105,9 @@ function LoginPageContent() {
       options: {
         redirectTo,
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+          prompt: 'select_account',
         },
-        scopes:
-          'openid email profile https://www.googleapis.com/auth/drive.metadata.readonly',
+        scopes: 'openid email profile',
       },
     });
 
