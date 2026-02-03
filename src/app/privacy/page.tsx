@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Privacy Policy
           </h1>
-          <p className="text-gray-400">Last Updated: January 6, 2025</p>
+          <p className="text-gray-400">Last Updated: February 2, 2026</p>
         </div>
 
         {/* Content */}
@@ -64,18 +64,6 @@ export default function PrivacyPage() {
                   <li>Profile information (LinkedIn, resume, skills)</li>
                   <li>Educational and professional background</li>
                 </ul>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-medium mb-2 text-white">
-                  Google Drive Access
-                </h3>
-                <p className="leading-relaxed">
-                  For authenticated PGI members, we request read-only access to
-                  specific Google Drive folders containing educational
-                  resources. We only access metadata (file names, types, links)
-                  and never download or store file contents.
-                </p>
               </div>
 
               <div>
@@ -161,7 +149,7 @@ export default function PrivacyPage() {
             <div className="space-y-3 text-gray-300">
               <div>
                 <strong className="text-white">Google OAuth:</strong> For
-                authentication and accessing Drive metadata
+                authentication
               </div>
               <div>
                 <strong className="text-white">Supabase:</strong> For secure
@@ -223,7 +211,8 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong className="text-white">Revoke Access:</strong> Revoke
-                Google Drive permissions at any time
+                Google sign-in access at any time through your Google Account
+                settings
               </li>
             </ul>
             <p className="text-gray-300 leading-relaxed mt-4">

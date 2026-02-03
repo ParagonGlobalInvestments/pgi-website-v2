@@ -21,7 +21,7 @@ export default function TermsPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Terms of Service
           </h1>
-          <p className="text-gray-400">Last Updated: January 6, 2025</p>
+          <p className="text-gray-400">Last Updated: February 2, 2026</p>
         </div>
 
         {/* Content */}
@@ -135,14 +135,13 @@ export default function TermsPage() {
           {/* Google OAuth */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">
-              Authentication and Google Services
+              Authentication
             </h2>
             <p className="text-gray-300 leading-relaxed">
               We use Google OAuth for authentication. By logging in, you agree
-              to Google&apos;s Terms of Service and Privacy Policy. We request
-              read-only access to Google Drive metadata solely to display member
-              resources. You can revoke this access at any time through your
-              Google Account settings.
+              to Google&apos;s Terms of Service and Privacy Policy. You can
+              revoke Google sign-in access at any time through your Google
+              Account settings.
             </p>
           </section>
 

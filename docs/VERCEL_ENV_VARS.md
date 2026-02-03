@@ -28,16 +28,6 @@ NEXT_PUBLIC_SUPABASE_URL=https://hgowpluxzagdzctxbagw.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable key>
 SUPABASE_SERVICE_ROLE_KEY=<service role key>
 
-# NextAuth (for /resources page)
-NEXTAUTH_SECRET=<generated secret>
-NEXTAUTH_URL=https://paragoninvestments.org
-NEXTAUTH_BASE_PATH=/api/nextauth
-PGI_REQUIRE_EDU=true
-
-# Google OAuth (for /resources page)
-GOOGLE_CLIENT_ID=<client id>
-GOOGLE_CLIENT_SECRET=<client secret>
-
 # Admin
 ADMIN_EMAILS=ap7564@nyu.edu,aalonso20@uchicago.edu,mylesspiess@uchicago.edu
 ```
