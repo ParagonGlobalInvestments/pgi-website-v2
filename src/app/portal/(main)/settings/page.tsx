@@ -162,7 +162,9 @@ export default function SettingsPage() {
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Account Details</h2>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-5 bg-gray-50 rounded-lg p-5 border border-gray-100">
           <DetailItem label="Email" value={user.email} />
-          <DetailItem label="School" value={SCHOOL_LABELS[user.school] || user.school} />
+          {user.school && (
+            <DetailItem label="School" value={SCHOOL_LABELS[user.school] || user.school} />
+          )}
           <DetailItem label="Role" value={ROLE_LABELS[user.role] || user.role} />
           <DetailItem
             label="Program"
@@ -174,7 +176,14 @@ export default function SettingsPage() {
         </dl>
       </section>
 
-      {/* Edit profile form */}
+      {/* Edit profile form - not available for admin allowlist users */}
+      {user.id === 'admin-allowlist' ? (
+        <section className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+          <p className="text-sm text-gray-600">
+            Admin allowlist accounts use external authentication. Profile editing is not available.
+          </p>
+        </section>
+      ) : (
       <section>
         <h2 className="text-sm font-semibold text-gray-900 mb-4">Edit Profile</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -230,6 +239,7 @@ export default function SettingsPage() {
           </div>
         </form>
       </section>
+      )}
     </div>
   );
 }
