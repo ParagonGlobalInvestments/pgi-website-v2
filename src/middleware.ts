@@ -85,6 +85,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url, 301);
     }
 
+    // Legacy path redirect: /home → / (prevents 404 from cached/stale links)
+    if (pathname === '/home') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url, 301);
+    }
+
     // All other paths → rewrite to /portal/* (transparent to user)
     const url = request.nextUrl.clone();
     url.pathname = `/portal${pathname}`;
