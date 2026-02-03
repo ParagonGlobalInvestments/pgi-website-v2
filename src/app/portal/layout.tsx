@@ -64,7 +64,7 @@ export default async function PortalLayout({
 
   // If no authenticated user, redirect to login with redirectTo param
   if (!user) {
-    redirect('/login?redirectTo=/portal/dashboard');
+    redirect('/login?redirectTo=/portal');
   }
 
   // User is authenticated - render portal layout

@@ -572,8 +572,7 @@ const Header = () => {
                   href="/portal"
                   className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
                 >
-                  <span className="block lg:hidden">Portal</span>
-                  <span className="hidden lg:block">Dashboard</span>
+                  Portal
                 </Link>
                 <button
                   onClick={async () => {
@@ -815,7 +814,7 @@ const Header = () => {
                       href="/portal"
                       className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
                     >
-                      Dashboard
+                      Portal
                     </Link>
                     <button
                       onClick={async () => {

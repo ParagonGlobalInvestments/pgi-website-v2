@@ -1,6 +1,5 @@
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
-import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
-import { createDatabase } from '@/lib/supabase/database';
+import { checkMembership } from '@/lib/auth/checkMembership';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { portalEnabled } from '@/lib/runtime';
@@ -22,53 +21,12 @@ function getRedirectOrigin(request: NextRequest): string {
   return new URL(request.url).origin;
 }
 
-/**
- * Check if user is a PGI member:
- * 1. ADMIN_EMAILS allowlist
- * 2. users table by supabase_id
- * 3. users table by email OR alternate_emails → link supabase_id
- */
-async function isPGIMember(
-  userEmail: string | undefined,
-  userId: string
-): Promise<boolean> {
-  if (!userEmail) return false;
-
-  const normalized = userEmail.trim().toLowerCase();
-  const isAdmin = (() => {
-    const adminEmails = process.env.ADMIN_EMAILS;
-    if (!adminEmails) return false;
-    const allowlist = adminEmails.split(',').map(e => e.trim().toLowerCase());
-    return allowlist.includes(normalized);
-  })();
-
-  // Use admin client (bypasses RLS) for membership checks
-  const adminClient = requireSupabaseAdminClient();
-  const db = createDatabase(adminClient);
-
-  // 1. Check by supabase_id (already linked)
-  const bySupabaseId = await db.getUserBySupabaseId(userId);
-  if (bySupabaseId) return true;
-
-  // 2. Check by email or alternate_emails, and link supabase_id
-  const byEmail = await db.getUserByAnyEmail(normalized);
-  if (byEmail) {
-    await db.linkSupabaseId(byEmail.dbId, userId);
-    return true;
-  }
-
-  // 3. Admin allowlist (user not in users table but is an admin)
-  if (isAdmin) return true;
-
-  return false;
-}
-
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const origin = getRedirectOrigin(request);
 
-  const defaultNext = portalEnabled ? '/portal/dashboard' : '/';
+  const defaultNext = portalEnabled ? '/portal' : '/';
   let next = requestUrl.searchParams.get('next') || defaultNext;
 
   if (!next.startsWith('/')) {
@@ -96,7 +54,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=no_user', origin));
     }
 
-    const isMember = await isPGIMember(user.email, user.id);
+    const { isMember } = await checkMembership(user.email, user.id);
 
     if (!isMember) {
       await supabase.auth.signOut();
@@ -106,9 +64,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Redirect to portal (handle subdomain if configured)
+    // Only use portal URL redirect in production, not on localhost
     const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
     let redirectOrigin = origin;
-    if (portalUrl && next.startsWith('/portal/')) {
+    if (portalUrl && next.startsWith('/portal/') && !isLocalhost) {
       redirectOrigin = portalUrl;
       next = next.replace(/^\/portal/, '') || '/';
     }

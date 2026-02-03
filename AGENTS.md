@@ -25,50 +25,53 @@ Single source of truth for AI coding agents working in the PGI Website codebase.
 
 ```bash
 npm run dev
-# Runs: next dev --turbo --experimental-https
+# Runs: next dev (plain HTTP on localhost:3000)
 ```
 
-**Important:** The `--turbo` flag is correct for **Next.js 14.x**. Next.js 15+ renamed it to `--turbopack`. If you see `error: unknown option '--turbo'` after a major Next.js upgrade, change the dev script in `package.json` to `--turbopack`.
-
-The `--experimental-https` flag generates a locally-trusted TLS certificate (via built-in mkcert). Required for portal subdomain testing since `portal.127.0.0.1.sslip.io` is not `localhost`.
-
-Dev server runs at `https://localhost:3000`. Portal subdomain at `https://portal.127.0.0.1.sslip.io:3000`.
+Dev server runs at `http://localhost:3000`. Portal is accessed via `/portal` path locally (subdomain routing only active in production).
 
 ---
 
 ## Project Structure
 
 ```
+.codex/                          # Cursor IDE context configuration
+scripts/                         # Development utilities (seed-cms.ts, import-members.ts)
+supabase/
+├── migrations/                  # Numbered SQL migrations (001_, 002_, etc.)
 src/
 ├── app/                         # Next.js App Router pages
-│   ├── (main)/                  # Route group: public marketing pages (home, privacy)
-│   ├── about/                   # /about
-│   ├── apply/                   # /apply (recruitment — national + UChicago)
+│   ├── (main)/                  # Route group: public marketing pages (home, privacy, terms)
+│   ├── (site)/                  # Route group: public site pages with shared StandaloneLayout
+│   │   ├── about/               # /about
+│   │   ├── apply/               # /apply (recruitment — national + UChicago)
+│   │   ├── contact/             # /contact
+│   │   ├── education/           # /education
+│   │   ├── investment-strategy/ # /investment-strategy
+│   │   ├── members/             # /members, /quant-team, /value-team
+│   │   ├── national-committee/  # /national-committee, /officers, /founders
+│   │   ├── placements/          # /placements (company logos)
+│   │   ├── resources/           # /resources (public, non-portal)
+│   │   ├── sponsors/            # /sponsors
+│   │   └── who-we-are/          # /who-we-are
+│   ├── api/
+│   │   ├── cms/                 # CMS API: people, sponsors, timeline, recruitment, statistics, upload
+│   │   └── users/               # REST API: /api/users, /api/users/me
 │   ├── auth/callback/           # OAuth callback route (Supabase)
-│   ├── contact/                 # /contact
-│   ├── api/users/               # REST API: /api/users, /api/users/me
-│   ├── education/               # /education
-│   ├── investment-strategy/     # /investment-strategy
-│   ├── members/                 # /members, /members/quant-team, /members/value-team
-│   ├── national-committee/      # /national-committee, /officers, /founders
-│   ├── placements/              # /placements (company logos)
-│   ├── portal/                  # Authenticated portal (directory, resources, settings)
-│   │   ├── dashboard/           # Dashboard pages
+│   ├── portal/                  # Authenticated portal
+│   │   ├── (main)/              # Portal pages with shared sidebar layout
 │   │   │   ├── directory/       # Member directory
 │   │   │   ├── resources/       # Resource viewer (PDFs, spreadsheets)
+│   │   │   ├── content/         # CMS admin (admin only)
 │   │   │   └── settings/        # Profile settings
 │   │   └── logout/              # Logout page
-│   ├── resources/               # /resources (public, non-portal)
 │   ├── login/                   # Login page (Google OAuth)
-│   ├── sponsors/                # /sponsors
-│   ├── who-we-are/              # /who-we-are
-│   ├── terms/                   # /terms
-│   ├── privacy/                 # /privacy
 │   └── layout.tsx               # Root layout
 ├── components/
 │   ├── analytics/               # PostHog trackers (company, form, PDF, university)
+│   ├── cms/                     # CMS admin components (forms, editors)
 │   ├── layout/                  # Header, Footer, StandaloneLayout
-│   ├── portal/                  # MobileDocumentViewer (PDF/Excel preview)
+│   ├── portal/                  # Portal UI components (sidebar, mobile nav, loading)
 │   ├── providers/               # PostHogProvider
 │   ├── reactbits/               # Third-party animation components (CountUp, ShinyText, etc.)
 │   └── ui/                      # shadcn/ui + custom (detail-panel, button, dialog, etc.)
@@ -76,10 +79,10 @@ src/
 │   ├── useIsMobile.ts           # Mobile viewport detection (768px)
 │   └── useSupabaseUser.ts       # Fetches user via /api/users/me
 ├── lib/
-│   ├── auth/                    # Auth type helpers (UserRole, UserTrack)
+│   ├── auth/                    # Auth utilities (checkMembership, requireAdmin)
+│   ├── cms/                     # CMS data fetching utilities
 │   ├── constants/               # Static data (companies, universities, resources)
 │   ├── supabase/                # Supabase clients (browser, server, admin, database)
-│   ├── featureFlags.ts          # enableAdminFeatures, isDevelopment
 │   ├── posthog.ts               # PostHog initialization
 │   └── runtime.ts               # Portal availability (portalEnabled)
 ├── types/
@@ -100,23 +103,36 @@ Authentication uses **Supabase Auth** exclusively. There is no NextAuth in the c
 1. User clicks "Log In" → `/login` page
 2. Supabase Auth initiates Google OAuth
 3. Callback → `/auth/callback/route.ts`
-4. Callback checks PGI membership in this order:
+4. Callback uses `checkMembership()` utility (`src/lib/auth/checkMembership.ts`) which checks in order:
    - `ADMIN_EMAILS` env var allowlist
    - `users` table by `supabase_id` (already linked)
    - `users` table by `email` or `alternate_emails` → auto-links `supabase_id`
 5. Non-members: signed out, redirected to `/resources?notMember=true`
-6. Members: redirected to `/portal/dashboard` (or subdomain if configured)
+6. Members: redirected to `/portal` (or subdomain if configured)
+
+### checkMembership Utility
+
+The `checkMembership()` function centralizes membership verification logic:
+
+```typescript
+import { checkMembership } from '@/lib/auth/checkMembership';
+
+const result = await checkMembership(email, supabaseId);
+// Returns: { isMember, user, dbId, isAdminAllowlist }
+```
+
+Used by: auth callback, `/api/users/me`, and `requireAdmin()` middleware.
 
 ### Auth Enforcement
 
 - **Edge middleware** (`src/middleware.ts`): Hard-blocks portal routes (404) when `NEXT_PUBLIC_PORTAL_ENABLED !== 'true'`. No Supabase imports — runs on Edge runtime.
-- **Portal layout** (`src/app/portal/layout.tsx`): Server-side auth check. Redirects unauthenticated users to `/login?redirectTo=/portal/dashboard`. This is the secure choke point.
+- **Portal layout** (`src/app/portal/layout.tsx`): Server-side auth check. Redirects unauthenticated users to `/login?redirectTo=/portal`. This is the secure choke point.
 - **API routes**: Each route calls `requireSupabaseServerClient()` + `supabase.auth.getUser()` independently.
 
 ### Subdomain Routing
 
 Middleware detects `portal.*` hostname prefix:
-- Non-portal paths (e.g., `/dashboard`) → rewritten to `/portal/dashboard` (transparent to user)
+- Non-portal paths on subdomain → rewritten to `/portal/*` (transparent to user)
 - `/portal/*` paths on subdomain → 301 redirect to strip prefix (clean URLs)
 - Auth/API routes (`/login`, `/auth/*`, `/api/*`, `/resources`) pass through unmodified
 
@@ -159,6 +175,8 @@ CREATE TABLE users (
 - `SELECT`: Any authenticated user can view all members (directory)
 - `UPDATE`: Users can update their own row only (`supabase_id` match)
 - Service role key bypasses RLS (used in API routes with admin client)
+
+**Performance Note:** RLS policies should use `(select auth.uid())` instead of `auth.uid()` directly. The subquery pattern is ~10x faster because PostgreSQL can optimize it as a constant. See migration `001_security_performance_fixes.sql`.
 
 ### Database Access Pattern
 
@@ -287,7 +305,7 @@ export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 ```
 
 Three enforcement points:
-1. **Middleware**: Returns 404 for `/portal/*`, `/dashboard/*`, `/login`, `/__tests__/*` when disabled
+1. **Middleware**: Returns 404 for `/portal/*`, `/login`, `/__tests__/*` when disabled
 2. **Server layouts**: `assertPortalEnabledOrNotFound()` for page-level enforcement
 3. **API routes**: `requirePortalEnabledOr404()` returns 404 JSON response when disabled
 
@@ -323,9 +341,9 @@ The `include` array contains `.next/types/**/*.ts`, which means App Router expor
 
 ## Key Patterns to Follow
 
-### Adding a New Portal Dashboard Page
+### Adding a New Portal Home Page
 
-1. Create `src/app/portal/dashboard/[feature]/page.tsx`
+1. Create `src/app/portal/[feature]/page.tsx`
 2. Mark with `'use client'` if interactive
 3. Use `useSupabaseUser()` hook for user data
 4. Use components from `@/components/ui`
@@ -406,12 +424,106 @@ Mobile users get an in-app preview via `MobileDocumentViewer` for PDFs and sprea
 
 ---
 
+## CMS (Content Management System)
+
+The CMS enables admins to manage dynamic content via the portal at `/portal/content`.
+
+### CMS Tables
+
+| Table | Purpose |
+|-------|---------|
+| `cms_people` | Team members displayed on public pages (officers, founders, teams) |
+| `cms_sponsors` | Sponsor logos and links for the sponsors page |
+| `cms_timeline` | Recruitment timeline events |
+| `cms_recruitment` | Key-value pairs for recruitment page content |
+| `cms_statistics` | Key-value pairs for homepage statistics |
+
+### CMS API Routes
+
+All CMS routes require admin authentication (`requireAdmin()` middleware).
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/cms/people` | GET, POST | List/create people |
+| `/api/cms/people/[id]` | PATCH, DELETE | Update/delete person |
+| `/api/cms/people/reorder` | PATCH | Reorder display order |
+| `/api/cms/sponsors` | GET, POST | List/create sponsors |
+| `/api/cms/sponsors/[id]` | PATCH, DELETE | Update/delete sponsor |
+| `/api/cms/timeline` | GET, POST | List/create timeline items |
+| `/api/cms/timeline/[id]` | PATCH, DELETE | Update/delete timeline item |
+| `/api/cms/recruitment` | GET, PUT | Get/update recruitment content |
+| `/api/cms/statistics` | GET, PUT | Get/update homepage statistics |
+| `/api/cms/upload` | POST | Upload images to Supabase Storage |
+
+### CMS Patterns
+
+**Upsert Pattern:** Recruitment and statistics routes use Supabase's `upsert()` with `onConflict: 'key'` for atomic updates. Old keys are selectively deleted rather than delete-all + insert.
+
+**Image Uploads:** Sponsor logos can be uploaded to Supabase Storage (`cms-assets` bucket) via `/api/cms/upload`. The `SponsorForm` component supports drag-and-drop with preview.
+
+**Backward Compatibility:** Image URLs support both legacy `/sponsors/logo.png` paths and full Supabase Storage URLs via the `getImageSrc()` helper.
+
+---
+
 ## Company & University Data
 
 Static constants in `src/lib/constants/`:
 - `companies.ts` — Investment Banking, Quant/Tech, Asset Mgmt/Consulting, Sponsors, Partners
 - `universities.ts` — Chapter data for 8 universities
 - `resources.ts` — Education, Recruitment, and Pitch resources
+
+---
+
+## Portal Components
+
+The portal sidebar and navigation are extracted into reusable components in `src/components/portal/`:
+
+| Component | Purpose |
+|-----------|---------|
+| `PortalSidebar` | Desktop collapsible sidebar with navigation and user info |
+| `PortalMobileNav` | Mobile navigation bar + full-screen overlay menu |
+| `PortalLoadingSkeleton` | Loading skeleton matching sidebar + content layout |
+| `constants.ts` | NAV_ITEMS, SCHOOL_LABELS, ROLE_LABELS, SIDEBAR_VARIANTS |
+| `types.ts` | PortalNavItem, PortalUserInfo, PortalSidebarProps, PortalMobileNavProps |
+
+The main portal layout (`src/app/portal/(main)/layout.tsx`) manages state and composes these components.
+
+---
+
+## Analytics / Observability System
+
+A custom analytics system for tracking Core Web Vitals, page views, and errors. Admin-only page at `/portal/observability` (labeled "Analytics" in the portal sidebar).
+
+### Components
+
+| File | Purpose |
+|------|---------|
+| `src/components/observability/VitalsCollector.tsx` | Client-side collector using web-vitals package |
+| `src/app/api/observability/vitals/route.ts` | Core Web Vitals collection endpoint |
+| `src/app/api/observability/pageviews/route.ts` | Page view tracking endpoint |
+| `src/app/api/observability/errors/route.ts` | Client-side error collection endpoint |
+| `src/app/api/observability/stats/route.ts` | Admin analytics data API |
+| `src/app/portal/(main)/observability/page.tsx` | Admin analytics UI |
+
+### Database Tables
+
+| Table | Purpose | Retention |
+|-------|---------|-----------|
+| `obs_vitals` | Raw Core Web Vitals (LCP, FCP, CLS, TTFB, INP) | 30 days |
+| `obs_pageviews` | Page views and custom events | 30 days |
+| `obs_errors` | Client-side JavaScript errors | 7 days |
+| `obs_vitals_hourly` | Aggregated hourly metrics | 90 days |
+| `obs_pageviews_daily` | Daily traffic aggregates | 1 year |
+
+### Design Principles
+
+- **Zero cost**: Uses Supabase free tier (500MB limit)
+- **Graceful degradation**: Never breaks the app if tables missing
+- **Non-blocking**: Collection endpoints always return success
+- **Rate limited**: Prevents abuse (100 vitals, 50 pageviews, 20 errors per minute per IP)
+- **Privacy-first**: No IP addresses stored, anonymous session IDs
+
+Migration file: `supabase/migrations/002_observability_tables.sql`
 
 ---
 

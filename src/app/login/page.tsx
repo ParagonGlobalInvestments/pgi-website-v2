@@ -50,8 +50,8 @@ function LoginPageContent() {
             // On portal subdomain, use clean paths (no /portal prefix)
             const onSubdomain = isPortalSubdomain();
             const defaultDest = onSubdomain
-              ? '/dashboard'
-              : '/portal/dashboard';
+              ? '/home'
+              : '/portal';
             const redirectTo = searchParams?.get('redirectTo') || defaultDest;
 
             if (onSubdomain) {
@@ -93,7 +93,7 @@ function LoginPageContent() {
     // Get the intended final destination after auth
     // Always use /portal/ prefix for the auth callback route (server-side),
     // which handles stripping it when redirecting to the portal subdomain.
-    const defaultDest = '/portal/dashboard';
+    const defaultDest = '/portal';
     const next = searchParams?.get('redirectTo') || defaultDest;
 
     // OAuth callback must stay on the same origin where signInWithOAuth is called,
