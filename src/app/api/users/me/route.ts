@@ -34,11 +34,24 @@ export async function GET() {
       );
     }
 
-    // Admin allowlist users don't have a user record
+    // Admin allowlist users get a synthetic user object (no database record)
     if (isAdminAllowlist && !user) {
       return NextResponse.json(
-        { error: 'Admin allowlist user — no profile in database' },
-        { status: 404 }
+        {
+          success: true,
+          user: {
+            id: 'admin-allowlist',
+            email: authUser.email,
+            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
+            role: 'admin',
+            school: null,
+          },
+        },
+        {
+          headers: {
+            'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+          },
+        }
       );
     }
 
