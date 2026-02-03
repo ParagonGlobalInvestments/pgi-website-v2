@@ -28,18 +28,31 @@ export async function requireAdmin(): Promise<
     }
 
     // Use consolidated membership check
-    const { user: portalUser, isMember } = await checkMembership(
+    const { user: portalUser, isMember, isAdminAllowlist } = await checkMembership(
       authUser.email,
       authUser.id
     );
 
-    if (!isMember || !portalUser) {
+    if (!isMember) {
       return {
         error: NextResponse.json({ error: 'User not found' }, { status: 404 }),
       };
     }
 
-    if (portalUser.role !== 'admin') {
+    // Admin allowlist users get synthetic admin access (no database record)
+    if (isAdminAllowlist && !portalUser) {
+      return {
+        user: authUser,
+        portalUser: {
+          id: 'admin-allowlist',
+          email: authUser.email,
+          name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
+          role: 'admin',
+        },
+      };
+    }
+
+    if (!portalUser || portalUser.role !== 'admin') {
       return {
         error: NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 }),
       };
