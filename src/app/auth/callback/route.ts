@@ -29,8 +29,13 @@ export async function GET(request: NextRequest) {
   const defaultNext = portalEnabled ? '/portal' : '/';
   let next = requestUrl.searchParams.get('next') || defaultNext;
 
+  // Ensure path starts with single slash and prevent open redirect via //evil.com
   if (!next.startsWith('/')) {
     next = `/${next}`;
+  }
+  // Block protocol-relative URLs (//example.com) which browsers treat as same-protocol redirects
+  if (next.startsWith('//')) {
+    next = defaultNext;
   }
 
   if (code) {
