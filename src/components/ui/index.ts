@@ -4,17 +4,10 @@ export * from './button';
 export * from './card';
 export * from './input';
 export * from './select';
-export * from './radio-group';
 export * from './tabs';
 export * from './textarea';
-export * from './switch';
-export * from './avatar';
-export * from './popover';
-export * from './command';
 export * from './dialog';
-export * from './combobox';
 export * from './table';
-export * from './checkbox';
 export * from './label';
 
 export { SmoothTransition } from './SmoothTransition';
