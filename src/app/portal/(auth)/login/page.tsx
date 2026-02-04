@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePortalShell } from '@/contexts/PortalShellContext';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { NavyExpansionOverlay } from '@/components/ui/NavyExpansionOverlay';
+import { SITE_URL } from '@/components/portal/constants';
 
 // Exit transition state for Back to Website
 const useExitTransition = () => {
@@ -16,9 +17,9 @@ const useExitTransition = () => {
     e.preventDefault();
     setIsExiting(true);
 
-    // Navy expands (400ms), then navigate with full page reload
+    // Navy expands (400ms), then navigate to main domain (not portal subdomain)
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = SITE_URL;
     }, 500);
   }, []);
 
