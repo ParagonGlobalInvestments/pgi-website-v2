@@ -43,13 +43,21 @@ export async function requireAdmin(): Promise<
 
     // Admin allowlist users get synthetic admin access (no database record)
     if (isAdminAllowlist && !portalUser) {
+      const now = new Date().toISOString();
       return {
         user: authUser,
         portalUser: {
           id: 'admin-allowlist',
-          email: authUser.email,
+          email: authUser.email ?? '',
           name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
-          role: 'admin',
+          role: 'admin' as const,
+          program: null,
+          school: '',
+          graduationYear: null,
+          linkedinUrl: null,
+          githubUrl: null,
+          createdAt: now,
+          updatedAt: now,
         },
       };
     }
