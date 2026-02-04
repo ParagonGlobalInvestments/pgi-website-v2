@@ -13,15 +13,17 @@ export default function LogoutPage() {
     const performLogout = async () => {
       try {
         await supabase.auth.signOut();
-        router.push('/');
+        // Redirect to login page (middleware rewrites to /portal/login on subdomain)
+        router.push('/login');
       } catch (error) {
         console.error('Error logging out:', error);
-        router.push('/');
+        router.push('/login');
       }
     };
 
+    // Fallback timeout in case signOut hangs
     const timer = setTimeout(() => {
-      router.push('/');
+      router.push('/login');
     }, 3000);
 
     performLogout();
