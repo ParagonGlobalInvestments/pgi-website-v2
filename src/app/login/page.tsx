@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/browser';
 import { motion } from 'framer-motion';
 
@@ -26,7 +27,7 @@ function isPortalSubdomain() {
 function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [checkingMembership, setCheckingMembership] = useState(false);
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -149,7 +150,7 @@ function LoginPageContent() {
     >
       <h1 className="text-2xl font-semibold text-gray-900">Log in</h1>
       <p className="text-gray-500 mt-1">
-        Access the portal with your school's Gmail.
+        Access the portal with your school&apos;s Gmail.
       </p>
 
       {searchParams?.get('error') === 'auth_failed' && (

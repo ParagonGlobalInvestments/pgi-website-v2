@@ -90,8 +90,8 @@ export default function PersonForm({
       }
       toast.success(isEditing ? 'Updated' : 'Created');
       onSaved();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
     }

@@ -227,8 +227,8 @@ export default function DirectoryPage() {
         }
         setUsers(data.users);
         setError('');
-      } catch (err: any) {
-        setError(err.message || 'Failed to load directory');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load directory');
       } finally {
         setLoading(false);
       }
