@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
+import type { User as AuthUser } from '@supabase/supabase-js';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { checkMembership } from '@/lib/auth/checkMembership';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import type { User } from '@/types';
 
 /**
  * Require admin role for CMS API routes.
  * Returns { user, portalUser } on success, or a NextResponse error.
  */
 export async function requireAdmin(): Promise<
-  | { user: any; portalUser: any; error?: undefined }
+  | { user: AuthUser; portalUser: User; error?: undefined }
   | { error: NextResponse }
 > {
   const portalCheck = requirePortalEnabledOr404();

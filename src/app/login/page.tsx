@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/browser';
 import { motion } from 'framer-motion';
 
@@ -26,7 +27,7 @@ function isPortalSubdomain() {
 function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [checkingMembership, setCheckingMembership] = useState(false);
   const searchParams = useSearchParams();
   const supabase = createClient();

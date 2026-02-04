@@ -91,8 +91,8 @@ export default function SettingsPage() {
       setUser(data.user);
       setMessage({ type: 'success', text: 'Profile updated successfully.' });
       setTimeout(() => setMessage(null), 4000);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to save profile.' });
+    } catch (err: unknown) {
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Failed to save profile.' });
     } finally {
       setSaving(false);
     }
