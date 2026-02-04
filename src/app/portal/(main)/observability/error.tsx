@@ -2,7 +2,7 @@
 
 import ErrorFallback from '@/components/portal/ErrorFallback';
 
-export default function DirectoryError({
+export default function ObservabilityError({
   error,
   reset,
 }: {
@@ -13,9 +13,9 @@ export default function DirectoryError({
     <ErrorFallback
       error={error}
       reset={reset}
-      title="Failed to load directory"
-      description="Could not load the member directory. Please try again."
-      logLabel="Directory error"
+      title="Failed to load observability"
+      description="Could not load the observability dashboard. Please try again."
+      logLabel="Observability error"
     />
   );
 }
