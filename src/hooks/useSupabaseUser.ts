@@ -27,8 +27,8 @@ export function useSupabaseUser(): UseSupabaseUserReturn {
         const data = await res.json();
         setUser(data.user || null);
         setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch user');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch user');
         setUser(null);
       } finally {
         setIsLoading(false);

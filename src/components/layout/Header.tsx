@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 import { trackEvent } from '@/lib/posthog';
 import { createClient } from '@/lib/supabase/browser';
 import { portalEnabled } from '@/lib/runtime';
@@ -158,7 +159,7 @@ const Header = () => {
     useState(false);
   const [expandedMembers, setExpandedMembers] = useState(false);
   // Authentication state
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isPGIMember, setIsPGIMember] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 

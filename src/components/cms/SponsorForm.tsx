@@ -105,8 +105,8 @@ export default function SponsorForm({
       setImagePath(url);
       setPreviewUrl(url);
       toast.success('Image uploaded');
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
       // Revert preview on error
       setPreviewUrl(imagePath || null);
     } finally {
@@ -179,8 +179,8 @@ export default function SponsorForm({
       }
       toast.success(isEditing ? 'Updated' : 'Created');
       onSaved();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
     }

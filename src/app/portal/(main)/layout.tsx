@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { usePathname } from 'next/navigation';
+import type { User as AuthUser } from '@supabase/supabase-js';
 import type { User } from '@/types';
 
 import { PortalSidebar } from '@/components/portal/PortalSidebar';
@@ -23,7 +24,7 @@ export default function PortalMainLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [authUser, setAuthUser] = useState<any>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [portalUser, setPortalUser] = useState<User | null>(null);
 
   useEffect(() => setIsClient(true), []);
