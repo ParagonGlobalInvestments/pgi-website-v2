@@ -42,7 +42,10 @@ export async function GET() {
           user: {
             id: 'admin-allowlist',
             email: authUser.email,
-            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
+            name:
+              authUser.user_metadata?.full_name ||
+              authUser.email?.split('@')[0] ||
+              'Admin',
             role: 'admin',
             school: null,
           },
@@ -108,13 +111,16 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    // Only allow name, linkedinUrl, githubUrl
-    const updates: Record<string, string> = {};
+    // Only allow name, linkedinUrl, githubUrl, bio, websiteUrl
+    const updates: Record<string, string | null> = {};
 
     if (body.name !== undefined) {
       const name = String(body.name).trim();
       if (!name) {
-        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 });
+        return NextResponse.json(
+          { error: 'Name cannot be empty' },
+          { status: 400 }
+        );
       }
       updates.name = name;
     }
@@ -123,7 +129,10 @@ export async function PATCH(req: NextRequest) {
       const url = body.linkedinUrl ? String(body.linkedinUrl).trim() : '';
       if (url && !LINKEDIN_RE.test(url)) {
         return NextResponse.json(
-          { error: 'LinkedIn URL must start with https://linkedin.com/in/ or https://www.linkedin.com/in/' },
+          {
+            error:
+              'LinkedIn URL must start with https://linkedin.com/in/ or https://www.linkedin.com/in/',
+          },
           { status: 400 }
         );
       }
@@ -141,15 +150,44 @@ export async function PATCH(req: NextRequest) {
       updates.github_url = url;
     }
 
+    if (body.bio !== undefined) {
+      const bio = body.bio ? String(body.bio).trim() : null;
+      if (bio && bio.length > 200) {
+        return NextResponse.json(
+          { error: 'Bio must be 200 characters or less' },
+          { status: 400 }
+        );
+      }
+      updates.bio = bio;
+    }
+
+    if (body.websiteUrl !== undefined) {
+      const url = body.websiteUrl ? String(body.websiteUrl).trim() : null;
+      if (url && !/^https?:\/\/.+/.test(url)) {
+        return NextResponse.json(
+          {
+            error:
+              'Website URL must be a valid URL starting with http:// or https://',
+          },
+          { status: 400 }
+        );
+      }
+      updates.website_url = url;
+    }
+
     if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No valid fields to update' },
+        { status: 400 }
+      );
     }
 
     const updated = await db.updateUserProfile(user.id, updates);
 
     return NextResponse.json({ success: true, user: updated });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Failed to update user';
+    const msg =
+      error instanceof Error ? error.message : 'Failed to update user';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
