@@ -404,8 +404,9 @@ export function UnifiedPortalShell({
     setIsExitTransitioning(true);
 
     // Navy expands (400ms), then navigate with full page reload
+    // Use SITE_URL to escape portal subdomain (portal.* rewrites / to /portal/)
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = SITE_URL;
     }, 500);
   }, []);
 
