@@ -75,14 +75,29 @@ export async function PUT(req: NextRequest) {
     }
 
     // Delete keys that were removed (not in incoming items)
+    // Fetch existing keys and delete those not in incoming set
     if (incomingKeys.length > 0) {
-      const { error: deleteError } = await supabase
+      const { data: existing, error: fetchExistingError } = await supabase
         .from('cms_statistics')
-        .delete()
-        .not('key', 'in', `(${incomingKeys.map(k => `"${k}"`).join(',')})`);
+        .select('key');
 
-      if (deleteError) {
-        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      if (fetchExistingError) {
+        return NextResponse.json({ error: fetchExistingError.message }, { status: 500 });
+      }
+
+      const keysToDelete = (existing || [])
+        .map(row => row.key)
+        .filter(key => !incomingKeys.includes(key));
+
+      if (keysToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('cms_statistics')
+          .delete()
+          .in('key', keysToDelete);
+
+        if (deleteError) {
+          return NextResponse.json({ error: deleteError.message }, { status: 500 });
+        }
       }
     } else {
       // No incoming items = delete all
