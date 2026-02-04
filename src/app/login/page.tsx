@@ -50,9 +50,7 @@ function LoginPageContent() {
             // User exists in PGI database - redirect to portal
             // On portal subdomain, use clean paths (no /portal prefix)
             const onSubdomain = isPortalSubdomain();
-            const defaultDest = onSubdomain
-              ? '/'
-              : '/portal';
+            const defaultDest = onSubdomain ? '/' : '/portal';
             const redirectTo = searchParams?.get('redirectTo') || defaultDest;
 
             if (onSubdomain) {
@@ -123,14 +121,15 @@ function LoginPageContent() {
   if (user && checkingMembership) {
     return (
       <motion.div
-        className="max-w-lg"
+        className="w-full text-center"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <div className="flex items-center gap-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#4A6BB1]"></div>
-          <p className="text-gray-500 text-sm">Checking membership...</p>
+        <h1 className="text-2xl font-semibold text-gray-900">Welcome back</h1>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#4A6BB1]"></div>
+          <p className="text-gray-500 text-sm">Verifying your membership...</p>
         </div>
       </motion.div>
     );
@@ -143,32 +142,36 @@ function LoginPageContent() {
 
   return (
     <motion.div
-      className="max-w-lg"
+      className="w-full"
       initial="hidden"
       animate="visible"
       variants={fadeIn}
     >
-      <h1 className="text-2xl font-semibold text-gray-900">Log in</h1>
-      <p className="text-gray-500 mt-1">
-        Access the portal with your school&apos;s Gmail.
-      </p>
+      <h1 className="text-2xl font-semibold text-gray-900">
+        Welcome to PGI Portal
+      </h1>
+      <p className="text-gray-500 mt-2">Sign in to your account to continue</p>
 
       {searchParams?.get('error') === 'auth_failed' && (
-        <p className="mt-3 text-sm text-red-600">
-          Authentication failed. Please try again.
-        </p>
+        <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg">
+          <p className="text-sm text-red-600">
+            Authentication failed. Please try again.
+          </p>
+        </div>
       )}
       {searchParams?.get('error') === 'no_user' && (
-        <p className="mt-3 text-sm text-red-600">
-          Could not retrieve your account. Please try again.
-        </p>
+        <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg">
+          <p className="text-sm text-red-600">
+            Could not retrieve your account. Please try again.
+          </p>
+        </div>
       )}
 
-      <div className="mt-8 space-y-5">
+      <div className="mt-8 space-y-4">
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="flex items-center w-full sm:w-auto px-6 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-full px-6 py-3.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <svg className="w-5 h-5 mr-3 flex-shrink-0" viewBox="0 0 24 24">
             <path
@@ -188,10 +191,18 @@ function LoginPageContent() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          {loading ? 'Logging in...' : 'Continue with Google'}
+          {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-100 rounded-lg">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
+        <p className="text-center text-sm text-gray-500 pt-2">
+          Use your school&apos;s Gmail account
+        </p>
       </div>
     </motion.div>
   );
