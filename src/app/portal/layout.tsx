@@ -54,10 +54,14 @@ export default async function PortalLayout({
   // Assert portal is enabled (calls notFound() if disabled)
   assertPortalEnabledOrNotFound();
 
-  // Get pathname from headers (set by middleware) to detect auth routes
+  // Get pathname and search params from headers (set by middleware) to detect auth routes
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '';
+  const searchParams = headersList.get('x-search-params') || '';
   const isOnAuthRoute = isAuthRoute(pathname);
+
+  // Check if this is a post-authentication redirect (needs to play animation)
+  const isPostAuthRedirect = searchParams.includes('authenticated=true');
 
   // Server-side authentication check using Node runtime Supabase client
   const supabase = getSupabaseServerClient();
@@ -84,10 +88,21 @@ export default async function PortalLayout({
     redirect('/portal/login?redirectTo=/portal');
   }
 
+  // If authenticated user is on login route (but NOT returning from OAuth), redirect to dashboard
+  // This prevents showing login form with sidebar for already-authenticated users
+  // Exception: allow ?authenticated=true through so the animation can play
+  if (user && isOnAuthRoute && !isPostAuthRedirect) {
+    redirect('/portal');
+  }
+
   // Render portal layout - the client wrapper handles shell mode based on auth state
+  // Pass isPostAuthRedirect so client can show login animation before dashboard
   return (
     <div className="antialiased bg-white min-h-screen">
-      <PortalLayoutClient isAuthenticated={!!user}>
+      <PortalLayoutClient
+        isAuthenticated={!!user}
+        isPostAuthRedirect={isPostAuthRedirect}
+      >
         {children}
       </PortalLayoutClient>
     </div>

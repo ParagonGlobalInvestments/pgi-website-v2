@@ -65,8 +65,9 @@ export async function GET(request: NextRequest) {
 
     if (!isMember) {
       await supabase.auth.signOut();
+      // Redirect back to portal login with notMember flag for clean rejection UX
       return NextResponse.redirect(
-        new URL('/resources?notMember=true', origin)
+        new URL('/portal/login?notMember=true', origin)
       );
     }
 

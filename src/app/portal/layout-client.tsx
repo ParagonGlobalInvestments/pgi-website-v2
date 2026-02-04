@@ -6,6 +6,7 @@ import { UnifiedPortalShell } from '@/components/layout/UnifiedPortalShell';
 interface PortalLayoutClientProps {
   children: React.ReactNode;
   isAuthenticated: boolean;
+  isPostAuthRedirect?: boolean;
 }
 
 /**
@@ -15,15 +16,21 @@ interface PortalLayoutClientProps {
  *
  * The shell mode is determined by:
  * - isAuthenticated prop from server (initial state)
- * - Current pathname (login route vs dashboard)
+ * - isPostAuthRedirect - if true, start in login mode for animation even if authenticated
  * - Transition state during animations
  */
 export default function PortalLayoutClient({
   children,
   isAuthenticated,
+  isPostAuthRedirect = false,
 }: PortalLayoutClientProps) {
+  // For post-auth redirects, start in login mode so animation can play
+  // The login page will trigger the transition to dashboard
+  const initialMode =
+    isAuthenticated && !isPostAuthRedirect ? 'dashboard' : 'login';
+
   return (
-    <PortalShellProvider initialMode={isAuthenticated ? 'dashboard' : 'login'}>
+    <PortalShellProvider initialMode={initialMode}>
       <UnifiedPortalShell>{children}</UnifiedPortalShell>
     </PortalShellProvider>
   );

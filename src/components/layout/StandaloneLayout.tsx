@@ -1,7 +1,6 @@
-import React from "react";
-import Header from "./Header";
-import Footer from "./Footer";
-import PageTransition from "@/components/ui/PageTransition";
+import React from 'react';
+import Header from './Header';
+import Footer from './Footer';
 
 export default function StandaloneLayout({
   children,
@@ -10,11 +9,9 @@ export default function StandaloneLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen bg-navy text-white">
-      <PageTransition>
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-      </PageTransition>
+      <Header />
+      <main className="flex-grow">{children}</main>
+      <Footer />
     </div>
   );
 }
