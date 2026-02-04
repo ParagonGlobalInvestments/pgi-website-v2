@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Montserrat } from 'next/font/google';
 import { PHProvider } from '@/components/providers/PostHogProvider';
 import { VitalsCollector } from '@/components/observability/VitalsCollector';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
-import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
@@ -16,7 +16,8 @@ const montserrat = Montserrat({
   display: 'swap',
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
+const appUrl =
+  process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -84,8 +85,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <head>
+        {process.env.NODE_ENV === 'development' && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
+        )}
         <meta name="theme-color" content="#00172B" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

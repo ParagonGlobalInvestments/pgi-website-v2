@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { assertPortalEnabledOrNotFound } from '@/lib/runtime';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -30,9 +31,20 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Check if the current path is an auth route that should bypass authentication.
+ * Auth routes are served within the portal layout but don't require a session.
+ */
+function isAuthRoute(pathname: string): boolean {
+  return pathname.includes('/portal/login') || pathname.includes('/login');
+}
+
+/**
  * Server component wrapper - enforces portal availability and authentication.
  * This is the secure choke point for all portal routes.
  * Runs on Node runtime (not Edge) so we can use Supabase server client.
+ *
+ * Auth routes (/portal/login) are exempted from the redirect to allow
+ * the unified portal shell to handle both login and dashboard views.
  */
 export default async function PortalLayout({
   children,
@@ -42,17 +54,22 @@ export default async function PortalLayout({
   // Assert portal is enabled (calls notFound() if disabled)
   assertPortalEnabledOrNotFound();
 
+  // Get pathname from headers (set by middleware) to detect auth routes
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isOnAuthRoute = isAuthRoute(pathname);
+
   // Server-side authentication check using Node runtime Supabase client
   const supabase = getSupabaseServerClient();
-  
+
   // If Supabase is not configured, allow through (will fail gracefully at runtime)
   // This prevents build-time crashes while preserving runtime behavior
   if (!supabase) {
-    // In production, this should not happen, but during build it's acceptable
-    // Protected routes will fail at runtime with proper error handling
     return (
       <div className="antialiased bg-white min-h-screen">
-        <PortalLayoutClient>{children}</PortalLayoutClient>
+        <PortalLayoutClient isAuthenticated={false}>
+          {children}
+        </PortalLayoutClient>
       </div>
     );
   }
@@ -62,15 +79,17 @@ export default async function PortalLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If no authenticated user, redirect to login with redirectTo param
-  if (!user) {
-    redirect('/login?redirectTo=/portal');
+  // If no authenticated user and not on auth route, redirect to portal login
+  if (!user && !isOnAuthRoute) {
+    redirect('/portal/login?redirectTo=/portal');
   }
 
-  // User is authenticated - render portal layout
+  // Render portal layout - the client wrapper handles shell mode based on auth state
   return (
     <div className="antialiased bg-white min-h-screen">
-      <PortalLayoutClient>{children}</PortalLayoutClient>
+      <PortalLayoutClient isAuthenticated={!!user}>
+        {children}
+      </PortalLayoutClient>
     </div>
   );
 }

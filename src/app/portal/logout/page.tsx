@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/browser';
 
 export default function LogoutPage() {
@@ -9,7 +10,6 @@ export default function LogoutPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Attempt to log out when the component mounts
     const performLogout = async () => {
       try {
         await supabase.auth.signOut();
@@ -20,7 +20,6 @@ export default function LogoutPage() {
       }
     };
 
-    // Auto-redirect to home page after 3 seconds regardless
     const timer = setTimeout(() => {
       router.push('/');
     }, 3000);
@@ -31,25 +30,14 @@ export default function LogoutPage() {
   }, [router, supabase]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-navy">
-      <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-gray-800">Logging Out</h1>
-        <p className="text-gray-600 mb-6">
-          Please wait while we log you out...
-        </p>
-
-        <div className="flex justify-center">
-          <button
-            onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
-            className="bg-primary hover:bg-opacity-90 text-white font-bold py-2 px-6 rounded transition-colors"
-          >
-            Log Out Now
-          </button>
-        </div>
-
-        <p className="mt-6 text-gray-500 text-sm">
-          You will be redirected to the home page automatically.
-        </p>
+    <div className="flex min-h-screen items-center justify-center bg-[#0a1628]">
+      <div className="flex flex-col items-center gap-4">
+        <motion.div
+          className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+        />
+        <span className="text-sm text-gray-400">Logging out</span>
       </div>
     </div>
   );

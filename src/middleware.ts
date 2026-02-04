@@ -2,6 +2,19 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { portalEnabled } from '@/lib/runtime';
 
 /**
+ * Helper to create a response with x-pathname header.
+ * This header allows server components to detect the current path.
+ */
+function createResponseWithPathname(
+  pathname: string,
+  response?: NextResponse
+): NextResponse {
+  const res = response || NextResponse.next();
+  res.headers.set('x-pathname', pathname);
+  return res;
+}
+
+/**
  * Edge-clean middleware - routing, path gating, and subdomain detection.
  * No Supabase imports or Node.js APIs - runs on Edge runtime.
  * Authentication enforcement happens server-side in portal layout.
@@ -10,7 +23,7 @@ import { portalEnabled } from '@/lib/runtime';
  * 1. Static file bypass
  * 2. Portal gating (404 when disabled)
  * 3. Subdomain detection + routing (portal.* → /portal/*)
- * 4. Pass through
+ * 4. Pass through with x-pathname header
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -48,8 +61,7 @@ export async function middleware(request: NextRequest) {
   if (!isPortalSubdomain && portalEnabled) {
     const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
     const isPortalRoute =
-      pathname.startsWith('/login') ||
-      pathname.startsWith('/portal');
+      pathname.startsWith('/login') || pathname.startsWith('/portal');
 
     // Don't redirect if portal URL matches current host (prevents loop in local dev)
     const portalHost = portalUrl ? new URL(portalUrl).host : null;
@@ -58,6 +70,7 @@ export async function middleware(request: NextRequest) {
     if (portalUrl && isPortalRoute && !isSameHost) {
       // Redirect to portal subdomain, preserving path + query string
       // /portal/* paths get cleaned (middleware on subdomain handles rewrite)
+      // /login redirects to /login on subdomain (will be rewritten to /portal/login)
       const cleanPath = pathname.startsWith('/portal')
         ? pathname.replace(/^\/portal/, '') || '/'
         : pathname;
@@ -67,14 +80,23 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isPortalSubdomain && portalEnabled) {
-    // Auth/API routes live at root level — must NOT be rewritten to /portal/*
-    const isRootRoute =
-      pathname.startsWith('/login') ||
-      pathname.startsWith('/auth/') ||
-      pathname.startsWith('/api/');
+    // API routes must NOT be rewritten to /portal/*
+    if (pathname.startsWith('/api/')) {
+      return createResponseWithPathname(pathname);
+    }
 
-    if (isRootRoute) {
-      return NextResponse.next();
+    // Auth callback stays at root level
+    if (pathname.startsWith('/auth/')) {
+      return createResponseWithPathname(pathname);
+    }
+
+    // Legacy /login path → redirect to /portal/login (now under portal route)
+    if (pathname === '/login' || pathname.startsWith('/login')) {
+      const url = request.nextUrl.clone();
+      // Rewrite to /portal/login (keeps /login in URL, serves /portal/login)
+      url.pathname = `/portal${pathname}`;
+      const response = NextResponse.rewrite(url);
+      return createResponseWithPathname(`/portal${pathname}`, response);
     }
 
     // /portal/* on subdomain → redirect to strip prefix (clean URLs)
@@ -95,10 +117,12 @@ export async function middleware(request: NextRequest) {
     // All other paths → rewrite to /portal/* (transparent to user)
     const url = request.nextUrl.clone();
     url.pathname = `/portal${pathname}`;
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+    return createResponseWithPathname(`/portal${pathname}`, response);
   }
 
-  return NextResponse.next();
+  // Default: pass through with x-pathname header
+  return createResponseWithPathname(pathname);
 }
 
 export const config = {

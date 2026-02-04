@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PGI Portal Sign-in Transition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --navy: #00172B;
+      --navy-light: #001a30;
+      --navy-border: #003E6B;
+      --accent: #4A6BB1;
+      --white: #ffffff;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      min-height: 100vh;
+    }
+
+    /* Control Panel */
+    .controls {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 1000;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px;
+      width: 280px;
+    }
+
+    .controls h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .control-group {
+      margin-bottom: 16px;
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5a7bc1;
+    }
+
+    .btn-secondary {
+      background: #333;
+      color: #fff;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover {
+      background: #444;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-group input[type="range"] {
+      flex: 1;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      -webkit-appearance: none;
+    }
+
+    .slider-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .slider-group span {
+      font-size: 12px;
+      color: #888;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .state-indicator {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .state-indicator span {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      border-radius: 6px;
+      background: #222;
+      color: #666;
+      transition: all 0.3s;
+    }
+
+    .state-indicator span.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Preview Container */
+    .preview-container {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Main Layout */
+    .app-layout {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Left Panel (Navy) */
+    .left-panel {
+      background: var(--navy);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: width var(--duration) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(74, 107, 177, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .left-panel.sidebar::before {
+      opacity: 0;
+    }
+
+    /* Logo Container */
+    .logo-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--duration) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo {
+      transition: all var(--duration) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo svg {
+      display: block;
+    }
+
+    .left-panel.sidebar .logo-container {
+      flex: none;
+      padding: 20px 16px;
+      justify-content: flex-start;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 12px;
+      opacity: 0;
+      transform: translateX(-20px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .left-panel.sidebar .sidebar-nav {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--gray-400);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    .left-panel.sidebar .nav-item {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(74, 107, 177, 0.2);
+      color: white;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 3px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Back to Website Link */
+    .back-link {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all var(--duration) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-link a {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .back-link a:hover {
+      color: var(--gray-400);
+    }
+
+    /* User Profile */
+    .user-profile {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .left-panel.sidebar .user-profile {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #6b8dd6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .user-role {
+      color: var(--gray-500);
+      font-size: 12px;
+    }
+
+    .user-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(74, 107, 177, 0.3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    /* Right Panel (White) */
+    .right-panel {
+      flex: 1;
+      background: var(--white);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Login Form */
+    .login-form {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      transition: all var(--duration) cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .login-form.hidden {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+
+    .login-content {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 32px;
+    }
+
+    .google-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 24px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .google-btn:hover {
+      border-color: var(--gray-400);
+      background: var(--gray-100);
+    }
+
+    .google-btn:active {
+      transform: scale(0.99);
+    }
+
+    .login-hint {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 16px;
+    }
+
+    /* Portal Content */
+    .portal-content {
+      flex: 1;
+      padding: 32px 48px;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+    }
+
+    .portal-content.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .portal-header {
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .portal-content.visible .portal-header {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .portal-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+
+    .portal-subtitle {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    .portal-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .portal-card {
+      padding: 24px;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0;
+      transform: translateY(15px);
+    }
+
+    .portal-content.visible .portal-card {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .portal-card:hover {
+      border-color: var(--gray-400);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .portal-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .portal-card p {
+      font-size: 14px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    /* Prompt Output */
+    .prompt-output {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 312px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .prompt-header h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      padding: 6px 12px;
+      background: #333;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+    }
+
+    .copy-btn.copied {
+      background: #22c55e;
+    }
+
+    .prompt-text {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- Controls -->
+  <div class="controls">
+    <h3>Transition Controls</h3>
+
+    <div class="state-indicator">
+      <span id="stateLogin" class="active">Login</span>
+      <span id="statePortal">Portal</span>
+    </div>
+
+    <div class="control-group">
+      <button class="btn btn-primary" id="toggleBtn">Sign In</button>
+      <button class="btn btn-secondary" id="resetBtn">Reset to Login</button>
+    </div>
+
+    <div class="control-group">
+      <label>Transition Duration</label>
+      <div class="slider-group">
+        <input type="range" id="duration" min="300" max="1200" value="600">
+        <span id="durationValue">600ms</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Sidebar Width</label>
+      <div class="slider-group">
+        <input type="range" id="sidebarWidth" min="180" max="280" value="224">
+        <span id="sidebarWidthValue">224px</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Nav Stagger Delay</label>
+      <div class="slider-group">
+        <input type="range" id="staggerDelay" min="30" max="150" value="60">
+        <span id="staggerDelayValue">60ms</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-container">
+    <div class="app-layout">
+      <!-- Left Panel -->
+      <div class="left-panel" id="leftPanel" style="width: 50%;">
+        <!-- Logo -->
+        <div class="logo-container">
+          <div class="logo" id="logo">
+            <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
+              <!-- PGI Logo simplified -->
+              <text x="0" y="32" fill="white" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="700">PARAGON</text>
+              <text x="0" y="46" fill="#6b7280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" letter-spacing="2">GLOBAL INVESTMENTS</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Sidebar Nav (hidden initially) -->
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <div class="nav-item active" style="transition-delay: 0ms;">Home</div>
+            <div class="nav-item" style="transition-delay: 60ms;">Directory</div>
+            <div class="nav-item" style="transition-delay: 120ms;">Resources</div>
+            <div class="nav-item" style="transition-delay: 180ms;">Content</div>
+            <div class="nav-item" style="transition-delay: 240ms;">Analytics</div>
+            <div class="nav-item" style="transition-delay: 300ms;">Settings</div>
+          </div>
+        </nav>
+
+        <!-- User Profile (hidden initially) -->
+        <div class="user-profile">
+          <div class="user-info">
+            <div class="user-avatar">AP</div>
+            <div class="user-details">
+              <div class="user-name">Ani Potts</div>
+              <div class="user-role">NYU / Admin</div>
+              <div class="user-badge">Admin</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to Website -->
+        <div class="back-link">
+          <a href="#">Back to Website</a>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="right-panel">
+        <!-- Login Form -->
+        <div class="login-form" id="loginForm">
+          <div class="login-content">
+            <h1 class="login-title">Welcome to PGI Portal</h1>
+            <p class="login-subtitle">Sign in to your account to continue</p>
+
+            <button class="google-btn" id="googleBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <p class="login-hint">Use your school's Gmail account</p>
+          </div>
+        </div>
+
+        <!-- Portal Content -->
+        <div class="portal-content" id="portalContent">
+          <div class="portal-header">
+            <h1 class="portal-title">Welcome back, Ani</h1>
+            <p class="portal-subtitle">152 members across 8 schools</p>
+          </div>
+
+          <div class="portal-cards">
+            <div class="portal-card" style="transition-delay: 100ms;">
+              <h3>Member Directory</h3>
+              <p>Browse all PGI members. Search by name, filter by school, program, or role.</p>
+            </div>
+            <div class="portal-card" style="transition-delay: 200ms;">
+              <h3>Resources</h3>
+              <p>Education materials, recruitment guides, and investment pitch reports.</p>
+            </div>
+            <div class="portal-card" style="transition-delay: 300ms;">
+              <h3>Upcoming Events</h3>
+              <p>Weekly market briefings, speaker series, and networking sessions.</p>
+            </div>
+            <div class="portal-card" style="transition-delay: 400ms;">
+              <h3>Team Analytics</h3>
+              <p>View engagement metrics and platform usage across chapters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Output -->
+  <div class="prompt-output">
+    <div class="prompt-header">
+      <h4>Implementation Prompt</h4>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+    <div class="prompt-text" id="promptText"></div>
+  </div>
+
+  <script>
+    // State
+    const state = {
+      isLoggedIn: false,
+      duration: 600,
+      sidebarWidth: 224,
+      staggerDelay: 60
+    };
+
+    // Elements
+    const leftPanel = document.getElementById('leftPanel');
+    const loginForm = document.getElementById('loginForm');
+    const portalContent = document.getElementById('portalContent');
+    const logo = document.getElementById('logo');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const stateLogin = document.getElementById('stateLogin');
+    const statePortal = document.getElementById('statePortal');
+    const durationSlider = document.getElementById('duration');
+    const sidebarWidthSlider = document.getElementById('sidebarWidth');
+    const staggerDelaySlider = document.getElementById('staggerDelay');
+    const promptText = document.getElementById('promptText');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Update CSS variable for duration
+    function updateDuration() {
+      document.documentElement.style.setProperty('--duration', state.duration + 'ms');
+    }
+
+    // Update nav item stagger delays
+    function updateStaggerDelays() {
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach((item, i) => {
+        item.style.transitionDelay = (i * state.staggerDelay) + 'ms';
+      });
+    }
+
+    // Transition to logged-in state
+    function transitionToPortal() {
+      state.isLoggedIn = true;
+
+      // Update state indicators
+      stateLogin.classList.remove('active');
+      statePortal.classList.add('active');
+      toggleBtn.textContent = 'Sign Out';
+
+      // Animate left panel to sidebar
+      leftPanel.style.width = state.sidebarWidth + 'px';
+      leftPanel.classList.add('sidebar');
+
+      // Shrink logo
+      logo.innerHTML = `
+        <svg width="100%" height="40" viewBox="0 0 140 40" fill="none">
+          <text x="20" y="20" fill="white" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700">PARAGON</text>
+          <text x="20" y="32" fill="#6b7280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="8" font-weight="500" letter-spacing="1">GLOBAL INVESTMENTS</text>
+        </svg>
+      `;
+
+      // Hide login, show portal
+      loginForm.classList.add('hidden');
+
+      setTimeout(() => {
+        portalContent.classList.add('visible');
+      }, state.duration * 0.5);
+
+      updatePrompt();
+    }
+
+    // Transition back to login state
+    function transitionToLogin() {
+      state.isLoggedIn = false;
+
+      // Update state indicators
+      statePortal.classList.remove('active');
+      stateLogin.classList.add('active');
+      toggleBtn.textContent = 'Sign In';
+
+      // Animate back to 50%
+      leftPanel.style.width = '50%';
+      leftPanel.classList.remove('sidebar');
+
+      // Restore logo
+      logo.innerHTML = `
+        <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
+          <text x="0" y="32" fill="white" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="700">PARAGON</text>
+          <text x="0" y="46" fill="#6b7280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" letter-spacing="2">GLOBAL INVESTMENTS</text>
+        </svg>
+      `;
+
+      // Hide portal, show login
+      portalContent.classList.remove('visible');
+
+      setTimeout(() => {
+        loginForm.classList.remove('hidden');
+      }, state.duration * 0.3);
+
+      updatePrompt();
+    }
+
+    // Update prompt
+    function updatePrompt() {
+      const parts = [];
+
+      parts.push(`Update the portal sign-in page with an animated transition to the dashboard.`);
+      parts.push(``);
+      parts.push(`**Login State:**`);
+      parts.push(`- Split 50/50 layout with navy left panel, white right panel`);
+      parts.push(`- Left panel: Centered PGI logo only (no text/testimonial)`);
+      parts.push(`- "Back to Website" link at bottom of navy panel`);
+      parts.push(`- Right panel: Sign-in form with Google button`);
+      parts.push(`- No Terms/Privacy footer`);
+      parts.push(``);
+      parts.push(`**Transition Animation (${state.duration}ms):**`);
+      parts.push(`- Navy panel shrinks from 50% to ${state.sidebarWidth}px (sidebar width)`);
+      parts.push(`- Logo shrinks and moves to top-left`);
+      parts.push(`- Login form fades out`);
+      parts.push(`- Sidebar nav items stagger in (${state.staggerDelay}ms delay each)`);
+      parts.push(`- User profile appears at sidebar bottom`);
+      parts.push(`- Portal content fades and slides up`);
+      parts.push(``);
+      parts.push(`Use Framer Motion with cubic-bezier(0.4, 0, 0.2, 1) easing.`);
+
+      promptText.textContent = parts.join('\n');
+    }
+
+    // Event Listeners
+    toggleBtn.addEventListener('click', () => {
+      if (state.isLoggedIn) {
+        transitionToLogin();
+      } else {
+        transitionToPortal();
+      }
+    });
+
+    resetBtn.addEventListener('click', transitionToLogin);
+
+    googleBtn.addEventListener('click', transitionToPortal);
+
+    durationSlider.addEventListener('input', (e) => {
+      state.duration = parseInt(e.target.value);
+      document.getElementById('durationValue').textContent = state.duration + 'ms';
+      updateDuration();
+      updatePrompt();
+    });
+
+    sidebarWidthSlider.addEventListener('input', (e) => {
+      state.sidebarWidth = parseInt(e.target.value);
+      document.getElementById('sidebarWidthValue').textContent = state.sidebarWidth + 'px';
+      if (state.isLoggedIn) {
+        leftPanel.style.width = state.sidebarWidth + 'px';
+      }
+      updatePrompt();
+    });
+
+    staggerDelaySlider.addEventListener('input', (e) => {
+      state.staggerDelay = parseInt(e.target.value);
+      document.getElementById('staggerDelayValue').textContent = state.staggerDelay + 'ms';
+      updateStaggerDelays();
+      updatePrompt();
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(promptText.textContent);
+      copyBtn.textContent = 'Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    });
+
+    // Initialize
+    updateDuration();
+    updateStaggerDelays();
+    updatePrompt();
+  </script>
+</body>
+</html>

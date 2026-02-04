@@ -67,6 +67,7 @@
     "lint-staged": "^16.2.7",
     "postcss": "^8.4.38",
     "prettier": "^3.3.2",
+    "react-grab": "^0.1.5",
     "tsx": "^4.20.6",
     "typescript": "5.5.4"
   }
