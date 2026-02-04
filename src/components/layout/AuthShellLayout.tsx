@@ -1,100 +1,84 @@
-import Image from 'next/image';
+'use client';
 
-/**
- * Split-screen auth layout inspired by Midday.
- * Left panel: Navy background with testimonial/value prop
- * Right panel: Clean white sign-in area
- */
-export default function AuthShellLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AuthTransitionProvider,
+  useAuthTransition,
+} from '@/contexts/AuthTransitionContext';
+
+const TRANSITION_DURATION = 0.8;
+// Use rem for accessibility - matches portal sidebar (14rem = 224px)
+const SIDEBAR_WIDTH = '14rem';
+
+const easing = [0.4, 0, 0.2, 1];
+
+function AuthShellLayoutInner({ children }: { children: React.ReactNode }) {
+  const { phase } = useAuthTransition();
+
+  // Determine what's visible based on phase
+  const showLogo = phase === 'idle' || phase === 'success';
+  const showContent =
+    phase === 'idle' || phase === 'success' || phase === 'fadeOut';
+  const shouldShrink = phase === 'shrink' || phase === 'complete';
+
   return (
     <div className="flex min-h-screen">
-      {/* Override body background for iOS safe-area */}
-      <style>{`html, body { background-color: #00172B; }`}</style>
+      <style>{`html, body { background-color: #0a1628; }`}</style>
 
-      {/* Left Panel - Branding & Testimonial (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#00172B] relative overflow-hidden">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00172B] via-[#001a30] to-[#002040]" />
-
-        {/* Decorative radial gradient (like Midday's subtle sphere) */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(74, 107, 177, 0.3) 0%, transparent 70%)',
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full w-full p-8 lg:p-12">
-          {/* Logo */}
-          <div className="flex items-center">
+      {/* Left Panel */}
+      <motion.div
+        className="hidden lg:flex bg-[#0a1628] relative overflow-hidden flex-col"
+        initial={{ width: '50%' }}
+        animate={{ width: shouldShrink ? SIDEBAR_WIDTH : '50%' }}
+        transition={{
+          duration: TRANSITION_DURATION,
+          ease: easing,
+        }}
+      >
+        {/* Logo - Centered, always visible until fadeOut phase */}
+        <div className="flex-1 flex items-center justify-center">
+          <motion.div
+            animate={{ opacity: showLogo ? 1 : 0 }}
+            transition={{ duration: 0.25, ease: easing }}
+          >
             <Image
-              src="/logos/pgiLogoTransparent.png"
+              src="/logos/pgiLogo.jpg"
               alt="Paragon Global Investments"
-              width={40}
+              width={110}
               height={40}
-              className="h-10 w-auto"
+              className="w-auto"
+              priority
             />
-          </div>
-
-          {/* Testimonial - Centered */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="max-w-md">
-              <blockquote className="text-gray-300 text-lg leading-relaxed">
-                <span className="text-gray-400">&quot;</span>
-                The portal keeps our team connected with real-time access to
-                member directory, resources, and event updates.{' '}
-                <span className="text-white font-medium">
-                  It&apos;s where collaboration happens.
-                </span>
-                <span className="text-gray-400">&quot;</span>
-              </blockquote>
-              <div className="mt-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#4A6BB1]/30 flex items-center justify-center">
-                  <span className="text-[#4A6BB1] text-sm font-semibold">
-                    PGI
-                  </span>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">
-                    PGI Member Portal
-                  </p>
-                  <p className="text-gray-500 text-sm">
-                    Exclusive member access
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Link */}
-          <div>
-            <a
-              href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
-              className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              ← Back to Website
-            </a>
-          </div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Right Panel - Sign In Form */}
-      <div className="flex-1 bg-white flex flex-col min-h-screen">
+        {/* Back to Website */}
+        <motion.div
+          className="relative z-10 px-4 py-4"
+          animate={{ opacity: phase === 'idle' ? 1 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <a
+            href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
+            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            Back to Website
+          </a>
+        </motion.div>
+      </motion.div>
+
+      {/* Right Panel */}
+      <div className="flex-1 bg-white flex flex-col min-h-screen relative">
         {/* Mobile Header */}
-        <div className="lg:hidden bg-[#00172B] px-6 py-4">
+        <div className="lg:hidden bg-[#0a1628] px-6 py-4">
           <div className="flex items-center justify-between">
             <Image
               src="/logos/pgiLogoTransparent.png"
               alt="PGI"
-              width={120}
-              height={24}
-              className="h-8 w-auto"
+              width={100}
+              height={20}
+              className="h-6 w-auto"
             />
             <a
               href={process.env.NEXT_PUBLIC_SITE_URL || '/'}
@@ -105,25 +89,62 @@ export default function AuthShellLayout({
           </div>
         </div>
 
-        {/* Sign In Content - Centered */}
-        <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12">
-          <div className="w-full max-w-sm">{children}</div>
+        {/* Content Area */}
+        <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-16 relative">
+          {/* Content - visible during idle, success, and fadeOut phases */}
+          <AnimatePresence>
+            {showContent && (
+              <motion.div
+                key="login-content"
+                className="w-full max-w-[340px]"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: phase === 'fadeOut' ? 0 : 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: easing }}
+              >
+                {children}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* No loading spinner - navigate directly to portal skeleton */}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-6 text-center lg:text-left lg:px-12">
-          <p className="text-xs text-gray-400">
-            By signing in, you agree to our{' '}
-            <a href="/terms" className="text-[#4A6BB1] hover:underline">
-              Terms of Service
-            </a>{' '}
-            &{' '}
-            <a href="/privacy" className="text-[#4A6BB1] hover:underline">
-              Privacy Policy
+        {/* Footer - Terms/Privacy with absolute URLs for subdomain compatibility */}
+        <motion.footer
+          className="px-6 py-4 text-center"
+          animate={{ opacity: phase === 'idle' ? 1 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
+            <a
+              href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/terms`}
+              className="hover:text-gray-600 transition-colors"
+            >
+              Terms
             </a>
-          </p>
-        </div>
+            <span className="text-gray-300">·</span>
+            <a
+              href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/privacy`}
+              className="hover:text-gray-600 transition-colors"
+            >
+              Privacy
+            </a>
+          </div>
+        </motion.footer>
       </div>
     </div>
+  );
+}
+
+export default function AuthShellLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthTransitionProvider>
+      <AuthShellLayoutInner>{children}</AuthShellLayoutInner>
+    </AuthTransitionProvider>
   );
 }

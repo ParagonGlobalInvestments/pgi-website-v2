@@ -28,6 +28,7 @@ export interface PortalSidebarProps {
   onCollapseToggle: () => void;
   navItems: PortalNavItem[];
   userInfo: PortalUserInfo | null;
+  fromAuth?: boolean;
 }
 
 /**

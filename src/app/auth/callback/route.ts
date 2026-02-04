@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError) {
       return NextResponse.redirect(
-        new URL('/login?error=auth_failed', origin)
+        new URL('/portal/login?error=auth_failed', origin)
       );
     }
 
@@ -56,7 +56,9 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return NextResponse.redirect(new URL('/login?error=no_user', origin));
+      return NextResponse.redirect(
+        new URL('/portal/login?error=no_user', origin)
+      );
     }
 
     const { isMember } = await checkMembership(user.email, user.id);
@@ -68,17 +70,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Redirect to portal (handle subdomain if configured)
-    // Only use portal URL redirect in production, not on localhost
-    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL;
-    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
-    let redirectOrigin = origin;
-    if (portalUrl && next.startsWith('/portal/') && !isLocalhost) {
-      redirectOrigin = portalUrl;
-      next = next.replace(/^\/portal/, '') || '/';
-    }
-    return NextResponse.redirect(new URL(next, redirectOrigin));
+    // Redirect to portal login page with authenticated param to show transition animation
+    // The login page will then redirect to the final destination after animation
+    // Using /portal/login keeps us in the same React tree for smooth CSS transitions
+    const loginUrl = new URL('/portal/login', origin);
+    loginUrl.searchParams.set('authenticated', 'true');
+    loginUrl.searchParams.set('redirectTo', next);
+    return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.redirect(new URL('/login', origin));
+  return NextResponse.redirect(new URL('/portal/login', origin));
 }

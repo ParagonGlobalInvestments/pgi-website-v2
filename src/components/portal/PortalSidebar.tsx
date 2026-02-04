@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -24,19 +25,30 @@ function NavItem({
   isActive,
   onClick,
   isCollapsed,
+  index,
+  shouldAnimate,
 }: {
   href: string;
   label: string;
   isActive: boolean;
   onClick: () => void;
   isCollapsed: boolean;
+  index: number;
+  shouldAnimate: boolean;
 }) {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Link href={href} onClick={onClick} className="w-full block">
-            <div
+            <motion.div
+              initial={shouldAnimate ? { opacity: 0, x: -10 } : false}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                duration: 0.3,
+                delay: shouldAnimate ? 0.3 + index * 0.05 : 0,
+                ease: [0.4, 0, 0.2, 1],
+              }}
               className={`relative flex items-center rounded-md text-sm transition-colors duration-200 ${
                 isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
               } ${
@@ -56,7 +68,7 @@ function NavItem({
               {isCollapsed && (
                 <span className="text-xs font-medium">{label[0]}</span>
               )}
-            </div>
+            </motion.div>
           </Link>
         </TooltipTrigger>
         {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
@@ -76,29 +88,57 @@ export function PortalSidebar({
   onCollapseToggle,
   navItems,
   userInfo,
+  fromAuth = false,
 }: PortalSidebarProps) {
+  // Track if we should run entrance animations (only once on initial load from auth)
+  // Using useState to capture the initial fromAuth value (won't change during component lifecycle)
+  const [shouldAnimate] = useState(fromAuth);
+
+  // Clear fromAuth from URL after animation completes (clean URL)
+  useEffect(() => {
+    if (!fromAuth) return;
+
+    const timer = setTimeout(() => {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('fromAuth');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [fromAuth]);
+
   return (
     <motion.aside
       className="hidden lg:flex flex-shrink-0 flex-col h-screen sticky top-0 overflow-hidden z-50"
       variants={SIDEBAR_VARIANTS}
+      initial="expanded"
       animate={isCollapsed ? 'collapsed' : 'expanded'}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       {/* Logo + collapse */}
       <div className="px-4 py-4 flex items-center justify-between">
-        <SmoothTransition
-          isVisible={!isCollapsed}
-          direction="vertical"
-          className="flex w-full items-center mt-2 justify-between gap-2"
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, x: -20 } : false}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            duration: 0.4,
+            delay: shouldAnimate ? 0.1 : 0,
+            ease: [0.4, 0, 0.2, 1],
+          }}
         >
-          <Image
-            src="/logos/pgiLogoFull.jpg"
-            alt="PGI"
-            width={250}
-            height={40}
-            className="w-auto"
-          />
-        </SmoothTransition>
+          <SmoothTransition
+            isVisible={!isCollapsed}
+            direction="vertical"
+            className="flex w-full items-center mt-2 justify-between gap-2"
+          >
+            <Image
+              src="/logos/pgiLogoFull.jpg"
+              alt="PGI"
+              width={250}
+              height={40}
+              className="w-auto"
+            />
+          </SmoothTransition>
+        </motion.div>
 
         <div className="flex items-center rounded-full">
           <SmoothTransition
@@ -143,12 +183,17 @@ export function PortalSidebar({
       {/* Nav items */}
       <div className="px-3 mt-6 flex-1">
         {!isCollapsed && (
-          <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <motion.h2
+            initial={shouldAnimate ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: shouldAnimate ? 0.25 : 0 }}
+            className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"
+          >
             Main
-          </h2>
+          </motion.h2>
         )}
         <nav className="space-y-0.5">
-          {navItems.map(item => (
+          {navItems.map((item, index) => (
             <NavItem
               key={item.id}
               href={item.href}
@@ -156,6 +201,8 @@ export function PortalSidebar({
               isActive={activeLink === item.id}
               onClick={() => onLinkClick(item.id)}
               isCollapsed={isCollapsed}
+              index={index}
+              shouldAnimate={shouldAnimate}
             />
           ))}
         </nav>
@@ -163,7 +210,16 @@ export function PortalSidebar({
 
       {/* User section */}
       {!isCollapsed && userInfo && (
-        <div className="px-4 py-3 mx-3 mb-3 bg-[#002C4D] rounded-md border border-[#003E6B]/50">
+        <motion.div
+          initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.3,
+            delay: shouldAnimate ? 0.5 : 0,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          className="px-4 py-3 mx-3 mb-3 bg-[#002C4D] rounded-md border border-[#003E6B]/50"
+        >
           <div className="font-medium text-white text-sm">{userInfo.name}</div>
           <div className="text-xs text-gray-400 mt-0.5">
             {userInfo.school}
@@ -175,11 +231,16 @@ export function PortalSidebar({
               Admin
             </span>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-[#003E6B]/50 space-y-0.5">
+      <motion.div
+        initial={shouldAnimate ? { opacity: 0 } : false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: shouldAnimate ? 0.6 : 0 }}
+        className="px-3 py-3 border-t border-[#003E6B]/50 space-y-0.5"
+      >
         {isCollapsed ? (
           <TooltipProvider>
             <Tooltip>
@@ -210,7 +271,7 @@ export function PortalSidebar({
             </Link>
           </>
         )}
-      </div>
+      </motion.div>
     </motion.aside>
   );
 }
