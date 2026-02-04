@@ -2,15 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { portalEnabled } from '@/lib/runtime';
 
 /**
- * Helper to create a response with x-pathname header.
- * This header allows server components to detect the current path.
+ * Helper to create a response with x-pathname and x-search-params headers.
+ * These headers allow server components to detect the current path and query params.
  */
-function createResponseWithPathname(
+function createResponseWithHeaders(
   pathname: string,
+  searchParams: string,
   response?: NextResponse
 ): NextResponse {
   const res = response || NextResponse.next();
   res.headers.set('x-pathname', pathname);
+  res.headers.set('x-search-params', searchParams);
   return res;
 }
 
@@ -27,6 +29,7 @@ function createResponseWithPathname(
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const searchParams = request.nextUrl.search;
 
   // Allow static files and Next.js internals to pass through immediately
   if (
@@ -82,12 +85,12 @@ export async function middleware(request: NextRequest) {
   if (isPortalSubdomain && portalEnabled) {
     // API routes must NOT be rewritten to /portal/*
     if (pathname.startsWith('/api/')) {
-      return createResponseWithPathname(pathname);
+      return createResponseWithHeaders(pathname, searchParams);
     }
 
     // Auth callback stays at root level
     if (pathname.startsWith('/auth/')) {
-      return createResponseWithPathname(pathname);
+      return createResponseWithHeaders(pathname, searchParams);
     }
 
     // Legacy /login path → redirect to /portal/login (now under portal route)
@@ -96,7 +99,11 @@ export async function middleware(request: NextRequest) {
       // Rewrite to /portal/login (keeps /login in URL, serves /portal/login)
       url.pathname = `/portal${pathname}`;
       const response = NextResponse.rewrite(url);
-      return createResponseWithPathname(`/portal${pathname}`, response);
+      return createResponseWithHeaders(
+        `/portal${pathname}`,
+        searchParams,
+        response
+      );
     }
 
     // /portal/* on subdomain → redirect to strip prefix (clean URLs)
@@ -118,11 +125,15 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = `/portal${pathname}`;
     const response = NextResponse.rewrite(url);
-    return createResponseWithPathname(`/portal${pathname}`, response);
+    return createResponseWithHeaders(
+      `/portal${pathname}`,
+      searchParams,
+      response
+    );
   }
 
   // Default: pass through with x-pathname header
-  return createResponseWithPathname(pathname);
+  return createResponseWithHeaders(pathname, searchParams);
 }
 
 export const config = {

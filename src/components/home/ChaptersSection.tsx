@@ -15,7 +15,7 @@ const AnimatedUniversityMasonry = dynamic(
 export default function ChaptersSection() {
   return (
     <motion.section
-      className="py-16 md:py-24 bg-pgi-dark-blue px-4"
+      className="py-16 md:py-24 bg-navy px-4"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}

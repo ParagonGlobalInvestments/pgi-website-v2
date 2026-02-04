@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { trackEvent } from '@/lib/posthog';
 import { createClient } from '@/lib/supabase/browser';
 import { portalEnabled } from '@/lib/runtime';
+import { usePortalUser } from '@/hooks/usePortalUser';
+import { EASING, NAVY_COLORS } from '@/lib/transitions';
 
 // Animation variants
 const navbarAnimation = {
@@ -160,64 +162,83 @@ const Header = () => {
   const [expandedMembers, setExpandedMembers] = useState(false);
   // Authentication state
   const [user, setUser] = useState<User | null>(null);
-  const [isPGIMember, setIsPGIMember] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  // Use SWR-cached portal user (deduplicates API calls across components)
+  const { isMember: isPGIMember, isLoading: memberLoading } =
+    usePortalUser(!!user);
+  // Combined loading state
+  const loading = authLoading || (!!user && memberLoading);
+  // Login transition state
+  const [isLoginTransitioning, setIsLoginTransitioning] = useState(false);
+  const [showWhitePanel, setShowWhitePanel] = useState(false);
+  // Portal entrance transition state (for authenticated users)
+  const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
 
   // Get current pathname for navigation events
   const pathname = usePathname();
+  const router = useRouter();
   const supabase = createClient();
 
-  // Check authentication state and PGI membership
+  // Prefetch portal route on hover for faster navigation
+  const prefetchPortalLogin = useCallback(() => {
+    router.prefetch('/portal/login');
+  }, [router]);
+
+  const prefetchPortal = useCallback(() => {
+    router.prefetch('/portal');
+  }, [router]);
+
+  // Handle login button click with smooth transition (unauthenticated users)
+  const handleLoginClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsLoginTransitioning(true);
+      setMobileMenuOpen(false);
+
+      // Phase 1: Full navy overlay (content fades out) - 400ms
+      // Phase 2: Brief pause on navy - 200ms more
+      // Phase 3: White panel slides in (with logo) - starts at 600ms
+      setTimeout(() => {
+        setShowWhitePanel(true);
+      }, 600);
+
+      // Phase 4: Navigate after panel slides in - at 1400ms
+      setTimeout(() => {
+        router.push('/portal/login');
+      }, 1400);
+    },
+    [router]
+  );
+
+  // Handle portal button click with smooth transition (authenticated users)
+  const handlePortalClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsPortalTransitioning(true);
+    setMobileMenuOpen(false);
+
+    // Navy compresses (400ms), then navigate with entrance flag
+    // The entrance flag tells portal to show skeleton with entrance animation
+    setTimeout(() => {
+      window.location.href = '/portal?entrance=true';
+    }, 500);
+  }, []);
+
+  // Check authentication state (membership is handled by usePortalUser hook)
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
-
-      // If user is authenticated, check if they're a PGI member
-      if (user) {
-        try {
-          const response = await fetch('/api/users/me');
-          if (response.ok) {
-            setIsPGIMember(true);
-          } else {
-            setIsPGIMember(false);
-          }
-        } catch (error) {
-          console.error('Error checking PGI membership:', error);
-          setIsPGIMember(false);
-        }
-      } else {
-        setIsPGIMember(false);
-      }
-
-      setLoading(false);
+      setAuthLoading(false);
     };
     checkAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const sessionUser = session?.user || null;
-      setUser(sessionUser);
-
-      // Check PGI membership when auth state changes
-      if (sessionUser) {
-        try {
-          const response = await fetch('/api/users/me');
-          if (response.ok) {
-            setIsPGIMember(true);
-          } else {
-            setIsPGIMember(false);
-          }
-        } catch (error) {
-          setIsPGIMember(false);
-        }
-      } else {
-        setIsPGIMember(false);
-      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
     });
 
     return () => subscription.unsubscribe();
@@ -312,28 +333,29 @@ const Header = () => {
   ];
 
   return (
-    <motion.header
-      className="bg-pgi-dark-blue font-semibold z-50 relative"
-      initial="hidden"
-      animate="visible"
-      variants={navbarAnimation}
-    >
-      <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        <motion.div
-          variants={logoAnimation}
-          className="flex items-center"
-          whileHover="hover"
-        >
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logos/pgiLogoTransparent.png"
-              alt="Paragon Global Investments"
-              width={200}
-              height={36}
-              priority
-              className="h-9 w-auto rounded-lg"
-            />
-            {/* <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
+    <>
+      <motion.header
+        className="bg-navy font-semibold z-50 relative"
+        initial="hidden"
+        animate="visible"
+        variants={navbarAnimation}
+      >
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+          <motion.div
+            variants={logoAnimation}
+            className="flex items-center"
+            whileHover="hover"
+          >
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logos/pgiLogoTransparent.png"
+                alt="Paragon Global Investments"
+                width={200}
+                height={36}
+                priority
+                className="h-9 w-auto rounded-lg"
+              />
+              {/* <span className="ml-2 text-white text-sm md:text-xl font-light hidden xl:block">
               <DecryptedText
                 text="Paragon Global Investments"
                 sequential={true}
@@ -344,504 +366,603 @@ const Header = () => {
                 className="text-sm md:text-xl font-normal text-white"
               />
             </span> */}
-          </Link>
-        </motion.div>
+            </Link>
+          </motion.div>
 
-        <motion.nav
-          className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-8 font-normal text-xs lg:text-base"
-          variants={staggerNavItems}
-        >
-          {/* About dropdown container */}
-          <motion.div
-            className="relative group"
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
+          <motion.nav
+            className="hidden md:flex items-center space-x-2 lg:space-x-4 xl:space-x-8 font-normal text-xs lg:text-base"
+            variants={staggerNavItems}
           >
-            <a
-              href="#"
-              onClick={handleAboutClick}
-              className="text-white hover:text-secondary transition-colors duration-300"
+            {/* About dropdown container */}
+            <motion.div
+              className="relative group"
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
             >
-              About
-            </a>
-
-            {/* Dropdown menu */}
-            <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
-              {/* Dropdown content */}
-              <motion.div
-                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
-                variants={dropdownAnimation}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
+              <a
+                href="#"
+                onClick={handleAboutClick}
+                className="text-white hover:text-secondary transition-colors duration-300"
               >
-                {aboutSubItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Link
-                      href={item.url}
-                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </motion.div>
+                About
+              </a>
 
-          {/* National Committee dropdown container */}
-          <motion.div
-            className="relative group"
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/national-committee"
-              className="text-white whitespace-nowrap hover:text-secondary transition-colors duration-300"
-            >
-              Committee
-            </Link>
-
-            {/* Dropdown menu */}
-            <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
-              {/* Dropdown content */}
-              <motion.div
-                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
-                variants={dropdownAnimation}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                {mainNav[2]?.subItems?.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Link
-                      href={item.url}
-                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Members dropdown container */}
-          <motion.div
-            className="relative group"
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/members"
-              className="text-white hover:text-secondary transition-colors duration-300"
-            >
-              Members
-            </Link>
-
-            {/* Dropdown menu */}
-            <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
-              {/* Dropdown content */}
-              <motion.div
-                className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
-                variants={dropdownAnimation}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                {mainNav[3]?.subItems?.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Link
-                      href={item.url}
-                      className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/placements"
-              className="text-white hover:text-secondary transition-colors duration-300"
-              onClick={() =>
-                trackEvent('nav_click', {
-                  section: 'header',
-                  link: 'placements',
-                  interest_type: 'career_opportunities',
-                })
-              }
-            >
-              Placements
-            </Link>
-          </motion.div>
-
-          <motion.div
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/apply"
-              className="text-white hover:text-secondary transition-colors duration-300"
-              onClick={() =>
-                trackEvent('nav_click', {
-                  section: 'header',
-                  link: 'apply',
-                  interest_type: 'recruitment',
-                  conversion_intent: 'high',
-                })
-              }
-            >
-              Apply
-            </Link>
-          </motion.div>
-
-          <motion.div
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/contact"
-              className="text-white hover:text-secondary transition-colors duration-300"
-              onClick={() =>
-                trackEvent('nav_click', {
-                  section: 'header',
-                  link: 'contact',
-                  interest_type: 'inquiry',
-                  conversion_intent: 'medium',
-                })
-              }
-            >
-              Contact
-            </Link>
-          </motion.div>
-
-          <motion.div
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Link
-              href="/resources"
-              className="text-white hover:text-secondary transition-colors duration-300"
-            >
-              Resources
-            </Link>
-          </motion.div>
-
-          {/* Authentication Links */}
-          <motion.div
-            variants={navItemAnimation}
-            whileHover="hover"
-            whileTap="tap"
-            className=""
-          >
-            {loading ? (
-              <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
-                Loading...
-              </div>
-            ) : user && isPGIMember && portalEnabled ? (
-              <div className="flex items-center pl-1 lg:pl-0">
-                <Link
-                  href="/portal"
-                  className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
-                >
-                  Portal
-                </Link>
-                <button
-                  onClick={async () => {
-                    const supabase = createClient();
-                    await supabase.auth.signOut();
-                    window.location.reload();
-                  }}
-                  className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
-                >
-                  Log out
-                </button>
-              </div>
-            ) : portalEnabled ? (
-              <Link
-                href="/login"
-                className="lg:py-2 lg:px-4 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
-              >
-                Log In
-              </Link>
-            ) : null}
-          </motion.div>
-        </motion.nav>
-
-        {/* Mobile Menu Button */}
-        <motion.div className="md:hidden" variants={navItemAnimation}>
-          <button
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            className="focus:outline-none text-white p-2 rounded-lg hover:bg-navy-light transition-all duration-200 active:scale-95"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
-        </motion.div>
-      </div>
-
-      {/* Mobile dropdown menu - Enhanced with better animations */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            className="md:hidden bg-navy/95 backdrop-blur-sm shadow-2xl"
-            variants={mobileMenuVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          >
-            <div className="px-4 py-2 space-y-1">
-              {/* Home link */}
-              <motion.div variants={mobileItemVariants}>
-                <Link
-                  href="/"
-                  className="block py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
-                >
-                  Home
-                </Link>
-              </motion.div>
-
-              {/* About section with dropdown */}
-              <motion.div variants={mobileItemVariants}>
-                <button
-                  onClick={() => toggleSection('about')}
-                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
-                >
-                  <span>About</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
-                      expandedAbout ? 'rotate-180' : ''
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <AnimatePresence>
-                  {expandedAbout && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
-                      className="ml-4 mt-1 space-y-1 overflow-hidden"
-                    >
-                      {aboutSubItems.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <Link
-                            href={item.url}
-                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
-                          >
-                            {item.name}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* National Committee with dropdown */}
-              <motion.div variants={mobileItemVariants}>
-                <button
-                  onClick={() => toggleSection('nationalCommittee')}
-                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
-                >
-                  <span>Committee</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
-                      expandedNationalCommittee ? 'rotate-180' : ''
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <AnimatePresence>
-                  {expandedNationalCommittee && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
-                      className="ml-4 mt-1 space-y-1 overflow-hidden"
-                    >
-                      {mainNav[2]?.subItems?.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <Link
-                            href={item.url}
-                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
-                          >
-                            {item.name}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* Members with dropdown */}
-              <motion.div variants={mobileItemVariants}>
-                <button
-                  onClick={() => toggleSection('members')}
-                  className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
-                >
-                  <span>Members</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
-                      expandedMembers ? 'rotate-180' : ''
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <AnimatePresence>
-                  {expandedMembers && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
-                      className="ml-4 mt-1 space-y-1 overflow-hidden"
-                    >
-                      {mainNav[3]?.subItems?.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <Link
-                            href={item.url}
-                            className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
-                          >
-                            {item.name}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* Regular links */}
-              {mainNav.slice(4).map((item, index) => (
+              {/* Dropdown menu */}
+              <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
+                {/* Dropdown content */}
                 <motion.div
-                  key={index}
-                  variants={mobileItemVariants}
-                  transition={{ delay: (index + 4) * 0.05 }}
+                  className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                  variants={dropdownAnimation}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
                 >
+                  {aboutSubItems.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={item.url}
+                        className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* National Committee dropdown container */}
+            <motion.div
+              className="relative group"
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/national-committee"
+                className="text-white whitespace-nowrap hover:text-secondary transition-colors duration-300"
+              >
+                Committee
+              </Link>
+
+              {/* Dropdown menu */}
+              <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
+                {/* Dropdown content */}
+                <motion.div
+                  className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                  variants={dropdownAnimation}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  {mainNav[2]?.subItems?.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={item.url}
+                        className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Members dropdown container */}
+            <motion.div
+              className="relative group"
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/members"
+                className="text-white hover:text-secondary transition-colors duration-300"
+              >
+                Members
+              </Link>
+
+              {/* Dropdown menu */}
+              <div className="absolute z-50 left-0 mt-2 w-48 opacity-0 invisible transform -translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-in-out">
+                {/* Dropdown content */}
+                <motion.div
+                  className="bg-navy-light/90 backdrop-blur-lg border border-gray-700/50 rounded-md shadow-2xl overflow-hidden"
+                  variants={dropdownAnimation}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  {mainNav[3]?.subItems?.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={item.url}
+                        className="block px-4 py-3 text-white hover:bg-gray-700/50 transition-all duration-200 hover:translate-x-1"
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/placements"
+                className="text-white hover:text-secondary transition-colors duration-300"
+                onClick={() =>
+                  trackEvent('nav_click', {
+                    section: 'header',
+                    link: 'placements',
+                    interest_type: 'career_opportunities',
+                  })
+                }
+              >
+                Placements
+              </Link>
+            </motion.div>
+
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/apply"
+                className="text-white hover:text-secondary transition-colors duration-300"
+                onClick={() =>
+                  trackEvent('nav_click', {
+                    section: 'header',
+                    link: 'apply',
+                    interest_type: 'recruitment',
+                    conversion_intent: 'high',
+                  })
+                }
+              >
+                Apply
+              </Link>
+            </motion.div>
+
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/contact"
+                className="text-white hover:text-secondary transition-colors duration-300"
+                onClick={() =>
+                  trackEvent('nav_click', {
+                    section: 'header',
+                    link: 'contact',
+                    interest_type: 'inquiry',
+                    conversion_intent: 'medium',
+                  })
+                }
+              >
+                Contact
+              </Link>
+            </motion.div>
+
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <Link
+                href="/resources"
+                className="text-white hover:text-secondary transition-colors duration-300"
+              >
+                Resources
+              </Link>
+            </motion.div>
+
+            {/* Authentication Links */}
+            <motion.div
+              variants={navItemAnimation}
+              whileHover="hover"
+              whileTap="tap"
+              className=""
+            >
+              {loading ? (
+                <div className="py-2 px-4 rounded bg-gray-600 text-gray-300 font-bold">
+                  Loading...
+                </div>
+              ) : user && isPGIMember && portalEnabled ? (
+                <div className="flex items-center pl-1 lg:pl-0">
+                  <button
+                    onClick={handlePortalClick}
+                    onMouseEnter={prefetchPortal}
+                    className="py-2 px-4 rounded-l-lg hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                  >
+                    Portal
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const supabase = createClient();
+                      await supabase.auth.signOut();
+                      window.location.reload();
+                    }}
+                    className="text-white lg:py-2 lg:px-4 px-2 py-1 border-2 border-white border-l-0 whitespace-nowrap rounded-r-lg text-sm hover:text-gray-300 transition-colors"
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : portalEnabled ? (
+                <button
+                  onClick={handleLoginClick}
+                  onMouseEnter={prefetchPortalLogin}
+                  className="lg:py-2 lg:px-4 px-3 py-1.5 rounded hover:bg-opacity-90 transition-colors font-bold bg-white text-black"
+                >
+                  Log In
+                </button>
+              ) : null}
+            </motion.div>
+          </motion.nav>
+
+          {/* Mobile Menu Button */}
+          <motion.div className="md:hidden" variants={navItemAnimation}>
+            <button
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              className="focus:outline-none text-white p-2 rounded-lg hover:bg-navy-light transition-all duration-200 active:scale-95"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Mobile dropdown menu - Enhanced with better animations */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              className="md:hidden bg-navy/95 backdrop-blur-sm shadow-2xl"
+              variants={mobileMenuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              <div className="px-4 py-2 space-y-1">
+                {/* Home link */}
+                <motion.div variants={mobileItemVariants}>
                   <Link
-                    href={item.url}
+                    href="/"
                     className="block py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                   >
-                    {item.name}
+                    Home
                   </Link>
                 </motion.div>
-              ))}
 
-              {/* Authentication links */}
-              <motion.div variants={mobileItemVariants} className="pt-2">
-                {loading ? (
-                  <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
-                    Loading...
-                  </div>
-                ) : user && isPGIMember && portalEnabled ? (
-                  <div className="space-y-2">
-                    <Link
-                      href="/portal"
-                      className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
-                    >
-                      Portal
-                    </Link>
-                    <button
-                      onClick={async () => {
-                        const supabase = createClient();
-                        await supabase.auth.signOut();
-                        window.location.reload();
-                      }}
-                      className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
-                    >
-                      Log out
-                    </button>
-                  </div>
-                ) : portalEnabled ? (
-                  <Link
-                    href="/login"
-                    className="block py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                {/* About section with dropdown */}
+                <motion.div variants={mobileItemVariants}>
+                  <button
+                    onClick={() => toggleSection('about')}
+                    className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
                   >
-                    Log In
-                  </Link>
-                ) : null}
-              </motion.div>
-            </div>
+                    <span>About</span>
+                    <svg
+                      className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                        expandedAbout ? 'rotate-180' : ''
+                      }`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <AnimatePresence>
+                    {expandedAbout && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                        className="ml-4 mt-1 space-y-1 overflow-hidden"
+                      >
+                        {aboutSubItems.map((item, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <Link
+                              href={item.url}
+                              className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            >
+                              {item.name}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* National Committee with dropdown */}
+                <motion.div variants={mobileItemVariants}>
+                  <button
+                    onClick={() => toggleSection('nationalCommittee')}
+                    className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  >
+                    <span>Committee</span>
+                    <svg
+                      className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                        expandedNationalCommittee ? 'rotate-180' : ''
+                      }`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <AnimatePresence>
+                    {expandedNationalCommittee && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                        className="ml-4 mt-1 space-y-1 overflow-hidden"
+                      >
+                        {mainNav[2]?.subItems?.map((item, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <Link
+                              href={item.url}
+                              className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            >
+                              {item.name}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Members with dropdown */}
+                <motion.div variants={mobileItemVariants}>
+                  <button
+                    onClick={() => toggleSection('members')}
+                    className="w-full text-left flex items-center justify-between py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                  >
+                    <span>Members</span>
+                    <svg
+                      className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                        expandedMembers ? 'rotate-180' : ''
+                      }`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <AnimatePresence>
+                    {expandedMembers && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                        className="ml-4 mt-1 space-y-1 overflow-hidden"
+                      >
+                        {mainNav[3]?.subItems?.map((item, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                          >
+                            <Link
+                              href={item.url}
+                              className="block py-2 px-4 text-gray-300 text-sm font-normal rounded-md hover:bg-navy-light/30 hover:text-white transition-all duration-200"
+                            >
+                              {item.name}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Regular links */}
+                {mainNav.slice(4).map((item, index) => (
+                  <motion.div
+                    key={index}
+                    variants={mobileItemVariants}
+                    transition={{ delay: (index + 4) * 0.05 }}
+                  >
+                    <Link
+                      href={item.url}
+                      className="block py-2 px-4 text-white font-medium rounded-lg hover:bg-navy-light/50 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                ))}
+
+                {/* Authentication links */}
+                <motion.div variants={mobileItemVariants} className="pt-2">
+                  {loading ? (
+                    <div className="block py-3 px-4 bg-gray-600 text-gray-300 font-semibold rounded-lg text-center">
+                      Loading...
+                    </div>
+                  ) : user && isPGIMember && portalEnabled ? (
+                    <div className="space-y-2">
+                      <button
+                        onClick={handlePortalClick}
+                        onTouchStart={prefetchPortal}
+                        className="block w-full py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                      >
+                        Portal
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const supabase = createClient();
+                          await supabase.auth.signOut();
+                          window.location.reload();
+                        }}
+                        className="block w-full py-2 px-4 text-gray-300 text-sm hover:text-white underline transition-colors text-center"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  ) : portalEnabled ? (
+                    <button
+                      onClick={handleLoginClick}
+                      onTouchStart={prefetchPortalLogin}
+                      className="block w-full py-3 px-4 bg-white text-navy font-semibold rounded-lg text-center hover:bg-gray-100 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      Log In
+                    </button>
+                  ) : null}
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
+
+      {/* Login Transition Overlay */}
+      <AnimatePresence>
+        {isLoginTransitioning && (
+          <motion.div
+            className="fixed inset-0 z-[100] overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: EASING.smooth }}
+          >
+            {/* Navy background - full screen, stays visible throughout */}
+            <motion.div
+              className="absolute inset-0"
+              style={{ backgroundColor: NAVY_COLORS.primary }}
+            />
+
+            {/* White panel sliding in from right */}
+            <motion.div
+              className="absolute top-0 right-0 bottom-0 bg-white"
+              initial={{ width: 0 }}
+              animate={{ width: showWhitePanel ? '50%' : 0 }}
+              transition={{
+                duration: 0.6,
+                ease: EASING.smooth,
+              }}
+            >
+              {/* Loading indicator in white panel */}
+              {showWhitePanel && (
+                <motion.div
+                  className="h-full flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin mx-auto" />
+                    <p className="text-gray-400 text-sm mt-3">
+                      Loading portal...
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+
+            {/* PGI logo - ONLY visible when in split view (50/50) */}
+            <AnimatePresence>
+              {showWhitePanel && (
+                <motion.div
+                  className="absolute top-0 left-0 bottom-0 flex items-center justify-center pointer-events-none"
+                  style={{ width: '50%' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    delay: 0.1,
+                    duration: 0.4,
+                    ease: EASING.smooth,
+                  }}
+                >
+                  <Image
+                    src="/logos/pgiLogo.jpg"
+                    alt="Paragon Global Investments"
+                    width={110}
+                    height={40}
+                    className="w-auto"
+                    priority
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+
+      {/* Portal Entrance Transition Overlay (authenticated users) */}
+      {/* Navy compresses from full-width to sidebar width (reverse of Back to Website) */}
+      <AnimatePresence>
+        {isPortalTransitioning && (
+          <motion.div className="fixed inset-0 z-[100] overflow-hidden">
+            {/* White background revealed as navy compresses */}
+            <div className="absolute inset-0 bg-white" />
+
+            {/* Navy panel compressing from full-width to sidebar width */}
+            <motion.div
+              className="absolute top-0 left-0 bottom-0"
+              style={{ backgroundColor: NAVY_COLORS.primary }}
+              initial={{ width: '100%' }}
+              animate={{ width: '14rem' }} // Sidebar width (224px)
+              transition={{ duration: 0.4, ease: EASING.smooth }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

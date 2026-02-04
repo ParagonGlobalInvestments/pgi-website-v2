@@ -41,11 +41,18 @@ export default {
         /* PGI brand colors */
         dark: '#354657',
         light: '#f5f5f5',
-        navy: '#00172B',
-        'navy-light': '#001e38',
-        'navy-hover': '#00213f',
-        'navy-border': '#002a52',
-        'navy-accent': '#0053a3',
+
+        /* Unified navy color system - matches CSS variables */
+        navy: '#0a1628',           /* Primary navy - matches PGI logo bg */
+        'navy-primary': '#0a1628', /* Alias for clarity */
+        'navy-alternate': '#0a192f', /* Lighter navy for alternating sections */
+        'navy-sidebar': '#001e38', /* Dashboard sidebar */
+        'navy-accent': '#002C4D',  /* User info sections */
+        'navy-border': '#003E6B',  /* Borders on navy backgrounds */
+        'navy-light': '#0a192f',   /* Legacy alias */
+        'navy-hover': '#0d1e35',   /* Hover state on navy */
+
+        /* Other colors */
         lightNavy: '#002642',
         darkNavy: '#000F1D',
         lightGray: '#E5E5E5',
@@ -56,6 +63,8 @@ export default {
         darkGreen: '#1E7E34',
         lightRed: '#DC3545',
         darkRed: '#C82333',
+
+        /* PGI branded blues */
         'pgi-dark-blue': '#0A192F',
         'pgi-light-blue': '#1F2A44',
         'pgi-accent-blue': '#1F3A5F',

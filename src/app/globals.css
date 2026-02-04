@@ -31,19 +31,40 @@
 /* Base styles */
 :root {
   --foreground-rgb: 255, 255, 255;
-  --background-rgb: 10, 25, 47;
+  --background-rgb: 10, 22, 40;
 
   /* Paragon Global Investments Colors */
   --pgi-primary: #4a6bb1;
-  --pgi-dark-blue-rgb: 10, 25, 47;
+  --pgi-dark-blue-rgb: 10, 22, 40;
   --pgi-dark-blue: #0a192f;
   --pgi-accent-blue: #1f3a5f;
   --pgi-secondary: #fbb040;
   --dark: #354657;
   --light: #f5f5f5;
   --gray: #6c757d;
-  --navy: #00172b;
-  --navy-light: #001e38;
+
+  /* Unified Navy Color System
+   * Primary navy matches PGI logo background for seamless transitions
+   */
+  --navy-primary: #0a1628; /* Main navy - matches PGI logo bg */
+  --navy-alternate: #0a192f; /* Lighter navy for alternating sections */
+  --navy-sidebar: #001e38; /* Sidebar/dashboard navy */
+  --navy-accent: #002c4d; /* User info section */
+  --navy-border: #003e6b; /* Borders on navy backgrounds */
+
+  /* Legacy aliases (for backwards compatibility) */
+  --navy: #0a1628;
+  --navy-light: #0a192f;
+
+  /* Animation timing tokens — single source of truth */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --duration-dramatic: 1000ms;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snappy: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Font variables — next/font injects --font-montserrat on <html> */
   --font-sans:
@@ -65,7 +86,12 @@ body {
   font-family: var(--font-sans);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-sans);
   letter-spacing: -0.025em;
 }
@@ -186,11 +212,86 @@ button,
 input,
 select,
 textarea {
-  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 
 /* Safe area padding for notch devices (PWA) — ensures at least 2rem so
    buttons at the bottom of sheets/panels always have breathing room. */
 .pb-safe {
   padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Portal Animation Performance Optimizations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* GPU-accelerated portal sidebar - enables smooth width transitions */
+.portal-sidebar {
+  contain: layout style;
+  will-change: width;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Content area containment - limits reflow scope during animations */
+.portal-content {
+  contain: layout style;
+}
+
+/* Skeleton shimmer animation for perceived performance */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Dark skeleton shimmer for navy backgrounds */
+.skeleton-shimmer-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(107, 114, 128, 0.3) 0%,
+    rgba(107, 114, 128, 0.5) 50%,
+    rgba(107, 114, 128, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Navy expansion overlay - GPU accelerated for smooth full-screen transitions */
+.navy-expansion-overlay {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: width;
+}
+
+/* Reduce motion preference - respect user accessibility settings */
+@media (prefers-reduced-motion: reduce) {
+  .portal-sidebar,
+  .navy-expansion-overlay {
+    will-change: auto;
+    transition-duration: 0.01ms !important;
+  }
+
+  .skeleton-shimmer,
+  .skeleton-shimmer-dark {
+    animation: none;
+  }
 }

@@ -10,6 +10,11 @@ const nextConfig = {
     // your project has TypeScript errors.
     ignoreBuildErrors: true,
   },
+  // Enable package tree-shaking for large dependencies
+  // Framer Motion has many features; this removes unused code (-30-40KB)
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react'],
+  },
   // Disable webpack persistent cache to prevent ENOSPC errors on low disk space
   // This is a safe fallback that doesn't affect functionality, only build speed
   webpack: (config, { dev, isServer }) => {
