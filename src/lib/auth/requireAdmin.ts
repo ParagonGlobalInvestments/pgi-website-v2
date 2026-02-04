@@ -62,7 +62,7 @@ export async function requireAdmin(): Promise<
 
     return { user: authUser, portalUser };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Auth check failed';
+    const msg = err instanceof Error ? (err.message || 'Auth check failed') : 'Auth check failed';
     return {
       error: NextResponse.json({ error: msg }, { status: 500 }),
     };
