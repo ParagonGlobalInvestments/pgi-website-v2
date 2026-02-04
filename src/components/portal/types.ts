@@ -5,6 +5,7 @@ export interface PortalNavItem {
   id: string;
   href: string;
   label: string;
+  icon: string;
   adminOnly: boolean;
 }
 
@@ -15,6 +16,7 @@ export interface PortalUserInfo {
   name: string;
   school: string;
   role: string;
+  program: 'value' | 'quant' | null;
   isAdmin: boolean;
 }
 

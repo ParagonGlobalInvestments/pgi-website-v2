@@ -30,10 +30,11 @@ export async function requireAdmin(): Promise<
     }
 
     // Use consolidated membership check
-    const { user: portalUser, isMember, isAdminAllowlist } = await checkMembership(
-      authUser.email,
-      authUser.id
-    );
+    const {
+      user: portalUser,
+      isMember,
+      isAdminAllowlist,
+    } = await checkMembership(authUser.email, authUser.id);
 
     if (!isMember) {
       return {
@@ -49,13 +50,18 @@ export async function requireAdmin(): Promise<
         portalUser: {
           id: 'admin-allowlist',
           email: authUser.email ?? '',
-          name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
+          name:
+            authUser.user_metadata?.full_name ||
+            authUser.email?.split('@')[0] ||
+            'Admin',
           role: 'admin' as const,
           program: null,
           school: '',
           graduationYear: null,
           linkedinUrl: null,
           githubUrl: null,
+          bio: null,
+          websiteUrl: null,
           createdAt: now,
           updatedAt: now,
         },
@@ -64,13 +70,19 @@ export async function requireAdmin(): Promise<
 
     if (!portalUser || portalUser.role !== 'admin') {
       return {
-        error: NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 }),
+        error: NextResponse.json(
+          { error: 'Forbidden — admin only' },
+          { status: 403 }
+        ),
       };
     }
 
     return { user: authUser, portalUser };
   } catch (err) {
-    const msg = err instanceof Error ? (err.message || 'Auth check failed') : 'Auth check failed';
+    const msg =
+      err instanceof Error
+        ? err.message || 'Auth check failed'
+        : 'Auth check failed';
     return {
       error: NextResponse.json({ error: msg }, { status: 500 }),
     };

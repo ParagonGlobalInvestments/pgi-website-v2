@@ -15,6 +15,8 @@ export interface User {
   graduationYear: number | null;
   linkedinUrl: string | null;
   githubUrl: string | null;
+  bio: string | null;
+  websiteUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -17,6 +17,8 @@ interface UserRow {
   graduation_year: number | null;
   linkedin_url: string | null;
   github_url: string | null;
+  bio: string | null;
+  website_url: string | null;
   supabase_id: string | null;
   created_at: string;
   updated_at: string;
@@ -33,6 +35,8 @@ function formatUser(row: UserRow): User {
     graduationYear: row.graduation_year,
     linkedinUrl: row.linkedin_url,
     githubUrl: row.github_url,
+    bio: row.bio,
+    websiteUrl: row.website_url,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -97,7 +101,9 @@ export class SupabaseDatabase {
   }
 
   /** Lookup by email OR alternate_emails (for dev dual-email login) */
-  async getUserByAnyEmail(email: string): Promise<(User & { dbId: string }) | null> {
+  async getUserByAnyEmail(
+    email: string
+  ): Promise<(User & { dbId: string }) | null> {
     const normalized = email.toLowerCase();
 
     // Check primary email first
@@ -123,10 +129,16 @@ export class SupabaseDatabase {
     return null;
   }
 
-  /** Update editable profile fields (name, linkedin_url, github_url) */
+  /** Update editable profile fields */
   async updateUserProfile(
     userId: string,
-    updates: { name?: string; linkedin_url?: string; github_url?: string }
+    updates: {
+      name?: string;
+      linkedin_url?: string;
+      github_url?: string;
+      bio?: string | null;
+      website_url?: string | null;
+    }
   ): Promise<User> {
     const { data, error } = await this.supabase
       .from('users')

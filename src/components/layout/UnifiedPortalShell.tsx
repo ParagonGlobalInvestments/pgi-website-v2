@@ -13,7 +13,15 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import {
+  ChevronLeft,
+  Home,
+  Users,
+  FolderOpen,
+  PenSquare,
+  BarChart3,
+  Settings,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
 import { usePortalShell } from '@/contexts/PortalShellContext';
 import { usePortalUser } from '@/hooks/usePortalUser';
@@ -47,6 +55,18 @@ const ExitTransitionContext = createContext<{
 
 /** Sidebar width in dashboard mode */
 const SIDEBAR_WIDTH = '14rem';
+/** Collapsed sidebar width */
+const COLLAPSED_SIDEBAR_WIDTH = '4.5rem';
+
+/** Icon mapping for nav items */
+const NAV_ICONS: Record<string, React.ElementType> = {
+  Home,
+  Users,
+  FolderOpen,
+  PenSquare,
+  BarChart3,
+  Settings,
+};
 /** Login panel width (50% of screen) */
 const LOGIN_PANEL_WIDTH = '50%';
 /** Morph transition duration in seconds (optimized: 0.4s, down from 0.6s) */
@@ -68,7 +88,9 @@ const navIndicatorTransition = {
 const NavItem = memo(function NavItem({
   href,
   label,
+  icon,
   isActive,
+  isAdminOnly,
   onClick,
   isCollapsed,
   index,
@@ -76,7 +98,9 @@ const NavItem = memo(function NavItem({
 }: {
   href: string;
   label: string;
+  icon: string;
   isActive: boolean;
+  isAdminOnly: boolean;
   onClick: () => void;
   isCollapsed: boolean;
   index: number;
@@ -92,6 +116,8 @@ const NavItem = memo(function NavItem({
     [shouldAnimate, index]
   );
 
+  const Icon = NAV_ICONS[icon];
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -100,7 +126,7 @@ const NavItem = memo(function NavItem({
             initial={shouldAnimate ? { opacity: 0, x: -10 } : false}
             animate={{ opacity: 1, x: 0 }}
             transition={transition}
-            className={`relative flex items-center rounded-md text-sm transition-colors duration-200 ${
+            className={`relative flex items-center gap-3 rounded-md text-sm transition-colors duration-200 ${
               isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
             } ${
               isActive
@@ -109,15 +135,29 @@ const NavItem = memo(function NavItem({
             }`}
           >
             {isActive && (
-              <motion.span
-                layoutId="nav-indicator"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4A6BB1] rounded-r"
-                transition={navIndicatorTransition}
-              />
+              <>
+                <motion.span
+                  layoutId="nav-indicator"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#4A6BB1] rounded-r"
+                  transition={navIndicatorTransition}
+                />
+                <motion.span
+                  layoutId="nav-bg"
+                  className="absolute inset-0 bg-white/5 rounded-md -z-10"
+                  transition={navIndicatorTransition}
+                />
+              </>
             )}
-            {!isCollapsed && <span>{label}</span>}
-            {isCollapsed && (
-              <span className="text-xs font-medium">{label[0]}</span>
+            {Icon && <Icon size={18} className="flex-shrink-0" />}
+            {!isCollapsed && (
+              <>
+                <span className="flex-1">{label}</span>
+                {isAdminOnly && (
+                  <span className="text-[9px] font-medium tracking-wide text-amber-400/70 uppercase">
+                    Admin
+                  </span>
+                )}
+              </>
             )}
           </motion.div>
         </Link>
@@ -260,7 +300,9 @@ function SidebarContent({
                 key={item.id}
                 href={item.href}
                 label={item.label}
+                icon={item.icon}
                 isActive={activeLink === item.id}
+                isAdminOnly={item.adminOnly}
                 onClick={() => onLinkClick(item.id)}
                 isCollapsed={isCollapsed}
                 index={index}
@@ -273,28 +315,7 @@ function SidebarContent({
 
       {/* User section */}
       {!isCollapsed && userInfo && (
-        <motion.div
-          initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.3,
-            delay: shouldAnimate ? 0.5 : 0,
-            ease: easing,
-          }}
-          className="px-4 py-3 mx-3 mb-3 bg-navy-accent rounded-md border border-navy-border/50"
-        >
-          <div className="font-medium text-white text-sm">{userInfo.name}</div>
-          <div className="text-xs text-gray-400 mt-0.5">
-            {userInfo.school}
-            {userInfo.school && userInfo.role ? ' / ' : ''}
-            {userInfo.role}
-          </div>
-          {userInfo.isAdmin && (
-            <span className="inline-block mt-1 text-xs px-1.5 py-0.5 bg-yellow-500/20 text-yellow-300 rounded">
-              Admin
-            </span>
-          )}
-        </motion.div>
+        <UserCard userInfo={userInfo} shouldAnimate={shouldAnimate} />
       )}
 
       {/* Footer */}
@@ -328,9 +349,9 @@ function SidebarFooter({
             <TooltipTrigger asChild>
               <button
                 onClick={onBackToWebsite}
-                className="flex items-center justify-center text-gray-400 hover:text-gray-200 py-2 rounded-md text-xs w-full"
+                className="flex items-center justify-center text-gray-400 hover:text-gray-200 py-2 rounded-md text-[10px] font-medium uppercase tracking-wide w-full"
               >
-                ←
+                Exit
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">Back to Website</TooltipContent>
@@ -352,6 +373,90 @@ function SidebarFooter({
           </Link>
         </>
       )}
+    </motion.div>
+  );
+}
+
+/**
+ * Program-based accent colors for user card (matching Directory colors)
+ * Quant = blue, Value = purple
+ */
+const PROGRAM_COLORS = {
+  quant: {
+    border: 'border-blue-500/40',
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-400',
+    badgeBg: 'bg-blue-500',
+  },
+  value: {
+    border: 'border-purple-500/40',
+    bg: 'bg-purple-500/10',
+    text: 'text-purple-400',
+    badgeBg: 'bg-purple-500',
+  },
+  default: {
+    border: 'border-navy-border/50',
+    bg: '',
+    text: 'text-gray-400',
+    badgeBg: 'bg-gray-500',
+  },
+} as const;
+
+/**
+ * User card component with program badge in top right corner
+ */
+function UserCard({
+  userInfo,
+  shouldAnimate,
+}: {
+  userInfo: PortalUserInfo;
+  shouldAnimate: boolean;
+}) {
+  const colors = PROGRAM_COLORS[userInfo.program || 'default'];
+  // Don't show role if it's "Admin" and user is admin (avoid duplicate)
+  const displayRole =
+    userInfo.role && !(userInfo.isAdmin && userInfo.role === 'Admin');
+
+  return (
+    <motion.div
+      initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.3,
+        delay: shouldAnimate ? 0.5 : 0,
+        ease: easing,
+      }}
+      className={`relative px-4 py-3 mx-3 mb-3 bg-navy-accent rounded-lg border-2 ${colors.border}`}
+    >
+      {/* Program badge in top right - blends with border */}
+      {userInfo.program && (
+        <span
+          className={`absolute -top-2 -right-2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full text-white ${colors.badgeBg}`}
+        >
+          {userInfo.program === 'value' ? 'Value' : 'Quant'}
+        </span>
+      )}
+
+      {/* Name row */}
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-white text-sm">{userInfo.name}</span>
+        {userInfo.isAdmin && (
+          <span className="text-[10px] font-medium tracking-wide text-amber-400/80 uppercase">
+            Admin
+          </span>
+        )}
+      </div>
+
+      {/* Info row - school and role (without duplicate admin) */}
+      <div className="text-xs text-gray-400 mt-0.5">
+        {userInfo.school}
+        {displayRole && (
+          <>
+            <span className="mx-1.5 text-gray-600">·</span>
+            {userInfo.role}
+          </>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -527,6 +632,7 @@ export function UnifiedPortalShell({
       role: portalUser?.role
         ? ROLE_LABELS[portalUser.role] || portalUser.role
         : '',
+      program: (portalUser?.program as 'value' | 'quant') || null,
       isAdmin: portalUser?.role === 'admin',
     };
   }, [portalUser, authUser]);
@@ -584,13 +690,19 @@ export function UnifiedPortalShell({
             backgroundColor: showDashboardView
               ? NAVY_COLORS.alternate
               : NAVY_COLORS.primary,
+            boxShadow:
+              'inset -1px 0 0 rgba(255,255,255,0.08), 4px 0 16px rgba(0,0,0,0.12)',
           }}
           initial={false}
           animate={{
-            width: showLoginView ? LOGIN_PANEL_WIDTH : SIDEBAR_WIDTH,
+            width: showLoginView
+              ? LOGIN_PANEL_WIDTH
+              : isCollapsed
+                ? COLLAPSED_SIDEBAR_WIDTH
+                : SIDEBAR_WIDTH,
           }}
           transition={{
-            duration: mode === 'transitioning' ? TRANSITION_DURATION : 0,
+            duration: mode === 'transitioning' ? TRANSITION_DURATION : 0.2,
             ease: easing,
           }}
         >

@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const searchParams = req.nextUrl.searchParams;
-    const days = Math.min(Math.max(parseInt(searchParams.get('days') || '7', 10), 1), 90);
+    const days = Math.min(
+      Math.max(parseInt(searchParams.get('days') || '7', 10), 1),
+      90
+    );
     const path = searchParams.get('path') || null;
 
     const startDate = new Date();
@@ -48,46 +51,57 @@ export async function GET(req: NextRequest) {
       console.error('Trends error:', trendsError);
     }
 
-    // Get page analytics
-    const { data: pageAnalytics, error: pageError } = await supabase.rpc(
-      'get_page_analytics',
-      {
-        p_start_date: startDate.toISOString(),
-        p_end_date: endDate.toISOString(),
-        p_limit: 20,
-      }
-    );
+    // Get page analytics (production only) - direct query instead of RPC
+    const { data: pageviewsByPath } = await supabase
+      .from('obs_pageviews')
+      .select('path')
+      .gte('created_at', startDate.toISOString())
+      .lt('created_at', endDate.toISOString())
+      .eq('event_type', 'pageview')
+      .eq('environment', 'production');
 
-    if (pageError) {
-      console.error('Page analytics error:', pageError);
-    }
+    // Aggregate pageviews by path
+    const pathCounts: Record<string, number> = {};
+    pageviewsByPath?.forEach(pv => {
+      const p = pv.path || '/';
+      pathCounts[p] = (pathCounts[p] || 0) + 1;
+    });
 
-    // Get total pageviews count
+    // Sort by count and take top 20
+    const pageAnalytics = Object.entries(pathCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([path, pageviews]) => ({ path, pageviews }));
+
+    // Get total pageviews count (production only)
     const { count: totalPageviews } = await supabase
       .from('obs_pageviews')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString())
-      .eq('event_type', 'pageview');
+      .eq('event_type', 'pageview')
+      .eq('environment', 'production');
 
-    // Get unique sessions count
+    // Get unique sessions count (production only)
     const { data: sessionsData } = await supabase
       .from('obs_pageviews')
       .select('session_id')
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString())
       .eq('event_type', 'pageview')
+      .eq('environment', 'production')
       .not('session_id', 'is', null);
 
     const uniqueSessions = new Set(sessionsData?.map(s => s.session_id)).size;
 
-    // Get device breakdown
+    // Get device breakdown (production only)
     const { data: deviceData } = await supabase
       .from('obs_pageviews')
       .select('device_type')
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString())
-      .eq('event_type', 'pageview');
+      .eq('event_type', 'pageview')
+      .eq('environment', 'production');
 
     const deviceBreakdown = {
       desktop: 0,
@@ -118,13 +132,14 @@ export async function GET(req: NextRequest) {
       errorsByType[err.error_type] = (errorsByType[err.error_type] || 0) + 1;
     });
 
-    // Get daily pageview trends
+    // Get daily pageview trends (production only)
     const { data: dailyPageviews } = await supabase
       .from('obs_pageviews')
       .select('created_at')
       .gte('created_at', startDate.toISOString())
       .lt('created_at', endDate.toISOString())
-      .eq('event_type', 'pageview');
+      .eq('event_type', 'pageview')
+      .eq('environment', 'production');
 
     const dailyTrends: Record<string, number> = {};
     dailyPageviews?.forEach(pv => {
@@ -161,7 +176,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to fetch analytics data';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to fetch analytics data';
     console.error('Analytics API error:', err);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }

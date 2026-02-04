@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, Linkedin, Mail, Github, X } from 'lucide-react';
+import { Search, Linkedin, Mail, Github, Globe, X } from 'lucide-react';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
 import {
@@ -121,6 +121,9 @@ function MemberDetail({ user }: { user: User }) {
         </div>
       </div>
 
+      {/* Bio */}
+      {user.bio && <p className="text-sm text-gray-600 -mt-2">{user.bio}</p>}
+
       {/* Details */}
       <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
@@ -181,8 +184,23 @@ function MemberDetail({ user }: { user: User }) {
           </a>
         )}
 
-        {!user.linkedinUrl && !user.githubUrl && (
-          <p className="text-gray-500 text-sm py-2">No profile links added yet</p>
+        {user.websiteUrl && (
+          <a
+            href={user.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+          >
+            <Globe className="text-gray-700 flex-shrink-0" />
+            <span className="flex-1">Personal Website</span>
+            <span className="text-xs text-gray-400">↗</span>
+          </a>
+        )}
+
+        {!user.linkedinUrl && !user.githubUrl && !user.websiteUrl && (
+          <p className="text-gray-500 text-sm py-2">
+            No profile links added yet
+          </p>
         )}
       </div>
     </div>
@@ -228,7 +246,9 @@ export default function DirectoryPage() {
         setUsers(data.users);
         setError('');
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Failed to load directory');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load directory'
+        );
       } finally {
         setLoading(false);
       }
@@ -237,19 +257,19 @@ export default function DirectoryPage() {
   }, []);
 
   // Filter users
-  const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+  const filteredUsers = useMemo(() => users.filter(user => {
       if (debouncedSearch) {
         const term = debouncedSearch.toLowerCase();
         const haystack = `${user.name} ${user.email}`.toLowerCase();
         if (!haystack.includes(term)) return false;
       }
-      if (filter.school !== 'all' && user.school !== filter.school) return false;
-      if (filter.program !== 'all' && user.program !== filter.program) return false;
+      if (filter.school !== 'all' && user.school !== filter.school)
+        return false;
+      if (filter.program !== 'all' && user.program !== filter.program)
+        return false;
       if (filter.role !== 'all' && user.role !== filter.role) return false;
       return true;
-    });
-  }, [users, debouncedSearch, filter]);
+    }), [users, debouncedSearch, filter]);
 
   const handleFilterChange = useCallback((type: string, value: string) => {
     setFilter(prev => ({ ...prev, [type]: value }));
@@ -274,7 +294,9 @@ export default function DirectoryPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Directory</h1>
-        <p className="text-gray-500 mt-1 text-sm">Browse and connect with PGI members</p>
+        <p className="text-gray-500 mt-1 text-sm">
+          Browse and connect with PGI members
+        </p>
       </div>
 
       {/* Search + Filters */}
@@ -401,64 +423,66 @@ export default function DirectoryPage() {
         >
           {filteredUsers.map(user => (
             <motion.div key={user.id} variants={gridItemVariants}>
-            <Card
-              className={`border transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
-                selectedUser?.id === user.id && isPanelOpen
-                  ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-              onClick={() => openPanel(user)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-2">
-                  {SCHOOL_LOGOS[user.school] && (
-                    <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                      <Image
-                        src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
-                        alt={SCHOOL_LABELS[user.school] || user.school}
-                        width={36}
-                        height={36}
-                        className="w-9 h-9 object-contain"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">
-                      {user.name}
-                    </h3>
-                    <div className="text-sm text-gray-600">
-                      {user.program && (
-                        <span
-                          className={`font-medium ${
-                            user.program === 'quant' ? 'text-blue-600' : 'text-purple-600'
-                          }`}
-                        >
-                          {PROGRAM_LABELS[user.program]}
+              <Card
+                className={`border transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
+                  selectedUser?.id === user.id && isPanelOpen
+                    ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => openPanel(user)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    {SCHOOL_LOGOS[user.school] && (
+                      <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                        <Image
+                          src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
+                          alt={SCHOOL_LABELS[user.school] || user.school}
+                          width={36}
+                          height={36}
+                          className="w-9 h-9 object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {user.name}
+                      </h3>
+                      <div className="text-sm text-gray-600">
+                        {user.program && (
+                          <span
+                            className={`font-medium ${
+                              user.program === 'quant'
+                                ? 'text-blue-600'
+                                : 'text-purple-600'
+                            }`}
+                          >
+                            {PROGRAM_LABELS[user.program]}
+                          </span>
+                        )}
+                        {user.program && user.role && (
+                          <span className="mx-1.5 text-gray-400">/</span>
+                        )}
+                        <span className="font-medium text-gray-700">
+                          {ROLE_LABELS[user.role] || user.role}
                         </span>
-                      )}
-                      {user.program && user.role && (
-                        <span className="mx-1.5 text-gray-400">/</span>
-                      )}
-                      <span className="font-medium text-gray-700">
-                        {ROLE_LABELS[user.role] || user.role}
-                      </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
-                  <span className="font-medium">
-                    {SCHOOL_LABELS[user.school] || user.school}
-                  </span>
-                  {user.graduationYear && (
-                    <>
-                      <span className="text-gray-300">|</span>
-                      <span>Class of {user.graduationYear}</span>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
+                    <span className="font-medium">
+                      {SCHOOL_LABELS[user.school] || user.school}
+                    </span>
+                    {user.graduationYear && (
+                      <>
+                        <span className="text-gray-300">|</span>
+                        <span>Class of {user.graduationYear}</span>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </motion.div>
