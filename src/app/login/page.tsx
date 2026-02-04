@@ -150,7 +150,7 @@ function LoginPageContent() {
     >
       <h1 className="text-2xl font-semibold text-gray-900">Log in</h1>
       <p className="text-gray-500 mt-1">
-        Access the portal with your school's Gmail.
+        Access the portal with your school&apos;s Gmail.
       </p>
 
       {searchParams?.get('error') === 'auth_failed' && (
