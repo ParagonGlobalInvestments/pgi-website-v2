@@ -25,6 +25,7 @@ import {
 import { createClient } from '@/lib/supabase/browser';
 import { usePortalShell } from '@/contexts/PortalShellContext';
 import { usePortalUser } from '@/hooks/usePortalUser';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -479,6 +480,7 @@ export function UnifiedPortalShell({
   const pathname = usePathname();
   const supabase = createClient();
   const { mode, phase, setMode } = usePortalShell();
+  const isMobile = useIsMobile();
 
   // UI state
   const [activeLink, setActiveLink] = useState('home');
@@ -504,16 +506,23 @@ export function UnifiedPortalShell({
   });
 
   // Handle "Back to Website" with smooth navy expand animation (matches logout)
-  const handleBackToWebsite = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsExitTransitioning(true);
+  const handleBackToWebsite = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsExitTransitioning(true);
 
-    // Navy expands (400ms), then navigate with full page reload
-    // Use SITE_URL to escape portal subdomain (portal.* rewrites / to /portal/)
-    setTimeout(() => {
-      window.location.href = SITE_URL;
-    }, 500);
-  }, []);
+      // Navy expands then navigate with full page reload
+      // Mobile: 300ms (shorter animation), Desktop: 500ms
+      // Use SITE_URL to escape portal subdomain (portal.* rewrites / to /portal/)
+      setTimeout(
+        () => {
+          window.location.href = SITE_URL;
+        },
+        isMobile ? 300 : 500
+      );
+    },
+    [isMobile]
+  );
 
   // Determine route type - only need logout for bypass, login handled by server redirect
   const isLogoutRoute = pathname?.includes('/logout');

@@ -8,20 +8,29 @@ import { usePortalShell } from '@/contexts/PortalShellContext';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { NavyExpansionOverlay } from '@/components/ui/NavyExpansionOverlay';
 import { SITE_URL } from '@/components/portal/constants';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Exit transition state for Back to Website
 const useExitTransition = () => {
   const [isExiting, setIsExiting] = useState(false);
+  const isMobile = useIsMobile();
 
-  const handleBackToWebsite = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsExiting(true);
+  const handleBackToWebsite = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsExiting(true);
 
-    // Navy expands (400ms), then navigate to main domain (not portal subdomain)
-    setTimeout(() => {
-      window.location.href = SITE_URL;
-    }, 500);
-  }, []);
+      // Navy expands then navigate to main domain (not portal subdomain)
+      // Mobile: 300ms (shorter animation), Desktop: 500ms
+      setTimeout(
+        () => {
+          window.location.href = SITE_URL;
+        },
+        isMobile ? 300 : 500
+      );
+    },
+    [isMobile]
+  );
 
   return { isExiting, handleBackToWebsite };
 };
