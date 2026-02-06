@@ -925,7 +925,7 @@ const Header = () => {
                 }}
               />
 
-              {/* Centered logo + spinner during hold phase */}
+              {/* Centered logo during hold phase — fades out before compression to avoid squishing */}
               <AnimatePresence>
                 {mobileLoginPhase === 'fill' && (
                   <motion.div
@@ -933,19 +933,16 @@ const Header = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2, ease: EASING.smooth }}
+                    transition={{ duration: 0.15, ease: EASING.smooth }}
                   >
-                    <div className="text-center">
-                      <Image
-                        src="/logos/pgiLogo.jpg"
-                        alt="Paragon Global Investments"
-                        width={110}
-                        height={40}
-                        className="w-auto mx-auto"
-                        priority
-                      />
-                      <div className="w-6 h-6 border-2 border-white/30 border-t-white/70 rounded-full animate-spin mx-auto mt-4" />
-                    </div>
+                    <Image
+                      src="/logos/pgiLogo.jpg"
+                      alt="Paragon Global Investments"
+                      width={110}
+                      height={40}
+                      className="w-auto"
+                      priority
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
