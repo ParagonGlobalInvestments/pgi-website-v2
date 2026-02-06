@@ -760,10 +760,18 @@ export function UnifiedPortalShell({
         <div
           className={`flex-1 flex flex-col min-h-screen relative bg-white portal-content ${showLoginView ? 'max-h-dvh overflow-hidden lg:max-h-screen' : ''}`}
         >
-          {/* Mobile header for login view */}
+          {/* Mobile header for login view — logo only, slides in/out */}
           {showLoginView && (
             <div className="lg:hidden bg-navy px-6 py-4 pt-safe">
-              <div className="flex items-center justify-between">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={
+                  isExitTransitioning
+                    ? { opacity: 0, x: -20 }
+                    : { opacity: 1, x: 0 }
+                }
+                transition={{ duration: 0.25, ease: easing }}
+              >
                 <Image
                   src="/logos/pgiLogoTransparent.png"
                   alt="PGI"
@@ -771,14 +779,7 @@ export function UnifiedPortalShell({
                   height={20}
                   className="h-6 w-auto"
                 />
-                <a
-                  href={SITE_URL}
-                  onClick={handleBackToWebsite}
-                  className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
-                >
-                  Back to Website
-                </a>
-              </div>
+              </motion.div>
             </div>
           )}
 
