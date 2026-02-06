@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { EASING, NAVY_COLORS } from '@/lib/transitions';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 /**
  * Props for NavyExpansionOverlay
@@ -14,6 +13,8 @@ interface NavyExpansionOverlayProps {
   duration?: number;
   /** Whether to show the overlay (controls visibility) */
   isVisible?: boolean;
+  /** Whether the viewport is mobile-sized (pass from parent to avoid mount-delay) */
+  isMobile?: boolean;
 }
 
 /**
@@ -27,10 +28,16 @@ interface NavyExpansionOverlayProps {
  * Desktop: Navy panel expands left-to-right (matches sidebar layout).
  * Mobile: Navy bar expands top-to-bottom (matches header layout).
  *
+ * IMPORTANT: `isMobile` must be passed as a prop from the parent component.
+ * Using useIsMobile() internally would cause a one-frame delay (useState
+ * defaults to false, useEffect corrects it after mount), making framer-motion
+ * capture the wrong initial state on the first render.
+ *
  * @example
  * ```tsx
  * <NavyExpansionOverlay
  *   initialWidth="14rem"
+ *   isMobile={isMobile}
  *   isVisible={isExiting}
  * />
  * ```
@@ -39,8 +46,8 @@ export function NavyExpansionOverlay({
   initialWidth,
   duration = 0.4,
   isVisible = true,
+  isMobile = false,
 }: NavyExpansionOverlayProps) {
-  const isMobile = useIsMobile();
   const mobileDuration = duration * 0.6; // 40% faster on mobile
 
   if (!isVisible) return null;

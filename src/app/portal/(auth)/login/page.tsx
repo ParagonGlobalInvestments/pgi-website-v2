@@ -32,7 +32,7 @@ const useExitTransition = () => {
     [isMobile]
   );
 
-  return { isExiting, handleBackToWebsite };
+  return { isExiting, isMobile, handleBackToWebsite };
 };
 
 type DisplayMode = 'welcome' | 'greeting' | 'rejected';
@@ -42,7 +42,7 @@ function PortalLoginContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
   const { phase, userName, triggerTransition } = usePortalShell();
-  const { isExiting, handleBackToWebsite } = useExitTransition();
+  const { isExiting, isMobile, handleBackToWebsite } = useExitTransition();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -313,7 +313,9 @@ function PortalLoginContent() {
 
             {/* Exit Transition Overlay - Navy expands to fill screen (matches logout) */}
             <AnimatePresence>
-              {isExiting && <NavyExpansionOverlay initialWidth="50%" />}
+              {isExiting && (
+                <NavyExpansionOverlay initialWidth="50%" isMobile={isMobile} />
+              )}
             </AnimatePresence>
           </motion.div>
         )}
