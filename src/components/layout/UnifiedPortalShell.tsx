@@ -552,15 +552,19 @@ export function UnifiedPortalShell({
   }, [showEntranceAnimation]);
 
   // iOS safe-area background fix
+  // Desktop login: navy body (matches left panel overscroll)
+  // Mobile login: white body (top header is navy, rest is white — no blue bottom)
+  // Dashboard: always white
   useEffect(() => {
-    const bgColor = showLoginView ? NAVY_COLORS.primary : '#ffffff';
+    const bgColor =
+      showLoginView && !isMobile ? NAVY_COLORS.primary : '#ffffff';
     document.documentElement.style.backgroundColor = bgColor;
     document.body.style.backgroundColor = bgColor;
     return () => {
       document.documentElement.style.backgroundColor = '';
       document.body.style.backgroundColor = '';
     };
-  }, [showLoginView]);
+  }, [showLoginView, isMobile]);
 
   // Auth state management
   // Only sets authUser state - does NOT change mode
@@ -754,7 +758,9 @@ export function UnifiedPortalShell({
         </motion.aside>
 
         {/* Content panel - always white */}
-        <div className="flex-1 flex flex-col min-h-screen relative bg-white portal-content">
+        <div
+          className={`flex-1 flex flex-col min-h-screen relative bg-white portal-content ${showLoginView ? 'max-h-screen overflow-hidden' : ''}`}
+        >
           {/* Mobile header for login view */}
           {showLoginView && (
             <div className="lg:hidden bg-navy px-6 py-4">
@@ -779,7 +785,7 @@ export function UnifiedPortalShell({
           {/* Main content area */}
           {showLoginView ? (
             // Login content - centered
-            <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-16">
+            <div className="flex-1 flex items-center justify-center px-6 py-6 lg:py-12 lg:px-16">
               <div className="w-full max-w-[340px]">{children}</div>
             </div>
           ) : (
@@ -821,6 +827,7 @@ export function UnifiedPortalShell({
         {isExitTransitioning && (
           <NavyExpansionOverlay
             initialWidth={showLoginView ? '50%' : SIDEBAR_WIDTH}
+            isMobile={isMobile}
           />
         )}
       </AnimatePresence>
