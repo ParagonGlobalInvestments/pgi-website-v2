@@ -11,6 +11,7 @@ import { trackEvent } from '@/lib/posthog';
 import { createClient } from '@/lib/supabase/browser';
 import { portalEnabled } from '@/lib/runtime';
 import { usePortalUser } from '@/hooks/usePortalUser';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { EASING, NAVY_COLORS } from '@/lib/transitions';
 
 // Animation variants
@@ -173,6 +174,14 @@ const Header = () => {
   const [showWhitePanel, setShowWhitePanel] = useState(false);
   // Portal entrance transition state (for authenticated users)
   const [isPortalTransitioning, setIsPortalTransitioning] = useState(false);
+  // Mobile detection for transitions
+  const isMobile = useIsMobile();
+  // Snapshot mobile state at click time to prevent orientation changes mid-animation
+  const [transitionMobile, setTransitionMobile] = useState(false);
+  // Mobile login: phase tracking for navy compress animation
+  const [mobileLoginPhase, setMobileLoginPhase] = useState<
+    'fill' | 'compress' | null
+  >(null);
 
   // Get current pathname for navigation events
   const pathname = usePathname();
@@ -192,36 +201,54 @@ const Header = () => {
   const handleLoginClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
+      const mobile = isMobile; // snapshot at click time
+      setTransitionMobile(mobile);
       setIsLoginTransitioning(true);
       setMobileMenuOpen(false);
 
-      // Phase 1: Full navy overlay (content fades out) - 400ms
-      // Phase 2: Brief pause on navy - 200ms more
-      // Phase 3: White panel slides in (with logo) - starts at 600ms
-      setTimeout(() => {
-        setShowWhitePanel(true);
-      }, 600);
-
-      // Phase 4: Navigate after panel slides in - at 1400ms
-      setTimeout(() => {
-        router.push('/portal/login');
-      }, 1400);
+      if (mobile) {
+        // Mobile: Navy fills screen (200ms) → hold with logo (300ms) → compress to 3.5rem (300ms) → navigate at 800ms
+        setMobileLoginPhase('fill');
+        setTimeout(() => {
+          setMobileLoginPhase('compress');
+        }, 500); // Start compress after fill (200ms) + hold (300ms)
+        setTimeout(() => {
+          router.push('/portal/login');
+        }, 800);
+      } else {
+        // Desktop: Navy fills → white panel slides in from right (50/50 split) → navigate
+        setTimeout(() => {
+          setShowWhitePanel(true);
+        }, 600);
+        setTimeout(() => {
+          router.push('/portal/login');
+        }, 1400);
+      }
     },
-    [router]
+    [router, isMobile]
   );
 
   // Handle portal button click with smooth transition (authenticated users)
-  const handlePortalClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPortalTransitioning(true);
-    setMobileMenuOpen(false);
+  const handlePortalClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const mobile = isMobile; // snapshot at click time
+      setTransitionMobile(mobile);
+      setIsPortalTransitioning(true);
+      setMobileMenuOpen(false);
 
-    // Navy compresses (400ms), then navigate with entrance flag
-    // The entrance flag tells portal to show skeleton with entrance animation
-    setTimeout(() => {
-      window.location.href = '/portal?entrance=true';
-    }, 500);
-  }, []);
+      // Navy compresses then navigate with entrance flag
+      // Mobile: height 100% → 3.5rem (300ms) — exact inverse of exit animation
+      // Desktop: width 100% → 14rem (500ms)
+      setTimeout(
+        () => {
+          window.location.href = '/portal?entrance=true';
+        },
+        mobile ? 300 : 500
+      );
+    },
+    [isMobile]
+  );
 
   // Check authentication state (membership is handled by usePortalUser hook)
   useEffect(() => {
@@ -871,93 +898,157 @@ const Header = () => {
 
       {/* Login Transition Overlay */}
       <AnimatePresence>
-        {isLoginTransitioning && (
-          <motion.div
-            className="fixed inset-0 z-[100] overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: EASING.smooth }}
-          >
-            {/* Navy background - full screen, stays visible throughout */}
+        {isLoginTransitioning &&
+          (transitionMobile ? (
+            // Mobile: Navy fills screen → compress to 3.5rem header height → reveals white below
             <motion.div
-              className="absolute inset-0"
-              style={{ backgroundColor: NAVY_COLORS.primary }}
-            />
-
-            {/* White panel sliding in from right */}
-            <motion.div
-              className="absolute top-0 right-0 bottom-0 bg-white"
-              initial={{ width: 0 }}
-              animate={{ width: showWhitePanel ? '50%' : 0 }}
-              transition={{
-                duration: 0.6,
-                ease: EASING.smooth,
-              }}
+              className="fixed inset-0 z-[100] overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: EASING.smooth }}
             >
-              {/* Loading indicator in white panel */}
-              {showWhitePanel && (
-                <motion.div
-                  className="h-full flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.3 }}
-                >
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin mx-auto" />
-                    <p className="text-gray-400 text-sm mt-3">
-                      Loading portal...
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
+              {/* White background revealed as navy compresses */}
+              <div className="absolute inset-0 bg-white" />
 
-            {/* PGI logo - ONLY visible when in split view (50/50) */}
-            <AnimatePresence>
-              {showWhitePanel && (
-                <motion.div
-                  className="absolute top-0 left-0 bottom-0 flex items-center justify-center pointer-events-none"
-                  style={{ width: '50%' }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{
-                    delay: 0.1,
-                    duration: 0.4,
-                    ease: EASING.smooth,
-                  }}
-                >
-                  <Image
-                    src="/logos/pgiLogo.jpg"
-                    alt="Paragon Global Investments"
-                    width={110}
-                    height={40}
-                    className="w-auto"
-                    priority
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
+              {/* Navy panel: fills screen then compresses to header height */}
+              <motion.div
+                className="absolute top-0 left-0 w-full"
+                style={{ backgroundColor: NAVY_COLORS.primary }}
+                initial={{ height: '100%' }}
+                animate={{
+                  height: mobileLoginPhase === 'compress' ? '3.5rem' : '100%',
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: EASING.smooth,
+                }}
+              />
+
+              {/* Centered logo + spinner during hold phase */}
+              <AnimatePresence>
+                {mobileLoginPhase === 'fill' && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2, ease: EASING.smooth }}
+                  >
+                    <div className="text-center">
+                      <Image
+                        src="/logos/pgiLogo.jpg"
+                        alt="Paragon Global Investments"
+                        width={110}
+                        height={40}
+                        className="w-auto mx-auto"
+                        priority
+                      />
+                      <div className="w-6 h-6 border-2 border-white/30 border-t-white/70 rounded-full animate-spin mx-auto mt-4" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            // Desktop: Navy fills → white panel slides in from right (50/50 split)
+            <motion.div
+              className="fixed inset-0 z-[100] overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: EASING.smooth }}
+            >
+              {/* Navy background - full screen, stays visible throughout */}
+              <motion.div
+                className="absolute inset-0"
+                style={{ backgroundColor: NAVY_COLORS.primary }}
+              />
+
+              {/* White panel sliding in from right */}
+              <motion.div
+                className="absolute top-0 right-0 bottom-0 bg-white"
+                initial={{ width: 0 }}
+                animate={{ width: showWhitePanel ? '50%' : 0 }}
+                transition={{
+                  duration: 0.6,
+                  ease: EASING.smooth,
+                }}
+              >
+                {/* Loading indicator in white panel */}
+                {showWhitePanel && (
+                  <motion.div
+                    className="h-full flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.3 }}
+                  >
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin mx-auto" />
+                      <p className="text-gray-400 text-sm mt-3">
+                        Loading portal...
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {/* PGI logo - ONLY visible when in split view (50/50) */}
+              <AnimatePresence>
+                {showWhitePanel && (
+                  <motion.div
+                    className="absolute top-0 left-0 bottom-0 flex items-center justify-center pointer-events-none"
+                    style={{ width: '50%' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      delay: 0.1,
+                      duration: 0.4,
+                      ease: EASING.smooth,
+                    }}
+                  >
+                    <Image
+                      src="/logos/pgiLogo.jpg"
+                      alt="Paragon Global Investments"
+                      width={110}
+                      height={40}
+                      className="w-auto"
+                      priority
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
       </AnimatePresence>
 
       {/* Portal Entrance Transition Overlay (authenticated users) */}
-      {/* Navy compresses from full-width to sidebar width (reverse of Back to Website) */}
+      {/* Navy compresses: desktop width 100%→14rem, mobile height 100%→3.5rem (inverse of exit) */}
       <AnimatePresence>
         {isPortalTransitioning && (
           <motion.div className="fixed inset-0 z-[100] overflow-hidden">
             {/* White background revealed as navy compresses */}
             <div className="absolute inset-0 bg-white" />
 
-            {/* Navy panel compressing from full-width to sidebar width */}
+            {/* Navy panel compressing */}
             <motion.div
-              className="absolute top-0 left-0 bottom-0"
+              className="absolute top-0 left-0"
               style={{ backgroundColor: NAVY_COLORS.primary }}
-              initial={{ width: '100%' }}
-              animate={{ width: '14rem' }} // Sidebar width (224px)
-              transition={{ duration: 0.4, ease: EASING.smooth }}
+              initial={
+                transitionMobile
+                  ? { width: '100%', height: '100%' }
+                  : { width: '100%', height: '100%' }
+              }
+              animate={
+                transitionMobile
+                  ? { width: '100%', height: '3.5rem' }
+                  : { width: '14rem', height: '100%' }
+              }
+              transition={{
+                duration: transitionMobile ? 0.3 : 0.4,
+                ease: EASING.smooth,
+              }}
             />
           </motion.div>
         )}
