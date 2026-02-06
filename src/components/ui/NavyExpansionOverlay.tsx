@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { EASING, NAVY_COLORS } from '@/lib/transitions';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 /**
  * Props for NavyExpansionOverlay
@@ -23,8 +24,8 @@ interface NavyExpansionOverlayProps {
  * - Logout page transition
  * - Dashboard "Back to Website" button
  *
- * The navy panel expands from its initial width to fill the screen,
- * creating a smooth wipe transition before navigation.
+ * Desktop: Navy panel expands left-to-right (matches sidebar layout).
+ * Mobile: Navy bar expands top-to-bottom (matches header layout).
  *
  * @example
  * ```tsx
@@ -39,6 +40,9 @@ export function NavyExpansionOverlay({
   duration = 0.4,
   isVisible = true,
 }: NavyExpansionOverlayProps) {
+  const isMobile = useIsMobile();
+  const mobileDuration = duration * 0.6; // 40% faster on mobile
+
   if (!isVisible) return null;
 
   return (
@@ -46,14 +50,18 @@ export function NavyExpansionOverlay({
       {/* White background (simulates the content area being covered) */}
       <div className="absolute inset-0 bg-white" />
 
-      {/* Navy panel expanding from left to fill screen */}
+      {/* Navy panel: mobile expands top-down, desktop expands left-right */}
       <motion.div
-        className="absolute top-0 left-0 bottom-0"
+        className="absolute top-0 left-0"
         style={{ backgroundColor: NAVY_COLORS.primary }}
-        initial={{ width: initialWidth }}
-        animate={{ width: '100%' }}
+        initial={
+          isMobile
+            ? { width: '100%', height: '3.5rem' }
+            : { width: initialWidth, height: '100%' }
+        }
+        animate={{ width: '100%', height: '100%' }}
         transition={{
-          duration,
+          duration: isMobile ? mobileDuration : duration,
           ease: EASING.smooth,
         }}
       />
