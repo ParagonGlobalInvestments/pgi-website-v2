@@ -77,7 +77,7 @@ export default function RecruitmentTab() {
       const res = await fetch('/api/cms/recruitment', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ items: payload }),
       });
       if (!res.ok) throw new Error('Failed to save');
       toast.success('Saved');

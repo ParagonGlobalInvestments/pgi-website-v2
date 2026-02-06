@@ -44,8 +44,8 @@ export function usePortalUser(enabled = true) {
     {
       // Cache for 30 seconds - prevents duplicate requests
       dedupingInterval: 30000,
-      // Don't refetch on window focus (user data rarely changes)
-      revalidateOnFocus: false,
+      // Refetch on window focus so tab-switching gets fresh data
+      revalidateOnFocus: true,
       // Don't refetch on reconnect
       revalidateOnReconnect: false,
       // Keep stale data while revalidating

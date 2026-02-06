@@ -18,7 +18,14 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+} from 'lucide-react';
 import PersonForm from './PersonForm';
 import type { CmsPerson, PeopleGroupSlug } from '@/lib/cms/types';
 import { PEOPLE_GROUPS } from '@/lib/cms/types';
@@ -28,7 +35,9 @@ export default function PeopleTab() {
   const [people, setPeople] = useState<CmsPerson[]>([]);
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [editingPerson, setEditingPerson] = useState<CmsPerson | undefined>(undefined);
+  const [editingPerson, setEditingPerson] = useState<CmsPerson | undefined>(
+    undefined
+  );
   const [reordering, setReordering] = useState<string | null>(null);
 
   const groupConfig = PEOPLE_GROUPS.find(g => g.slug === groupSlug);
@@ -88,7 +97,9 @@ export default function PeopleTab() {
   const handleDelete = async (person: CmsPerson) => {
     if (!confirm(`Delete "${person.name}"?`)) return;
     try {
-      const res = await fetch(`/api/cms/people/${person.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/cms/people/${person.id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) throw new Error('Failed to delete');
       toast.success('Deleted');
       fetchPeople();
@@ -165,65 +176,78 @@ export default function PeopleTab() {
           No people in this group yet.
         </p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>{getDetailHeader()}</TableHead>
-              <TableHead className="w-32 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {people.map((person, idx) => (
-              <TableRow key={person.id}>
-                <TableCell className="text-gray-500">{idx + 1}</TableCell>
-                <TableCell className="font-medium">{person.name}</TableCell>
-                <TableCell className="text-gray-600">
-                  {getDetailValue(person)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={idx === 0 || reordering !== null}
-                      onClick={() => handleReorder(idx, 'up')}
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={idx === people.length - 1 || reordering !== null}
-                      onClick={() => handleReorder(idx, 'down')}
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleEdit(person)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-red-600 hover:text-red-700"
-                      onClick={() => handleDelete(person)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  {getDetailHeader()}
+                </TableHead>
+                <TableHead className="w-28 sm:w-32 text-right">
+                  Actions
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {people.map((person, idx) => (
+                <TableRow key={person.id}>
+                  <TableCell className="text-gray-500">{idx + 1}</TableCell>
+                  <TableCell>
+                    <span className="font-medium">{person.name}</span>
+                    <span className="block sm:hidden text-xs text-gray-500 mt-0.5">
+                      {getDetailValue(person)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-600 hidden sm:table-cell">
+                    {getDetailValue(person)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        disabled={idx === 0 || reordering !== null}
+                        onClick={() => handleReorder(idx, 'up')}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        disabled={
+                          idx === people.length - 1 || reordering !== null
+                        }
+                        onClick={() => handleReorder(idx, 'down')}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        onClick={() => handleEdit(person)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
+                        onClick={() => handleDelete(person)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <PersonForm
