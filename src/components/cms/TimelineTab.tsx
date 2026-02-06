@@ -11,7 +11,14 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+} from 'lucide-react';
 import TimelineEventForm from './TimelineEventForm';
 import type { CmsTimelineEvent } from '@/lib/cms/types';
 
@@ -19,7 +26,9 @@ export default function TimelineTab() {
   const [events, setEvents] = useState<CmsTimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<CmsTimelineEvent | undefined>(undefined);
+  const [editingEvent, setEditingEvent] = useState<
+    CmsTimelineEvent | undefined
+  >(undefined);
   const [reordering, setReordering] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
@@ -29,7 +38,12 @@ export default function TimelineTab() {
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       // Sort by sort_order
-      setEvents(data.sort((a: CmsTimelineEvent, b: CmsTimelineEvent) => a.sort_order - b.sort_order));
+      setEvents(
+        data.sort(
+          (a: CmsTimelineEvent, b: CmsTimelineEvent) =>
+            a.sort_order - b.sort_order
+        )
+      );
     } catch {
       toast.error('Failed to load timeline events');
     } finally {
@@ -78,7 +92,9 @@ export default function TimelineTab() {
   const handleDelete = async (event: CmsTimelineEvent) => {
     if (!confirm(`Delete "${event.title}"?`)) return;
     try {
-      const res = await fetch(`/api/cms/timeline/${event.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/cms/timeline/${event.id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) throw new Error('Failed to delete');
       toast.success('Deleted');
       fetchEvents();
@@ -139,69 +155,84 @@ export default function TimelineTab() {
           No timeline events yet.
         </p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="w-28">Date</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-32 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {events.map((event, idx) => (
-              <TableRow key={event.id}>
-                <TableCell className="text-gray-500">{idx + 1}</TableCell>
-                <TableCell className="font-medium">{event.title}</TableCell>
-                <TableCell className="text-gray-600">
-                  {formatDate(event.event_date)}
-                </TableCell>
-                <TableCell className="text-gray-600">
-                  {truncate(event.description)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={idx === 0 || reordering !== null}
-                      onClick={() => handleReorder(idx, 'up')}
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={idx === events.length - 1 || reordering !== null}
-                      onClick={() => handleReorder(idx, 'down')}
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleEdit(event)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-red-600 hover:text-red-700"
-                      onClick={() => handleDelete(event)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead className="w-28 hidden sm:table-cell">
+                  Date
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Description
+                </TableHead>
+                <TableHead className="w-28 sm:w-32 text-right">
+                  Actions
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {events.map((event, idx) => (
+                <TableRow key={event.id}>
+                  <TableCell className="text-gray-500">{idx + 1}</TableCell>
+                  <TableCell>
+                    <span className="font-medium">{event.title}</span>
+                    <span className="block sm:hidden text-xs text-gray-500 mt-0.5">
+                      {formatDate(event.event_date)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-600 hidden sm:table-cell">
+                    {formatDate(event.event_date)}
+                  </TableCell>
+                  <TableCell className="text-gray-600 hidden md:table-cell">
+                    {truncate(event.description)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        disabled={idx === 0 || reordering !== null}
+                        onClick={() => handleReorder(idx, 'up')}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        disabled={
+                          idx === events.length - 1 || reordering !== null
+                        }
+                        onClick={() => handleReorder(idx, 'down')}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8"
+                        onClick={() => handleEdit(event)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
+                        onClick={() => handleDelete(event)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <TimelineEventForm

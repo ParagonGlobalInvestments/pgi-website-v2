@@ -74,7 +74,9 @@ export async function checkMembership(
   if (byEmail) {
     const { dbId, ...userData } = byEmail;
     // Link for future fast lookups (fire-and-forget, non-blocking)
-    db.linkSupabaseId(dbId, supabaseId).catch(() => {});
+    db.linkSupabaseId(dbId, supabaseId).catch(err =>
+      console.error('[linkSupabaseId] Failed:', err?.message)
+    );
     return {
       isMember: true,
       user: userData,

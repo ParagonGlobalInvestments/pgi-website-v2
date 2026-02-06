@@ -20,7 +20,11 @@ export default function StatisticsTab() {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         // Sort by sort_order
-        setStats(data.sort((a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order));
+        setStats(
+          data.sort(
+            (a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order
+          )
+        );
       } catch {
         toast.error('Failed to load statistics');
       } finally {
@@ -30,7 +34,11 @@ export default function StatisticsTab() {
     fetch();
   }, []);
 
-  const updateStat = (id: string, field: 'label' | 'value', newValue: string) => {
+  const updateStat = (
+    id: string,
+    field: 'label' | 'value',
+    newValue: string
+  ) => {
     setStats(prev =>
       prev.map(s => (s.id === id ? { ...s, [field]: newValue } : s))
     );
@@ -49,7 +57,7 @@ export default function StatisticsTab() {
       const res = await fetch('/api/cms/statistics', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ items: payload }),
       });
       if (!res.ok) throw new Error('Failed to save');
       toast.success('Saved');
@@ -57,7 +65,11 @@ export default function StatisticsTab() {
       const refreshRes = await fetch('/api/cms/statistics');
       if (refreshRes.ok) {
         const data = await refreshRes.json();
-        setStats(data.sort((a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order));
+        setStats(
+          data.sort(
+            (a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order
+          )
+        );
       }
     } catch {
       toast.error('Failed to save');
