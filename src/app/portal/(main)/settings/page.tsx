@@ -5,6 +5,7 @@ import { Linkedin, Github, Globe, ExternalLink, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Input, Label } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePortalUser } from '@/hooks/usePortalUser';
 import type { User } from '@/types';
 
 const SCHOOL_LABELS: Record<string, string> = {
@@ -83,6 +84,7 @@ export default function SettingsPage() {
   // Store just usernames for cleaner UI
   const [linkedinUsername, setLinkedinUsername] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
+  const { mutate: mutatePortalUser } = usePortalUser();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -140,6 +142,8 @@ export default function SettingsPage() {
       }
 
       setUser(data.user);
+      // Update SWR cache so header/sidebar reflect changes immediately
+      mutatePortalUser();
       setMessage({ type: 'success', text: 'Profile updated successfully.' });
       setTimeout(() => setMessage(null), 4000);
     } catch (err: unknown) {

@@ -81,11 +81,18 @@ export default async function PortalLayout({
   // Check authentication status
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  // If Supabase errored AND no user, redirect to login with error indicator
+  if (authError && !user && !isOnAuthRoute) {
+    redirect('/portal/login?error=auth_failed');
+  }
 
   // If no authenticated user and not on auth route, redirect to portal login
   if (!user && !isOnAuthRoute) {
-    redirect('/portal/login?redirectTo=/portal');
+    const destination = pathname || '/portal';
+    redirect(`/portal/login?redirectTo=${encodeURIComponent(destination)}`);
   }
 
   // If authenticated user is on login route (but NOT returning from OAuth), redirect to dashboard

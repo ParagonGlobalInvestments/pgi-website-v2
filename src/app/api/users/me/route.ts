@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
 import { checkMembership } from '@/lib/auth/checkMembership';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
@@ -102,7 +103,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const db = createDatabase();
+    const db = createDatabase(requireSupabaseAdminClient());
     const user = await db.getUserBySupabaseId(authUser.id);
 
     if (!user) {

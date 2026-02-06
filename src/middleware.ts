@@ -1,5 +1,48 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { portalEnabled } from '@/lib/runtime';
+
+/**
+ * Refresh the Supabase session by creating a server client in middleware.
+ * This is the only place that can reliably write updated auth cookies
+ * (Server Components can't call setAll). Calling getUser() triggers
+ * automatic token refresh if the access token is expired.
+ */
+async function refreshSession(
+  request: NextRequest,
+  response: NextResponse
+): Promise<NextResponse> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Skip if Supabase isn't configured (build-safe)
+  if (!supabaseUrl || !supabaseKey) return response;
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        // Forward updated cookies to both request (for downstream server components)
+        // and response (so the browser gets them)
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  // getUser() triggers token refresh if access token is expired
+  await supabase.auth.getUser();
+
+  return response;
+}
 
 /**
  * Helper to create a response with x-pathname and x-search-params headers.
@@ -85,7 +128,8 @@ export async function middleware(request: NextRequest) {
   if (isPortalSubdomain && portalEnabled) {
     // API routes must NOT be rewritten to /portal/*
     if (pathname.startsWith('/api/')) {
-      return createResponseWithHeaders(pathname, searchParams);
+      const apiResponse = createResponseWithHeaders(pathname, searchParams);
+      return refreshSession(request, apiResponse);
     }
 
     // Auth callback stays at root level
@@ -99,11 +143,12 @@ export async function middleware(request: NextRequest) {
       // Rewrite to /portal/login (keeps /login in URL, serves /portal/login)
       url.pathname = `/portal${pathname}`;
       const response = NextResponse.rewrite(url);
-      return createResponseWithHeaders(
+      const loginResponse = createResponseWithHeaders(
         `/portal${pathname}`,
         searchParams,
         response
       );
+      return refreshSession(request, loginResponse);
     }
 
     // /portal/* on subdomain → redirect to strip prefix (clean URLs)
@@ -111,29 +156,37 @@ export async function middleware(request: NextRequest) {
       const cleanPath = pathname.replace(/^\/portal/, '') || '/';
       const url = request.nextUrl.clone();
       url.pathname = cleanPath;
-      return NextResponse.redirect(url, 301);
+      return NextResponse.redirect(url, 307);
     }
 
     // Legacy path redirect: /home → / (prevents 404 from cached/stale links)
     if (pathname === '/home') {
       const url = request.nextUrl.clone();
       url.pathname = '/';
-      return NextResponse.redirect(url, 301);
+      return NextResponse.redirect(url, 307);
     }
 
     // All other paths → rewrite to /portal/* (transparent to user)
     const url = request.nextUrl.clone();
     url.pathname = `/portal${pathname}`;
     const response = NextResponse.rewrite(url);
-    return createResponseWithHeaders(
+    const rewriteResponse = createResponseWithHeaders(
       `/portal${pathname}`,
       searchParams,
       response
     );
+    return refreshSession(request, rewriteResponse);
   }
 
   // Default: pass through with x-pathname header
-  return createResponseWithHeaders(pathname, searchParams);
+  const defaultResponse = createResponseWithHeaders(pathname, searchParams);
+
+  // Refresh Supabase session for portal-related routes
+  if (pathname.startsWith('/portal') || pathname.startsWith('/api/')) {
+    return refreshSession(request, defaultResponse);
+  }
+
+  return defaultResponse;
 }
 
 export const config = {

@@ -11,7 +11,14 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronUp, ChevronDown, Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import {
+  ChevronUp,
+  ChevronDown,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+} from 'lucide-react';
 import SponsorForm from './SponsorForm';
 import type { CmsSponsor, SponsorType } from '@/lib/cms/types';
 
@@ -21,7 +28,9 @@ export default function SponsorsTab() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [formType, setFormType] = useState<SponsorType>('sponsor');
-  const [editingItem, setEditingItem] = useState<CmsSponsor | undefined>(undefined);
+  const [editingItem, setEditingItem] = useState<CmsSponsor | undefined>(
+    undefined
+  );
   const [reordering, setReordering] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
@@ -91,7 +100,9 @@ export default function SponsorsTab() {
   const handleDelete = async (item: CmsSponsor) => {
     if (!confirm(`Delete "${item.display_name}"?`)) return;
     try {
-      const res = await fetch(`/api/cms/sponsors/${item.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/cms/sponsors/${item.id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) throw new Error('Failed to delete');
       toast.success('Deleted');
       fetchAll();
@@ -134,76 +145,104 @@ export default function SponsorsTab() {
             No {label.toLowerCase()} yet.
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Website</TableHead>
-                <TableHead className="w-32 text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item, idx) => (
-                <TableRow key={item.id}>
-                  <TableCell className="text-gray-500">{idx + 1}</TableCell>
-                  <TableCell className="font-medium">{item.display_name}</TableCell>
-                  <TableCell className="text-gray-600">
-                    {item.website ? (
-                      <a
-                        href={item.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {item.website.replace(/^https?:\/\//, '').slice(0, 40)}
-                      </a>
-                    ) : (
-                      '--'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        disabled={idx === 0 || reordering !== null}
-                        onClick={() => handleReorder(items, setItems, idx, 'up')}
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        disabled={idx === items.length - 1 || reordering !== null}
-                        onClick={() => handleReorder(items, setItems, idx, 'down')}
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700"
-                        onClick={() => handleDelete(item)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    Website
+                  </TableHead>
+                  <TableHead className="w-28 sm:w-32 text-right">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {items.map((item, idx) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="text-gray-500">{idx + 1}</TableCell>
+                    <TableCell>
+                      <span className="font-medium">{item.display_name}</span>
+                      {item.website && (
+                        <a
+                          href={item.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block sm:hidden text-xs text-blue-600 hover:underline mt-0.5 truncate max-w-[180px]"
+                        >
+                          {item.website
+                            .replace(/^https?:\/\//, '')
+                            .slice(0, 30)}
+                        </a>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-gray-600 hidden sm:table-cell">
+                      {item.website ? (
+                        <a
+                          href={item.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {item.website
+                            .replace(/^https?:\/\//, '')
+                            .slice(0, 40)}
+                        </a>
+                      ) : (
+                        '--'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          disabled={idx === 0 || reordering !== null}
+                          onClick={() =>
+                            handleReorder(items, setItems, idx, 'up')
+                          }
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          disabled={
+                            idx === items.length - 1 || reordering !== null
+                          }
+                          onClick={() =>
+                            handleReorder(items, setItems, idx, 'down')
+                          }
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
+                          onClick={() => handleDelete(item)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
     );

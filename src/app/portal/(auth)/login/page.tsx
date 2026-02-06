@@ -124,29 +124,36 @@ function PortalLoginContent() {
    * 4. Navigate to dashboard (staying in same React tree!)
    */
   const handlePostAuth = useCallback(async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    // Extract first name for greeting
-    const firstName =
-      user?.user_metadata?.full_name?.split(' ')[0] ||
-      user?.user_metadata?.name?.split(' ')[0] ||
-      '';
+      // Extract first name for greeting
+      const firstName =
+        user?.user_metadata?.full_name?.split(' ')[0] ||
+        user?.user_metadata?.name?.split(' ')[0] ||
+        '';
 
-    // Switch to greeting mode and trigger decrypt
-    setDisplayMode('greeting');
-    setDecryptKey(prev => prev + 1);
+      // Switch to greeting mode and trigger decrypt
+      setDisplayMode('greeting');
+      setDecryptKey(prev => prev + 1);
 
-    // Trigger the transition animation sequence
-    await triggerTransition(firstName);
+      // Trigger the transition animation sequence
+      await triggerTransition(firstName);
 
-    // Navigate using Next.js router (preserves React tree!)
-    const cleanRedirectTo = redirectTo.startsWith('/portal')
-      ? redirectTo
-      : '/portal';
+      // Navigate using Next.js router (preserves React tree!)
+      const cleanRedirectTo = redirectTo.startsWith('/portal')
+        ? redirectTo
+        : '/portal';
 
-    router.push(cleanRedirectTo);
+      router.push(cleanRedirectTo);
+    } catch {
+      // Recovery: show login button again with error message
+      setError('Something went wrong during login. Please try again.');
+      setDisplayMode('welcome');
+      setDecryptKey(prev => prev + 1);
+    }
   }, [supabase.auth, triggerTransition, router, redirectTo]);
 
   // Run post-auth flow when returning from OAuth
@@ -262,7 +269,7 @@ function PortalLoginContent() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={loading}
-                  className="flex items-center justify-center w-full px-6 py-3.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="flex items-center justify-center w-full px-6 py-3.5 rounded-xl border border-gray-100 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-200 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_2px_8px_rgba(0,0,0,0.08),0_4px_20px_rgba(0,0,0,0.04)]"
                 >
                   <svg
                     className="w-5 h-5 mr-3 flex-shrink-0"
