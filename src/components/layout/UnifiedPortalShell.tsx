@@ -552,19 +552,18 @@ export function UnifiedPortalShell({
   }, [showEntranceAnimation]);
 
   // iOS safe-area background fix
-  // Desktop login: navy body (matches left panel overscroll)
-  // Mobile login: white body (top header is navy, rest is white — no blue bottom)
+  // Login: navy body (matches status bar + header for both mobile and desktop)
   // Dashboard: always white
+  // Bottom overscroll solved by max-h-dvh, so navy is safe on mobile too
   useEffect(() => {
-    const bgColor =
-      showLoginView && !isMobile ? NAVY_COLORS.primary : '#ffffff';
+    const bgColor = showLoginView ? NAVY_COLORS.primary : '#ffffff';
     document.documentElement.style.backgroundColor = bgColor;
     document.body.style.backgroundColor = bgColor;
     return () => {
       document.documentElement.style.backgroundColor = '';
       document.body.style.backgroundColor = '';
     };
-  }, [showLoginView, isMobile]);
+  }, [showLoginView]);
 
   // Auth state management
   // Only sets authUser state - does NOT change mode
@@ -680,8 +679,8 @@ export function UnifiedPortalShell({
   return (
     <ExitTransitionContext.Provider value={exitContextValue}>
       <div className="flex min-h-screen bg-white">
-        {/* Set html/body background - white for clean appearance */}
-        <style>{`html, body { background-color: #ffffff; }`}</style>
+        {/* Set html/body background - matches useEffect logic, prevents flash of wrong color on first paint */}
+        <style>{`html, body { background-color: ${showLoginView ? NAVY_COLORS.primary : '#ffffff'}; }`}</style>
 
         {/* Mobile nav (only for dashboard view) */}
         {showDashboardView && authUser && (
@@ -759,11 +758,11 @@ export function UnifiedPortalShell({
 
         {/* Content panel - always white */}
         <div
-          className={`flex-1 flex flex-col min-h-screen relative bg-white portal-content ${showLoginView ? 'max-h-screen overflow-hidden' : ''}`}
+          className={`flex-1 flex flex-col min-h-screen relative bg-white portal-content ${showLoginView ? 'max-h-dvh overflow-hidden lg:max-h-screen' : ''}`}
         >
           {/* Mobile header for login view */}
           {showLoginView && (
-            <div className="lg:hidden bg-navy px-6 py-4">
+            <div className="lg:hidden bg-navy px-6 py-4 pt-safe">
               <div className="flex items-center justify-between">
                 <Image
                   src="/logos/pgiLogoTransparent.png"
@@ -774,6 +773,7 @@ export function UnifiedPortalShell({
                 />
                 <a
                   href={SITE_URL}
+                  onClick={handleBackToWebsite}
                   className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
                 >
                   Back to Website
@@ -798,7 +798,7 @@ export function UnifiedPortalShell({
           {/* Footer for login view */}
           {showLoginView && (
             <motion.footer
-              className="px-6 py-4 text-center"
+              className="px-6 py-4 pb-safe text-center"
               animate={{ opacity: phase === 'idle' ? 1 : 0 }}
               transition={{ duration: 0.2 }}
             >
