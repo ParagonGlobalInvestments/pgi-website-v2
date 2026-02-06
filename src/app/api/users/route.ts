@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { createDatabase } from '@/lib/supabase/database';
+import { requirePortalEnabledOr404 } from '@/lib/runtime';
 
 export async function GET(req: NextRequest) {
+  const portalCheck = requirePortalEnabledOr404();
+  if (portalCheck) return portalCheck;
+
   try {
     const supabase = requireSupabaseServerClient();
     const {
@@ -33,7 +37,8 @@ export async function GET(req: NextRequest) {
       }
     );
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Failed to fetch users';
+    const msg =
+      error instanceof Error ? error.message : 'Failed to fetch users';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
