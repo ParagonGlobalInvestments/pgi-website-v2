@@ -67,13 +67,9 @@ export function CmsTabLayout<T extends { id: string }>({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap min-w-0">
-          {headerLeft}
-          <span className="text-xs tabular-nums text-gray-400">
-            {countLabel}
-          </span>
-        </div>
+      {headerLeft && <div className="mb-2">{headerLeft}</div>}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs tabular-nums text-gray-400">{countLabel}</span>
         <Button size="sm" className="h-8 text-sm flex-shrink-0" onClick={onAdd}>
           <Plus className="h-3.5 w-3.5 mr-1" />
           Add

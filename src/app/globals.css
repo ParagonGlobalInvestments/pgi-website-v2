@@ -84,6 +84,7 @@ body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
   font-family: var(--font-sans);
+  transition: background-color 300ms ease;
 }
 
 h1,
@@ -176,6 +177,7 @@ html {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: auto;
   scroll-behavior: smooth;
+  transition: background-color 300ms ease;
 }
 
 body {

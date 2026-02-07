@@ -1,9 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePortalUser } from '@/hooks/usePortalUser';
+import {
+  SCHOOL_LABELS,
+  ROLE_LABELS,
+  PROGRAM_LABELS,
+} from '@/components/portal/constants';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -14,77 +19,119 @@ const cardVariants = {
   }),
 };
 
-export default function Home() {
-  const [memberCount, setMemberCount] = useState<number | null>(null);
+interface QuickCard {
+  title: string;
+  description: string;
+  href: string;
+}
 
-  // TODO: Replace with a dedicated count endpoint (e.g. /api/users/count) or
-  // derive from existing cached data to avoid fetching ALL users just for a count.
-  useEffect(() => {
-    fetch('/api/users')
-      .then(res => (res.ok ? res.json() : null))
-      .then(data => data && setMemberCount(data.users?.length || 0))
-      .catch(() => {});
-  }, []);
+function getCardsForRole(
+  role: string | undefined,
+  program: string | null | undefined
+): QuickCard[] {
+  const programName = program ? PROGRAM_LABELS[program] : null;
+
+  const cards: QuickCard[] = [
+    {
+      title: 'Member Directory',
+      description: 'Browse all PGI members. Search by name, school, or role.',
+      href: '/portal/directory',
+    },
+    {
+      title: 'Resources',
+      description: programName
+        ? `${programName} program materials, guides, and reports.`
+        : 'Education materials, recruitment guides, and reports.',
+      href: '/portal/resources',
+    },
+  ];
+
+  if (role === 'admin') {
+    cards.push(
+      {
+        title: 'Content Management',
+        description: 'Edit public site content. Changes go live immediately.',
+        href: '/portal/content',
+      },
+      {
+        title: 'Analytics',
+        description: 'Traffic, performance, and engagement metrics.',
+        href: '/portal/observability',
+      }
+    );
+  }
+
+  return cards;
+}
+
+function HomeSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-8 w-36 mb-2" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+export default function Home() {
+  const { user, isLoading } = usePortalUser();
+
+  if (isLoading) return <HomeSkeleton />;
+
+  const firstName = user?.name?.split(' ')[0] || '';
+  const metaParts = [
+    user?.role ? ROLE_LABELS[user.role] : null,
+    user?.program ? PROGRAM_LABELS[user.program] : null,
+    user?.school ? SCHOOL_LABELS[user.school] : null,
+  ].filter(Boolean);
+
+  const cards = getCardsForRole(user?.role, user?.program);
 
   return (
     <div className="space-y-6">
-      {/* Welcome header */}
+      {/* Identity header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <PortalPageHeader
-          title="Welcome back"
-          description={
-            memberCount !== null
-              ? `${memberCount} members across 8 schools`
-              : 'Loading...'
-          }
-        />
+        <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+          {firstName}
+        </h1>
+        {metaParts.length > 0 && (
+          <p className="text-sm text-gray-400 mt-1">
+            {metaParts.join(' \u00b7 ')}
+          </p>
+        )}
       </motion.div>
 
-      {/* Feature cards — clean, no decorative icons */}
+      {/* Quick-access cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div
-          custom={0}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ y: -2, transition: { duration: 0.2 } }}
-        >
-          <Link href="/portal/directory" className="block group">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                Member Directory
-              </h2>
-              <p className="text-gray-500 text-sm">
-                Browse all PGI members. Search by name, filter by school,
-                program, or role.
-              </p>
-            </div>
-          </Link>
-        </motion.div>
-
-        <motion.div
-          custom={1}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          whileHover={{ y: -2, transition: { duration: 0.2 } }}
-        >
-          <Link href="/portal/resources" className="block group">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                Resources
-              </h2>
-              <p className="text-gray-500 text-sm">
-                Education materials, recruitment guides, and investment pitch
-                reports.
-              </p>
-            </div>
-          </Link>
-        </motion.div>
+        {cards.map((card, i) => (
+          <motion.div
+            key={card.href}
+            custom={i}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ y: -2, transition: { duration: 0.2 } }}
+          >
+            <Link href={card.href} className="block">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                  {card.title}
+                </h2>
+                <p className="text-gray-500 text-sm">{card.description}</p>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
       </div>
     </div>
   );
