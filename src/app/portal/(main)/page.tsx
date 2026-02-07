@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePortalUser } from '@/hooks/usePortalUser';
-import { usePortalShell } from '@/contexts/PortalShellContext';
+import { usePortalTransition } from '@/lib/portal-transitions';
 import {
   SCHOOL_LABELS,
   ROLE_LABELS,
@@ -25,7 +25,7 @@ function makeCardVariants(baseDelay: number) {
       opacity: 1,
       transition: {
         delay: baseDelay + i * 0.1,
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 400,
         damping: 25,
       },
@@ -95,10 +95,9 @@ function HomeSkeleton() {
 
 export default function Home() {
   const { user, isLoading } = usePortalUser();
-  const { phase } = usePortalShell();
+  const { tag, flow } = usePortalTransition();
 
-  // Fix 4: Deferred skeleton — wait 300ms before showing skeleton.
-  // With SWR pre-warm (Fix 1) this rarely fires. Safety net for slow networks.
+  // Deferred skeleton — wait 300ms before showing
   const [showSkeleton, setShowSkeleton] = useState(false);
   useEffect(() => {
     if (!isLoading) return;
@@ -108,9 +107,8 @@ export default function Home() {
 
   if (isLoading) return showSkeleton ? <HomeSkeleton /> : null;
 
-  // Fix 3: Coordinate animations with sidebar when arriving from login.
-  // phase === 'complete' means we just transitioned; sidebar is still springing in.
-  const isFromTransition = phase === 'complete';
+  // Coordinate with sidebar: tag=complete + flow=login:morph means we just transitioned
+  const isFromTransition = tag === 'complete' && flow === 'login:morph';
   const headerDelay = isFromTransition ? 0.15 : 0;
   const cardVariants = makeCardVariants(isFromTransition ? 0.25 : 0);
 

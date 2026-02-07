@@ -2,51 +2,49 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
-import { NavyExpansionOverlay } from '@/components/ui/NavyExpansionOverlay';
-import { SITE_URL } from '@/components/portal/constants';
+import { usePortalTransition } from '@/lib/portal-transitions';
+import { NAVY, LAYOUT } from '@/lib/portal-transitions/config';
 
 export default function LogoutPage() {
   const supabase = createClient();
-  // Synchronous mobile check — must be correct on first render since
-  // the overlay mounts immediately (no user click to wait for useEffect)
-  const [isMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  const { start } = usePortalTransition();
+
+  // Synchronous mobile check — must be correct on first render
+  const [mobile] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.innerWidth < Number.parseInt(LAYOUT.mobileBreakpoint.toString())
+      : false
   );
+
+  // Immediately set body to navy so there's no white flash during logout
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = NAVY.primary;
+    document.body.style.backgroundColor = NAVY.primary;
+  }, []);
 
   useEffect(() => {
     const performLogout = async () => {
       try {
-        // Sign out first
         await supabase.auth.signOut();
       } catch (error) {
         console.error('Error logging out:', error);
       }
 
-      // After expansion animation completes, navigate
-      // Mobile: 300ms (shorter animation), Desktop: 500ms
-      setTimeout(
-        () => {
-          // Use window.location for full page load so home mounts fresh with its animations
-          window.location.href = SITE_URL;
-        },
-        isMobile ? 300 : 500
-      );
+      // Start the exit:logout flow — NavyOverlay handles the visual
+      start('exit:logout', { mobile });
     };
 
     performLogout();
 
-    // Fallback timeout in case something hangs
+    // Fallback timeout
     const timer = setTimeout(() => {
-      window.location.href = SITE_URL;
+      window.location.href =
+        process.env.NEXT_PUBLIC_APP_URL || 'https://paragoninvestments.org';
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [supabase, isMobile]);
+  }, [supabase, mobile, start]);
 
-  return (
-    <NavyExpansionOverlay
-      initialWidth="176px" // Sidebar width (w-44 = 176px)
-      isMobile={isMobile}
-    />
-  );
+  // NavyOverlay renders at root layout level — this page returns nothing
+  return null;
 }
