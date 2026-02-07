@@ -62,6 +62,8 @@ export async function requireAdmin(): Promise<
           githubUrl: null,
           bio: null,
           websiteUrl: null,
+          preferences: {},
+          status: 'active' as const,
           createdAt: now,
           updatedAt: now,
         },

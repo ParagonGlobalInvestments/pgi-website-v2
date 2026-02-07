@@ -19,6 +19,8 @@ interface UserRow {
   github_url: string | null;
   bio: string | null;
   website_url: string | null;
+  status: string;
+  preferences: Record<string, unknown> | null;
   supabase_id: string | null;
   created_at: string;
   updated_at: string;
@@ -37,6 +39,8 @@ function formatUser(row: UserRow): User {
     githubUrl: row.github_url,
     bio: row.bio,
     websiteUrl: row.website_url,
+    status: (row.status as User['status']) || 'active',
+    preferences: (row.preferences as User['preferences']) || {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -59,6 +63,7 @@ export class SupabaseDatabase {
     program?: string;
     role?: string;
     search?: string;
+    status?: string;
   }): Promise<User[]> {
     let query = this.supabase
       .from('users')
@@ -69,6 +74,7 @@ export class SupabaseDatabase {
     if (filters?.school) query = query.eq('school', filters.school);
     if (filters?.program) query = query.eq('program', filters.program);
     if (filters?.role) query = query.eq('role', filters.role);
+    if (filters?.status) query = query.eq('status', filters.status);
     if (filters?.search) query = query.ilike('name', `%${filters.search}%`);
 
     const { data, error } = await query;
@@ -132,17 +138,27 @@ export class SupabaseDatabase {
   /** Update editable profile fields */
   async updateUserProfile(
     userId: string,
-    updates: {
-      name?: string;
-      linkedin_url?: string;
-      github_url?: string;
-      bio?: string | null;
-      website_url?: string | null;
-    }
+    updates: Record<string, unknown>
   ): Promise<User> {
     const { data, error } = await this.supabase
       .from('users')
       .update(updates)
+      .eq('id', userId)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return formatUser(data);
+  }
+
+  /** Update a user's status (admin only) */
+  async updateUserStatus(
+    userId: string,
+    status: 'active' | 'alumni'
+  ): Promise<User> {
+    const { data, error } = await this.supabase
+      .from('users')
+      .update({ status })
       .eq('id', userId)
       .select('*')
       .single();

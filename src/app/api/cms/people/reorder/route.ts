@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidatePeople } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,12 +39,19 @@ export async function POST(req: NextRequest) {
     );
 
     const results = await Promise.all(updates);
-    const failed = results.find((r) => r.error);
+    const failed = results.find(r => r.error);
     if (failed?.error) {
-      return NextResponse.json({ error: failed.error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: failed.error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: { updated: items.length } });
+    revalidatePeople(); // reorder can affect any group
+    return NextResponse.json({
+      success: true,
+      data: { updated: items.length },
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to reorder people';
     return NextResponse.json({ error: msg }, { status: 500 });

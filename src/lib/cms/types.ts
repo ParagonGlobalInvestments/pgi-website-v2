@@ -22,6 +22,8 @@ export interface CmsPerson {
   school: string | null;
   company: string | null;
   linkedin: string | null;
+  headshot_url: string | null;
+  banner_url: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -72,16 +74,51 @@ export interface CmsSponsor {
 export const PEOPLE_GROUPS: {
   slug: PeopleGroupSlug;
   label: string;
-  fields: ('title' | 'school' | 'company' | 'linkedin')[];
+  fields: (
+    | 'title'
+    | 'school'
+    | 'company'
+    | 'linkedin'
+    | 'headshot_url'
+    | 'banner_url'
+  )[];
 }[] = [
-  { slug: 'officers', label: 'Officers', fields: ['title', 'school', 'linkedin'] },
-  { slug: 'alumni-board', label: 'Alumni Board', fields: ['company', 'linkedin'] },
+  {
+    slug: 'officers',
+    label: 'Officers',
+    fields: ['title', 'school', 'linkedin', 'headshot_url', 'banner_url'],
+  },
+  {
+    slug: 'alumni-board',
+    label: 'Alumni Board',
+    fields: ['company', 'linkedin'],
+  },
   { slug: 'founders', label: 'Founders', fields: ['school', 'linkedin'] },
-  { slug: 'chapter-founders', label: 'Chapter Founders', fields: ['school', 'linkedin'] },
-  { slug: 'investment-committee', label: 'Investment Committee', fields: ['school', 'linkedin'] },
-  { slug: 'portfolio-managers', label: 'Portfolio Managers', fields: ['school', 'linkedin'] },
+  {
+    slug: 'chapter-founders',
+    label: 'Chapter Founders',
+    fields: ['school', 'linkedin'],
+  },
+  {
+    slug: 'investment-committee',
+    label: 'Investment Committee',
+    fields: ['school', 'linkedin'],
+  },
+  {
+    slug: 'portfolio-managers',
+    label: 'Portfolio Managers',
+    fields: ['school', 'linkedin'],
+  },
   { slug: 'value-analysts', label: 'Value Analysts', fields: ['school'] },
-  { slug: 'quant-research-committee', label: 'Quant Research Committee', fields: ['school', 'linkedin'] },
+  {
+    slug: 'quant-research-committee',
+    label: 'Quant Research Committee',
+    fields: ['school', 'linkedin'],
+  },
   { slug: 'quant-analysts', label: 'Quant Analysts', fields: ['school'] },
-  { slug: 'recruitment-team', label: 'Recruitment Team', fields: ['title', 'school', 'linkedin'] },
+  {
+    slug: 'recruitment-team',
+    label: 'Recruitment Team',
+    fields: ['title', 'school', 'linkedin'],
+  },
 ];

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidateTimeline } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,12 +43,17 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     }
 
     if (!data) {
-      return NextResponse.json({ error: 'Timeline event not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Timeline event not found' },
+        { status: 404 }
+      );
     }
 
+    revalidateTimeline();
     return NextResponse.json({ success: true, data });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to update timeline event';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to update timeline event';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
@@ -60,18 +66,17 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const supabase = requireSupabaseAdminClient();
 
-    const { error } = await supabase
-      .from('cms_timeline')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('cms_timeline').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidateTimeline();
     return NextResponse.json({ success: true, data: { id } });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to delete timeline event';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to delete timeline event';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

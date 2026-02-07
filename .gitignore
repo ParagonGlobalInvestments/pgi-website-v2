@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# playwright browser session (LinkedIn cookies)
+.playwright-session/
+
 # next.js
 /.next/
 /out/

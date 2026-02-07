@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidateRecruitment } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,8 @@ export async function GET() {
 
     return NextResponse.json(data ?? []);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to fetch recruitment config';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to fetch recruitment config';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
@@ -66,7 +68,10 @@ export async function PUT(req: NextRequest) {
         .upsert(rows, { onConflict: 'key' });
 
       if (upsertError) {
-        return NextResponse.json({ error: upsertError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: upsertError.message },
+          { status: 500 }
+        );
       }
     }
 
@@ -78,7 +83,10 @@ export async function PUT(req: NextRequest) {
         .select('key');
 
       if (fetchExistingError) {
-        return NextResponse.json({ error: fetchExistingError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: fetchExistingError.message },
+          { status: 500 }
+        );
       }
 
       const keysToDelete = (existing || [])
@@ -92,7 +100,10 @@ export async function PUT(req: NextRequest) {
           .in('key', keysToDelete);
 
         if (deleteError) {
-          return NextResponse.json({ error: deleteError.message }, { status: 500 });
+          return NextResponse.json(
+            { error: deleteError.message },
+            { status: 500 }
+          );
         }
       }
     } else {
@@ -103,7 +114,10 @@ export async function PUT(req: NextRequest) {
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) {
-        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: deleteError.message },
+          { status: 500 }
+        );
       }
     }
 
@@ -117,9 +131,13 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
+    revalidateRecruitment();
     return NextResponse.json(data ?? []);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to update recruitment config';
+    const msg =
+      err instanceof Error
+        ? err.message
+        : 'Failed to update recruitment config';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

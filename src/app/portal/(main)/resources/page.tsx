@@ -13,7 +13,10 @@ import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 // Constants
 // ============================================================================
 
-const TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   pdf: FileText,
   doc: FileText,
   sheet: FileSpreadsheet,
@@ -52,13 +55,16 @@ function ResourceDetail({
   const Icon = TYPE_ICONS[resource.type] || FileText;
   const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url);
-  const canPreview = hasUrl && (resource.type === 'pdf' || resource.type === 'sheet');
+  const canPreview =
+    hasUrl && (resource.type === 'pdf' || resource.type === 'sheet');
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <div className={`w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0 ${color}`}>
+        <div
+          className={`w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0 ${color}`}
+        >
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -191,7 +197,9 @@ function ResourceCard({
 
 export default function ResourcesPage() {
   const [activeTab, setActiveTab] = useState(RESOURCE_CATEGORIES[0].id);
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -215,7 +223,7 @@ export default function ResourcesPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Resources</h1>
         <p className="text-gray-500 mt-1 text-sm">
-          Education materials, recruitment prep, and investment pitches
+          General resources, value track materials, and quant prep
         </p>
       </div>
 

@@ -1,37 +1,34 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { CmsStatistic } from '@/lib/cms/types';
 
 export default function StatisticsTab() {
   const [stats, setStats] = useState<CmsStatistic[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const serverStats = useRef<CmsStatistic[]>([]);
 
   useEffect(() => {
-    async function fetch() {
+    async function load() {
       try {
         const res = await window.fetch('/api/cms/statistics');
         if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        // Sort by sort_order
-        setStats(
-          data.sort(
-            (a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order
-          )
-        );
+        const data: CmsStatistic[] = await res.json();
+        const sorted = data.sort((a, b) => a.sort_order - b.sort_order);
+        setStats(sorted);
+        serverStats.current = sorted;
       } catch {
         toast.error('Failed to load statistics');
       } finally {
         setLoading(false);
       }
     }
-    fetch();
+    load();
   }, []);
 
   const updateStat = (
@@ -44,8 +41,14 @@ export default function StatisticsTab() {
     );
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleBlur = async (id: string) => {
+    const current = stats.find(s => s.id === id);
+    const server = serverStats.current.find(s => s.id === id);
+    if (!current || !server) return;
+    if (current.label === server.label && current.value === server.value)
+      return;
+
+    setSavingId(id);
     try {
       const payload = stats.map(s => ({
         id: s.id,
@@ -60,21 +63,17 @@ export default function StatisticsTab() {
         body: JSON.stringify({ items: payload }),
       });
       if (!res.ok) throw new Error('Failed to save');
-      toast.success('Saved');
-      // Refresh
-      const refreshRes = await fetch('/api/cms/statistics');
-      if (refreshRes.ok) {
-        const data = await refreshRes.json();
-        setStats(
-          data.sort(
-            (a: CmsStatistic, b: CmsStatistic) => a.sort_order - b.sort_order
-          )
-        );
-      }
+
+      const data: CmsStatistic[] = await res.json();
+      const sorted = data.sort((a, b) => a.sort_order - b.sort_order);
+      setStats(sorted);
+      serverStats.current = sorted;
     } catch {
       toast.error('Failed to save');
+      // Revert to server values
+      setStats([...serverStats.current]);
     } finally {
-      setSaving(false);
+      setSavingId(null);
     }
   };
 
@@ -113,36 +112,39 @@ export default function StatisticsTab() {
             </div>
             <div className="space-y-2">
               <Label htmlFor={`label-${stat.id}`}>Label</Label>
-              <Input
-                id={`label-${stat.id}`}
-                value={stat.label}
-                onChange={e => updateStat(stat.id, 'label', e.target.value)}
-                placeholder="Display label"
-              />
+              <div className="relative">
+                <Input
+                  id={`label-${stat.id}`}
+                  value={stat.label}
+                  onChange={e => updateStat(stat.id, 'label', e.target.value)}
+                  onBlur={() => handleBlur(stat.id)}
+                  placeholder="Display label"
+                  className={savingId === stat.id ? 'opacity-60' : ''}
+                />
+                {savingId === stat.id && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-gray-400" />
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor={`value-${stat.id}`}>Value</Label>
-              <Input
-                id={`value-${stat.id}`}
-                value={stat.value}
-                onChange={e => updateStat(stat.id, 'value', e.target.value)}
-                placeholder="Statistic value"
-              />
+              <div className="relative">
+                <Input
+                  id={`value-${stat.id}`}
+                  value={stat.value}
+                  onChange={e => updateStat(stat.id, 'value', e.target.value)}
+                  onBlur={() => handleBlur(stat.id)}
+                  placeholder="Statistic value"
+                  className={savingId === stat.id ? 'opacity-60' : ''}
+                />
+              </div>
             </div>
           </div>
         ))}
       </div>
-
-      <div className="flex justify-end pt-4 border-t">
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4 mr-1" />
-          )}
-          Save All
-        </Button>
-      </div>
+      <p className="text-xs text-gray-400">
+        Changes save automatically when you leave a field.
+      </p>
     </div>
   );
 }

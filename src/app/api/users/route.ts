@@ -23,9 +23,10 @@ export async function GET(req: NextRequest) {
     const program = params.get('program') || undefined;
     const role = params.get('role') || undefined;
     const search = params.get('search') || undefined;
+    const status = params.get('status') || undefined;
 
     const db = createDatabase();
-    const users = await db.getUsers({ school, program, role, search });
+    const users = await db.getUsers({ school, program, role, search, status });
 
     return NextResponse.json(
       { success: true, users },
