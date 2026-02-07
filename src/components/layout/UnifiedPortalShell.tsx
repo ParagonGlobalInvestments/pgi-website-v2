@@ -36,6 +36,7 @@ import {
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import { NavyExpansionOverlay } from '@/components/ui/NavyExpansionOverlay';
 import { PortalMobileNav } from '@/components/portal/PortalMobileNav';
+import { MockModeIndicator } from '@/components/portal/MockModeIndicator';
 import { PortalLoadingSkeleton } from '@/components/portal/PortalLoadingSkeleton';
 import {
   NAV_ITEMS,
@@ -776,7 +777,7 @@ export function UnifiedPortalShell({
 
         {/* Content panel - always white */}
         <div
-          className={`flex-1 flex flex-col min-h-screen relative bg-white portal-content ${showLoginView ? 'max-h-dvh overflow-hidden lg:max-h-screen' : ''}`}
+          className={`flex-1 flex flex-col relative bg-white portal-content ${showLoginView ? 'min-h-screen max-h-dvh overflow-hidden lg:max-h-screen' : 'h-screen overflow-y-auto'}`}
         >
           {/* Mobile header for login view — logo only, slides in/out */}
           {showLoginView && (
@@ -810,6 +811,7 @@ export function UnifiedPortalShell({
           ) : (
             // Dashboard content - full width with padding
             <div className="flex-1 min-w-0 text-gray-900">
+              <MockModeIndicator />
               <div className="lg:p-8 p-4 pt-24 lg:pt-8 pb-safe">{children}</div>
             </div>
           )}

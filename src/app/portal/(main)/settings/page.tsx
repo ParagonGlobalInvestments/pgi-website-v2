@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Input, Label } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePortalUser } from '@/hooks/usePortalUser';
+import { useMockUser } from '@/contexts/MockUserContext';
 import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
 import {
   SCHOOL_LABELS,
   ROLE_LABELS,
   PROGRAM_LABELS,
 } from '@/components/portal/constants';
-import type { User, UserPreferences } from '@/types';
+import type { User, UserRole, UserProgram, UserPreferences } from '@/types';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -566,6 +567,131 @@ function ExperienceSection({ userId }: { userId: string }) {
 }
 
 // ============================================================================
+// Mock Mode section (admin only — "View As")
+// ============================================================================
+
+const MOCK_ROLES: { value: UserRole; label: string }[] = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'committee', label: 'Committee' },
+  { value: 'pm', label: 'PM' },
+  { value: 'analyst', label: 'Analyst' },
+];
+
+const MOCK_PROGRAMS: { value: UserProgram | ''; label: string }[] = [
+  { value: '', label: 'None' },
+  { value: 'value', label: 'Value' },
+  { value: 'quant', label: 'Quant' },
+];
+
+function MockModeSection() {
+  const { realUser } = usePortalUser();
+  const { mock, startMock, updateMock, stopMock } = useMockUser();
+
+  if (realUser?.role !== 'admin') return null;
+
+  const selectedRole = mock.isActive ? mock.role : 'analyst';
+  const selectedProgram = mock.isActive ? (mock.program ?? '') : '';
+
+  const handleStart = () => {
+    startMock(selectedRole, selectedProgram || null);
+  };
+
+  const handleRoleChange = (role: UserRole) => {
+    if (mock.isActive) {
+      updateMock({ role });
+    }
+  };
+
+  const handleProgramChange = (program: UserProgram | '') => {
+    if (mock.isActive) {
+      updateMock({ program: program || null });
+    }
+  };
+
+  return (
+    <Section title="View As">
+      <div className="space-y-4">
+        <p className="text-xs text-gray-500">
+          Preview the portal as a different role. API calls always use your real
+          admin credentials.
+        </p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label
+              htmlFor="mock-role"
+              className="text-xs font-medium text-gray-600 mb-1.5 block"
+            >
+              Role
+            </label>
+            <select
+              id="mock-role"
+              value={mock.isActive ? mock.role : selectedRole}
+              onChange={e => {
+                const role = e.target.value as UserRole;
+                if (mock.isActive) handleRoleChange(role);
+              }}
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {MOCK_ROLES.map(r => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label
+              htmlFor="mock-program"
+              className="text-xs font-medium text-gray-600 mb-1.5 block"
+            >
+              Program
+            </label>
+            <select
+              id="mock-program"
+              value={mock.isActive ? (mock.program ?? '') : selectedProgram}
+              onChange={e => {
+                const program = e.target.value as UserProgram | '';
+                if (mock.isActive) handleProgramChange(program);
+              }}
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {MOCK_PROGRAMS.map(p => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {mock.isActive ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={stopMock}
+            className="w-full"
+          >
+            Stop Mock Mode
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="navy"
+            size="sm"
+            onClick={handleStart}
+            className="w-full"
+          >
+            Start Mock Mode
+          </Button>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+// ============================================================================
 // Settings Page
 // ============================================================================
 
@@ -1000,6 +1126,9 @@ export default function SettingsPage() {
 
         {/* RIGHT column */}
         <div className="space-y-6">
+          {/* View As — admin only */}
+          <MockModeSection />
+
           {/* Experience */}
           {!isAdmin && <ExperienceSection userId={user.id} />}
 
