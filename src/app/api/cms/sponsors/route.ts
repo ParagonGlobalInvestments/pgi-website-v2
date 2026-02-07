@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { SponsorType } from '@/lib/cms/types';
+import { revalidateSponsors } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { type, name, display_name, website, image_path, description, sort_order } = body;
+    const {
+      type,
+      name,
+      display_name,
+      website,
+      image_path,
+      description,
+      sort_order,
+    } = body;
 
     if (!type || !name || !display_name) {
       return NextResponse.json(
@@ -84,6 +93,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidateSponsors();
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to create sponsor';

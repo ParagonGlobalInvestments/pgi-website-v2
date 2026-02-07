@@ -70,7 +70,12 @@ export default function SponsorForm({
     if (!file) return;
 
     // Validate file type client-side
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/svg+xml',
+    ];
     if (!allowedTypes.includes(file.type)) {
       toast.error('Invalid file type. Use PNG, JPEG, WebP, or SVG.');
       return;
@@ -104,7 +109,25 @@ export default function SponsorForm({
       const { url } = await res.json();
       setImagePath(url);
       setPreviewUrl(url);
-      toast.success('Image uploaded');
+
+      // Auto-save logo to DB when editing an existing sponsor
+      if (isEditing && sponsor) {
+        const patchRes = await fetch(`/api/cms/sponsors/${sponsor.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_path: url }),
+        });
+        if (!patchRes.ok) {
+          toast.error(
+            'Image uploaded but failed to save — click Update to retry'
+          );
+          return;
+        }
+        toast.success('Logo saved');
+        onSaved();
+      } else {
+        toast.success('Image uploaded — click Create to save');
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
       // Revert preview on error
@@ -124,11 +147,20 @@ export default function SponsorForm({
     e.preventDefault();
   };
 
-  const clearImage = () => {
+  const clearImage = async () => {
     setImagePath('');
     setPreviewUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+    // Auto-save removal when editing an existing sponsor
+    if (isEditing && sponsor) {
+      await fetch(`/api/cms/sponsors/${sponsor.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_path: null }),
+      });
+      onSaved();
     }
   };
 
@@ -166,7 +198,9 @@ export default function SponsorForm({
     };
 
     try {
-      const url = isEditing ? `/api/cms/sponsors/${sponsor!.id}` : '/api/cms/sponsors';
+      const url = isEditing
+        ? `/api/cms/sponsors/${sponsor!.id}`
+        : '/api/cms/sponsors';
       const method = isEditing ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,

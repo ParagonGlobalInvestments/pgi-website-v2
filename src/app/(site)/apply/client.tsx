@@ -71,7 +71,7 @@ function RecruitmentTeamSection({
         </motion.h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-          {members.map((m) => (
+          {members.map(m => (
             <motion.div
               key={m.id}
               className="bg-darkNavy rounded-2xl p-6 border border-gray-700 hover:border-pgi-light-blue transition"
@@ -147,27 +147,26 @@ function RecruitmentTeamSection({
   );
 }
 
-// Static timeline for now - could be moved to CMS later
-const generalTimeline = [
-  { date: 'Monday 12th', detail: 'Applications open' },
-  { date: 'Mon 12th – Fri 16th', detail: 'Coffee chats' },
-  {
-    date: 'Wednesday 14th',
-    detail: '1st info session · 7PM ET',
-    link: 'https://uchicago.zoom.us/meetings/93724594264/invitations?signature=HIwjcPthsxZIX0IoQa2mVVVqNtpNgNb5ZXj-QWwWplc',
-    linkLabel: 'Zoom',
-  },
-  {
-    date: 'Friday 16th',
-    detail: '2nd info session · 5PM ET',
-    link: 'https://uchicago.zoom.us/meetings/97029407547/invitations?signature=N03Z6ZbwFqah1Weq3-kpou---nFrWjNQc-I1WyJxoes',
-    linkLabel: 'Zoom',
-  },
-  { date: 'Monday 19th', detail: 'Applications close · 11:59 PM' },
-  { date: 'Early February', detail: 'Decisions released' },
-];
+function GeneralRecruitment({ config }: { config: Record<string, string> }) {
+  const applicationsOpen = config.applications_open === 'true';
 
-function GeneralRecruitment() {
+  const timeline = [
+    { date: config.app_open_date || 'TBD', detail: 'Applications open' },
+    {
+      date: config.zoom_session_1_time || 'TBD',
+      detail: '1st info session',
+      link: config.zoom_session_1_link || undefined,
+      linkLabel: 'Zoom',
+    },
+    {
+      date: config.zoom_session_2_time || 'TBD',
+      detail: '2nd info session',
+      link: config.zoom_session_2_link || undefined,
+      linkLabel: 'Zoom',
+    },
+    { date: config.app_deadline || 'TBD', detail: 'Applications close' },
+  ];
+
   return (
     <>
       {/* Hero Section */}
@@ -181,7 +180,7 @@ function GeneralRecruitment() {
           >
             <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light mb-6 md:mb-8 text-white">
               <ShinyText
-                text="PGI 2026 National Recruitment"
+                text={`PGI ${new Date().getFullYear()} National Recruitment`}
                 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal"
               />
             </h1>
@@ -199,7 +198,7 @@ function GeneralRecruitment() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto">
             {/* Education Application */}
             <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col"
               initial="hidden"
               animate="visible"
               variants={cardItem}
@@ -233,14 +232,30 @@ function GeneralRecruitment() {
                 below.
               </p>
               <p className="text-white font-medium mb-6 text-sm md:text-base">
-                This opportunity is exclusively available to first-year
-                students.
+                This opportunity is exclusively available to{' '}
+                {config.education_eligibility || 'first-year students'}.
               </p>
+              <div className="mt-auto pt-2">
+                {applicationsOpen && config.education_application_link ? (
+                  <a
+                    href={config.education_application_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
+                  >
+                    Apply Now
+                  </a>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">
+                    Applications are currently closed.
+                  </p>
+                )}
+              </div>
             </motion.div>
 
             {/* Direct Fund Application */}
             <motion.div
-              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"
+              className="bg-darkNavy p-6 md:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 flex flex-col"
               initial="hidden"
               animate="visible"
               variants={cardItem}
@@ -274,9 +289,25 @@ function GeneralRecruitment() {
                 application form.
               </p>
               <p className="text-white font-medium mb-6 text-sm md:text-base">
-                This opportunity is exclusively available to second-year
-                students.
+                This opportunity is exclusively available to{' '}
+                {config.fund_eligibility || 'second-year students'}.
               </p>
+              <div className="mt-auto pt-2">
+                {applicationsOpen && config.fund_application_link ? (
+                  <a
+                    href={config.fund_application_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
+                  >
+                    Apply Now
+                  </a>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">
+                    Applications are currently closed.
+                  </p>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
@@ -316,11 +347,11 @@ function GeneralRecruitment() {
           >
             <div className="absolute left-7 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-pgi-light-blue via-white/20 to-transparent md:-translate-x-px" />
 
-            {generalTimeline.map((item, index) => {
+            {timeline.map((item, index) => {
               const isLeft = index % 2 === 0;
               return (
                 <motion.div
-                  key={`${item.date}-${index}`}
+                  key={`${item.detail}-${index}`}
                   className="relative mb-10 md:mb-14 flex flex-col md:flex-row"
                   variants={timelineItemVariants}
                 >
@@ -406,10 +437,11 @@ function GeneralRecruitment() {
 
 export default function ApplyClient({
   recruitmentTeam,
+  recruitmentConfig,
 }: ApplyClientProps) {
   return (
     <div className="bg-pgi-dark-blue text-white min-h-screen">
-      <GeneralRecruitment />
+      <GeneralRecruitment config={recruitmentConfig} />
       <RecruitmentTeamSection
         members={recruitmentTeam}
         title="National Recruitment Team"

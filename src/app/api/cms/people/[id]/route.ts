@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidatePeople } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,16 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const body = await req.json();
 
-    const allowed = ['group_slug', 'name', 'title', 'school', 'company', 'linkedin', 'sort_order'];
+    const allowed = [
+      'group_slug',
+      'name',
+      'title',
+      'school',
+      'company',
+      'linkedin',
+      'headshot_url',
+      'sort_order',
+    ];
     const updates: Record<string, unknown> = {};
     for (const key of allowed) {
       if (body[key] !== undefined) {
@@ -45,6 +55,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Person not found' }, { status: 404 });
     }
 
+    revalidatePeople(data.group_slug);
     return NextResponse.json({ success: true, data });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to update person';
@@ -60,15 +71,13 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const supabase = requireSupabaseAdminClient();
 
-    const { error } = await supabase
-      .from('cms_people')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('cms_people').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidatePeople(); // group unknown after delete — revalidate all
     return NextResponse.json({ success: true, data: { id } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to delete person';

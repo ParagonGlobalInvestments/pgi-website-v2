@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, Linkedin, Mail, Github, Globe, X } from 'lucide-react';
+import {
+  Search,
+  Linkedin,
+  Mail,
+  Github,
+  Globe,
+  X,
+  Briefcase,
+} from 'lucide-react';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
 import {
@@ -72,6 +80,81 @@ const gridItemVariants = {
 };
 
 // ============================================================================
+// Experience display
+// ============================================================================
+
+interface ExperienceRow {
+  id: string;
+  company: string;
+  role: string;
+  start_year: number;
+  end_year: number | null;
+}
+
+function ExperienceList({ userId }: { userId: string }) {
+  const [entries, setEntries] = useState<ExperienceRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchExperience = async () => {
+      try {
+        const res = await fetch(`/api/users/${userId}/experience`);
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setEntries(data.experience ?? []);
+        }
+      } catch {
+        // silently fail
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchExperience();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  if (loading) return null;
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        Experience
+      </h3>
+      <div className="space-y-1.5">
+        {entries.map(intern => (
+          <div
+            key={intern.id}
+            className="flex items-start gap-2.5 py-2 text-sm"
+          >
+            <Briefcase
+              className="text-gray-400 flex-shrink-0 mt-0.5"
+              size={14}
+            />
+            <div className="min-w-0">
+              <p className="text-gray-900 font-medium">{intern.role}</p>
+              <p className="text-gray-500 text-xs">
+                {intern.company}
+                {intern.start_year && (
+                  <>
+                    {' '}
+                    · {intern.start_year}
+                    {intern.end_year ? `–${intern.end_year}` : '–Present'}
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Member Detail Panel Content
 // ============================================================================
 
@@ -121,9 +204,6 @@ function MemberDetail({ user }: { user: User }) {
         </div>
       </div>
 
-      {/* Bio */}
-      {user.bio && <p className="text-sm text-gray-600 -mt-2">{user.bio}</p>}
-
       {/* Details */}
       <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
@@ -141,6 +221,9 @@ function MemberDetail({ user }: { user: User }) {
           </div>
         )}
       </div>
+
+      {/* Experience */}
+      <ExperienceList userId={user.id} />
 
       {/* Contact & Links */}
       <div className="space-y-2">
@@ -224,6 +307,7 @@ export default function DirectoryPage() {
     school: 'all',
     program: 'all',
     role: 'all',
+    status: 'active',
   });
 
   // Debounce search
@@ -232,7 +316,7 @@ export default function DirectoryPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch users
+  // Fetch users (include all statuses, filter client-side)
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -257,19 +341,25 @@ export default function DirectoryPage() {
   }, []);
 
   // Filter users
-  const filteredUsers = useMemo(() => users.filter(user => {
-      if (debouncedSearch) {
-        const term = debouncedSearch.toLowerCase();
-        const haystack = `${user.name} ${user.email}`.toLowerCase();
-        if (!haystack.includes(term)) return false;
-      }
-      if (filter.school !== 'all' && user.school !== filter.school)
-        return false;
-      if (filter.program !== 'all' && user.program !== filter.program)
-        return false;
-      if (filter.role !== 'all' && user.role !== filter.role) return false;
-      return true;
-    }), [users, debouncedSearch, filter]);
+  const filteredUsers = useMemo(
+    () =>
+      users.filter(user => {
+        if (debouncedSearch) {
+          const term = debouncedSearch.toLowerCase();
+          const haystack = `${user.name} ${user.email}`.toLowerCase();
+          if (!haystack.includes(term)) return false;
+        }
+        if (filter.school !== 'all' && user.school !== filter.school)
+          return false;
+        if (filter.program !== 'all' && user.program !== filter.program)
+          return false;
+        if (filter.role !== 'all' && user.role !== filter.role) return false;
+        if (filter.status !== 'all' && user.status !== filter.status)
+          return false;
+        return true;
+      }),
+    [users, debouncedSearch, filter]
+  );
 
   const handleFilterChange = useCallback((type: string, value: string) => {
     setFilter(prev => ({ ...prev, [type]: value }));
@@ -279,6 +369,7 @@ export default function DirectoryPage() {
     filter.school !== 'all' ||
     filter.program !== 'all' ||
     filter.role !== 'all' ||
+    filter.status !== 'active' ||
     searchTerm !== '';
 
   const openPanel = (user: User) => {
@@ -361,12 +452,31 @@ export default function DirectoryPage() {
             </SelectContent>
           </Select>
 
+          <Select
+            value={filter.status}
+            onValueChange={v => handleFilterChange('status', v)}
+          >
+            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="alumni">Alumni</SelectItem>
+              <SelectItem value="all">All Members</SelectItem>
+            </SelectContent>
+          </Select>
+
           {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                setFilter({ school: 'all', program: 'all', role: 'all' });
+                setFilter({
+                  school: 'all',
+                  program: 'all',
+                  role: 'all',
+                  status: 'active',
+                });
                 setSearchTerm('');
               }}
               className="h-9 text-sm text-gray-600"
@@ -478,6 +588,14 @@ export default function DirectoryPage() {
                       <>
                         <span className="text-gray-300">|</span>
                         <span>Class of {user.graduationYear}</span>
+                      </>
+                    )}
+                    {user.status === 'alumni' && (
+                      <>
+                        <span className="text-gray-300">|</span>
+                        <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-semibold uppercase">
+                          Alumni
+                        </span>
                       </>
                     )}
                   </div>

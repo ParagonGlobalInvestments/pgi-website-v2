@@ -1,7 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   Select,
   SelectTrigger,
@@ -18,15 +33,10 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import {
-  ChevronUp,
-  ChevronDown,
-  Plus,
-  Pencil,
-  Trash2,
-  Loader2,
-} from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import PersonForm from './PersonForm';
+import { SortableRow } from './SortableRow';
 import type { CmsPerson, PeopleGroupSlug } from '@/lib/cms/types';
 import { PEOPLE_GROUPS } from '@/lib/cms/types';
 
@@ -38,9 +48,13 @@ export default function PeopleTab() {
   const [editingPerson, setEditingPerson] = useState<CmsPerson | undefined>(
     undefined
   );
-  const [reordering, setReordering] = useState<string | null>(null);
 
   const groupConfig = PEOPLE_GROUPS.find(g => g.slug === groupSlug);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  );
 
   const fetchPeople = useCallback(async () => {
     setLoading(true);
@@ -60,51 +74,72 @@ export default function PeopleTab() {
     fetchPeople();
   }, [fetchPeople]);
 
-  const handleReorder = async (index: number, direction: 'up' | 'down') => {
-    const swapIndex = direction === 'up' ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= people.length) return;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const itemA = people[index];
-    const itemB = people[swapIndex];
-    const key = `${itemA.id}-${direction}`;
-    setReordering(key);
+    const oldIndex = people.findIndex(p => p.id === active.id);
+    const newIndex = people.findIndex(p => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
 
     // Optimistic update
-    const updated = [...people];
-    [updated[index], updated[swapIndex]] = [updated[swapIndex], updated[index]];
-    setPeople(updated);
+    const reordered = arrayMove(people, oldIndex, newIndex);
+    setPeople(reordered);
+
+    // Build sort_order updates — assign sequential order
+    const items = reordered.map((person, idx) => ({
+      id: person.id,
+      sort_order: idx,
+    }));
 
     try {
       const res = await fetch('/api/cms/people/reorder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: [
-            { id: itemA.id, sort_order: itemB.sort_order },
-            { id: itemB.id, sort_order: itemA.sort_order },
-          ],
-        }),
+        body: JSON.stringify({ items }),
       });
       if (!res.ok) throw new Error('Failed to reorder');
     } catch {
       toast.error('Failed to reorder');
       fetchPeople();
-    } finally {
-      setReordering(null);
     }
   };
 
-  const handleDelete = async (person: CmsPerson) => {
-    if (!confirm(`Delete "${person.name}"?`)) return;
+  const undoRef = useRef<{ id: string; undone: boolean } | null>(null);
+
+  const handleDelete = (person: CmsPerson) => {
+    const snapshot = [...people];
+    setPeople(prev => prev.filter(p => p.id !== person.id));
+
+    const undo = { id: person.id, undone: false };
+    undoRef.current = undo;
+
+    toast(`Deleted "${person.name}"`, {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          undo.undone = true;
+          setPeople(snapshot);
+        },
+      },
+      duration: 5000,
+      onAutoClose: () => commitDelete(person.id, undo, snapshot),
+      onDismiss: () => commitDelete(person.id, undo, snapshot),
+    });
+  };
+
+  const commitDelete = async (
+    id: string,
+    undo: { undone: boolean },
+    snapshot: CmsPerson[]
+  ) => {
+    if (undo.undone) return;
     try {
-      const res = await fetch(`/api/cms/people/${person.id}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/cms/people/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
-      toast.success('Deleted');
-      fetchPeople();
     } catch {
-      toast.error('Failed to delete');
+      toast.error('Failed to delete — restoring');
+      setPeople(snapshot);
     }
   };
 
@@ -118,10 +153,13 @@ export default function PeopleTab() {
     setFormOpen(true);
   };
 
-  /** Return the contextual detail column value based on which fields the group uses */
+  const IMAGE_FIELDS = ['headshot_url', 'banner_url'];
+
   const getDetailValue = (person: CmsPerson): string => {
     if (!groupConfig) return '';
-    const fields = groupConfig.fields.filter(f => f !== 'linkedin');
+    const fields = groupConfig.fields.filter(
+      f => f !== 'linkedin' && !IMAGE_FIELDS.includes(f)
+    );
     const parts: string[] = [];
     for (const f of fields) {
       const val = person[f];
@@ -132,7 +170,9 @@ export default function PeopleTab() {
 
   const getDetailHeader = (): string => {
     if (!groupConfig) return 'Details';
-    const fields = groupConfig.fields.filter(f => f !== 'linkedin');
+    const fields = groupConfig.fields.filter(
+      f => f !== 'linkedin' && !IMAGE_FIELDS.includes(f)
+    );
     if (fields.length === 0) return 'Details';
     const labels: Record<string, string> = {
       title: 'Title',
@@ -177,80 +217,94 @@ export default function PeopleTab() {
         </p>
       ) : (
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden sm:table-cell">
-                  {getDetailHeader()}
-                </TableHead>
-                <TableHead className="w-28 sm:w-32 text-right">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {people.map((person, idx) => (
-                <TableRow key={person.id}>
-                  <TableCell className="text-gray-500">{idx + 1}</TableCell>
-                  <TableCell>
-                    <span className="font-medium">{person.name}</span>
-                    <span className="block sm:hidden text-xs text-gray-500 mt-0.5">
-                      {getDetailValue(person)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-gray-600 hidden sm:table-cell">
-                    {getDetailValue(person)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-0.5 sm:gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 sm:h-8 sm:w-8"
-                        disabled={idx === 0 || reordering !== null}
-                        onClick={() => handleReorder(idx, 'up')}
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 sm:h-8 sm:w-8"
-                        disabled={
-                          idx === people.length - 1 || reordering !== null
-                        }
-                        onClick={() => handleReorder(idx, 'down')}
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 sm:h-8 sm:w-8"
-                        onClick={() => handleEdit(person)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
-                        onClick={() => handleDelete(person)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8" />
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    {getDetailHeader()}
+                  </TableHead>
+                  <TableHead className="w-20 text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <SortableContext
+                items={people.map(p => p.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <TableBody>
+                  {people.map((person, idx) => (
+                    <SortableRow key={person.id} id={person.id}>
+                      <TableCell className="text-gray-500">{idx + 1}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2.5">
+                          {person.headshot_url ? (
+                            <Image
+                              src={person.headshot_url}
+                              alt=""
+                              width={28}
+                              height={28}
+                              className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <span className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 text-xs font-medium flex items-center justify-center flex-shrink-0">
+                              {person.name
+                                .split(' ')
+                                .map(w => w[0])
+                                .join('')
+                                .slice(0, 2)
+                                .toUpperCase()}
+                            </span>
+                          )}
+                          <div className="min-w-0">
+                            <span className="font-medium">{person.name}</span>
+                            <span className="block sm:hidden text-xs text-gray-500 mt-0.5">
+                              {getDetailValue(person)}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-600 hidden sm:table-cell">
+                        {getDetailValue(person)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 sm:h-8 sm:w-8"
+                            onClick={() => handleEdit(person)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
+                            onClick={() => handleDelete(person)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </SortableRow>
+                  ))}
+                </TableBody>
+              </SortableContext>
+            </Table>
+          </DndContext>
         </div>
       )}
 
       <PersonForm
+        key={editingPerson?.id ?? 'new'}
         open={formOpen}
         onOpenChange={setFormOpen}
         groupSlug={groupSlug}

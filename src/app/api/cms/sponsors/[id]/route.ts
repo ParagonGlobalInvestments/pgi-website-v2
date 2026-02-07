@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidateSponsors } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,15 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const body = await req.json();
 
-    const allowed = ['type', 'name', 'display_name', 'website', 'image_path', 'description', 'sort_order'];
+    const allowed = [
+      'type',
+      'name',
+      'display_name',
+      'website',
+      'image_path',
+      'description',
+      'sort_order',
+    ];
     const updates: Record<string, unknown> = {};
     for (const key of allowed) {
       if (body[key] !== undefined) {
@@ -45,6 +54,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Sponsor not found' }, { status: 404 });
     }
 
+    revalidateSponsors();
     return NextResponse.json({ success: true, data });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to update sponsor';
@@ -60,15 +70,13 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const supabase = requireSupabaseAdminClient();
 
-    const { error } = await supabase
-      .from('cms_sponsors')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('cms_sponsors').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidateSponsors();
     return NextResponse.json({ success: true, data: { id } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to delete sponsor';

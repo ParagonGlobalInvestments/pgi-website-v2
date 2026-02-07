@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidateStatistics } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,8 @@ export async function GET() {
 
     return NextResponse.json(data ?? []);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to fetch statistics';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to fetch statistics';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
@@ -36,7 +38,9 @@ export async function PUT(req: NextRequest) {
 
     if (!Array.isArray(items)) {
       return NextResponse.json(
-        { error: 'items must be an array of { key, label, value, sort_order }' },
+        {
+          error: 'items must be an array of { key, label, value, sort_order }',
+        },
         { status: 400 }
       );
     }
@@ -44,7 +48,10 @@ export async function PUT(req: NextRequest) {
     for (const item of items) {
       if (!item.key || !item.label || typeof item.value !== 'string') {
         return NextResponse.json(
-          { error: 'Each item must have key, label (strings) and value (string)' },
+          {
+            error:
+              'Each item must have key, label (strings) and value (string)',
+          },
           { status: 400 }
         );
       }
@@ -54,7 +61,15 @@ export async function PUT(req: NextRequest) {
 
     // Build rows with sort_order
     const rows = items.map(
-      (item: { key: string; label: string; value: string; sort_order?: number }, idx: number) => ({
+      (
+        item: {
+          key: string;
+          label: string;
+          value: string;
+          sort_order?: number;
+        },
+        idx: number
+      ) => ({
         key: String(item.key).trim(),
         label: String(item.label).trim(),
         value: String(item.value).trim(),
@@ -70,7 +85,10 @@ export async function PUT(req: NextRequest) {
         .upsert(rows, { onConflict: 'key' });
 
       if (upsertError) {
-        return NextResponse.json({ error: upsertError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: upsertError.message },
+          { status: 500 }
+        );
       }
     }
 
@@ -82,7 +100,10 @@ export async function PUT(req: NextRequest) {
         .select('key');
 
       if (fetchExistingError) {
-        return NextResponse.json({ error: fetchExistingError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: fetchExistingError.message },
+          { status: 500 }
+        );
       }
 
       const keysToDelete = (existing || [])
@@ -96,7 +117,10 @@ export async function PUT(req: NextRequest) {
           .in('key', keysToDelete);
 
         if (deleteError) {
-          return NextResponse.json({ error: deleteError.message }, { status: 500 });
+          return NextResponse.json(
+            { error: deleteError.message },
+            { status: 500 }
+          );
         }
       }
     } else {
@@ -107,7 +131,10 @@ export async function PUT(req: NextRequest) {
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (deleteError) {
-        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: deleteError.message },
+          { status: 500 }
+        );
       }
     }
 
@@ -121,9 +148,11 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
+    revalidateStatistics();
     return NextResponse.json(data ?? []);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to update statistics';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to update statistics';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

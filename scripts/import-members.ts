@@ -68,28 +68,8 @@ function mapProgram(csvSide: string): string | null {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Dev accounts (added or upgraded from CSV)
-// Loaded from data/admin-accounts.json (gitignored) to keep PII out of VCS
-// ---------------------------------------------------------------------------
-
-interface DevOverride {
-  email: string;
-  alternateEmails: string[];
-  role: string;
-  program: string | null;
-  school: string;
-  name?: string;
-  graduationYear?: number;
-}
-
-const adminPath = resolve(__dirname, '../data/admin-accounts.json');
-let DEV_ACCOUNTS: DevOverride[] = [];
-try {
-  DEV_ACCOUNTS = JSON.parse(readFileSync(adminPath, 'utf-8'));
-} catch {
-  console.warn('No data/admin-accounts.json found — skipping admin overrides');
-}
+// Admin roles are set directly in the users table (role = 'admin').
+// No separate admin accounts file needed.
 
 // ---------------------------------------------------------------------------
 // Parse CSV
@@ -174,10 +154,6 @@ async function main() {
   const rows = parseCSV(csvPath);
   console.log(`Parsed ${rows.length} unique members from CSV`);
 
-  // Build insert records, applying dev overrides
-  const devEmailMap = new Map(DEV_ACCOUNTS.map(d => [d.email, d]));
-  const insertedEmails = new Set<string>();
-
   interface InsertRecord {
     name: string;
     email: string;
@@ -188,51 +164,15 @@ async function main() {
     graduation_year: number | null;
   }
 
-  const records: InsertRecord[] = [];
-
-  // Process CSV rows
-  for (const row of rows) {
-    const dev = devEmailMap.get(row.email);
-    if (dev) {
-      // Dev exists in CSV — override role, add alternate_emails
-      records.push({
-        name: dev.name || row.name,
-        email: row.email,
-        alternate_emails: dev.alternateEmails,
-        role: dev.role,
-        program: dev.program,
-        school: dev.school,
-        graduation_year: row.graduationYear,
-      });
-      insertedEmails.add(row.email);
-    } else {
-      records.push({
-        name: row.name,
-        email: row.email,
-        alternate_emails: [],
-        role: row.role,
-        program: row.program,
-        school: row.school,
-        graduation_year: row.graduationYear,
-      });
-      insertedEmails.add(row.email);
-    }
-  }
-
-  // Add dev accounts NOT already in CSV
-  for (const dev of DEV_ACCOUNTS) {
-    if (!insertedEmails.has(dev.email)) {
-      records.push({
-        name: dev.name || dev.email.split('@')[0],
-        email: dev.email,
-        alternate_emails: dev.alternateEmails,
-        role: dev.role,
-        program: dev.program,
-        school: dev.school,
-        graduation_year: dev.graduationYear || null,
-      });
-    }
-  }
+  const records: InsertRecord[] = rows.map(row => ({
+    name: row.name,
+    email: row.email,
+    alternate_emails: [],
+    role: row.role,
+    program: row.program,
+    school: row.school,
+    graduation_year: row.graduationYear,
+  }));
 
   console.log(`Total records to insert: ${records.length}`);
 
@@ -248,16 +188,23 @@ async function main() {
       console.error(`Error inserting batch ${i / batchSize + 1}:`, error);
       // Try inserting one by one to find the problem record
       for (const record of batch) {
-        const { error: singleError } = await supabase.from('users').insert(record);
+        const { error: singleError } = await supabase
+          .from('users')
+          .insert(record);
         if (singleError) {
-          console.error(`  Failed: ${record.name} (${record.email}):`, singleError.message);
+          console.error(
+            `  Failed: ${record.name} (${record.email}):`,
+            singleError.message
+          );
         } else {
           inserted++;
         }
       }
     } else {
       inserted += batch.length;
-      console.log(`Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} records`);
+      console.log(
+        `Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} records`
+      );
     }
   }
 
@@ -274,7 +221,9 @@ async function main() {
     .from('users')
     .select('name, email')
     .eq('role', 'admin');
-  console.log(`  Admins (${admins?.length}): ${admins?.map(a => a.name).join(', ')}`);
+  console.log(
+    `  Admins (${admins?.length}): ${admins?.map(a => a.name).join(', ')}`
+  );
 
   const { count: committeeCount } = await supabase
     .from('users')

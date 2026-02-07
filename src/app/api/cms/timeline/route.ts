@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
+import { revalidateTimeline } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,8 @@ export async function GET() {
 
     return NextResponse.json(data ?? []);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to fetch timeline events';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to fetch timeline events';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
@@ -57,9 +59,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidateTimeline();
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Failed to create timeline event';
+    const msg =
+      err instanceof Error ? err.message : 'Failed to create timeline event';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

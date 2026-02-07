@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { PeopleGroupSlug } from '@/lib/cms/types';
+import { revalidatePeople } from '@/lib/cms/revalidate';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { group_slug, name, title, school, company, linkedin, sort_order } = body;
+    const {
+      group_slug,
+      name,
+      title,
+      school,
+      company,
+      linkedin,
+      headshot_url,
+      sort_order,
+    } = body;
 
     if (!group_slug || !name) {
       return NextResponse.json(
@@ -86,6 +96,7 @@ export async function POST(req: NextRequest) {
         school: school ? String(school).trim() : null,
         company: company ? String(company).trim() : null,
         linkedin: linkedin ? String(linkedin).trim() : null,
+        headshot_url: headshot_url ? String(headshot_url).trim() : null,
         sort_order: sort_order ?? 0,
       })
       .select()
@@ -95,6 +106,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidatePeople(group_slug as PeopleGroupSlug);
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to create person';

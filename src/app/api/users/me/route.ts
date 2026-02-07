@@ -112,8 +112,8 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
 
-    // Only allow name, linkedinUrl, githubUrl, bio, websiteUrl
-    const updates: Record<string, string | null> = {};
+    // Only allow name, linkedinUrl, githubUrl, bio, websiteUrl, preferences
+    const updates: Record<string, unknown> = {};
 
     if (body.name !== undefined) {
       const name = String(body.name).trim();
@@ -174,6 +174,13 @@ export async function PATCH(req: NextRequest) {
         );
       }
       updates.website_url = url;
+    }
+
+    if (
+      body.preferences !== undefined &&
+      typeof body.preferences === 'object'
+    ) {
+      updates.preferences = body.preferences;
     }
 
     if (Object.keys(updates).length === 0) {
