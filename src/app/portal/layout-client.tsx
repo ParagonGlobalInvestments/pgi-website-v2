@@ -1,6 +1,7 @@
 'use client';
 
 import { PortalShellProvider } from '@/contexts/PortalShellContext';
+import { MockUserProvider } from '@/contexts/MockUserContext';
 import { UnifiedPortalShell } from '@/components/layout/UnifiedPortalShell';
 
 interface PortalLayoutClientProps {
@@ -12,7 +13,8 @@ interface PortalLayoutClientProps {
 /**
  * Client component wrapper that provides:
  * 1. PortalShellProvider - shared animation state context
- * 2. UnifiedPortalShell - morphing layout (login ↔ dashboard)
+ * 2. MockUserProvider - admin "View As" mock user context
+ * 3. UnifiedPortalShell - morphing layout (login ↔ dashboard)
  *
  * The shell mode is determined by:
  * - isAuthenticated prop from server (initial state)
@@ -30,8 +32,10 @@ export default function PortalLayoutClient({
     isAuthenticated && !isPostAuthRedirect ? 'dashboard' : 'login';
 
   return (
-    <PortalShellProvider initialMode={initialMode}>
-      <UnifiedPortalShell>{children}</UnifiedPortalShell>
-    </PortalShellProvider>
+    <MockUserProvider>
+      <PortalShellProvider initialMode={initialMode}>
+        <UnifiedPortalShell>{children}</UnifiedPortalShell>
+      </PortalShellProvider>
+    </MockUserProvider>
   );
 }

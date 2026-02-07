@@ -1,6 +1,8 @@
 'use client';
 
+import { useMemo } from 'react';
 import useSWR from 'swr';
+import { useMockUser } from '@/contexts/MockUserContext';
 import type { User } from '@/types';
 
 /**
@@ -33,8 +35,11 @@ async function fetchPortalUser(): Promise<User | null> {
  * - Client-side caching: 30s dedupe interval prevents refetches
  * - Stale-while-revalidate: Shows cached data while refreshing
  *
+ * When mock mode is active (admin only), overlays mocked role/program
+ * on the real user. API calls always use the real auth token.
+ *
  * @param enabled - Whether to fetch (default: true). Set to false when user not authenticated.
- * @returns { user, isLoading, error, mutate }
+ * @returns { user, realUser, isLoading, error, mutate, isMember }
  */
 export function usePortalUser(enabled = true) {
   const { data, error, isLoading, mutate } = useSWR(
@@ -55,8 +60,20 @@ export function usePortalUser(enabled = true) {
     }
   );
 
+  const { mock } = useMockUser();
+
+  // Overlay mock role/program when active (admin only, client-side only)
+  const user = useMemo(() => {
+    if (!data) return null;
+    if (!mock.isActive || data.role !== 'admin') return data;
+    return { ...data, role: mock.role, program: mock.program } as User;
+  }, [data, mock.isActive, mock.role, mock.program]);
+
   return {
-    user: data ?? null,
+    /** User with mock overlay applied (if active) */
+    user: user ?? null,
+    /** Real user — never mocked. Use for admin checks in mock UI. */
+    realUser: data ?? null,
     isLoading,
     error,
     /** Manually revalidate user data */
