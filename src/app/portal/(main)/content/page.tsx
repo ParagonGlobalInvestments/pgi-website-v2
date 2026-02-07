@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import PeopleTab from '@/components/cms/PeopleTab';
@@ -8,7 +7,8 @@ import RecruitmentTab from '@/components/cms/RecruitmentTab';
 import StatisticsTab from '@/components/cms/StatisticsTab';
 import TimelineTab from '@/components/cms/TimelineTab';
 import SponsorsTab from '@/components/cms/SponsorsTab';
-import type { User } from '@/types';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import { usePortalUser } from '@/hooks/usePortalUser';
 
 function ContentSkeleton() {
   return (
@@ -33,25 +33,9 @@ function ContentSkeleton() {
 }
 
 export default function ContentPage() {
-  const [portalUser, setPortalUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user: portalUser, isLoading } = usePortalUser();
 
-  useEffect(() => {
-    async function check() {
-      try {
-        const res = await fetch('/api/users/me');
-        if (res.ok) {
-          const data = await res.json();
-          setPortalUser(data.user);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    check();
-  }, []);
-
-  if (loading) return <ContentSkeleton />;
+  if (isLoading) return <ContentSkeleton />;
   if (!portalUser || portalUser.role !== 'admin')
     return (
       <div className="p-8 text-red-600 font-medium">
@@ -60,11 +44,11 @@ export default function ContentPage() {
     );
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-1">Content Management</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Edit public site content. Changes go live immediately.
-      </p>
+    <div className="space-y-6">
+      <PortalPageHeader
+        title="Content Management"
+        description="Edit public site content. Changes go live immediately."
+      />
       <Tabs defaultValue="people" className="w-full">
         <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <TabsList>

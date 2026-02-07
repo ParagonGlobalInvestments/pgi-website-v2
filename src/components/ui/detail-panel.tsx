@@ -8,6 +8,7 @@ interface DetailPanelProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  'aria-label'?: string;
 }
 
 /**
@@ -18,7 +19,12 @@ interface DetailPanelProps {
  * Portal rendering guarantees no parent CSS (space-y, margin, padding)
  * can leak into the fixed-position overlay.
  */
-export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
+export function DetailPanel({
+  isOpen,
+  onClose,
+  children,
+  'aria-label': ariaLabel,
+}: DetailPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -67,6 +73,7 @@ export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
         ref={panelRef}
         role="dialog"
         aria-modal="true"
+        aria-label={ariaLabel}
         className={`
           fixed z-[95] bg-white overflow-y-auto overscroll-contain
           transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
@@ -82,9 +89,10 @@ export function DetailPanel({ isOpen, onClose, children }: DetailPanelProps) {
           sm:border-l sm:border-gray-200
           sm:shadow-[-4px_0_24px_rgba(0,0,0,0.08)]
 
-          ${isOpen
-            ? 'translate-y-0 sm:translate-x-0'
-            : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
+          ${
+            isOpen
+              ? 'translate-y-0 sm:translate-x-0'
+              : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
           }
         `}
       >

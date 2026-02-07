@@ -21,6 +21,12 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { DetailPanel } from '@/components/ui/detail-panel';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import {
+  SCHOOL_LABELS,
+  ROLE_LABELS,
+  PROGRAM_LABELS,
+} from '@/components/portal/constants';
 import type { User } from '@/types';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -28,17 +34,6 @@ import { motion } from 'framer-motion';
 // ============================================================================
 // Constants
 // ============================================================================
-
-const SCHOOL_LABELS: Record<string, string> = {
-  brown: 'Brown',
-  columbia: 'Columbia',
-  cornell: 'Cornell',
-  nyu: 'NYU',
-  princeton: 'Princeton',
-  uchicago: 'UChicago',
-  upenn: 'UPenn',
-  yale: 'Yale',
-};
 
 const SCHOOL_LOGOS: Record<string, string> = {
   brown: 'brown.png',
@@ -49,18 +44,6 @@ const SCHOOL_LOGOS: Record<string, string> = {
   uchicago: 'uchicago.png',
   upenn: 'upenn.png',
   yale: 'yale.png',
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  committee: 'Committee',
-  pm: 'PM',
-  analyst: 'Analyst',
-};
-
-const PROGRAM_LABELS: Record<string, string> = {
-  value: 'Value',
-  quant: 'Quant',
 };
 
 const gridContainerVariants = {
@@ -383,12 +366,10 @@ export default function DirectoryPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Directory</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          Browse and connect with PGI members
-        </p>
-      </div>
+      <PortalPageHeader
+        title="Directory"
+        description="Browse and connect with PGI members"
+      />
 
       {/* Search + Filters */}
       <div>
@@ -399,6 +380,7 @@ export default function DirectoryPage() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by name..."
+            aria-label="Search members"
             className="pl-10 pr-4 w-full bg-white border-gray-300"
           />
         </div>
@@ -408,7 +390,10 @@ export default function DirectoryPage() {
             value={filter.school}
             onValueChange={v => handleFilterChange('school', v)}
           >
-            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger
+              className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300"
+              aria-label="Filter by school"
+            >
               <SelectValue placeholder="School" />
             </SelectTrigger>
             <SelectContent>
@@ -425,7 +410,10 @@ export default function DirectoryPage() {
             value={filter.program}
             onValueChange={v => handleFilterChange('program', v)}
           >
-            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger
+              className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300"
+              aria-label="Filter by program"
+            >
               <SelectValue placeholder="Program" />
             </SelectTrigger>
             <SelectContent>
@@ -439,7 +427,10 @@ export default function DirectoryPage() {
             value={filter.role}
             onValueChange={v => handleFilterChange('role', v)}
           >
-            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger
+              className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300"
+              aria-label="Filter by role"
+            >
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
@@ -456,7 +447,10 @@ export default function DirectoryPage() {
             value={filter.status}
             onValueChange={v => handleFilterChange('status', v)}
           >
-            <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300">
+            <SelectTrigger
+              className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300"
+              aria-label="Filter by status"
+            >
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -607,7 +601,11 @@ export default function DirectoryPage() {
       )}
 
       {/* Member Detail Panel */}
-      <DetailPanel isOpen={isPanelOpen} onClose={closePanel}>
+      <DetailPanel
+        isOpen={isPanelOpen}
+        onClose={closePanel}
+        aria-label="Member details"
+      >
         {selectedUser && <MemberDetail user={selectedUser} />}
       </DetailPanel>
     </div>

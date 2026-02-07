@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -16,6 +17,8 @@ const cardVariants = {
 export default function Home() {
   const [memberCount, setMemberCount] = useState<number | null>(null);
 
+  // TODO: Replace with a dedicated count endpoint (e.g. /api/users/count) or
+  // derive from existing cached data to avoid fetching ALL users just for a count.
   useEffect(() => {
     fetch('/api/users')
       .then(res => (res.ok ? res.json() : null))
@@ -24,19 +27,21 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Welcome header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          {memberCount !== null
-            ? `${memberCount} members across 8 schools`
-            : 'Loading...'}
-        </p>
+        <PortalPageHeader
+          title="Welcome back"
+          description={
+            memberCount !== null
+              ? `${memberCount} members across 8 schools`
+              : 'Loading...'
+          }
+        />
       </motion.div>
 
       {/* Feature cards — clean, no decorative icons */}

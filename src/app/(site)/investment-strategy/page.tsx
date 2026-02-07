@@ -4,51 +4,12 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-
-// Animation variants from home page
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const itemFadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
-
-const buttonHover = {
-  scale: 1.05,
-  backgroundColor: '#1f4287',
-  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  transition: {
-    duration: 0.2,
-    ease: 'easeInOut',
-  },
-};
+import {
+  fadeIn,
+  staggerContainer,
+  itemFadeIn,
+  buttonHover,
+} from '@/lib/animations';
 
 const cardHover = {
   scale: 1.02,

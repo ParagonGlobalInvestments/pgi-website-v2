@@ -21,19 +21,6 @@ export interface PortalUserInfo {
 }
 
 /**
- * Portal sidebar props
- */
-export interface PortalSidebarProps {
-  activeLink: string;
-  onLinkClick: (linkId: string) => void;
-  isCollapsed: boolean;
-  onCollapseToggle: () => void;
-  navItems: PortalNavItem[];
-  userInfo: PortalUserInfo | null;
-  fromAuth?: boolean;
-}
-
-/**
  * Mobile nav bar props
  */
 export interface PortalMobileNavProps {

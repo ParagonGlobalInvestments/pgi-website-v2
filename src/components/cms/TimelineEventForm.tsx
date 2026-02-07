@@ -2,17 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DetailPanel } from '@/components/ui/detail-panel';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
+import CmsFormFooter from '@/components/cms/CmsFormFooter';
 import type { CmsTimelineEvent } from '@/lib/cms/types';
 
 interface TimelineEventFormProps {
@@ -39,10 +34,8 @@ export default function TimelineEventForm({
     if (open) {
       if (event) {
         setTitle(event.title);
-        // Format date for input[type="date"]
         const date = new Date(event.event_date);
-        const formatted = date.toISOString().split('T')[0];
-        setEventDate(formatted);
+        setEventDate(date.toISOString().split('T')[0]);
         setDescription(event.description);
       } else {
         setTitle('');
@@ -71,7 +64,9 @@ export default function TimelineEventForm({
     };
 
     try {
-      const url = isEditing ? `/api/cms/timeline/${event!.id}` : '/api/cms/timeline';
+      const url = isEditing
+        ? `/api/cms/timeline/${event!.id}`
+        : '/api/cms/timeline';
       const method = isEditing ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
@@ -92,65 +87,50 @@ export default function TimelineEventForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Timeline Event' : 'Add Timeline Event'}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Event title"
-              autoFocus
-            />
-          </div>
+    <DetailPanel isOpen={open} onClose={() => onOpenChange(false)}>
+      <h2 className="text-base font-semibold mb-4">
+        {isEditing ? 'Edit Timeline Event' : 'Add Timeline Event'}
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title *</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Event title"
+            className="h-9 text-sm"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="event_date">Date *</Label>
-            <Input
-              id="event_date"
-              type="date"
-              value={eventDate}
-              onChange={e => setEventDate(e.target.value)}
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="event_date">Date *</Label>
+          <DatePicker
+            id="event_date"
+            value={eventDate}
+            onChange={setEventDate}
+            placeholder="Select event date"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Event description"
-              rows={4}
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Event description"
+            rows={3}
+            className="text-sm"
+          />
+        </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={saving}>
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-1" />
-              )}
-              {isEditing ? 'Update' : 'Create'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <CmsFormFooter
+          saving={saving}
+          isEditing={isEditing}
+          onCancel={() => onOpenChange(false)}
+        />
+      </form>
+    </DetailPanel>
   );
 }

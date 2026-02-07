@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PortalMobileNavProps } from './types';
-import { SITE_URL } from './constants';
+import { SITE_URL, SETTINGS_NAV_ITEM } from './constants';
 
 /**
  * Mobile navigation bar and overlay menu for the portal.
@@ -32,6 +32,7 @@ export function PortalMobileNav({
           />
           <button
             onClick={onMenuToggle}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             className="text-white p-2 hover:bg-[#003E6B] rounded-md min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             {isMenuOpen ? (
@@ -82,7 +83,9 @@ export function PortalMobileNav({
               {userInfo && (
                 <div className="flex items-center space-x-3 mb-4 p-3 bg-[#002C4D] rounded-lg">
                   <div className="flex-1">
-                    <div className="text-white font-medium">{userInfo.name}</div>
+                    <div className="text-white font-medium">
+                      {userInfo.name}
+                    </div>
                     <div className="text-xs text-gray-400">
                       {userInfo.school}
                       {userInfo.school && userInfo.role ? ' / ' : ''}
@@ -109,7 +112,11 @@ export function PortalMobileNav({
                       visible: {
                         opacity: 1,
                         x: 0,
-                        transition: { type: 'spring', stiffness: 400, damping: 25 },
+                        transition: {
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 25,
+                        },
                       },
                     }}
                   >
@@ -137,6 +144,17 @@ export function PortalMobileNav({
                 initial="hidden"
                 animate="visible"
               >
+                <Link
+                  href={SETTINGS_NAV_ITEM.href}
+                  className={`flex items-center text-sm px-3 py-3 rounded-md min-h-[44px] ${
+                    activeLink === SETTINGS_NAV_ITEM.id
+                      ? 'bg-[#003E6B] text-white font-medium'
+                      : 'text-gray-400 hover:bg-[#002C4D]'
+                  }`}
+                  onClick={() => onLinkClick(SETTINGS_NAV_ITEM.id)}
+                >
+                  {SETTINGS_NAV_ITEM.label}
+                </Link>
                 <a
                   href={SITE_URL}
                   className="flex items-center text-sm px-3 py-3 rounded-md text-gray-400 hover:bg-[#002C4D] min-h-[44px]"

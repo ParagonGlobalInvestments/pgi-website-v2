@@ -14,28 +14,7 @@ import {
   BriefcaseIcon,
   LockIcon,
 } from 'lucide-react';
-
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
-  },
-};
-
-const itemFadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
+import { fadeIn, staggerContainer, itemFadeIn } from '@/lib/animations';
 
 const PLACEHOLDER_FOLDERS = [
   {
@@ -77,7 +56,9 @@ function ResourcesPageContent() {
         duration: 6000,
         action: {
           label: 'Apply',
-          onClick: () => { window.location.href = '/apply#interest-form'; },
+          onClick: () => {
+            window.location.href = '/apply#interest-form';
+          },
         },
       });
       window.history.replaceState({}, '', '/resources');
@@ -86,7 +67,9 @@ function ResourcesPageContent() {
 
   useEffect(() => {
     const checkUserStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user?.email) {
         try {
@@ -157,8 +140,8 @@ function ResourcesPageContent() {
               />
             </h1>
             <p className="text-base md:text-lg text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              Explore our collection of investment and finance resources.
-              Log in as a PGI member to access the full library.
+              Explore our collection of investment and finance resources. Log in
+              as a PGI member to access the full library.
             </p>
           </motion.div>
 
@@ -169,7 +152,7 @@ function ResourcesPageContent() {
             animate="visible"
             variants={staggerContainer}
           >
-            {PLACEHOLDER_FOLDERS.map((folder) => {
+            {PLACEHOLDER_FOLDERS.map(folder => {
               const Icon = folder.icon;
               return (
                 <motion.div
@@ -191,7 +174,9 @@ function ResourcesPageContent() {
                     <div className="bg-pgi-light-blue/90 p-3.5 rounded-xl mb-5 w-fit shadow-lg shadow-pgi-light-blue/20">
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-white font-medium text-lg md:text-xl mb-2">{folder.name}</h3>
+                    <h3 className="text-white font-medium text-lg md:text-xl mb-2">
+                      {folder.name}
+                    </h3>
                     <p className="text-gray-400 text-sm md:text-base font-light leading-relaxed">
                       {folder.description}
                     </p>
@@ -199,7 +184,9 @@ function ResourcesPageContent() {
 
                   {/* Footer */}
                   <div className="relative mt-6 pt-4 border-t border-gray-700/50 flex items-center justify-between">
-                    <span className="text-xs text-gray-500 font-medium tracking-wide uppercase">Members Only</span>
+                    <span className="text-xs text-gray-500 font-medium tracking-wide uppercase">
+                      Members Only
+                    </span>
                     <div className="w-8 h-0.5 bg-gradient-to-r from-pgi-light-blue/50 to-transparent rounded-full" />
                   </div>
                 </motion.div>

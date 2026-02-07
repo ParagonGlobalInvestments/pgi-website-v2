@@ -39,6 +39,7 @@ import { PortalMobileNav } from '@/components/portal/PortalMobileNav';
 import { PortalLoadingSkeleton } from '@/components/portal/PortalLoadingSkeleton';
 import {
   NAV_ITEMS,
+  SETTINGS_NAV_ITEM,
   SCHOOL_LABELS,
   ROLE_LABELS,
   SITE_URL,
@@ -248,9 +249,11 @@ function SidebarContent({
             direction="scale"
             className="w-full"
           >
-            <div
+            <button
+              type="button"
               className="w-8 h-8 rounded cursor-pointer"
               onClick={onCollapseToggle}
+              aria-label="Expand sidebar"
             >
               <Image
                 src="/logos/pgiLogoTransparent.png"
@@ -259,7 +262,7 @@ function SidebarContent({
                 height={32}
                 className="w-auto"
               />
-            </div>
+            </button>
           </SmoothTransition>
 
           {!isCollapsed && (
@@ -311,6 +314,21 @@ function SidebarContent({
               />
             ))}
           </nav>
+        </div>
+
+        {/* Settings — pinned to bottom, above user card */}
+        <div className="px-3 mb-1">
+          <NavItem
+            href={SETTINGS_NAV_ITEM.href}
+            label={SETTINGS_NAV_ITEM.label}
+            icon={SETTINGS_NAV_ITEM.icon}
+            isActive={activeLink === SETTINGS_NAV_ITEM.id}
+            isAdminOnly={false}
+            onClick={() => onLinkClick(SETTINGS_NAV_ITEM.id)}
+            isCollapsed={isCollapsed}
+            index={navItems.length}
+            shouldAnimate={shouldAnimate}
+          />
         </div>
       </TooltipProvider>
 

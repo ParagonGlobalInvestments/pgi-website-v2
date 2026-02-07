@@ -4,19 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
+import { fadeIn } from '@/lib/animations';
 
 const teamCardVariant = {
   hidden: { opacity: 0, y: 30 },

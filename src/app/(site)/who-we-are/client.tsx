@@ -7,52 +7,13 @@ import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import AnimatedUniversityMasonry from '@/components/ui/AnimatedUniversityMasonry';
 import { UNIVERSITIES } from '@/lib/constants/universities';
+import {
+  fadeIn,
+  staggerContainer,
+  itemFadeIn,
+  buttonHover,
+} from '@/lib/animations';
 import type { CmsTimelineEvent } from '@/lib/cms/types';
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const itemFadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
-
-const buttonHover = {
-  scale: 1.05,
-  backgroundColor: '#1f4287',
-  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  transition: {
-    duration: 0.2,
-    ease: 'easeInOut',
-  },
-};
 
 const timelineItemVariants = {
   hidden: {
@@ -122,8 +83,8 @@ export default function WhoWeAreClient({ timeline }: WhoWeAreClientProps) {
               completing the education portion, students will join the
               organization either as investment analysts or quantitative
               analysts, working on stock pitches or designing systematic
-              algorithms that will be invested into or deployed into Paragon&apos;s
-              $70,000 investment funds.
+              algorithms that will be invested into or deployed into
+              Paragon&apos;s $70,000 investment funds.
             </motion.p>
 
             <motion.p

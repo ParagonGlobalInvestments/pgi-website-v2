@@ -4,43 +4,8 @@ import { motion } from 'framer-motion';
 import { Linkedin } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+import { fadeIn, staggerContainer, cardAnimation } from '@/lib/animations';
 import type { CmsPerson } from '@/lib/cms/types';
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const cardAnimation = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: 'easeOut',
-    },
-  },
-};
 
 interface FoundersClientProps {
   founders: CmsPerson[];
@@ -60,7 +25,10 @@ function groupBySchool(people: CmsPerson[]): Record<string, CmsPerson[]> {
   return grouped;
 }
 
-export default function FoundersClient({ founders, chapterFounders }: FoundersClientProps) {
+export default function FoundersClient({
+  founders,
+  chapterFounders,
+}: FoundersClientProps) {
   const groupedChapterFounders = groupBySchool(chapterFounders);
 
   return (
@@ -86,7 +54,7 @@ export default function FoundersClient({ founders, chapterFounders }: FoundersCl
             initial="hidden"
             animate="visible"
           >
-            {founders.map((founder) => (
+            {founders.map(founder => (
               <motion.div
                 key={founder.id}
                 className="bg-darkNavy p-4 md:p-6 lg:p-8 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300 text-center"
@@ -157,7 +125,7 @@ export default function FoundersClient({ founders, chapterFounders }: FoundersCl
                     whileInView="visible"
                     viewport={{ once: true }}
                   >
-                    {members.map((founder) => (
+                    {members.map(founder => (
                       <motion.div
                         key={founder.id}
                         className="bg-darkNavy p-4 md:p-6 rounded-lg border border-gray-700 hover:border-pgi-light-blue transition-colors duration-300"

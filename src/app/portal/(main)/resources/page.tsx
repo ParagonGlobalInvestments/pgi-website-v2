@@ -6,6 +6,7 @@ import { ExternalLink, FileText, FileSpreadsheet, Folder } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { DetailPanel } from '@/components/ui/detail-panel';
 import { RESOURCE_CATEGORIES, type Resource } from '@/lib/constants/resources';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import MobileDocumentViewer from '@/components/portal/MobileDocumentViewer';
 
@@ -220,12 +221,10 @@ export default function ResourcesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Resources</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          General resources, value track materials, and quant prep
-        </p>
-      </div>
+      <PortalPageHeader
+        title="Resources"
+        description="General resources, value track materials, and quant prep"
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">

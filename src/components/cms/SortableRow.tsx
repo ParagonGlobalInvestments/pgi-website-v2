@@ -30,11 +30,16 @@ export function SortableRow({ id, children, disabled }: SortableRowProps) {
   };
 
   return (
-    <TableRow ref={setNodeRef} style={style} {...attributes}>
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="group hover:bg-gray-50/60 transition-colors"
+    >
       <TableCell className="w-8 px-1">
         <button
           type="button"
-          className="p-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
+          className="p-1 cursor-grab active:cursor-grabbing text-gray-300 group-hover:text-gray-500 transition-colors touch-none"
           aria-label="Drag to reorder"
           {...listeners}
         >
