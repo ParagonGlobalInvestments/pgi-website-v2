@@ -243,7 +243,7 @@ textarea {
 
 /* Content area containment - limits reflow scope during animations */
 .portal-content {
-  contain: layout style;
+  contain: style;
 }
 
 /* Skeleton shimmer animation for perceived performance */
