@@ -547,7 +547,7 @@ export function UnifiedPortalShell({
   const isLogoutRoute = pathname?.includes('/logout');
 
   // Determine view based on mode and phase
-  // - Login view: during login mode OR transitioning (success/fadeOut phases)
+  // - Login view: during login mode OR transitioning (success phase)
   // - Dashboard view: only after morphing starts or in dashboard mode
   const isMorphing = phase === 'morphing' || phase === 'complete';
   const showLoginView =
@@ -584,36 +584,32 @@ export function UnifiedPortalShell({
     };
   }, [showLoginView]);
 
-  // Auth state management
-  // Only sets authUser state - does NOT change mode
-  // Mode is controlled by: initialMode (from server) + triggerTransition() + resetToLogin()
-  // This separation prevents race conditions during the login animation
+  // Auth state management — split into two effects to avoid re-runs during transition
+  // Effect 1: Set authUser + subscribe to auth changes (runs once)
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setAuthUser(user);
-      // Only reset to login if user is null AND mode is dashboard (logout case)
-      // Don't touch mode if we're in login or transitioning (animation playing)
-      if (!user && mode === 'dashboard') {
-        setMode('login');
-      }
     };
     checkAuth();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user || null;
-      setAuthUser(user);
-      // Only reset to login on logout (user becomes null while in dashboard mode)
-      if (!user && mode === 'dashboard') {
-        setMode('login');
-      }
+      setAuthUser(session?.user || null);
     });
     return () => subscription.unsubscribe();
-  }, [supabase, setMode, mode]);
+  }, [supabase]);
+
+  // Effect 2: Reset to login when user signs out while in dashboard mode
+  // Uses a ref to read current mode without adding it as a dependency
+  useEffect(() => {
+    if (!authUser && mode === 'dashboard') {
+      setMode('login');
+    }
+  }, [authUser, mode, setMode]);
 
   // Sync active link with pathname
   useEffect(() => {
@@ -737,42 +733,33 @@ export function UnifiedPortalShell({
             ease: easing,
           }}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {showLoginView ? (
-              <motion.div
-                key="login-panel"
-                className="flex flex-col h-full"
-                initial={false}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <LoginPanelContent />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="sidebar-panel"
-                className="flex flex-col h-full"
-                initial={shouldAnimateSidebar ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: shouldAnimateSidebar ? 0.1 : 0,
-                }}
-              >
-                <SidebarContent
-                  activeLink={activeLink}
-                  onLinkClick={handleLinkClick}
-                  isCollapsed={isCollapsed}
-                  onCollapseToggle={() => setIsCollapsed(prev => !prev)}
-                  navItems={visibleNavItems}
-                  userInfo={userInfo}
-                  shouldAnimate={shouldAnimateSidebar}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* No AnimatePresence — sidebar mounts instantly during morph, no 0.3s gap */}
+          {showLoginView ? (
+            <div className="flex flex-col h-full">
+              <LoginPanelContent />
+            </div>
+          ) : (
+            <motion.div
+              key="sidebar-panel"
+              className="flex flex-col h-full"
+              initial={shouldAnimateSidebar ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.3,
+                delay: shouldAnimateSidebar ? 0.1 : 0,
+              }}
+            >
+              <SidebarContent
+                activeLink={activeLink}
+                onLinkClick={handleLinkClick}
+                isCollapsed={isCollapsed}
+                onCollapseToggle={() => setIsCollapsed(prev => !prev)}
+                navItems={visibleNavItems}
+                userInfo={userInfo}
+                shouldAnimate={shouldAnimateSidebar}
+              />
+            </motion.div>
+          )}
         </motion.aside>
 
         {/* Content panel - always white */}

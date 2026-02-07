@@ -136,15 +136,18 @@ function PortalLoginContent() {
         user?.user_metadata?.name?.split(' ')[0] ||
         '';
 
-      // Pre-warm SWR cache in background — runs during greeting animation
-      // so home page mounts with cached data (no skeleton flash)
-      fetch('/api/users/me')
-        .then(res => (res.ok ? res.json() : null))
-        .then(data => {
+      // Pre-warm SWR cache BEFORE animation starts — avoids mid-animation re-render
+      // from mutate() and ensures home page has cached data when it mounts
+      try {
+        const res = await fetch('/api/users/me');
+        if (res.ok) {
+          const data = await res.json();
           if (data?.user)
             mutate('/api/users/me', data.user, { revalidate: false });
-        })
-        .catch(() => {});
+        }
+      } catch {
+        // Non-critical — home page will fetch its own data
+      }
 
       // Switch to greeting mode and trigger decrypt
       setDisplayMode('greeting');
@@ -339,14 +342,12 @@ function PortalLoginContent() {
         )}
 
         {/* Success/transition states - show greeting with DecryptedText */}
-        {(phase === 'success' ||
-          phase === 'fadeOut' ||
-          phase === 'morphing') && (
+        {(phase === 'success' || phase === 'morphing') && (
           <motion.div
             key="success"
             initial={{ opacity: 0, y: 10 }}
             animate={{
-              opacity: phase === 'fadeOut' || phase === 'morphing' ? 0 : 1,
+              opacity: phase === 'morphing' ? 0 : 1,
               y: 0,
             }}
             exit={{ opacity: 0 }}

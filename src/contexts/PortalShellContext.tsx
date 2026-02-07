@@ -17,21 +17,15 @@ import {
 export type ShellMode = 'login' | 'dashboard' | 'transitioning';
 
 /**
- * Transition phases for fine-grained animation control:
+ * Transition phases (simplified — 3 phases, no fadeOut):
  * - idle: No transition in progress
- * - success: Show "Hey [Name]!" message (1200ms - optimized from 2000ms)
- * - fadeOut: Logo + success message fade out (200ms - overlaps with morphing start)
- * - morphing: Navy panel shrinks 50% → 14rem, sidebar content fades in (400ms - optimized)
+ * - success: Show "Hey [Name]!" message (1200ms)
+ * - morphing: Greeting fades, navy panel shrinks 50% → 14rem (500ms)
  * - complete: Transition done, ready for dashboard
  *
- * Total: ~1700ms (optimized from 2900ms, -41%)
+ * Total: ~1700ms
  */
-export type TransitionPhase =
-  | 'idle'
-  | 'success'
-  | 'fadeOut'
-  | 'morphing'
-  | 'complete';
+export type TransitionPhase = 'idle' | 'success' | 'morphing' | 'complete';
 
 interface PortalShellContextType {
   mode: ShellMode;
@@ -59,30 +53,21 @@ export function PortalShellProvider({
 
   /**
    * Triggers the login → dashboard transition animation sequence.
-   * Returns a promise that resolves when the animation is complete.
-   *
-   * Optimized timing (total ~1700ms, down from 2900ms):
-   * - Success: 1200ms (readable but snappy)
-   * - FadeOut: 200ms (quick fade, overlaps with morph start)
-   * - Morphing: 400ms (smooth but faster panel resize)
+   * Simplified: 3 phases, no fadeOut. Total ~1700ms.
    */
   const triggerTransition = useCallback(async (name: string) => {
     setUserName(name);
     setMode('transitioning');
 
-    // Phase 1: Success message (1200ms - optimized for readability + speed)
+    // Phase 1: Show greeting (1200ms)
     setPhase('success');
     await new Promise(r => setTimeout(r, 1200));
 
-    // Phase 2: Fade out logo + success (200ms - quick transition)
-    setPhase('fadeOut');
-    await new Promise(r => setTimeout(r, 200));
-
-    // Phase 3: Morph navy panel from 50% to 14rem (400ms - snappy resize)
+    // Phase 2: Greeting fades + navy panel morphs 50% → 14rem (500ms)
     setPhase('morphing');
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 500));
 
-    // Phase 4: Complete
+    // Phase 3: Done
     setPhase('complete');
     setMode('dashboard');
   }, []);
