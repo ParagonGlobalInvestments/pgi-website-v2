@@ -7,7 +7,10 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { TransitionProvider, WithDebugOverlay } from '@/lib/transitions';
+import {
+  PortalTransitionProvider,
+  NavyOverlay,
+} from '@/lib/portal-transitions';
 import './globals.css';
 
 const montserrat = Montserrat({
@@ -117,12 +120,13 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen font-sans antialiased">
         <PHProvider>
-          <TransitionProvider>
-            <WithDebugOverlay>{children}</WithDebugOverlay>
+          <PortalTransitionProvider>
+            <NavyOverlay />
+            {children}
             <Toaster />
             <Sonner position="top-center" richColors closeButton />
             <VitalsCollector />
-          </TransitionProvider>
+          </PortalTransitionProvider>
         </PHProvider>
         <Analytics />
         <SpeedInsights />

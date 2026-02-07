@@ -1,40 +1,12 @@
 'use client';
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { mutate } from 'swr';
 import { createClient } from '@/lib/supabase/browser';
-import { motion, AnimatePresence } from 'framer-motion';
-import { usePortalShell } from '@/contexts/PortalShellContext';
+import { motion, AnimatePresence } from 'motion/react';
+import { usePortalTransition, usePortalExit } from '@/lib/portal-transitions';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-import { NavyExpansionOverlay } from '@/components/ui/NavyExpansionOverlay';
-import { SITE_URL } from '@/components/portal/constants';
-import { useIsMobile } from '@/hooks/useIsMobile';
-
-// Exit transition state for Back to Website
-const useExitTransition = () => {
-  const [isExiting, setIsExiting] = useState(false);
-  const isMobile = useIsMobile();
-
-  const handleBackToWebsite = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      setIsExiting(true);
-
-      // Navy expands then navigate to main domain (not portal subdomain)
-      // Mobile: 300ms (shorter animation), Desktop: 500ms
-      setTimeout(
-        () => {
-          window.location.href = SITE_URL;
-        },
-        isMobile ? 300 : 500
-      );
-    },
-    [isMobile]
-  );
-
-  return { isExiting, isMobile, handleBackToWebsite };
-};
 
 type DisplayMode = 'welcome' | 'greeting' | 'rejected';
 
@@ -42,58 +14,45 @@ function PortalLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const { phase, userName, triggerTransition } = usePortalShell();
-  const { isExiting, isMobile, handleBackToWebsite } = useExitTransition();
+  const { tag, userName, start } = usePortalTransition();
+  const { handleExit } = usePortalExit();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('welcome');
-  const [decryptKey, setDecryptKey] = useState(0); // Force re-mount for new animations
+  const [decryptKey, setDecryptKey] = useState(0);
 
   const justAuthenticated = searchParams?.get('authenticated') === 'true';
   const notMember = searchParams?.get('notMember') === 'true';
   const redirectTo = searchParams?.get('redirectTo') || '/portal';
 
-  /**
-   * Handle non-member rejection: show message for 10 seconds, then return to welcome
-   */
+  // Handle non-member rejection
   useEffect(() => {
     if (!notMember) return;
-
-    // Trigger rejection display
     setDisplayMode('rejected');
     setDecryptKey(prev => prev + 1);
 
-    // Clear the URL param to prevent re-triggering on refresh
     const url = new URL(window.location.href);
     url.searchParams.delete('notMember');
     window.history.replaceState({}, '', url.toString());
 
-    // Return to welcome after 10 seconds
     const timer = setTimeout(() => {
       setDisplayMode('welcome');
       setDecryptKey(prev => prev + 1);
     }, 10000);
-
     return () => clearTimeout(timer);
   }, [notMember]);
 
-  /**
-   * Handle OAuth errors from hash fragment (e.g., #error=access_denied&error_code=signup_disabled)
-   * Supabase returns these errors via hash, not query params
-   */
+  // Handle OAuth errors from hash fragment
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const hash = window.location.hash;
     if (!hash || !hash.includes('error=')) return;
 
-    // Parse hash fragment as URLSearchParams
     const hashParams = new URLSearchParams(hash.substring(1));
     const errorType = hashParams.get('error');
     const errorCode = hashParams.get('error_code');
 
-    // Check for OAuth errors that indicate user isn't allowed
     const isAuthRejection =
       errorType === 'access_denied' ||
       errorCode === 'signup_disabled' ||
@@ -101,28 +60,19 @@ function PortalLoginContent() {
 
     if (!isAuthRejection) return;
 
-    // Trigger rejection display (same as notMember)
     setDisplayMode('rejected');
     setDecryptKey(prev => prev + 1);
-
-    // Clear the hash to prevent re-triggering on refresh
     window.history.replaceState({}, '', window.location.pathname);
 
-    // Return to welcome after 10 seconds
     const timer = setTimeout(() => {
       setDisplayMode('welcome');
       setDecryptKey(prev => prev + 1);
     }, 10000);
-
     return () => clearTimeout(timer);
   }, []);
 
   /**
-   * Handle the post-OAuth redirect flow:
-   * 1. Get user info
-   * 2. Show greeting with decrypt animation
-   * 3. Trigger the transition animation
-   * 4. Navigate to dashboard (staying in same React tree!)
+   * Post-OAuth flow: get user → show greeting → trigger morph → navigate
    */
   const handlePostAuth = useCallback(async () => {
     try {
@@ -130,14 +80,12 @@ function PortalLoginContent() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Extract first name for greeting
       const firstName =
         user?.user_metadata?.full_name?.split(' ')[0] ||
         user?.user_metadata?.name?.split(' ')[0] ||
         '';
 
-      // Pre-warm SWR cache BEFORE animation starts — avoids mid-animation re-render
-      // from mutate() and ensures home page has cached data when it mounts
+      // Pre-warm SWR cache BEFORE animation — avoids mid-animation re-render
       try {
         const res = await fetch('/api/users/me');
         if (res.ok) {
@@ -146,33 +94,39 @@ function PortalLoginContent() {
             mutate('/api/users/me', data.user, { revalidate: false });
         }
       } catch {
-        // Non-critical — home page will fetch its own data
+        // Non-critical
       }
 
-      // Switch to greeting mode and trigger decrypt
+      // Switch to greeting and trigger the morph transition
       setDisplayMode('greeting');
       setDecryptKey(prev => prev + 1);
 
-      // Trigger the transition animation sequence
-      await triggerTransition(firstName);
+      // Start the login:morph flow — greeting (1200ms) → morph (500ms) → complete
+      start('login:morph', { mobile: false, userName: firstName });
 
-      // Navigate using Next.js router (preserves React tree!)
-      const cleanRedirectTo = redirectTo.startsWith('/portal')
-        ? redirectTo
-        : '/portal';
-
-      router.push(cleanRedirectTo);
+      // The reducer will auto-advance through greeting → morph → complete.
+      // We navigate after the complete phase. We listen for complete in useEffect below.
     } catch {
-      // Recovery: show login button again with error message
       setError('Something went wrong during login. Please try again.');
       setDisplayMode('welcome');
       setDecryptKey(prev => prev + 1);
     }
-  }, [supabase.auth, triggerTransition, router, redirectTo]);
+  }, [supabase.auth, start]);
 
-  // Run post-auth flow when returning from OAuth
+  // Navigate when login:morph completes
   useEffect(() => {
-    if (!justAuthenticated) return;
+    if (tag !== 'complete') return;
+    const cleanRedirectTo = redirectTo.startsWith('/portal')
+      ? redirectTo
+      : '/portal';
+    router.push(cleanRedirectTo);
+  }, [tag, router, redirectTo]);
+
+  // Run post-auth flow when returning from OAuth (ref guards against StrictMode double-invoke)
+  const postAuthStarted = useRef(false);
+  useEffect(() => {
+    if (!justAuthenticated || postAuthStarted.current) return;
+    postAuthStarted.current = true;
     handlePostAuth();
   }, [justAuthenticated, handlePostAuth]);
 
@@ -183,17 +137,13 @@ function PortalLoginContent() {
 
     const defaultDest = '/portal';
     const next = searchParams?.get('redirectTo') || defaultDest;
-
-    // Redirect back to /portal/login with authenticated=true
     const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: callbackUrl,
-        queryParams: {
-          prompt: 'select_account',
-        },
+        queryParams: { prompt: 'select_account' },
         scopes: 'openid email profile',
       },
     });
@@ -204,7 +154,6 @@ function PortalLoginContent() {
     }
   };
 
-  // Get the current text to display based on mode
   const getDisplayText = () => {
     switch (displayMode) {
       case 'greeting':
@@ -216,12 +165,9 @@ function PortalLoginContent() {
     }
   };
 
-  // Determine if we should show the login button (welcome or rejected mode, idle phase)
   const showLoginButton =
-    (displayMode === 'welcome' || displayMode === 'rejected') &&
-    phase === 'idle';
+    (displayMode === 'welcome' || displayMode === 'rejected') && tag === 'idle';
 
-  // Animation variants
   const containerVariants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -231,8 +177,8 @@ function PortalLoginContent() {
   return (
     <div className="w-full text-center">
       <AnimatePresence mode="wait">
-        {/* Idle/Welcome state - show login form with DecryptedText */}
-        {phase === 'idle' && (
+        {/* Idle/Welcome state */}
+        {tag === 'idle' && (
           <motion.div
             key={`content-${displayMode}`}
             variants={containerVariants}
@@ -256,7 +202,6 @@ function PortalLoginContent() {
               />
             </h1>
 
-            {/* Error messages from OAuth failures */}
             {searchParams?.get('error') === 'auth_failed' && (
               <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-left">
                 <p className="text-sm text-red-600">
@@ -272,7 +217,6 @@ function PortalLoginContent() {
               </div>
             )}
 
-            {/* Google login button - only show in welcome mode */}
             {showLoginButton && (
               <motion.div
                 className="mt-8"
@@ -315,7 +259,6 @@ function PortalLoginContent() {
                   </div>
                 )}
 
-                {/* Back to Website link */}
                 <motion.div
                   className="mt-6"
                   initial={{ opacity: 0 }}
@@ -323,7 +266,7 @@ function PortalLoginContent() {
                   transition={{ delay: 0.4, duration: 0.3 }}
                 >
                   <button
-                    onClick={handleBackToWebsite}
+                    onClick={handleExit}
                     className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     Go back to website
@@ -331,23 +274,16 @@ function PortalLoginContent() {
                 </motion.div>
               </motion.div>
             )}
-
-            {/* Exit Transition Overlay - Navy expands to fill screen (matches logout) */}
-            <AnimatePresence>
-              {isExiting && (
-                <NavyExpansionOverlay initialWidth="50%" isMobile={isMobile} />
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
 
-        {/* Success/transition states - show greeting with DecryptedText */}
-        {(phase === 'success' || phase === 'morphing') && (
+        {/* Success/transition states — greeting with DecryptedText */}
+        {(tag === 'greeting' || tag === 'morph') && (
           <motion.div
             key="success"
             initial={{ opacity: 0, y: 10 }}
             animate={{
-              opacity: phase === 'morphing' ? 0 : 1,
+              opacity: tag === 'morph' ? 0 : 1,
               y: 0,
             }}
             exit={{ opacity: 0 }}
