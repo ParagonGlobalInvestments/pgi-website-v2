@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import useSWR from 'swr';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Activity,
   TrendingUp,
@@ -16,7 +16,6 @@ import {
   Clock,
   BarChart3,
   RefreshCw,
-  ChevronDown,
   CheckCircle2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -336,52 +336,6 @@ function DeviceBreakdown({
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-// Collapsible section wrapper
-function CollapsibleSection({
-  title,
-  icon: Icon,
-  defaultOpen = false,
-  children,
-}: {
-  title: string;
-  icon: React.ElementType;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Icon size={18} className="text-gray-400" />
-          <span className="font-medium text-gray-700">{title}</span>
-        </div>
-        <ChevronDown
-          size={18}
-          className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </button>
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="p-4 pt-0 border-t border-gray-100">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

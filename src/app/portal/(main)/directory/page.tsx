@@ -290,7 +290,6 @@ export default function DirectoryPage() {
     school: 'all',
     program: 'all',
     role: 'all',
-    status: 'active',
   });
 
   // Debounce search
@@ -337,8 +336,7 @@ export default function DirectoryPage() {
         if (filter.program !== 'all' && user.program !== filter.program)
           return false;
         if (filter.role !== 'all' && user.role !== filter.role) return false;
-        if (filter.status !== 'all' && user.status !== filter.status)
-          return false;
+        if (user.status !== 'active') return false;
         return true;
       }),
     [users, debouncedSearch, filter]
@@ -352,7 +350,6 @@ export default function DirectoryPage() {
     filter.school !== 'all' ||
     filter.program !== 'all' ||
     filter.role !== 'all' ||
-    filter.status !== 'active' ||
     searchTerm !== '';
 
   const openPanel = (user: User) => {
@@ -443,23 +440,6 @@ export default function DirectoryPage() {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filter.status}
-            onValueChange={v => handleFilterChange('status', v)}
-          >
-            <SelectTrigger
-              className="h-10 sm:h-9 w-full sm:w-[140px] text-sm bg-white border-gray-300"
-              aria-label="Filter by status"
-            >
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="alumni">Alumni</SelectItem>
-              <SelectItem value="all">All Members</SelectItem>
-            </SelectContent>
-          </Select>
-
           {hasActiveFilters && (
             <Button
               variant="ghost"
@@ -469,7 +449,6 @@ export default function DirectoryPage() {
                   school: 'all',
                   program: 'all',
                   role: 'all',
-                  status: 'active',
                 });
                 setSearchTerm('');
               }}

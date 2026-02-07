@@ -70,6 +70,23 @@ export interface CmsSponsor {
   updated_at: string;
 }
 
+export type ResourceTabId = 'general' | 'value' | 'quant';
+export type ResourceType = 'pdf' | 'doc' | 'sheet' | 'folder' | 'link';
+
+export interface CmsResource {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  link_url: string;
+  type: ResourceType;
+  tab_id: ResourceTabId;
+  section: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Group metadata for the People tab UI */
 export const PEOPLE_GROUPS: {
   slug: PeopleGroupSlug;

@@ -196,7 +196,6 @@ export default function SponsorsTab() {
         count={sponsors.length}
         noun={['sponsor', 'sponsors']}
         columns={columns}
-        sectionTitle="Sponsors"
         onAdd={() => {
           setEditingItem(undefined);
           setFormType('sponsor');
@@ -214,13 +213,14 @@ export default function SponsorsTab() {
         itemLabel={item => item.display_name}
       />
 
+      <div className="border-t border-gray-100 pt-6" />
+
       <CmsTabLayout
         items={partners}
         loading={false}
         count={partners.length}
         noun={['partner', 'partners']}
         columns={columns}
-        sectionTitle="Partners"
         onAdd={() => {
           setEditingItem(undefined);
           setFormType('partner');
