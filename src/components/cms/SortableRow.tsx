@@ -36,7 +36,7 @@ export function SortableRow({ id, children, disabled }: SortableRowProps) {
       {...attributes}
       className="group hover:bg-gray-50/60 transition-colors"
     >
-      <TableCell className="w-8 px-1">
+      <TableCell className="w-8 px-1 hidden sm:table-cell">
         <button
           type="button"
           className="p-1 cursor-grab active:cursor-grabbing text-gray-300 group-hover:text-gray-500 transition-colors touch-none"

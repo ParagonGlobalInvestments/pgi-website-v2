@@ -55,3 +55,9 @@ export function revalidateTimeline() {
 export function revalidateSponsors() {
   revalidatePath('/sponsors');
 }
+
+export function revalidateResources() {
+  // Resources are portal-only (no public page to revalidate),
+  // but we invalidate the API route cache.
+  revalidatePath('/api/resources');
+}
