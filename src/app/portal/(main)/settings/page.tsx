@@ -587,24 +587,32 @@ function MockModeSection() {
   const { realUser } = usePortalUser();
   const { mock, startMock, updateMock, stopMock } = useMockUser();
 
+  // Local state for pre-start selections
+  const [pendingRole, setPendingRole] = useState<UserRole>('analyst');
+  const [pendingProgram, setPendingProgram] = useState<UserProgram | ''>('');
+
   if (realUser?.role !== 'admin') return null;
 
-  const selectedRole = mock.isActive ? mock.role : 'analyst';
-  const selectedProgram = mock.isActive ? (mock.program ?? '') : '';
+  const currentRole = mock.isActive ? mock.role : pendingRole;
+  const currentProgram = mock.isActive ? (mock.program ?? '') : pendingProgram;
 
   const handleStart = () => {
-    startMock(selectedRole, selectedProgram || null);
+    startMock(pendingRole, pendingProgram || null);
   };
 
   const handleRoleChange = (role: UserRole) => {
     if (mock.isActive) {
       updateMock({ role });
+    } else {
+      setPendingRole(role);
     }
   };
 
   const handleProgramChange = (program: UserProgram | '') => {
     if (mock.isActive) {
       updateMock({ program: program || null });
+    } else {
+      setPendingProgram(program);
     }
   };
 
@@ -617,7 +625,7 @@ function MockModeSection() {
         </p>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="mock-role"
               className="text-xs font-medium text-gray-600 mb-1.5 block"
@@ -626,11 +634,8 @@ function MockModeSection() {
             </label>
             <select
               id="mock-role"
-              value={mock.isActive ? mock.role : selectedRole}
-              onChange={e => {
-                const role = e.target.value as UserRole;
-                if (mock.isActive) handleRoleChange(role);
-              }}
+              value={currentRole}
+              onChange={e => handleRoleChange(e.target.value as UserRole)}
               className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {MOCK_ROLES.map(r => (
@@ -640,7 +645,7 @@ function MockModeSection() {
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="mock-program"
               className="text-xs font-medium text-gray-600 mb-1.5 block"
@@ -649,11 +654,10 @@ function MockModeSection() {
             </label>
             <select
               id="mock-program"
-              value={mock.isActive ? (mock.program ?? '') : selectedProgram}
-              onChange={e => {
-                const program = e.target.value as UserProgram | '';
-                if (mock.isActive) handleProgramChange(program);
-              }}
+              value={currentProgram}
+              onChange={e =>
+                handleProgramChange(e.target.value as UserProgram | '')
+              }
               className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {MOCK_PROGRAMS.map(p => (
@@ -918,9 +922,9 @@ export default function SettingsPage() {
       </AnimatePresence>
 
       {/* Two-column grid on desktop, stacked on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
         {/* LEFT column */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           {/* Account Details */}
           <Section title="Account">
             <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -1125,7 +1129,7 @@ export default function SettingsPage() {
         </div>
 
         {/* RIGHT column */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           {/* View As — admin only */}
           <MockModeSection />
 

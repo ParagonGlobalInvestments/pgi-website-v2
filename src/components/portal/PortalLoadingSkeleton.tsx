@@ -1,36 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { NAVY_COLORS, EASING } from '@/lib/transitions';
+import { NAVY, EASING } from '@/lib/portal-transitions/config';
 
 interface PortalLoadingSkeletonProps {
-  /** If true, animate the entrance (navy already at sidebar width, content fades in) */
   showEntrance?: boolean;
 }
 
 /**
  * Loading skeleton for the portal layout.
  * Mirrors the sidebar + content structure for smooth loading transitions.
- * Uses NAVY_COLORS.primary to match transition overlays exactly.
  */
 export function PortalLoadingSkeleton({
   showEntrance = false,
 }: PortalLoadingSkeletonProps) {
-  // Only apply entrance animation after hydration to prevent mismatch
   const [isHydrated, setIsHydrated] = useState(false);
   useEffect(() => setIsHydrated(true), []);
 
-  // Entrance animation only applies after hydration (server renders full opacity)
   const shouldAnimateEntrance = isHydrated && showEntrance;
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar skeleton (desktop only) - matches NAVY_COLORS.primary */}
       <div
         className="hidden lg:flex flex-shrink-0 flex-col w-56 h-screen sticky top-0 p-4 portal-sidebar"
-        style={{ backgroundColor: NAVY_COLORS.primary }}
+        style={{ backgroundColor: NAVY.primary }}
       >
         <Skeleton className="h-8 w-32 bg-gray-700/40 mb-8 skeleton-shimmer-dark" />
         <div className="space-y-2 mt-4">
@@ -40,7 +35,6 @@ export function PortalLoadingSkeleton({
           <Skeleton className="h-8 w-full bg-gray-700/40 rounded-md skeleton-shimmer-dark" />
         </div>
       </div>
-      {/* Content skeleton - fades in smoothly during entrance */}
       <motion.div
         className="flex-1 lg:p-8 p-4 pt-24 lg:pt-8"
         initial={shouldAnimateEntrance ? { opacity: 0 } : false}
