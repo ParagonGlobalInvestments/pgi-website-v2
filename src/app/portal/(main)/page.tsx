@@ -1,23 +1,37 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePortalUser } from '@/hooks/usePortalUser';
+import { usePortalShell } from '@/contexts/PortalShellContext';
 import {
   SCHOOL_LABELS,
   ROLE_LABELS,
   PROGRAM_LABELS,
 } from '@/components/portal/constants';
 
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: (i: number) => ({
-    y: 0,
-    opacity: 1,
-    transition: { delay: i * 0.1, type: 'spring', stiffness: 400, damping: 25 },
-  }),
-};
+/**
+ * Card animation variants.
+ * `baseDelay` offsets when arriving from login transition
+ * so cards animate after the sidebar finishes springing in.
+ */
+function makeCardVariants(baseDelay: number) {
+  return {
+    hidden: { y: 20, opacity: 0 },
+    visible: (i: number) => ({
+      y: 0,
+      opacity: 1,
+      transition: {
+        delay: baseDelay + i * 0.1,
+        type: 'spring',
+        stiffness: 400,
+        damping: 25,
+      },
+    }),
+  };
+}
 
 interface QuickCard {
   title: string;
@@ -81,8 +95,24 @@ function HomeSkeleton() {
 
 export default function Home() {
   const { user, isLoading } = usePortalUser();
+  const { phase } = usePortalShell();
 
-  if (isLoading) return <HomeSkeleton />;
+  // Fix 4: Deferred skeleton — wait 300ms before showing skeleton.
+  // With SWR pre-warm (Fix 1) this rarely fires. Safety net for slow networks.
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  useEffect(() => {
+    if (!isLoading) return;
+    const t = setTimeout(() => setShowSkeleton(true), 300);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
+  if (isLoading) return showSkeleton ? <HomeSkeleton /> : null;
+
+  // Fix 3: Coordinate animations with sidebar when arriving from login.
+  // phase === 'complete' means we just transitioned; sidebar is still springing in.
+  const isFromTransition = phase === 'complete';
+  const headerDelay = isFromTransition ? 0.15 : 0;
+  const cardVariants = makeCardVariants(isFromTransition ? 0.25 : 0);
 
   const firstName = user?.name?.split(' ')[0] || '';
   const metaParts = [
@@ -99,7 +129,7 @@ export default function Home() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.4, delay: headerDelay }}
       >
         <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
           {firstName}

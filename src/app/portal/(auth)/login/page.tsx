@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { mutate } from 'swr';
 import { createClient } from '@/lib/supabase/browser';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePortalShell } from '@/contexts/PortalShellContext';
@@ -134,6 +135,16 @@ function PortalLoginContent() {
         user?.user_metadata?.full_name?.split(' ')[0] ||
         user?.user_metadata?.name?.split(' ')[0] ||
         '';
+
+      // Pre-warm SWR cache in background — runs during greeting animation
+      // so home page mounts with cached data (no skeleton flash)
+      fetch('/api/users/me')
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => {
+          if (data?.user)
+            mutate('/api/users/me', data.user, { revalidate: false });
+        })
+        .catch(() => {});
 
       // Switch to greeting mode and trigger decrypt
       setDisplayMode('greeting');
@@ -359,7 +370,7 @@ function PortalLoginContent() {
               className="text-sm text-gray-500 mt-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.15, duration: 0.2 }}
             >
               Welcome to the portal
             </motion.p>
