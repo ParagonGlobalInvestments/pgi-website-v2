@@ -5,69 +5,14 @@ import { motion } from 'framer-motion';
 import { Handshake, Award } from 'lucide-react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+import {
+  fadeIn,
+  staggerContainer,
+  itemFadeIn,
+  cardAnimation,
+} from '@/lib/animations';
+import { getImageSrc } from '@/utils';
 import type { CmsSponsor } from '@/lib/cms/types';
-
-/**
- * Get image source URL - handles both local paths and Supabase Storage URLs.
- * Local paths like "/sponsors/logo.png" work as-is (Next.js public folder).
- * Supabase URLs are used directly.
- */
-function getImageSrc(imagePath: string | null): string | null {
-  if (!imagePath) return null;
-  // Already a full URL (Supabase Storage or other)
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  // Local path in public folder
-  return imagePath;
-}
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const itemFadeIn = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
-
-const cardAnimation = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: 'easeOut',
-    },
-  },
-};
 
 const sponsorAnimation = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -86,7 +31,10 @@ interface SponsorsClientProps {
   partners: CmsSponsor[];
 }
 
-export default function SponsorsClient({ sponsors, partners }: SponsorsClientProps) {
+export default function SponsorsClient({
+  sponsors,
+  partners,
+}: SponsorsClientProps) {
   return (
     <div className="bg-navy text-white min-h-screen">
       <div className="container mx-auto py-24 px-4">
@@ -115,8 +63,8 @@ export default function SponsorsClient({ sponsors, partners }: SponsorsClientPro
             Paragon Global Investments is partnered with top firms and
             organizations to provide our students the best access to the top
             firms in finance, tech, and quant across the United States. Sponsors
-            contribute to Paragon&apos;s investment fund, operations, and the growth
-            of our members.
+            contribute to Paragon&apos;s investment fund, operations, and the
+            growth of our members.
           </motion.p>
         </motion.div>
 
@@ -149,7 +97,7 @@ export default function SponsorsClient({ sponsors, partners }: SponsorsClientPro
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
             variants={staggerContainer}
           >
-            {sponsors.map((sponsor) => (
+            {sponsors.map(sponsor => (
               <motion.div
                 key={sponsor.id}
                 className="flex items-center justify-center"
@@ -210,7 +158,7 @@ export default function SponsorsClient({ sponsors, partners }: SponsorsClientPro
           </motion.div>
 
           <div className="max-w-6xl mx-auto">
-            {partners.map((partner) => (
+            {partners.map(partner => (
               <motion.div
                 key={partner.id}
                 className="bg-navy-light p-6 mb-8 rounded-lg border border-gray-700 hover:border-secondary transition-duration-300"
@@ -251,7 +199,8 @@ export default function SponsorsClient({ sponsors, partners }: SponsorsClientPro
                       </a>
                     </h3>
                     <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-                      {partner.description || 'Partnership details coming soon.'}
+                      {partner.description ||
+                        'Partnership details coming soon.'}
                     </p>
                   </div>
                 </div>

@@ -11,30 +11,7 @@ import {
   ASSET_MGMT_CONSULTING_COMPANIES,
   type Company,
 } from '@/lib/constants/companies';
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.3,
-    },
-  },
-};
+import { fadeIn, staggerContainer } from '@/lib/animations';
 
 const companyItem = {
   hidden: { opacity: 0, y: 30, scale: 0.9 },

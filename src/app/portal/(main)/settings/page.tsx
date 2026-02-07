@@ -6,30 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Input, Label } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePortalUser } from '@/hooks/usePortalUser';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import {
+  SCHOOL_LABELS,
+  ROLE_LABELS,
+  PROGRAM_LABELS,
+} from '@/components/portal/constants';
 import type { User, UserPreferences } from '@/types';
-
-const SCHOOL_LABELS: Record<string, string> = {
-  brown: 'Brown',
-  columbia: 'Columbia',
-  cornell: 'Cornell',
-  nyu: 'NYU',
-  princeton: 'Princeton',
-  uchicago: 'UChicago',
-  upenn: 'UPenn',
-  yale: 'Yale',
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  committee: 'Committee',
-  pm: 'PM',
-  analyst: 'Analyst',
-};
-
-const PROGRAM_LABELS: Record<string, string> = {
-  value: 'Value',
-  quant: 'Quant',
-};
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -308,16 +291,22 @@ function ExperienceForm({
           >
             Start Year
           </label>
-          <Input
+          <select
             id="exp-start"
-            type="number"
             value={draft.startYear}
             onChange={e => onChange({ ...draft, startYear: e.target.value })}
-            placeholder="2025"
-            min={2000}
-            max={2035}
-            className="h-9 text-sm"
-          />
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Select year</option>
+            {Array.from(
+              { length: 12 },
+              (_, i) => new Date().getFullYear() + 2 - i
+            ).map(y => (
+              <option key={y} value={String(y)}>
+                {y}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label
@@ -326,16 +315,22 @@ function ExperienceForm({
           >
             End Year
           </label>
-          <Input
+          <select
             id="exp-end"
-            type="number"
             value={draft.endYear}
             onChange={e => onChange({ ...draft, endYear: e.target.value })}
-            placeholder="Ongoing"
-            min={2000}
-            max={2035}
-            className="h-9 text-sm"
-          />
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Ongoing</option>
+            {Array.from(
+              { length: 12 },
+              (_, i) => new Date().getFullYear() + 2 - i
+            ).map(y => (
+              <option key={y} value={String(y)}>
+                {y}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-1">
@@ -595,35 +590,31 @@ export default function SettingsPage() {
   const [serverWebsite, setServerWebsite] = useState('');
   const [serverLinkedin, setServerLinkedin] = useState('');
   const [serverGithub, setServerGithub] = useState('');
-  const { mutate: mutatePortalUser } = usePortalUser();
+  const {
+    user: portalUserData,
+    isLoading: portalLoading,
+    mutate: mutatePortalUser,
+  } = usePortalUser();
 
+  // Sync local form state when portalUser data arrives or changes
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/users/me');
-        if (res.ok) {
-          const data = await res.json();
-          const u = data.user as User;
-          setUser(u);
-          setName(u.name);
-          setWebsiteUrl(u.websiteUrl || '');
-          setLinkedinUsername(extractLinkedInUsername(u.linkedinUrl || ''));
-          setGithubUsername(extractGitHubUsername(u.githubUrl || ''));
-          setPreferences(u.preferences || {});
-          // Track server values
-          setServerName(u.name);
-          setServerWebsite(u.websiteUrl || '');
-          setServerLinkedin(extractLinkedInUsername(u.linkedinUrl || ''));
-          setServerGithub(extractGitHubUsername(u.githubUrl || ''));
-        }
-      } catch {
-        // silently fail
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+    if (portalLoading) return;
+    if (portalUserData) {
+      const u = portalUserData;
+      setUser(u);
+      setName(u.name);
+      setWebsiteUrl(u.websiteUrl || '');
+      setLinkedinUsername(extractLinkedInUsername(u.linkedinUrl || ''));
+      setGithubUsername(extractGitHubUsername(u.githubUrl || ''));
+      setPreferences(u.preferences || {});
+      // Track server values
+      setServerName(u.name);
+      setServerWebsite(u.websiteUrl || '');
+      setServerLinkedin(extractLinkedInUsername(u.linkedinUrl || ''));
+      setServerGithub(extractGitHubUsername(u.githubUrl || ''));
+    }
+    setLoading(false);
+  }, [portalUserData, portalLoading]);
 
   const handleLinkedInChange = (value: string) => {
     setLinkedinUsername(extractLinkedInUsername(value));
@@ -776,13 +767,10 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          Manage your profile information
-        </p>
-      </div>
+      <PortalPageHeader
+        title="Settings"
+        description="Manage your profile information"
+      />
 
       {/* Toast */}
       <AnimatePresence>

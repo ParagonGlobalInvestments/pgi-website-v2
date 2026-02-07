@@ -1,36 +1,26 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
-  DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { arrayMove } from '@dnd-kit/sortable';
+import { Loader2 } from 'lucide-react';
 import SponsorForm from './SponsorForm';
-import { SortableRow } from './SortableRow';
+import { CmsTabLayout, type CmsColumn } from './CmsTabLayout';
 import type { CmsSponsor, SponsorType } from '@/lib/cms/types';
 
+/**
+ * SponsorsTab uses a single API endpoint that returns both sponsors and
+ * partners, then splits them into two independent sortable lists. Because
+ * of this dual-list pattern, it manages its own fetch/reorder/delete
+ * rather than using useCmsData (which assumes one list per hook).
+ */
 export default function SponsorsTab() {
   const [sponsors, setSponsors] = useState<CmsSponsor[]>([]);
   const [partners, setPartners] = useState<CmsSponsor[]>([]);
@@ -42,7 +32,7 @@ export default function SponsorsTab() {
   );
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
@@ -73,207 +63,121 @@ export default function SponsorsTab() {
     fetchAll();
   }, [fetchAll]);
 
-  const handleDragEnd = async (
-    event: DragEndEvent,
-    items: CmsSponsor[],
-    setItems: React.Dispatch<React.SetStateAction<CmsSponsor[]>>
-  ) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+  const makeDragHandler =
+    (
+      items: CmsSponsor[],
+      setItems: React.Dispatch<React.SetStateAction<CmsSponsor[]>>
+    ) =>
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
 
-    const oldIndex = items.findIndex(s => s.id === active.id);
-    const newIndex = items.findIndex(s => s.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
+      const oldIndex = items.findIndex(s => s.id === active.id);
+      const newIndex = items.findIndex(s => s.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
 
-    const reordered = arrayMove(items, oldIndex, newIndex);
-    setItems(reordered);
+      const reordered = arrayMove(items, oldIndex, newIndex);
+      setItems(reordered);
 
-    const reorderItems = reordered.map((item, idx) => ({
-      id: item.id,
-      sort_order: idx,
-    }));
+      const reorderItems = reordered.map((item, idx) => ({
+        id: item.id,
+        sort_order: idx,
+      }));
 
-    try {
-      const res = await fetch('/api/cms/sponsors/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: reorderItems }),
-      });
-      if (!res.ok) throw new Error('Failed to reorder');
-    } catch {
-      toast.error('Failed to reorder');
-      fetchAll();
-    }
-  };
+      try {
+        const res = await fetch('/api/cms/sponsors/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: reorderItems }),
+        });
+        if (!res.ok) throw new Error('Failed to reorder');
+      } catch {
+        toast.error('Failed to reorder');
+        fetchAll();
+      }
+    };
 
   const undoRef = useRef<{ id: string; undone: boolean } | null>(null);
 
-  const handleDelete = (item: CmsSponsor) => {
-    const list = item.type === 'sponsor' ? sponsors : partners;
-    const setList = item.type === 'sponsor' ? setSponsors : setPartners;
-    const snapshot = [...list];
-    setList(prev => prev.filter(s => s.id !== item.id));
+  const handleDelete = useCallback(
+    (item: CmsSponsor) => {
+      const setList = item.type === 'sponsor' ? setSponsors : setPartners;
+      const list = item.type === 'sponsor' ? sponsors : partners;
+      const snapshot = [...list];
+      setList(prev => prev.filter(s => s.id !== item.id));
 
-    const undo = { id: item.id, undone: false };
-    undoRef.current = undo;
+      const undo = { id: item.id, undone: false };
+      undoRef.current = undo;
 
-    toast(`Deleted "${item.display_name}"`, {
-      action: {
-        label: 'Undo',
-        onClick: () => {
-          undo.undone = true;
+      const commitDelete = async () => {
+        if (undo.undone) return;
+        try {
+          const res = await fetch(`/api/cms/sponsors/${item.id}`, {
+            method: 'DELETE',
+          });
+          if (!res.ok) throw new Error('Failed to delete');
+        } catch {
+          toast.error('Failed to delete \u2014 restoring');
           setList(snapshot);
+        }
+      };
+
+      toast(`Deleted "${item.display_name}"`, {
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            undo.undone = true;
+            setList(snapshot);
+          },
         },
+        duration: 5000,
+        onAutoClose: commitDelete,
+        onDismiss: commitDelete,
+      });
+    },
+    [sponsors, partners]
+  );
+
+  const columns: CmsColumn<CmsSponsor>[] = useMemo(
+    () => [
+      {
+        header: 'Name',
+        render: (item: CmsSponsor) => (
+          <>
+            <span className="font-medium">{item.display_name}</span>
+            {item.website && (
+              <a
+                href={item.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block sm:hidden text-xs text-blue-600 hover:underline mt-0.5 truncate max-w-[180px]"
+              >
+                {item.website.replace(/^https?:\/\//, '').slice(0, 30)}
+              </a>
+            )}
+          </>
+        ),
       },
-      duration: 5000,
-      onAutoClose: () => commitDelete(item.id, undo, snapshot, setList),
-      onDismiss: () => commitDelete(item.id, undo, snapshot, setList),
-    });
-  };
-
-  const commitDelete = async (
-    id: string,
-    undo: { undone: boolean },
-    snapshot: CmsSponsor[],
-    setList: React.Dispatch<React.SetStateAction<CmsSponsor[]>>
-  ) => {
-    if (undo.undone) return;
-    try {
-      const res = await fetch(`/api/cms/sponsors/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
-    } catch {
-      toast.error('Failed to delete — restoring');
-      setList(snapshot);
-    }
-  };
-
-  const handleEdit = (item: CmsSponsor) => {
-    setEditingItem(item);
-    setFormType(item.type);
-    setFormOpen(true);
-  };
-
-  const handleAdd = (type: SponsorType) => {
-    setEditingItem(undefined);
-    setFormType(type);
-    setFormOpen(true);
-  };
-
-  const renderTable = (
-    items: CmsSponsor[],
-    setItems: React.Dispatch<React.SetStateAction<CmsSponsor[]>>,
-    type: SponsorType
-  ) => {
-    const label = type === 'sponsor' ? 'Sponsors' : 'Partners';
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">{label}</h3>
-          <Button size="sm" onClick={() => handleAdd(type)}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add {type === 'sponsor' ? 'Sponsor' : 'Partner'}
-          </Button>
-        </div>
-
-        {items.length === 0 ? (
-          <p className="text-gray-500 py-4 text-center border rounded-lg">
-            No {label.toLowerCase()} yet.
-          </p>
-        ) : (
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={e => handleDragEnd(e, items, setItems)}
-              modifiers={[restrictToVerticalAxis]}
+      {
+        header: 'Website',
+        className: 'hidden sm:table-cell',
+        render: (item: CmsSponsor) =>
+          item.website ? (
+            <a
+              href={item.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
             >
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-8" />
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">
-                      Website
-                    </TableHead>
-                    <TableHead className="w-20 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <SortableContext
-                  items={items.map(s => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <TableBody>
-                    {items.map((item, idx) => (
-                      <SortableRow key={item.id} id={item.id}>
-                        <TableCell className="text-gray-500">
-                          {idx + 1}
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium">
-                            {item.display_name}
-                          </span>
-                          {item.website && (
-                            <a
-                              href={item.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block sm:hidden text-xs text-blue-600 hover:underline mt-0.5 truncate max-w-[180px]"
-                            >
-                              {item.website
-                                .replace(/^https?:\/\//, '')
-                                .slice(0, 30)}
-                            </a>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-gray-600 hidden sm:table-cell">
-                          {item.website ? (
-                            <a
-                              href={item.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {item.website
-                                .replace(/^https?:\/\//, '')
-                                .slice(0, 40)}
-                            </a>
-                          ) : (
-                            '--'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-end gap-0.5 sm:gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 sm:h-8 sm:w-8"
-                              onClick={() => handleEdit(item)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 sm:h-8 sm:w-8 text-red-600 hover:text-red-700"
-                              onClick={() => handleDelete(item)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </SortableRow>
-                    ))}
-                  </TableBody>
-                </SortableContext>
-              </Table>
-            </DndContext>
-          </div>
-        )}
-      </div>
-    );
-  };
+              {item.website.replace(/^https?:\/\//, '').slice(0, 40)}
+            </a>
+          ) : (
+            <span className="text-gray-600">--</span>
+          ),
+      },
+    ],
+    []
+  );
 
   if (loading) {
     return (
@@ -286,8 +190,53 @@ export default function SponsorsTab() {
 
   return (
     <div className="mt-4 space-y-8">
-      {renderTable(sponsors, setSponsors, 'sponsor')}
-      {renderTable(partners, setPartners, 'partner')}
+      <CmsTabLayout
+        items={sponsors}
+        loading={false}
+        count={sponsors.length}
+        noun={['sponsor', 'sponsors']}
+        columns={columns}
+        sectionTitle="Sponsors"
+        onAdd={() => {
+          setEditingItem(undefined);
+          setFormType('sponsor');
+          setFormOpen(true);
+        }}
+        onEdit={item => {
+          setEditingItem(item);
+          setFormType(item.type);
+          setFormOpen(true);
+        }}
+        onDelete={handleDelete}
+        onDragEnd={makeDragHandler(sponsors, setSponsors)}
+        sensors={sensors}
+        emptyMessage="No sponsors yet."
+        itemLabel={item => item.display_name}
+      />
+
+      <CmsTabLayout
+        items={partners}
+        loading={false}
+        count={partners.length}
+        noun={['partner', 'partners']}
+        columns={columns}
+        sectionTitle="Partners"
+        onAdd={() => {
+          setEditingItem(undefined);
+          setFormType('partner');
+          setFormOpen(true);
+        }}
+        onEdit={item => {
+          setEditingItem(item);
+          setFormType(item.type);
+          setFormOpen(true);
+        }}
+        onDelete={handleDelete}
+        onDragEnd={makeDragHandler(partners, setPartners)}
+        sensors={sensors}
+        emptyMessage="No partners yet."
+        itemLabel={item => item.display_name}
+      />
 
       <SponsorForm
         open={formOpen}

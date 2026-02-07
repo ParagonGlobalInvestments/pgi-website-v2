@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -530,18 +531,19 @@ export default function AnalyticsPage() {
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            See how the public site is performing
-          </p>
-        </div>
+        <PortalPageHeader
+          title="Analytics"
+          description="See how the public site is performing"
+        />
         <div className="flex items-center gap-2">
           <Select
             value={String(days)}
             onValueChange={val => setDays(parseInt(val))}
           >
-            <SelectTrigger className="h-9 w-[140px] text-sm bg-white border-gray-200">
+            <SelectTrigger
+              className="h-9 w-[140px] text-sm bg-white border-gray-200"
+              aria-label="Time range"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -553,7 +555,7 @@ export default function AnalyticsPage() {
           <button
             onClick={() => mutate()}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Refresh"
+            aria-label="Refresh data"
           >
             <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
           </button>

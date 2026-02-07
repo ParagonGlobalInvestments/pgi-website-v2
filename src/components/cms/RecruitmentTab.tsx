@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Loader2 } from 'lucide-react';
 import type { CmsRecruitment } from '@/lib/cms/types';
 
@@ -15,8 +16,10 @@ const KEY_LABELS: Record<string, string> = {
   app_deadline: 'Application Deadline',
   zoom_session_1_link: 'Info Session 1 Link',
   zoom_session_1_time: 'Info Session 1 Time',
+  zoom_session_1_visible: 'Show Info Session 1',
   zoom_session_2_link: 'Info Session 2 Link',
   zoom_session_2_time: 'Info Session 2 Time',
+  zoom_session_2_visible: 'Show Info Session 2',
   education_eligibility: 'Education Eligibility',
   fund_eligibility: 'Fund Eligibility',
 };
@@ -29,11 +32,36 @@ const KEY_ORDER = [
   'app_deadline',
   'zoom_session_1_link',
   'zoom_session_1_time',
+  'zoom_session_1_visible',
   'zoom_session_2_link',
   'zoom_session_2_time',
+  'zoom_session_2_visible',
   'education_eligibility',
   'fund_eligibility',
 ];
+
+const TOGGLE_KEYS = new Set([
+  'applications_open',
+  'zoom_session_1_visible',
+  'zoom_session_2_visible',
+]);
+
+const DATE_KEYS = new Set(['app_open_date', 'app_deadline']);
+
+const TOGGLE_HINTS: Record<string, { on: string; off: string }> = {
+  applications_open: {
+    on: 'Apply buttons visible on website.',
+    off: 'Apply buttons hidden.',
+  },
+  zoom_session_1_visible: {
+    on: 'Zoom link visible on Apply page.',
+    off: 'Zoom link hidden.',
+  },
+  zoom_session_2_visible: {
+    on: 'Zoom link visible on Apply page.',
+    off: 'Zoom link hidden.',
+  },
+};
 
 const SECTIONS: { title: string; keys: string[] }[] = [
   {
@@ -49,12 +77,19 @@ const SECTIONS: { title: string; keys: string[] }[] = [
     keys: ['app_open_date', 'app_deadline'],
   },
   {
-    title: 'Info Sessions',
+    title: 'Info Session 1',
     keys: [
       'zoom_session_1_link',
       'zoom_session_1_time',
+      'zoom_session_1_visible',
+    ],
+  },
+  {
+    title: 'Info Session 2',
+    keys: [
       'zoom_session_2_link',
       'zoom_session_2_time',
+      'zoom_session_2_visible',
     ],
   },
   {
@@ -106,21 +141,25 @@ export default function RecruitmentTab() {
     });
   };
 
-  const saveKey = async (key: string) => {
-    const current = getValue(key);
-    if (current === (serverValues.current[key] ?? '')) return;
+  const saveKey = async (key: string, overrideValue?: string) => {
+    const current = overrideValue ?? getValue(key);
+    if (
+      current === (serverValues.current[key] ?? '') &&
+      overrideValue === undefined
+    )
+      return;
 
     setSavingKey(key);
     try {
-      const allItems = KEY_ORDER.map(k => ({ key: k, value: getValue(k) }));
-      const payload = allItems.map(item =>
-        item.key === key ? { key, value: current } : item
-      );
+      const allItems = KEY_ORDER.map(k => ({
+        key: k,
+        value: k === key ? current : getValue(k),
+      }));
 
       const res = await fetch('/api/cms/recruitment', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: payload }),
+        body: JSON.stringify({ items: allItems }),
       });
       if (!res.ok) throw new Error('Failed to save');
 
@@ -139,12 +178,15 @@ export default function RecruitmentTab() {
 
   const handleBlur = (key: string) => saveKey(key);
 
+  const handleDateChange = (key: string, value: string) => {
+    setValue(key, value);
+    saveKey(key, value);
+  };
+
   const handleToggle = (key: string) => {
     const current = getValue(key);
     const next = current === 'true' ? 'false' : 'true';
     setValue(key, next);
-    // Save immediately — we need to wait for setValue to flush
-    // so we save directly with the new value
     setSavingKey(key);
     const allItems = KEY_ORDER.map(k => ({
       key: k,
@@ -181,20 +223,34 @@ export default function RecruitmentTab() {
   }
 
   return (
-    <div className="mt-4 space-y-8">
+    <div className="mt-4 space-y-6">
       {SECTIONS.map(section => (
-        <div key={section.title}>
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <div
+          key={section.title}
+          className="rounded-lg border border-gray-200 bg-white p-4"
+        >
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
             {section.title}
           </h3>
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {section.keys.map(key =>
-              key === 'applications_open' ? (
+              TOGGLE_KEYS.has(key) ? (
                 <div
                   key={key}
-                  className="space-y-2 flex flex-col justify-center"
+                  className="flex items-center justify-between gap-3 sm:col-span-2 py-1"
                 >
-                  <Label htmlFor={key}>{KEY_LABELS[key]}</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor={key} className="text-sm font-medium">
+                      {KEY_LABELS[key]}
+                    </Label>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {
+                        TOGGLE_HINTS[key]?.[
+                          getValue(key) === 'true' ? 'on' : 'off'
+                        ]
+                      }
+                    </p>
+                  </div>
                   <button
                     id={key}
                     type="button"
@@ -202,29 +258,39 @@ export default function RecruitmentTab() {
                     aria-checked={getValue(key) === 'true'}
                     disabled={savingKey === key}
                     onClick={() => handleToggle(key)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                       getValue(key) === 'true'
                         ? 'bg-pgi-light-blue'
                         : 'bg-gray-300'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
+                      className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform ${
                         getValue(key) === 'true'
-                          ? 'translate-x-5'
+                          ? 'translate-x-4'
                           : 'translate-x-0'
                       }`}
                     />
                   </button>
-                  <p className="text-xs text-gray-400">
-                    {getValue(key) === 'true'
-                      ? 'Apply buttons are visible on the website.'
-                      : 'Apply buttons are hidden. "Applications closed" message shown.'}
-                  </p>
+                </div>
+              ) : DATE_KEYS.has(key) ? (
+                <div key={key} className="space-y-1.5">
+                  <Label htmlFor={key} className="text-sm">
+                    {KEY_LABELS[key]}
+                  </Label>
+                  <DatePicker
+                    id={key}
+                    value={getValue(key)}
+                    onChange={v => handleDateChange(key, v)}
+                    placeholder={KEY_LABELS[key]}
+                    disabled={savingKey === key}
+                  />
                 </div>
               ) : (
-                <div key={key} className="space-y-2">
-                  <Label htmlFor={key}>{KEY_LABELS[key] || key}</Label>
+                <div key={key} className="space-y-1.5">
+                  <Label htmlFor={key} className="text-sm">
+                    {KEY_LABELS[key]}
+                  </Label>
                   <div className="relative">
                     <Input
                       id={key}
@@ -232,7 +298,7 @@ export default function RecruitmentTab() {
                       onChange={e => setValue(key, e.target.value)}
                       onBlur={() => handleBlur(key)}
                       placeholder={KEY_LABELS[key]}
-                      className={savingKey === key ? 'opacity-60' : ''}
+                      className={`h-9 text-sm ${savingKey === key ? 'opacity-60' : ''}`}
                     />
                     {savingKey === key && (
                       <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-gray-400" />
@@ -244,9 +310,7 @@ export default function RecruitmentTab() {
           </div>
         </div>
       ))}
-      <p className="text-xs text-gray-400">
-        Changes save automatically when you leave a field.
-      </p>
+      <p className="text-xs text-gray-400">Changes save automatically.</p>
     </div>
   );
 }

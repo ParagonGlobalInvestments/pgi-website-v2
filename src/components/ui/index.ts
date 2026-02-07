@@ -9,8 +9,3 @@ export * from './textarea';
 export * from './dialog';
 export * from './table';
 export * from './label';
-
-export { SmoothTransition } from './SmoothTransition';
-export { default as AnimatedText } from './AnimatedText';
-export { default as AnimatedSection } from './AnimatedSection';
-export { default as ScrollButton } from './ScrollButton';

@@ -6,29 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
-
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const buttonHover = {
-  scale: 1.05,
-  backgroundColor: '#1f4287',
-  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  transition: {
-    duration: 0.2,
-    ease: 'easeInOut',
-  },
-};
+import { fadeIn, buttonHover } from '@/lib/animations';
 
 export default function NationalCommitteePage() {
   const router = useRouter();

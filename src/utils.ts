@@ -65,3 +65,18 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
 }
+
+/**
+ * Get image source URL - handles both local paths and Supabase Storage URLs.
+ * Local paths like "/sponsors/logo.png" work as-is (Next.js public folder).
+ * Supabase URLs are used directly.
+ */
+export function getImageSrc(imagePath: string | null): string | null {
+  if (!imagePath) return null;
+  // Already a full URL (Supabase Storage or other)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  // Local path in public folder
+  return imagePath;
+}

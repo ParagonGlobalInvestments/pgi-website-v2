@@ -5,52 +5,14 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+import {
+  fadeIn,
+  staggerContainer,
+  memberItem,
+  buttonHover,
+} from '@/lib/animations';
 
-// Animation variants
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const cardItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: 'easeOut',
-    },
-  },
-};
-
-const buttonHover = {
-  scale: 1.05,
-  backgroundColor: '#1f4287',
-  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  transition: {
-    duration: 0.2,
-    ease: 'easeInOut',
-  },
-};
+const cardItem = memberItem;
 
 type FormData = {
   name: string;

@@ -1,6 +1,7 @@
 /**
  * Portal sidebar constants
  */
+import type { PortalNavItem } from './types';
 
 export const SCHOOL_LABELS: Record<string, string> = {
   brown: 'Brown',
@@ -20,15 +21,12 @@ export const ROLE_LABELS: Record<string, string> = {
   analyst: 'Analyst',
 };
 
-export interface NavItem {
-  id: string;
-  href: string;
-  label: string;
-  icon: string;
-  adminOnly: boolean;
-}
+export const PROGRAM_LABELS: Record<string, string> = {
+  value: 'Value',
+  quant: 'Quant',
+};
 
-export const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: PortalNavItem[] = [
   {
     id: 'home',
     href: '/portal',
@@ -64,14 +62,15 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'BarChart3',
     adminOnly: true,
   },
-  {
-    id: 'settings',
-    href: '/portal/settings',
-    label: 'Settings',
-    icon: 'Settings',
-    adminOnly: false,
-  },
 ];
+
+export const SETTINGS_NAV_ITEM: PortalNavItem = {
+  id: 'settings',
+  href: '/portal/settings',
+  label: 'Settings',
+  icon: 'Settings',
+  adminOnly: false,
+};
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://paragoninvestments.org';

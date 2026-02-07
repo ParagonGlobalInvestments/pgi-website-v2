@@ -1,19 +1,7 @@
 'use client';
 
-import ErrorFallback from '@/components/portal/ErrorFallback';
+import { createPortalErrorPage } from './_create-error-page';
 
-export default function PortalError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  return (
-    <ErrorFallback
-      error={error}
-      reset={reset}
-      logLabel="Portal error"
-    />
-  );
-}
+export default createPortalErrorPage({
+  logLabel: 'Portal error',
+});

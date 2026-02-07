@@ -2,36 +2,28 @@
 
 import { motion } from 'framer-motion';
 import { GraduationCap, TrendingUp } from 'lucide-react';
+import { format, parseISO, isValid } from 'date-fns';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
+import { fadeIn, staggerContainer, memberItem } from '@/lib/animations';
 import type { CmsPerson } from '@/lib/cms/types';
 
-/** Animation variants */
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' },
-  },
-};
+/** Format an ISO date string for display. Falls back to the raw value if not ISO. */
+function displayDate(
+  value: string | undefined,
+  fmt: string = 'MMMM d'
+): string {
+  if (!value) return 'TBD';
+  try {
+    const parsed = parseISO(value);
+    if (isValid(parsed)) return format(parsed, fmt);
+  } catch {
+    /* ignore */
+  }
+  return value;
+}
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
-  },
-};
-
-const cardItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-};
+const cardItem = memberItem;
 
 const timelineItemVariants = {
   hidden: { opacity: 0, y: 30, scale: 0.95 },
@@ -151,20 +143,26 @@ function GeneralRecruitment({ config }: { config: Record<string, string> }) {
   const applicationsOpen = config.applications_open === 'true';
 
   const timeline = [
-    { date: config.app_open_date || 'TBD', detail: 'Applications open' },
+    { date: displayDate(config.app_open_date), detail: 'Applications open' },
     {
       date: config.zoom_session_1_time || 'TBD',
       detail: '1st info session',
-      link: config.zoom_session_1_link || undefined,
+      link:
+        config.zoom_session_1_visible === 'true'
+          ? config.zoom_session_1_link || undefined
+          : undefined,
       linkLabel: 'Zoom',
     },
     {
       date: config.zoom_session_2_time || 'TBD',
       detail: '2nd info session',
-      link: config.zoom_session_2_link || undefined,
+      link:
+        config.zoom_session_2_visible === 'true'
+          ? config.zoom_session_2_link || undefined
+          : undefined,
       linkLabel: 'Zoom',
     },
-    { date: config.app_deadline || 'TBD', detail: 'Applications close' },
+    { date: displayDate(config.app_deadline), detail: 'Applications close' },
   ];
 
   return (
@@ -236,15 +234,21 @@ function GeneralRecruitment({ config }: { config: Record<string, string> }) {
                 {config.education_eligibility || 'first-year students'}.
               </p>
               <div className="mt-auto pt-2">
-                {applicationsOpen && config.education_application_link ? (
-                  <a
-                    href={config.education_application_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
-                  >
-                    Apply Now
-                  </a>
+                {applicationsOpen ? (
+                  config.education_application_link ? (
+                    <a
+                      href={config.education_application_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
+                    >
+                      Apply Now
+                    </a>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic">
+                      Application link coming soon.
+                    </p>
+                  )
                 ) : (
                   <p className="text-gray-400 text-sm italic">
                     Applications are currently closed.
@@ -293,15 +297,21 @@ function GeneralRecruitment({ config }: { config: Record<string, string> }) {
                 {config.fund_eligibility || 'second-year students'}.
               </p>
               <div className="mt-auto pt-2">
-                {applicationsOpen && config.fund_application_link ? (
-                  <a
-                    href={config.fund_application_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
-                  >
-                    Apply Now
-                  </a>
+                {applicationsOpen ? (
+                  config.fund_application_link ? (
+                    <a
+                      href={config.fund_application_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-pgi-light-blue text-white px-6 py-3 rounded-lg font-semibold text-sm md:text-base tracking-wide shadow-lg hover:bg-[#1f4287] transition-colors"
+                    >
+                      Apply Now
+                    </a>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic">
+                      Application link coming soon.
+                    </p>
+                  )
                 ) : (
                   <p className="text-gray-400 text-sm italic">
                     Applications are currently closed.
