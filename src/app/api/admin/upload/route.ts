@@ -18,7 +18,7 @@ const ALLOWED_TYPES = [
 /**
  * Upload an image to Supabase Storage (cms-assets bucket).
  *
- * POST /api/cms/upload
+ * POST /api/admin/upload
  * Body: FormData with 'file' field
  * Optional query param: ?folder=sponsors (subfolder in bucket)
  *
@@ -33,16 +33,15 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+        {
+          error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+        },
         { status: 400 }
       );
     }
@@ -77,10 +76,7 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Storage upload error:', error);
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     // Get public URL
