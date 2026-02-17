@@ -383,7 +383,7 @@ export default function ResourcesTab() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/cms/resources');
+      const res = await fetch('/api/admin/resources');
       if (!res.ok) throw new Error('Failed to fetch');
       const data: CmsResource[] = await res.json();
       data.sort((a, b) => a.sort_order - b.sort_order);
@@ -401,41 +401,45 @@ export default function ResourcesTab() {
   });
 
   // Build tree structure
-  const tree: TreeTab[] = useMemo(() => TAB_ORDER.map(tab => {
-      const tabItems = items.filter(r => r.tab_id === tab.id);
-      const sectionOrder = SECTION_ORDER[tab.id] || [];
+  const tree: TreeTab[] = useMemo(
+    () =>
+      TAB_ORDER.map(tab => {
+        const tabItems = items.filter(r => r.tab_id === tab.id);
+        const sectionOrder = SECTION_ORDER[tab.id] || [];
 
-      const sectionMap: Record<string, CmsResource[]> = {};
-      for (const r of tabItems) {
-        if (!sectionMap[r.section]) sectionMap[r.section] = [];
-        sectionMap[r.section].push(r);
-      }
-
-      // Sort within each section
-      for (const section of Object.keys(sectionMap)) {
-        sectionMap[section].sort((a, b) => a.sort_order - b.sort_order);
-      }
-
-      // Ordered sections
-      const sections: TreeSection[] = [];
-      for (const s of sectionOrder) {
-        if (sectionMap[s]) {
-          sections.push({ tabId: tab.id, section: s, items: sectionMap[s] });
-          delete sectionMap[s];
+        const sectionMap: Record<string, CmsResource[]> = {};
+        for (const r of tabItems) {
+          if (!sectionMap[r.section]) sectionMap[r.section] = [];
+          sectionMap[r.section].push(r);
         }
-      }
-      // Extras
-      for (const [s, resources] of Object.entries(sectionMap)) {
-        sections.push({ tabId: tab.id, section: s, items: resources });
-      }
 
-      return {
-        id: tab.id,
-        label: tab.label,
-        sections,
-        totalCount: tabItems.length,
-      };
-    }), [items]);
+        // Sort within each section
+        for (const section of Object.keys(sectionMap)) {
+          sectionMap[section].sort((a, b) => a.sort_order - b.sort_order);
+        }
+
+        // Ordered sections
+        const sections: TreeSection[] = [];
+        for (const s of sectionOrder) {
+          if (sectionMap[s]) {
+            sections.push({ tabId: tab.id, section: s, items: sectionMap[s] });
+            delete sectionMap[s];
+          }
+        }
+        // Extras
+        for (const [s, resources] of Object.entries(sectionMap)) {
+          sections.push({ tabId: tab.id, section: s, items: resources });
+        }
+
+        return {
+          id: tab.id,
+          label: tab.label,
+          sections,
+          totalCount: tabItems.length,
+        };
+      }),
+    [items]
+  );
 
   const handleReorder = useCallback(
     async (sectionItems: CmsResource[], oldIndex: number, newIndex: number) => {
@@ -459,7 +463,7 @@ export default function ResourcesTab() {
       }));
 
       try {
-        const res = await fetch('/api/cms/resources/reorder', {
+        const res = await fetch('/api/admin/resources/reorder', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ items: reorderPayload }),
@@ -484,7 +488,7 @@ export default function ResourcesTab() {
       const commitDelete = async () => {
         if (undo.undone) return;
         try {
-          const res = await fetch(`/api/cms/resources/${resource.id}`, {
+          const res = await fetch(`/api/admin/resources/${resource.id}`, {
             method: 'DELETE',
           });
           if (!res.ok) throw new Error('Failed to delete');

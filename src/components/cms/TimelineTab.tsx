@@ -30,7 +30,7 @@ const truncate = (text: string, maxLength: number = 60): string => {
 export default function TimelineTab() {
   const { items, loading, refetch, handleDragEnd, handleDelete, sensors } =
     useCmsData<CmsTimelineEvent>({
-      endpoint: '/api/cms/timeline',
+      endpoint: '/api/admin/timeline',
       sortBy: 'sort_order',
     });
 

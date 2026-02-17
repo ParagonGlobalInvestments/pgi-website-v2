@@ -60,7 +60,7 @@ export default function CmsImageUpload({
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`/api/cms/upload?folder=${folder}`, {
+      const res = await fetch(`/api/admin/upload?folder=${folder}`, {
         method: 'POST',
         body: formData,
       });

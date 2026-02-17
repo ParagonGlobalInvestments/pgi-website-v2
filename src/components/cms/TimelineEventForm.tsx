@@ -65,8 +65,8 @@ export default function TimelineEventForm({
 
     try {
       const url = isEditing
-        ? `/api/cms/timeline/${event!.id}`
-        : '/api/cms/timeline';
+        ? `/api/admin/timeline/${event!.id}`
+        : '/api/admin/timeline';
       const method = isEditing ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
