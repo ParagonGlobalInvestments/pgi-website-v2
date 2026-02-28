@@ -31,6 +31,16 @@ function coerceSortOrder(value: unknown): number | null {
   return value;
 }
 
+function revalidateChangedGroups(
+  previousGroup: PeopleGroupSlug,
+  nextGroup: PeopleGroupSlug
+) {
+  revalidatePeople(previousGroup);
+  if (previousGroup !== nextGroup) {
+    revalidatePeople(nextGroup);
+  }
+}
+
 export async function PATCH(req: NextRequest, context: RouteContext) {
   const auth = await requireAdmin();
   if ('error' in auth) return auth.error;
@@ -290,7 +300,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
         toExternalPersonId('user', membership.id)
       );
 
-      revalidatePeople(nextGroupSlug);
+      revalidateChangedGroups(
+        membership.group_slug as PeopleGroupSlug,
+        nextGroupSlug
+      );
       return NextResponse.json({ success: true, data: person });
     }
 
@@ -485,7 +498,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       toExternalPersonId('alumni', membership.id)
     );
 
-    revalidatePeople(nextGroupSlug);
+    revalidateChangedGroups(
+      membership.group_slug as PeopleGroupSlug,
+      nextGroupSlug
+    );
     return NextResponse.json({ success: true, data: person });
   } catch (err) {
     if (isMembershipSchemaError(err)) {
