@@ -110,6 +110,8 @@ interface AlumniMembershipRow {
 }
 
 const VALID_GROUP_SET = new Set<string>(PEOPLE_GROUPS.map(group => group.slug));
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function isPeopleGroupSlug(value: string): value is PeopleGroupSlug {
   return VALID_GROUP_SET.has(value);
@@ -129,6 +131,7 @@ export function parseExternalPersonId(
   if (rest.length > 0) return null;
   if (!membershipId) return null;
   if (type !== 'user' && type !== 'alumni') return null;
+  if (!UUID_RE.test(membershipId)) return null;
   return { type, membershipId };
 }
 
@@ -186,8 +189,7 @@ export function isMembershipSchemaError(error: unknown): boolean {
   return (
     message.includes('user_public_group_memberships') ||
     message.includes('alumni_public_group_memberships') ||
-    message.includes('alumni_people') ||
-    message.includes('relationship')
+    message.includes('alumni_people')
   );
 }
 

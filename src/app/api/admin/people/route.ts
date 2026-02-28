@@ -29,7 +29,7 @@ async function findUserByName(name: string) {
   const { data, error } = await supabase
     .from('users')
     .select('id')
-    .ilike('name', name);
+    .eq('name', name);
 
   if (error) throw error;
 
@@ -174,10 +174,47 @@ async function createOrUpdateAlumniMembership(params: {
 
   try {
     if (normalizedLinkedin) {
-      const { data: alumniPerson, error: alumniUpsertError } = await supabase
-        .from('alumni_people')
-        .upsert(
-          {
+      const { data: existingAlumni, error: existingLookupError } =
+        await supabase
+          .from('alumni_people')
+          .select('id, school, title, company, headshot_url, banner_url')
+          .eq('name', params.input.name)
+          .eq('linkedin', normalizedLinkedin)
+          .maybeSingle();
+
+      if (existingLookupError) throw existingLookupError;
+
+      if (existingAlumni) {
+        const merged = {
+          school: params.input.school ?? existingAlumni.school,
+          title: params.input.title ?? existingAlumni.title,
+          company: params.input.company ?? existingAlumni.company,
+          headshot_url:
+            params.input.headshot_url ?? existingAlumni.headshot_url,
+          banner_url: params.input.banner_url ?? existingAlumni.banner_url,
+        };
+
+        const shouldUpdate =
+          merged.school !== existingAlumni.school ||
+          merged.title !== existingAlumni.title ||
+          merged.company !== existingAlumni.company ||
+          merged.headshot_url !== existingAlumni.headshot_url ||
+          merged.banner_url !== existingAlumni.banner_url;
+
+        if (shouldUpdate) {
+          const { error: alumniUpdateError } = await supabase
+            .from('alumni_people')
+            .update(merged)
+            .eq('id', existingAlumni.id);
+
+          if (alumniUpdateError) throw alumniUpdateError;
+        }
+
+        alumniPersonId = existingAlumni.id;
+      } else {
+        const { data: alumniPerson, error: alumniInsertError } = await supabase
+          .from('alumni_people')
+          .insert({
             name: params.input.name,
             school: params.input.school,
             title: params.input.title,
@@ -185,14 +222,14 @@ async function createOrUpdateAlumniMembership(params: {
             linkedin: normalizedLinkedin,
             headshot_url: params.input.headshot_url,
             banner_url: params.input.banner_url,
-          },
-          { onConflict: 'name,linkedin' }
-        )
-        .select('id')
-        .single();
+          })
+          .select('id')
+          .single();
 
-      if (alumniUpsertError) throw alumniUpsertError;
-      alumniPersonId = alumniPerson.id;
+        if (alumniInsertError) throw alumniInsertError;
+        alumniPersonId = alumniPerson.id;
+        createdAlumniPersonId = alumniPerson.id;
+      }
     } else {
       const { data: alumniPerson, error: alumniInsertError } = await supabase
         .from('alumni_people')
