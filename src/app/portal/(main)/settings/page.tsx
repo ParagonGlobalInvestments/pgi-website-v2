@@ -1136,8 +1136,8 @@ export default function SettingsPage() {
           {/* Experience */}
           {!isAdmin && <ExperienceSection userId={user.id} />}
 
-          {/* Preferences */}
-          {!isAdmin && (
+          {/* Preferences — dev only, hidden in production */}
+          {!isAdmin && process.env.NODE_ENV !== 'production' && (
             <PreferencesSection
               preferences={preferences}
               onUpdate={handlePreferencesUpdate}
