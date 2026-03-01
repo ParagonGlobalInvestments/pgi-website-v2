@@ -277,8 +277,17 @@ function MemberDetail({ user }: { user: User }) {
 // Directory Page
 // ============================================================================
 
+interface ExperienceEntry {
+  user_id: string;
+  company: string;
+  role: string;
+}
+
 export default function DirectoryPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [experienceMap, setExperienceMap] = useState<Map<string, string>>(
+    new Map()
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -298,18 +307,37 @@ export default function DirectoryPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch users (include all statuses, filter client-side)
+  // Fetch users and experience (include all statuses, filter client-side)
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/users');
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        const data = await res.json();
-        if (!data.success || !Array.isArray(data.users)) {
-          throw new Error(data.error || 'Failed to fetch users');
+        const [usersRes, expRes] = await Promise.all([
+          fetch('/api/users'),
+          fetch('/api/users/experience'),
+        ]);
+        if (!usersRes.ok) throw new Error(`API error: ${usersRes.status}`);
+        const usersData = await usersRes.json();
+        if (!usersData.success || !Array.isArray(usersData.users)) {
+          throw new Error(usersData.error || 'Failed to fetch users');
         }
-        setUsers(data.users);
+        setUsers(usersData.users);
+
+        // Build a map of userId -> concatenated experience text for search
+        if (expRes.ok) {
+          const expData = await expRes.json();
+          const entries: ExperienceEntry[] = expData.experience ?? [];
+          const map = new Map<string, string>();
+          for (const entry of entries) {
+            const existing = map.get(entry.user_id) ?? '';
+            map.set(
+              entry.user_id,
+              `${existing} ${entry.company} ${entry.role}`
+            );
+          }
+          setExperienceMap(map);
+        }
+
         setError('');
       } catch (err: unknown) {
         setError(
@@ -319,7 +347,7 @@ export default function DirectoryPage() {
         setLoading(false);
       }
     };
-    fetchUsers();
+    fetchData();
   }, []);
 
   // Filter users
@@ -328,7 +356,9 @@ export default function DirectoryPage() {
       users.filter(user => {
         if (debouncedSearch) {
           const term = debouncedSearch.toLowerCase();
-          const haystack = `${user.name} ${user.email}`.toLowerCase();
+          const experience = experienceMap.get(user.id) ?? '';
+          const haystack =
+            `${user.name} ${user.email} ${experience}`.toLowerCase();
           if (!haystack.includes(term)) return false;
         }
         if (filter.school !== 'all' && user.school !== filter.school)
@@ -339,7 +369,7 @@ export default function DirectoryPage() {
         if (user.status !== 'active') return false;
         return true;
       }),
-    [users, debouncedSearch, filter]
+    [users, debouncedSearch, filter, experienceMap]
   );
 
   const handleFilterChange = useCallback((type: string, value: string) => {
@@ -376,7 +406,7 @@ export default function DirectoryPage() {
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by name..."
+            placeholder="Search by name, company, or role..."
             aria-label="Search members"
             className="pl-10 pr-4 w-full bg-white border-gray-300"
           />

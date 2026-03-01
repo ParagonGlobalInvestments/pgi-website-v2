@@ -5,9 +5,9 @@ import useSWR, { mutate } from 'swr';
 import { motion } from 'framer-motion';
 import {
   ExternalLink,
-  FileText,
-  FileSpreadsheet,
-  Folder,
+  // FileText,
+  // FileSpreadsheet,
+  // Folder,
   Link2,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
@@ -54,32 +54,32 @@ const SECTION_ORDER: Record<ResourceTabId, string[]> = {
   quant: ['Education', 'Interview Prep'],
 };
 
-const TYPE_ICONS: Record<
-  string,
-  React.ComponentType<{ className?: string }>
-> = {
-  pdf: FileText,
-  doc: FileText,
-  sheet: FileSpreadsheet,
-  folder: Folder,
-  link: Link2,
-};
+// const TYPE_ICONS: Record<
+//   string,
+//   React.ComponentType<{ className?: string }>
+// > = {
+//   pdf: FileText,
+//   doc: FileText,
+//   sheet: FileSpreadsheet,
+//   folder: Folder,
+//   link: Link2,
+// };
 
-const TYPE_COLORS: Record<string, string> = {
-  pdf: 'text-red-500',
-  doc: 'text-blue-500',
-  sheet: 'text-green-500',
-  folder: 'text-yellow-600',
-  link: 'text-purple-500',
-};
+// const TYPE_COLORS: Record<string, string> = {
+//   pdf: 'text-red-500',
+//   doc: 'text-blue-500',
+//   sheet: 'text-green-500',
+//   folder: 'text-yellow-600',
+//   link: 'text-purple-500',
+// };
 
-const TYPE_LABELS: Record<string, string> = {
-  pdf: 'PDF Document',
-  doc: 'Word Document',
-  sheet: 'Spreadsheet',
-  folder: 'Folder',
-  link: 'External Link',
-};
+// const TYPE_LABELS: Record<string, string> = {
+//   pdf: 'PDF Document',
+//   doc: 'Word Document',
+//   sheet: 'Spreadsheet',
+//   folder: 'Folder',
+//   link: 'External Link',
+// };
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -98,8 +98,8 @@ function ResourceDetail({
   isMobile: boolean;
   onPreview: () => void;
 }) {
-  const Icon = TYPE_ICONS[resource.type] || FileText;
-  const color = TYPE_COLORS[resource.type] || 'text-gray-500';
+  // const Icon = TYPE_ICONS[resource.type] || FileText;
+  // const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url);
   const hasLink = Boolean(resource.link_url);
   const canPreview =
@@ -109,16 +109,20 @@ function ResourceDetail({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
+        {/* Type icon hidden
         <div
           className={`w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0 ${color}`}
         >
           <Icon className="h-5 w-5" />
         </div>
+        */}
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-bold text-gray-900">{resource.title}</h2>
+          {/* Type label hidden
           <p className="text-sm text-gray-500 mt-1">
             {TYPE_LABELS[resource.type] || resource.type}
           </p>
+          */}
         </div>
       </div>
 
@@ -134,12 +138,14 @@ function ResourceDetail({
           <span className="text-gray-500">Section</span>
           <span className="text-gray-900 font-medium">{sectionLabel}</span>
         </div>
+        {/* Type row hidden
         <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
           <span className="text-gray-500">Type</span>
           <span className="text-gray-900 font-medium">
             {TYPE_LABELS[resource.type] || resource.type}
           </span>
         </div>
+        */}
         <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
           <span className="text-gray-500">Status</span>
           {hasUrl || hasLink ? (
@@ -227,8 +233,8 @@ function ResourceCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const Icon = TYPE_ICONS[resource.type] || FileText;
-  const color = TYPE_COLORS[resource.type] || 'text-gray-500';
+  // const Icon = TYPE_ICONS[resource.type] || FileText;
+  // const color = TYPE_COLORS[resource.type] || 'text-gray-500';
   const hasUrl = Boolean(resource.url) || Boolean(resource.link_url);
 
   return (
@@ -242,9 +248,11 @@ function ResourceCard({
       }`}
       onClick={onClick}
     >
+      {/* Resource type icon hidden
       <div className={`flex-shrink-0 ${color}`}>
         <Icon className="h-5 w-5" />
       </div>
+      */}
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-gray-900 text-sm truncate">
           {resource.title}
