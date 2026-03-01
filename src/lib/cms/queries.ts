@@ -180,70 +180,88 @@ function mapAlumniMembershipToCmsPerson(row: AlumniMembershipRow): CmsPerson {
 }
 
 async function getCmsPeopleFromMembershipTables(
-  group: PeopleGroupSlug
+  group: PeopleGroupSlug,
+  options?: {
+    includeAlumni?: boolean;
+    usersOnly?: boolean;
+  }
 ): Promise<CmsPerson[] | null> {
   const client = getClient();
   if (!client) return [];
+  const includeAlumni = options?.includeAlumni ?? true;
+  const usersOnly = options?.usersOnly ?? false;
+
+  const userPromise = client
+    .from('user_public_group_memberships')
+    .select(
+      `
+        id,
+        group_slug,
+        sort_order,
+        created_at,
+        updated_at,
+        user:users (
+          id,
+          name,
+          school,
+          linkedin_url
+        ),
+        source:cms_people (
+          school,
+          title,
+          company,
+          linkedin,
+          headshot_url,
+          banner_url
+        )
+      `
+    )
+    .eq('group_slug', group)
+    .order('sort_order', { ascending: true });
+
+  const alumniPromise = includeAlumni
+    ? client
+        .from('alumni_public_group_memberships')
+        .select(
+          `
+            id,
+            group_slug,
+            sort_order,
+            created_at,
+            updated_at,
+            alumni:alumni_people (
+              id,
+              name,
+              school,
+              title,
+              company,
+              linkedin,
+              headshot_url,
+              banner_url
+            ),
+            source:cms_people (
+              school,
+              title,
+              company,
+              linkedin,
+              headshot_url,
+              banner_url
+            )
+          `
+        )
+        .eq('group_slug', group)
+        .order('sort_order', { ascending: true })
+    : Promise.resolve({
+        data: [],
+        error: null,
+      } as {
+        data: AlumniMembershipRow[];
+        error: null;
+      });
 
   const [userResult, alumniResult] = await Promise.all([
-    client
-      .from('user_public_group_memberships')
-      .select(
-        `
-          id,
-          group_slug,
-          sort_order,
-          created_at,
-          updated_at,
-          user:users (
-            id,
-            name,
-            school,
-            linkedin_url
-          ),
-          source:cms_people (
-            school,
-            title,
-            company,
-            linkedin,
-            headshot_url,
-            banner_url
-          )
-        `
-      )
-      .eq('group_slug', group)
-      .order('sort_order', { ascending: true }),
-    client
-      .from('alumni_public_group_memberships')
-      .select(
-        `
-          id,
-          group_slug,
-          sort_order,
-          created_at,
-          updated_at,
-          alumni:alumni_people (
-            id,
-            name,
-            school,
-            title,
-            company,
-            linkedin,
-            headshot_url,
-            banner_url
-          ),
-          source:cms_people (
-            school,
-            title,
-            company,
-            linkedin,
-            headshot_url,
-            banner_url
-          )
-        `
-      )
-      .eq('group_slug', group)
-      .order('sort_order', { ascending: true }),
+    userPromise,
+    alumniPromise,
   ]);
 
   if (userResult.error || alumniResult.error) {
@@ -251,9 +269,9 @@ async function getCmsPeopleFromMembershipTables(
     return null;
   }
 
-  const users = ((userResult.data as UserMembershipRow[] | null) ?? []).map(
-    mapUserMembershipToCmsPerson
-  );
+  const users = ((userResult.data as UserMembershipRow[] | null) ?? [])
+    .filter(row => !usersOnly || pickOne(row.user) !== null)
+    .map(mapUserMembershipToCmsPerson);
   const alumni = (
     (alumniResult.data as AlumniMembershipRow[] | null) ?? []
   ).map(mapAlumniMembershipToCmsPerson);
@@ -265,10 +283,17 @@ async function getCmsPeopleFromMembershipTables(
 }
 
 export async function getCmsPeople(
-  group: PeopleGroupSlug
+  group: PeopleGroupSlug,
+  options?: {
+    includeAlumni?: boolean;
+    usersOnly?: boolean;
+    fallbackToCmsPeople?: boolean;
+  }
 ): Promise<CmsPerson[]> {
-  const membershipRows = await getCmsPeopleFromMembershipTables(group);
+  const membershipRows = await getCmsPeopleFromMembershipTables(group, options);
   if (membershipRows) return membershipRows;
+  const fallbackToCmsPeople = options?.fallbackToCmsPeople ?? true;
+  if (!fallbackToCmsPeople) return [];
 
   const client = getClient();
   if (!client) return [];

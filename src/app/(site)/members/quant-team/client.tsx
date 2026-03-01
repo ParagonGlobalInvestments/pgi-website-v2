@@ -46,7 +46,12 @@ export default function QuantTeamClient({
         members={researchCommittee}
         darkBg
       />
-      <TeamMemberGrid title="Analysts" members={analysts} compact />
+      <TeamMemberGrid
+        title="Analysts"
+        members={analysts}
+        compact
+        showLinkedin={false}
+      />
     </div>
   );
 }

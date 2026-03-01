@@ -49,7 +49,13 @@ export default function ValueTeamClient({
         darkBg
       />
       <TeamMemberGrid title="Portfolio Managers" members={portfolioManagers} />
-      <TeamMemberGrid title="Analysts" members={analysts} darkBg compact />
+      <TeamMemberGrid
+        title="Analysts"
+        members={analysts}
+        darkBg
+        compact
+        showLinkedin={false}
+      />
     </div>
   );
 }

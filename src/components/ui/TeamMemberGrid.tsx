@@ -13,6 +13,8 @@ interface TeamMemberGridProps {
   darkBg?: boolean;
   /** Use compact card styling (less padding, smaller hover offset) */
   compact?: boolean;
+  /** Whether LinkedIn button should be shown when a profile has a LinkedIn URL */
+  showLinkedin?: boolean;
 }
 
 export default function TeamMemberGrid({
@@ -20,6 +22,7 @@ export default function TeamMemberGrid({
   members,
   darkBg = false,
   compact = false,
+  showLinkedin = true,
 }: TeamMemberGridProps) {
   return (
     <section
@@ -60,16 +63,16 @@ export default function TeamMemberGrid({
               }}
             >
               <h3
-                className={`${compact ? 'text-base md:text-lg' : 'text-lg md:text-xl'} font-medium ${member.linkedin ? 'mb-2' : ''} text-white`}
+                className={`${compact ? 'text-base md:text-lg' : 'text-lg md:text-xl'} font-medium ${showLinkedin && member.linkedin ? 'mb-2' : ''} text-white`}
               >
                 {member.name}
               </h3>
               <p
-                className={`text-gray-300 ${member.linkedin ? 'mb-4' : ''} text-sm md:text-base font-light`}
+                className={`text-gray-300 ${showLinkedin && member.linkedin ? 'mb-4' : ''} text-sm md:text-base font-light`}
               >
                 {member.school}
               </p>
-              {member.linkedin && (
+              {showLinkedin && member.linkedin && (
                 <a
                   href={member.linkedin}
                   target="_blank"
