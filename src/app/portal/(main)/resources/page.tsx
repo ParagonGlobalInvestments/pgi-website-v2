@@ -239,7 +239,7 @@ function ResourceCard({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 bg-white border rounded-lg transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${
+      className={`flex items-center gap-4 p-4 bg-white border rounded-lg transition-all duration-200 ease-smooth cursor-pointer hover:shadow-md hover:-translate-y-0.5 ${
         isSelected
           ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
           : hasUrl
