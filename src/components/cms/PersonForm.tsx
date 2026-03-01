@@ -59,7 +59,7 @@ export default function PersonForm({
 
   const handleAutoSaveImage = async (url: string) => {
     if (isEditing && person) {
-      const patchRes = await fetch(`/api/cms/people/${person.id}`, {
+      const patchRes = await fetch(`/api/admin/people/${person.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ headshot_url: url }),
@@ -77,7 +77,7 @@ export default function PersonForm({
 
   const handleAutoClearImage = async () => {
     if (isEditing && person) {
-      await fetch(`/api/cms/people/${person.id}`, {
+      await fetch(`/api/admin/people/${person.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ headshot_url: null }),
@@ -97,19 +97,20 @@ export default function PersonForm({
     const payload: Record<string, string | null> = {
       group_slug: groupSlug,
       name: name.trim(),
-      title: fields.includes('title') ? title.trim() || null : null,
-      school: fields.includes('school') ? school.trim() || null : null,
-      company: fields.includes('company') ? company.trim() || null : null,
-      linkedin: fields.includes('linkedin') ? linkedin.trim() || null : null,
-      headshot_url: fields.includes('headshot_url')
-        ? headshotUrl.trim() || null
-        : null,
     };
+
+    if (fields.includes('title')) payload.title = title.trim() || null;
+    if (fields.includes('school')) payload.school = school.trim() || null;
+    if (fields.includes('company')) payload.company = company.trim() || null;
+    if (fields.includes('linkedin')) payload.linkedin = linkedin.trim() || null;
+    if (fields.includes('headshot_url')) {
+      payload.headshot_url = headshotUrl.trim() || null;
+    }
 
     try {
       const url = isEditing
-        ? `/api/cms/people/${person!.id}`
-        : '/api/cms/people';
+        ? `/api/admin/people/${person!.id}`
+        : '/api/admin/people';
       const method = isEditing ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,

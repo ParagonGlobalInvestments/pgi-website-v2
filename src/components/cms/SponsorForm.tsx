@@ -56,7 +56,7 @@ export default function SponsorForm({
 
   const handleAutoSaveImage = async (url: string) => {
     if (isEditing && sponsor) {
-      const patchRes = await fetch(`/api/cms/sponsors/${sponsor.id}`, {
+      const patchRes = await fetch(`/api/admin/sponsors/${sponsor.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_path: url }),
@@ -74,7 +74,7 @@ export default function SponsorForm({
 
   const handleAutoClearImage = async () => {
     if (isEditing && sponsor) {
-      await fetch(`/api/cms/sponsors/${sponsor.id}`, {
+      await fetch(`/api/admin/sponsors/${sponsor.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_path: null }),
@@ -118,8 +118,8 @@ export default function SponsorForm({
 
     try {
       const url = isEditing
-        ? `/api/cms/sponsors/${sponsor!.id}`
-        : '/api/cms/sponsors';
+        ? `/api/admin/sponsors/${sponsor!.id}`
+        : '/api/admin/sponsors';
       const method = isEditing ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,

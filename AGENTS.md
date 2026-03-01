@@ -6,18 +6,18 @@ Single source of truth for AI coding agents working in the PGI Website codebase.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript 5.5 (strict mode) |
-| Auth | Supabase Auth (Google OAuth) |
-| Database | Supabase (PostgreSQL + RLS) |
-| Storage | Supabase Storage (resources) |
-| Styling | Tailwind CSS 3 + shadcn/ui + Radix UI |
-| Animation | Framer Motion, GSAP |
+| Layer     | Technology                                       |
+| --------- | ------------------------------------------------ |
+| Framework | Next.js 14 (App Router)                          |
+| Language  | TypeScript 5.5 (strict mode)                     |
+| Auth      | Supabase Auth (Google OAuth)                     |
+| Database  | Supabase (PostgreSQL + RLS)                      |
+| Storage   | Supabase Storage (resources)                     |
+| Styling   | Tailwind CSS 3 + shadcn/ui + Radix UI            |
+| Animation | Framer Motion, GSAP                              |
 | Analytics | PostHog, Vercel Analytics, Vercel Speed Insights |
-| Hosting | Vercel |
-| CI | GitHub Actions |
+| Hosting   | Vercel                                           |
+| CI        | GitHub Actions                                   |
 
 ---
 
@@ -55,7 +55,7 @@ src/
 │   │   ├── sponsors/            # /sponsors
 │   │   └── who-we-are/          # /who-we-are
 │   ├── api/
-│   │   ├── cms/                 # CMS API: people, sponsors, timeline, recruitment, statistics, upload
+│   │   ├── admin/               # Admin content API: people, sponsors, timeline, recruitment, statistics, resources, uploads
 │   │   └── users/               # REST API: /api/users, /api/users/me
 │   ├── auth/callback/           # OAuth callback route (Supabase)
 │   ├── portal/                  # Authenticated portal
@@ -132,6 +132,7 @@ Used by: auth callback, `/api/users/me`, and `requireAdmin()` middleware.
 ### Subdomain Routing
 
 Middleware detects `portal.*` hostname prefix:
+
 - Non-portal paths on subdomain → rewritten to `/portal/*` (transparent to user)
 - `/portal/*` paths on subdomain → 301 redirect to strip prefix (clean URLs)
 - Auth/API routes (`/login`, `/auth/*`, `/api/*`, `/resources`) pass through unmodified
@@ -163,12 +164,12 @@ CREATE TABLE users (
 
 ### Roles
 
-| Role | Description |
-|------|-------------|
-| `admin` | Full access |
-| `committee` | National committee member |
-| `pm` | Portfolio manager |
-| `analyst` | Default role for new members |
+| Role        | Description                  |
+| ----------- | ---------------------------- |
+| `admin`     | Full access                  |
+| `committee` | National committee member    |
+| `pm`        | Portfolio manager            |
+| `analyst`   | Default role for new members |
 
 ### Row Level Security (RLS)
 
@@ -185,11 +186,12 @@ All database operations go through `SupabaseDatabase` class in `src/lib/supabase
 ```typescript
 import { createDatabase } from '@/lib/supabase/database';
 
-const db = createDatabase();                          // Uses server client
+const db = createDatabase(); // Uses server client
 const db = createDatabase(requireSupabaseAdminClient()); // Bypasses RLS
 ```
 
 Available methods:
+
 - `getUsers(filters?)` — Directory listing with optional school/program/role/search filters
 - `getUserBySupabaseId(id)` — Auth lookup
 - `getUserByEmail(email)` — Primary email lookup
@@ -267,23 +269,23 @@ Returns all users for the directory. Supports query params: `school`, `program`,
 
 ### Required
 
-| Variable | Context | Purpose |
-|----------|---------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Build + Runtime | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Build + Runtime | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Runtime only | Admin operations (server-side) |
-| `NEXT_PUBLIC_PORTAL_ENABLED` | Build + Runtime | Must be `'true'` to enable portal |
+| Variable                               | Context         | Purpose                           |
+| -------------------------------------- | --------------- | --------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Build + Runtime | Supabase project URL              |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Build + Runtime | Supabase anon key                 |
+| `SUPABASE_SERVICE_ROLE_KEY`            | Runtime only    | Admin operations (server-side)    |
+| `NEXT_PUBLIC_PORTAL_ENABLED`           | Build + Runtime | Must be `'true'` to enable portal |
 
 ### Optional
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_APP_URL` | Base URL for redirects |
-| `NEXT_PUBLIC_PORTAL_URL` | Subdomain URL (e.g., `https://portal.paragoninvestments.org`) |
-| `ADMIN_EMAILS` | Comma-separated admin email allowlist |
-| `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` | Default `true` — set `'false'` to hide admin UI |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog analytics key |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host (default: `https://us.i.posthog.com`) |
+| Variable                            | Purpose                                                       |
+| ----------------------------------- | ------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`               | Base URL for redirects                                        |
+| `NEXT_PUBLIC_PORTAL_URL`            | Subdomain URL (e.g., `https://portal.paragoninvestments.org`) |
+| `ADMIN_EMAILS`                      | Comma-separated admin email allowlist                         |
+| `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` | Default `true` — set `'false'` to hide admin UI               |
+| `NEXT_PUBLIC_POSTHOG_KEY`           | PostHog analytics key                                         |
+| `NEXT_PUBLIC_POSTHOG_HOST`          | PostHog host (default: `https://us.i.posthog.com`)            |
 
 ### Build Safety Rules
 
@@ -305,6 +307,7 @@ export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 ```
 
 Three enforcement points:
+
 1. **Middleware**: Returns 404 for `/portal/*`, `/login`, `/__tests__/*` when disabled
 2. **Server layouts**: `assertPortalEnabledOrNotFound()` for page-level enforcement
 3. **API routes**: `requirePortalEnabledOr404()` returns 404 JSON response when disabled
@@ -320,6 +323,7 @@ Never check `process.env.NEXT_PUBLIC_PORTAL_ENABLED` directly — import from `@
 Triggers: push to `main`/`develop`, PRs targeting `main`/`develop`
 
 Steps (sequential):
+
 1. `npm ci` — Install dependencies
 2. `npm run lint` — ESLint (non-blocking, `continue-on-error: true`)
 3. `npm run build` — Next.js build (generates `.next/types` for App Router validation)
@@ -328,6 +332,7 @@ Steps (sequential):
 ### TypeScript Strictness
 
 `tsconfig.json` enforces:
+
 - `strict: true`
 - `noImplicitAny: true`
 - `noImplicitReturns: true`
@@ -430,36 +435,40 @@ The CMS enables admins to manage dynamic content via the portal at `/portal/cont
 
 ### CMS Tables
 
-| Table | Purpose |
-|-------|---------|
-| `cms_people` | Team members displayed on public pages (officers, founders, teams) |
-| `cms_sponsors` | Sponsor logos and links for the sponsors page |
-| `cms_timeline` | Recruitment timeline events |
-| `cms_recruitment` | Key-value pairs for recruitment page content |
-| `cms_statistics` | Key-value pairs for homepage statistics |
+| Table             | Purpose                                                            |
+| ----------------- | ------------------------------------------------------------------ |
+| `cms_people`      | Team members displayed on public pages (officers, founders, teams) |
+| `cms_sponsors`    | Sponsor logos and links for the sponsors page                      |
+| `cms_timeline`    | Recruitment timeline events                                        |
+| `cms_recruitment` | Key-value pairs for recruitment page content                       |
+| `cms_statistics`  | Key-value pairs for homepage statistics                            |
 
-### CMS API Routes
+### Admin Content API Routes
 
-All CMS routes require admin authentication (`requireAdmin()` middleware).
+All admin content routes require admin authentication (`requireAdmin()` middleware).
 
-| Route | Methods | Purpose |
-|-------|---------|---------|
-| `/api/cms/people` | GET, POST | List/create people |
-| `/api/cms/people/[id]` | PATCH, DELETE | Update/delete person |
-| `/api/cms/people/reorder` | PATCH | Reorder display order |
-| `/api/cms/sponsors` | GET, POST | List/create sponsors |
-| `/api/cms/sponsors/[id]` | PATCH, DELETE | Update/delete sponsor |
-| `/api/cms/timeline` | GET, POST | List/create timeline items |
-| `/api/cms/timeline/[id]` | PATCH, DELETE | Update/delete timeline item |
-| `/api/cms/recruitment` | GET, PUT | Get/update recruitment content |
-| `/api/cms/statistics` | GET, PUT | Get/update homepage statistics |
-| `/api/cms/upload` | POST | Upload images to Supabase Storage |
+| Route                          | Methods       | Purpose                           |
+| ------------------------------ | ------------- | --------------------------------- |
+| `/api/admin/people`            | GET, POST     | List/create people                |
+| `/api/admin/people/[id]`       | PATCH, DELETE | Update/delete person              |
+| `/api/admin/people/reorder`    | POST          | Reorder display order             |
+| `/api/admin/sponsors`          | GET, POST     | List/create sponsors              |
+| `/api/admin/sponsors/[id]`     | PATCH, DELETE | Update/delete sponsor             |
+| `/api/admin/timeline`          | GET, POST     | List/create timeline items        |
+| `/api/admin/timeline/[id]`     | PATCH, DELETE | Update/delete timeline item       |
+| `/api/admin/recruitment`       | GET, PUT      | Get/update recruitment content    |
+| `/api/admin/statistics`        | GET, PUT      | Get/update homepage statistics    |
+| `/api/admin/resources`         | GET, POST     | List/create resources             |
+| `/api/admin/resources/[id]`    | PUT, DELETE   | Update/delete resource            |
+| `/api/admin/resources/reorder` | POST          | Reorder resources                 |
+| `/api/admin/upload`            | POST          | Upload images to Supabase Storage |
+| `/api/admin/resources/upload`  | POST          | Upload files to resources bucket  |
 
 ### CMS Patterns
 
 **Upsert Pattern:** Recruitment and statistics routes use Supabase's `upsert()` with `onConflict: 'key'` for atomic updates. Old keys are selectively deleted rather than delete-all + insert.
 
-**Image Uploads:** Sponsor logos can be uploaded to Supabase Storage (`cms-assets` bucket) via `/api/cms/upload`. The `SponsorForm` component supports drag-and-drop with preview.
+**Image Uploads:** Sponsor logos can be uploaded to Supabase Storage (`cms-assets` bucket) via `/api/admin/upload`. The `SponsorForm` component supports drag-and-drop with preview.
 
 **Backward Compatibility:** Image URLs support both legacy `/sponsors/logo.png` paths and full Supabase Storage URLs via the `getImageSrc()` helper.
 
@@ -468,6 +477,7 @@ All CMS routes require admin authentication (`requireAdmin()` middleware).
 ## Company & University Data
 
 Static constants in `src/lib/constants/`:
+
 - `companies.ts` — Investment Banking, Quant/Tech, Asset Mgmt/Consulting, Sponsors, Partners
 - `universities.ts` — Chapter data for 8 universities
 - `resources.ts` — Education, Recruitment, and Pitch resources
@@ -478,13 +488,13 @@ Static constants in `src/lib/constants/`:
 
 The portal sidebar and navigation are extracted into reusable components in `src/components/portal/`:
 
-| Component | Purpose |
-|-----------|---------|
-| `PortalSidebar` | Desktop collapsible sidebar with navigation and user info |
-| `PortalMobileNav` | Mobile navigation bar + full-screen overlay menu |
-| `PortalLoadingSkeleton` | Loading skeleton matching sidebar + content layout |
-| `constants.ts` | NAV_ITEMS, SCHOOL_LABELS, ROLE_LABELS, SIDEBAR_VARIANTS |
-| `types.ts` | PortalNavItem, PortalUserInfo, PortalSidebarProps, PortalMobileNavProps |
+| Component               | Purpose                                                                 |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `PortalSidebar`         | Desktop collapsible sidebar with navigation and user info               |
+| `PortalMobileNav`       | Mobile navigation bar + full-screen overlay menu                        |
+| `PortalLoadingSkeleton` | Loading skeleton matching sidebar + content layout                      |
+| `constants.ts`          | NAV_ITEMS, SCHOOL_LABELS, ROLE_LABELS, SIDEBAR_VARIANTS                 |
+| `types.ts`              | PortalNavItem, PortalUserInfo, PortalSidebarProps, PortalMobileNavProps |
 
 The main portal layout (`src/app/portal/(main)/layout.tsx`) manages state and composes these components.
 
@@ -496,24 +506,24 @@ A custom analytics system for tracking Core Web Vitals, page views, and errors. 
 
 ### Components
 
-| File | Purpose |
-|------|---------|
+| File                                               | Purpose                                        |
+| -------------------------------------------------- | ---------------------------------------------- |
 | `src/components/observability/VitalsCollector.tsx` | Client-side collector using web-vitals package |
-| `src/app/api/observability/vitals/route.ts` | Core Web Vitals collection endpoint |
-| `src/app/api/observability/pageviews/route.ts` | Page view tracking endpoint |
-| `src/app/api/observability/errors/route.ts` | Client-side error collection endpoint |
-| `src/app/api/observability/stats/route.ts` | Admin analytics data API |
-| `src/app/portal/(main)/observability/page.tsx` | Admin analytics UI |
+| `src/app/api/observability/vitals/route.ts`        | Core Web Vitals collection endpoint            |
+| `src/app/api/observability/pageviews/route.ts`     | Page view tracking endpoint                    |
+| `src/app/api/observability/errors/route.ts`        | Client-side error collection endpoint          |
+| `src/app/api/observability/stats/route.ts`         | Admin analytics data API                       |
+| `src/app/portal/(main)/observability/page.tsx`     | Admin analytics UI                             |
 
 ### Database Tables
 
-| Table | Purpose | Retention |
-|-------|---------|-----------|
-| `obs_vitals` | Raw Core Web Vitals (LCP, FCP, CLS, TTFB, INP) | 30 days |
-| `obs_pageviews` | Page views and custom events | 30 days |
-| `obs_errors` | Client-side JavaScript errors | 7 days |
-| `obs_vitals_hourly` | Aggregated hourly metrics | 90 days |
-| `obs_pageviews_daily` | Daily traffic aggregates | 1 year |
+| Table                 | Purpose                                        | Retention |
+| --------------------- | ---------------------------------------------- | --------- |
+| `obs_vitals`          | Raw Core Web Vitals (LCP, FCP, CLS, TTFB, INP) | 30 days   |
+| `obs_pageviews`       | Page views and custom events                   | 30 days   |
+| `obs_errors`          | Client-side JavaScript errors                  | 7 days    |
+| `obs_vitals_hourly`   | Aggregated hourly metrics                      | 90 days   |
+| `obs_pageviews_daily` | Daily traffic aggregates                       | 1 year    |
 
 ### Design Principles
 
@@ -530,6 +540,7 @@ Migration file: `supabase/migrations/002_observability_tables.sql`
 ## Branch & Commit Conventions
 
 **Branches:**
+
 - `main` — Production source of truth
 - `live-version` — Emergency rollback snapshot
 - Feature branches: `feat/[description]`, `fix/[description]`, `refactor/[description]`
