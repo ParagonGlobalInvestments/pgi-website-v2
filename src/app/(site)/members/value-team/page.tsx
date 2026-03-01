@@ -11,9 +11,21 @@ export const metadata: Metadata = {
 
 export default async function ValueTeamPage() {
   const [investmentCommittee, portfolioManagers, analysts] = await Promise.all([
-    getCmsPeople('investment-committee'),
-    getCmsPeople('portfolio-managers'),
-    getCmsPeople('value-analysts'),
+    getCmsPeople('investment-committee', {
+      includeAlumni: false,
+      usersOnly: true,
+      fallbackToCmsPeople: false,
+    }),
+    getCmsPeople('portfolio-managers', {
+      includeAlumni: false,
+      usersOnly: true,
+      fallbackToCmsPeople: false,
+    }),
+    getCmsPeople('value-analysts', {
+      includeAlumni: false,
+      usersOnly: true,
+      fallbackToCmsPeople: false,
+    }),
   ]);
 
   return (

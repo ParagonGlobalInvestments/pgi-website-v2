@@ -11,11 +11,22 @@ export const metadata: Metadata = {
 
 export default async function QuantTeamPage() {
   const [researchCommittee, analysts] = await Promise.all([
-    getCmsPeople('quant-research-committee'),
-    getCmsPeople('quant-analysts'),
+    getCmsPeople('quant-research-committee', {
+      includeAlumni: false,
+      usersOnly: true,
+      fallbackToCmsPeople: false,
+    }),
+    getCmsPeople('quant-analysts', {
+      includeAlumni: false,
+      usersOnly: true,
+      fallbackToCmsPeople: false,
+    }),
   ]);
 
   return (
-    <QuantTeamClient researchCommittee={researchCommittee} analysts={analysts} />
+    <QuantTeamClient
+      researchCommittee={researchCommittee}
+      analysts={analysts}
+    />
   );
 }
