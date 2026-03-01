@@ -9,6 +9,8 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
+    "sync-members:dry-run": "tsx scripts/sync-members-oneoff.ts --dry-run",
+    "sync-members:apply": "tsx scripts/sync-members-oneoff.ts --apply",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
