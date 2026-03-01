@@ -151,7 +151,7 @@ export default function Home() {
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
           >
             <Link href={card.href} className="block">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-smooth">
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">
                   {card.title}
                 </h2>

@@ -537,7 +537,7 @@ export default function DirectoryPage() {
           {filteredUsers.map(user => (
             <motion.div key={user.id} variants={gridItemVariants}>
               <Card
-                className={`border transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
+                className={`border transition-all duration-200 ease-smooth cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
                   selectedUser?.id === user.id && isPanelOpen
                     ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
                     : 'border-gray-200 hover:border-gray-300'

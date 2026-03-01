@@ -76,7 +76,7 @@ export function DetailPanel({
         aria-label={ariaLabel}
         className={`
           fixed z-[95] bg-white overflow-y-auto overscroll-contain
-          transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+          transition-transform duration-300 ease-smooth
 
           /* Mobile: bottom sheet */
           inset-x-0 bottom-0 top-auto

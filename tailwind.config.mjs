@@ -83,6 +83,9 @@ export default {
         ],
         montserrat: ['var(--font-montserrat)', 'sans-serif'],
       },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
       keyframes: {
         shine: {
           '0%': { 'background-position': '100%' },
