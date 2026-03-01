@@ -39,7 +39,7 @@ export default function SponsorsTab() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/cms/sponsors');
+      const res = await fetch('/api/admin/sponsors');
       if (!res.ok) throw new Error('Failed to fetch');
       const data: CmsSponsor[] = await res.json();
       setSponsors(
@@ -85,7 +85,7 @@ export default function SponsorsTab() {
       }));
 
       try {
-        const res = await fetch('/api/cms/sponsors/reorder', {
+        const res = await fetch('/api/admin/sponsors/reorder', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ items: reorderItems }),
@@ -112,7 +112,7 @@ export default function SponsorsTab() {
       const commitDelete = async () => {
         if (undo.undone) return;
         try {
-          const res = await fetch(`/api/cms/sponsors/${item.id}`, {
+          const res = await fetch(`/api/admin/sponsors/${item.id}`, {
             method: 'DELETE',
           });
           if (!res.ok) throw new Error('Failed to delete');

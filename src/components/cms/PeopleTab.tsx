@@ -28,7 +28,7 @@ export default function PeopleTab() {
 
   const { items, loading, refetch, handleDragEnd, handleDelete, sensors } =
     useCmsData<CmsPerson>({
-      endpoint: '/api/cms/people',
+      endpoint: '/api/admin/people',
       sortBy: 'sort_order',
       query: `group=${groupSlug}`,
     });

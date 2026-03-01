@@ -107,7 +107,7 @@ export default function RecruitmentTab() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await window.fetch('/api/cms/recruitment');
+        const res = await window.fetch('/api/admin/recruitment');
         if (!res.ok) throw new Error('Failed to fetch');
         const data: CmsRecruitment[] = await res.json();
         setItems(data);
@@ -156,7 +156,7 @@ export default function RecruitmentTab() {
         value: k === key ? current : getValue(k),
       }));
 
-      const res = await fetch('/api/cms/recruitment', {
+      const res = await fetch('/api/admin/recruitment', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: allItems }),
@@ -193,7 +193,7 @@ export default function RecruitmentTab() {
       value: k === key ? next : getValue(k),
     }));
 
-    fetch('/api/cms/recruitment', {
+    fetch('/api/admin/recruitment', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: allItems }),

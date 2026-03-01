@@ -15,7 +15,7 @@ export default function StatisticsTab() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await window.fetch('/api/cms/statistics');
+        const res = await window.fetch('/api/admin/statistics');
         if (!res.ok) throw new Error('Failed to fetch');
         const data: CmsStatistic[] = await res.json();
         const sorted = data.sort((a, b) => a.sort_order - b.sort_order);
@@ -56,7 +56,7 @@ export default function StatisticsTab() {
         value: s.value,
         sort_order: s.sort_order,
       }));
-      const res = await fetch('/api/cms/statistics', {
+      const res = await fetch('/api/admin/statistics', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: payload }),

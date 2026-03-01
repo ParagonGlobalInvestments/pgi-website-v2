@@ -109,7 +109,7 @@ export default function ResourceForm({
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/cms/resources/upload', {
+      const res = await fetch('/api/admin/resources/upload', {
         method: 'POST',
         body: formData,
       });
@@ -159,8 +159,8 @@ export default function ResourceForm({
 
     try {
       const endpoint = isEditing
-        ? `/api/cms/resources/${resource!.id}`
-        : '/api/cms/resources';
+        ? `/api/admin/resources/${resource!.id}`
+        : '/api/admin/resources';
       const method = isEditing ? 'PUT' : 'POST';
       const res = await fetch(endpoint, {
         method,
