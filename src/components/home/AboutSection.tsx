@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
-import { fadeIn, staggerContainer, itemFadeIn, buttonHover } from './animations';
+import {
+  fadeIn,
+  staggerContainer,
+  itemFadeIn,
+  buttonHover,
+} from './animations';
 
 const CountUp = dynamic(
   () => import('@/components/reactbits/TextAnimations/CountUp/CountUp'),
@@ -27,9 +32,16 @@ function parseStatValue(value: string): number {
 }
 
 // Format value with appropriate prefix/suffix
-function formatStatDisplay(key: string, value: string): { prefix?: string; suffix?: string; numericValue: number } {
+function formatStatDisplay(
+  key: string,
+  value: string
+): { prefix?: string; suffix?: string; numericValue: number } {
   if (key === 'fund_size' || value.startsWith('$')) {
-    return { prefix: '$', suffix: 'K', numericValue: parseStatValue(value) / 1000 };
+    return {
+      prefix: '$',
+      suffix: 'K',
+      numericValue: parseStatValue(value) / 1000,
+    };
   }
   if (value.includes('+')) {
     return { suffix: '+', numericValue: parseStatValue(value) };
@@ -46,10 +58,16 @@ const DEFAULT_STATS: Record<string, StatItem> = {
 };
 
 export default function AboutSection({ stats }: AboutSectionProps) {
-  const displayStats = stats && Object.keys(stats).length > 0 ? stats : DEFAULT_STATS;
+  const displayStats =
+    stats && Object.keys(stats).length > 0 ? stats : DEFAULT_STATS;
 
   // Define the order and keys we want to display
-  const statKeys = ['fund_size', 'sponsors_partners', 'active_students', 'chapters'];
+  const statKeys = [
+    'fund_size',
+    'sponsors_partners',
+    'active_students',
+    'chapters',
+  ];
 
   return (
     <motion.section
@@ -76,22 +94,26 @@ export default function AboutSection({ stats }: AboutSectionProps) {
             transition={{ delay: 0.2 }}
             className="text-base md:text-lg lg:text-lg xl:text-lg mb-12 md:mb-16 lg:mb-20 text-gray-300 text-center font-light leading-relaxed"
           >
-            Paragon Global Investments (PGI) is an intercollegiate,
-            student-run fund with chapters at 8 top U.S. universities.
-            Combining fundamental and systematic strategies, we manage a
-            $70,000 portfolio. With 300+ active members, PGI annually attracts
-            nearly 2,000 interested students nationwide.
+            Paragon Global Investments (PGI) is an intercollegiate, student-run
+            fund with chapters at 8 top U.S. universities. Combining fundamental
+            and systematic strategies, we manage a
+            {displayStats.fund_size?.value ?? DEFAULT_STATS.fund_size.value}{' '}
+            portfolio. With 300+ active members, PGI annually attracts nearly
+            2,000 interested students nationwide.
           </motion.p>
 
           <motion.div
             variants={staggerContainer}
             className="flex flex-wrap justify-center gap-4 md:gap-6 lg:gap-8 mt-8 md:mt-12 lg:mt-16 text-center"
           >
-            {statKeys.map((key) => {
+            {statKeys.map(key => {
               const stat = displayStats[key];
               if (!stat) return null;
 
-              const { prefix, suffix, numericValue } = formatStatDisplay(key, stat.value);
+              const { prefix, suffix, numericValue } = formatStatDisplay(
+                key,
+                stat.value
+              );
 
               return (
                 <motion.div
@@ -100,7 +122,9 @@ export default function AboutSection({ stats }: AboutSectionProps) {
                   className="p-6 md:p-8 lg:p-10 bg-pgi-light-blue border border-gray-700 rounded-lg"
                 >
                   <p className="text-2xl md:text-3xl lg:text-4xl font-normal mb-3 md:mb-4">
-                    {prefix}<CountUp to={numericValue} duration={1.5} delay={0.3} />{suffix}
+                    {prefix}
+                    <CountUp to={numericValue} duration={1.5} delay={0.3} />
+                    {suffix}
                   </p>
                   <p className="text-gray-300 font-light text-sm md:text-base lg:text-lg">
                     {stat.label}

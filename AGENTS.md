@@ -546,5 +546,3 @@ Migration file: `supabase/migrations/002_observability_tables.sql`
 - Feature branches: `feat/[description]`, `fix/[description]`, `refactor/[description]`
 
 **Commits:** Use conventional commit format (`fix:`, `feat:`, `refactor:`, `chore:`, `docs:`)
-
-**Agent attribution:** Include `Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>` for significant agent work.

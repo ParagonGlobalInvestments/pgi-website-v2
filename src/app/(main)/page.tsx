@@ -2,11 +2,22 @@ import dynamic from 'next/dynamic';
 import HeroSection from '@/components/home/HeroSection';
 import { getCmsStatistics, getCmsSponsors } from '@/lib/cms/queries';
 
+// Refresh direct Supabase edits as well as changes saved through the CMS.
+export const revalidate = 300;
+
 const AboutSection = dynamic(() => import('@/components/home/AboutSection'));
-const ChaptersSection = dynamic(() => import('@/components/home/ChaptersSection'));
-const PlacementsSection = dynamic(() => import('@/components/home/PlacementsSection'));
-const EducationInvestmentSection = dynamic(() => import('@/components/home/EducationInvestmentSection'));
-const SponsorsPartnersSection = dynamic(() => import('@/components/home/SponsorsPartnersSection'));
+const ChaptersSection = dynamic(
+  () => import('@/components/home/ChaptersSection')
+);
+const PlacementsSection = dynamic(
+  () => import('@/components/home/PlacementsSection')
+);
+const EducationInvestmentSection = dynamic(
+  () => import('@/components/home/EducationInvestmentSection')
+);
+const SponsorsPartnersSection = dynamic(
+  () => import('@/components/home/SponsorsPartnersSection')
+);
 
 export default async function Home() {
   const [statistics, sponsors, partners] = await Promise.all([
@@ -17,7 +28,7 @@ export default async function Home() {
 
   // Convert stats array to a lookup object by key
   const statsMap = Object.fromEntries(
-    statistics.map((s) => [s.key, { value: s.value, label: s.label }])
+    statistics.map(s => [s.key, { value: s.value, label: s.label }])
   );
 
   return (

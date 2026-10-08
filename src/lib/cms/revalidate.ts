@@ -45,7 +45,7 @@ export function revalidateRecruitment() {
 }
 
 export function revalidateStatistics() {
-  revalidatePath('/who-we-are');
+  revalidatePath('/');
 }
 
 export function revalidateTimeline() {
