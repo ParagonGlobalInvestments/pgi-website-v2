@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   if (portalCheck) return portalCheck;
 
   try {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
     const {
       data: { user },
       error: authError,
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const search = params.get('search') || undefined;
     const status = params.get('status') || undefined;
 
-    const db = createDatabase();
+    const db = createDatabase(supabase);
     const users = await db.getUsers({ school, program, role, search, status });
 
     return NextResponse.json(

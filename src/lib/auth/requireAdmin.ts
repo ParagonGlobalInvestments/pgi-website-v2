@@ -17,7 +17,7 @@ export async function requireAdmin(): Promise<
   if (portalCheck) return { error: portalCheck };
 
   try {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,

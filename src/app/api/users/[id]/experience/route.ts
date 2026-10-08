@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
   if (portalCheck) return portalCheck;
 
   try {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,

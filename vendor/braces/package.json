@@ -1,0 +1,11 @@
+{
+  "name": "@pgi/braces",
+  "version": "3.0.3-pgi.1",
+  "private": true,
+  "description": "braces 3.0.3 with bounded parser and AST nesting (CVE-2026-93687)",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "fill-range": "^7.1.1"
+  }
+}

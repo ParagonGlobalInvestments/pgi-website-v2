@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
 
     const { error: exchangeError } =
       await supabase.auth.exchangeCodeForSession(code);

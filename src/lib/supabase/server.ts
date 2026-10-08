@@ -7,7 +7,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  * Returns null if env vars are missing (prevents build-time crashes).
  * Only creates client when actually called (lazy initialization).
  */
-export function getSupabaseServerClient(): SupabaseClient | null {
+export async function getSupabaseServerClient(): Promise<SupabaseClient | null> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -19,7 +19,7 @@ export function getSupabaseServerClient(): SupabaseClient | null {
   }
 
   // Only access cookies when client is actually created
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -46,8 +46,8 @@ export function getSupabaseServerClient(): SupabaseClient | null {
  * Use this ONLY in API routes or server actions where Supabase is required.
  * DO NOT use in pages/layouts that might be prerendered.
  */
-export function requireSupabaseServerClient(): SupabaseClient {
-  const client = getSupabaseServerClient();
+export async function requireSupabaseServerClient(): Promise<SupabaseClient> {
+  const client = await getSupabaseServerClient();
   if (!client) {
     throw new Error(
       'Supabase client unavailable: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set'

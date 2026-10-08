@@ -64,7 +64,7 @@ export default async function PortalLayout({
   const isPostAuthRedirect = searchParams.includes('authenticated=true');
 
   // Server-side authentication check using Node runtime Supabase client
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
 
   // If Supabase is not configured, allow through (will fail gracefully at runtime)
   // This prevents build-time crashes while preserving runtime behavior

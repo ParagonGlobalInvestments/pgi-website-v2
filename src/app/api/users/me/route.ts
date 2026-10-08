@@ -12,7 +12,7 @@ export async function GET() {
   if (portalCheck) return portalCheck;
 
   try {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,
@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest) {
   if (portalCheck) return portalCheck;
 
   try {
-    const supabase = requireSupabaseServerClient();
+    const supabase = await requireSupabaseServerClient();
     const {
       data: { user: authUser },
       error: authError,

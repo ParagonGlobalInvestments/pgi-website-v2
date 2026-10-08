@@ -1,4 +1,3 @@
-import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { User } from '@/types';
 
@@ -53,8 +52,8 @@ function formatUser(row: UserRow): User {
 export class SupabaseDatabase {
   private supabase: SupabaseClient;
 
-  constructor(supabase?: SupabaseClient) {
-    this.supabase = supabase || requireSupabaseServerClient();
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase;
   }
 
   /** Get all users for the directory, with optional filters */
@@ -178,6 +177,6 @@ export class SupabaseDatabase {
   }
 }
 
-export function createDatabase(supabase?: SupabaseClient) {
+export function createDatabase(supabase: SupabaseClient) {
   return new SupabaseDatabase(supabase);
 }

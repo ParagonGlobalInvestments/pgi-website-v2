@@ -42,6 +42,12 @@
   "ignorePatterns": ["node_modules/", ".next/", "out/"],
   "overrides": [
     {
+      "files": ["vendor/braces/**/*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
       "files": [
         "src/app/__tests__/**/*",
         "scripts/dev/**/*",
