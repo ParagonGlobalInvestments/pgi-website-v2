@@ -6,6 +6,9 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
   "preview_urls": false,
+  "vars": {
+    "NEXT_PUBLIC_APP_URL": "https://pgi-website-v2.paragon-national-group-account.workers.dev",
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
