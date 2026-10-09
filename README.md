@@ -269,7 +269,7 @@ Ensure production environment variables match your local `.env.local` setup. The
 
 ### Deployment
 
-OpenNext targets the separate `pgi-website-preview` Worker on `workers.dev`, without production domains or cron. CI builds but does not deploy.
+OpenNext targets the `pgi-website-v2` Worker on `workers.dev`, without production domains or cron. CI builds but does not deploy.
 
 ```bash
 npm run preview       # Test locally at http://localhost:8787

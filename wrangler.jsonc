@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "pgi-website-preview",
+  "name": "pgi-website-v2",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-09",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -13,7 +13,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "pgi-website-preview",
+      "service": "pgi-website-v2",
     },
   ],
   "images": {
