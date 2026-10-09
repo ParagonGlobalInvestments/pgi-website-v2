@@ -30,13 +30,13 @@ This is the web platform for Paragon Global Investments, serving both public vis
 - **Analytics**: Vercel Analytics + Speed Insights, PostHog (optional)
 - **State Management**: SWR for data fetching
 - **Form Handling**: React Hook Form
-- **Deployment**: Vercel
+- **Deployment**: Cloudflare Workers (OpenNext)
 
 ## Getting Started (Local Development)
 
 ### Prerequisites
 
-- Node.js 20+ (LTS version recommended)
+- Node.js 22.22+ (LTS version recommended)
 - npm (comes with Node.js)
 - A Supabase account and project ([create one here](https://supabase.com/home))
 
@@ -62,7 +62,6 @@ npm install
    ```
 
 2. Fill in your Supabase credentials:
-
    - Get your project URL and keys from [Supabase Dashboard](https://supabase.com/home) → Project Settings → API
    - Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
    - Add `SUPABASE_SERVICE_ROLE_KEY` (keep this secret, server-only)
@@ -201,8 +200,11 @@ pgi-website-v2/
 ### Common Scripts
 
 - `npm run dev` - Start dev server at `http://localhost:3000`
-- `npm run build` - Build for production
-- `npm run start` - Start production server (after build)
+- `npm run build` - Build Next.js and the Cloudflare Worker
+- `npm run start` - Run the built Worker locally (after build)
+- `npm run preview` - Build and run the Worker locally
+- `npm run deploy` - Build and deploy the preview Worker to Cloudflare
+- `npm run typegen` - Generate Wrangler binding types
 - `npm run lint` - Run ESLint (warnings don't block, errors do)
 - `npm run format` - Format code with Prettier
 - `npm run type-check` - Run TypeScript type checking
@@ -267,12 +269,17 @@ Ensure production environment variables match your local `.env.local` setup. The
 
 ### Deployment
 
-The application is configured for deployment on Vercel:
+OpenNext targets the separate `pgi-website-preview` Worker on `workers.dev`, without production domains or cron. CI builds but does not deploy.
 
-1. Push code to your Git repository
-2. Import the project in Vercel
-3. Configure environment variables in Vercel project settings
-4. Deploy (automatic builds on push to main branch)
+```bash
+npm run preview       # Test locally at http://localhost:8787
+npx wrangler login
+npm run deploy        # Build and deploy to Cloudflare
+```
+
+Set public environment variables before building and server secrets in Cloudflare. For portal testing, use the preview URL as `NEXT_PUBLIC_APP_URL`, leave `NEXT_PUBLIC_PORTAL_URL` unset, and allow the callback URL in Supabase. The `IMAGES` binding needs availability/quota verification in Cloudflare.
+
+Preview limitations: prerendered content refreshes only on rebuild; writable ISR caching is required before production cutover. OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
 
 The build process disables webpack persistent caching in production to prevent disk space issues during builds.
 
@@ -283,6 +290,7 @@ SQL migrations are stored in `supabase/migrations/` with numbered prefixes (e.g.
 ### Applying Migrations
 
 **Option 1: Supabase CLI (recommended)**
+
 ```bash
 supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
@@ -293,10 +301,10 @@ Copy the migration file contents and run in the Supabase SQL Editor (Dashboard �
 
 ### Current Migrations
 
-| File | Purpose |
-|------|---------|
-| `001_security_performance_fixes.sql` | Users table, RLS policies, performance optimizations |
-| `002_observability_tables.sql` | Analytics tables (obs_vitals, obs_pageviews, obs_errors) |
+| File                                 | Purpose                                                  |
+| ------------------------------------ | -------------------------------------------------------- |
+| `001_security_performance_fixes.sql` | Users table, RLS policies, performance optimizations     |
+| `002_observability_tables.sql`       | Analytics tables (obs_vitals, obs_pageviews, obs_errors) |
 
 ## Common Gotchas
 
@@ -367,12 +375,12 @@ your-branch-name.vercel.app/portal
 
 ### How It Works
 
-| Environment | URL Pattern | Mechanism |
-|---|---|---|
-| Production | `portal.paragoninvestments.org/home` | Middleware rewrites to `/portal` |
-| Local dev | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
-| Local dev | `localhost:3000/portal` | Direct path, no rewrite needed |
-| Vercel preview | `preview-url.vercel.app/portal` | Direct path, no rewrite needed |
+| Environment    | URL Pattern                           | Mechanism                            |
+| -------------- | ------------------------------------- | ------------------------------------ |
+| Production     | `portal.paragoninvestments.org/home`  | Middleware rewrites to `/portal`     |
+| Local dev      | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
+| Local dev      | `localhost:3000/portal`               | Direct path, no rewrite needed       |
+| Vercel preview | `preview-url.vercel.app/portal`       | Direct path, no rewrite needed       |
 
 If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
 
