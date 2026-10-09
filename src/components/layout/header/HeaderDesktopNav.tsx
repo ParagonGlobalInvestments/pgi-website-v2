@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { trackEvent } from '@/lib/posthog';
 import type { NavItem, AboutSubItem } from './types';
 
 // Animation variants
@@ -224,13 +223,6 @@ export default function HeaderDesktopNav({
         <Link
           href="/placements"
           className="text-white hover:text-secondary transition-colors duration-300"
-          onClick={() =>
-            trackEvent('nav_click', {
-              section: 'header',
-              link: 'placements',
-              interest_type: 'career_opportunities',
-            })
-          }
         >
           Placements
         </Link>
@@ -240,14 +232,6 @@ export default function HeaderDesktopNav({
         <Link
           href="/apply"
           className="text-white hover:text-secondary transition-colors duration-300"
-          onClick={() =>
-            trackEvent('nav_click', {
-              section: 'header',
-              link: 'apply',
-              interest_type: 'recruitment',
-              conversion_intent: 'high',
-            })
-          }
         >
           Apply
         </Link>
@@ -257,14 +241,6 @@ export default function HeaderDesktopNav({
         <Link
           href="/contact"
           className="text-white hover:text-secondary transition-colors duration-300"
-          onClick={() =>
-            trackEvent('nav_click', {
-              section: 'header',
-              link: 'contact',
-              interest_type: 'inquiry',
-              conversion_intent: 'medium',
-            })
-          }
         >
           Contact
         </Link>

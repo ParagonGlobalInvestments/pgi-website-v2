@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Montserrat } from 'next/font/google';
-import { PHProvider } from '@/components/providers/PostHogProvider';
 import { VitalsCollector } from '@/components/observability/VitalsCollector';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import {
   PortalTransitionProvider,
   NavyOverlay,
@@ -119,17 +116,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen font-sans antialiased">
-        <PHProvider>
-          <PortalTransitionProvider>
-            <NavyOverlay />
-            {children}
-            <Toaster />
-            <Sonner position="top-center" richColors closeButton />
-            <VitalsCollector />
-          </PortalTransitionProvider>
-        </PHProvider>
-        <Analytics />
-        <SpeedInsights />
+        <PortalTransitionProvider>
+          <NavyOverlay />
+          {children}
+          <Toaster />
+          <Sonner position="top-center" richColors closeButton />
+          <VitalsCollector />
+        </PortalTransitionProvider>
         <Script
           id="org-jsonld"
           type="application/ld+json"

@@ -47,7 +47,8 @@ function getDeviceType(): string {
 }
 
 function getBrowserInfo(): { browser: string; os: string } {
-  if (typeof navigator === 'undefined') return { browser: 'unknown', os: 'unknown' };
+  if (typeof navigator === 'undefined')
+    return { browser: 'unknown', os: 'unknown' };
 
   const ua = navigator.userAgent;
   let browser = 'unknown';
@@ -89,7 +90,10 @@ async function flushQueue() {
     });
   } catch {
     // Re-queue failed items (with limit)
-    vitalsQueue = [...batch.slice(-BATCH_SIZE), ...vitalsQueue].slice(0, BATCH_SIZE * 2);
+    vitalsQueue = [...batch.slice(-BATCH_SIZE), ...vitalsQueue].slice(
+      0,
+      BATCH_SIZE * 2
+    );
   }
 }
 
@@ -104,7 +108,7 @@ function queueVital(vital: WebVitalMetric, path: string) {
     deviceType: getDeviceType(),
     browser,
     os,
-    deploymentId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7),
+    deploymentId: process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.slice(0, 7),
   });
 
   if (vitalsQueue.length >= BATCH_SIZE) {
@@ -127,7 +131,7 @@ async function trackPageview(path: string) {
         deviceType: getDeviceType(),
         browser,
         os,
-        deploymentId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7),
+        deploymentId: process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.slice(0, 7),
       }),
       keepalive: true,
     });
@@ -179,7 +183,7 @@ export function VitalsCollector() {
           browser,
           os,
           userAgent: navigator.userAgent,
-          deploymentId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7),
+          deploymentId: process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.slice(0, 7),
         }),
         keepalive: true,
       }).catch(() => {});
@@ -189,7 +193,10 @@ export function VitalsCollector() {
     // Set up unhandled rejection handler
     const handleRejection = (event: PromiseRejectionEvent) => {
       const { browser, os } = getBrowserInfo();
-      const message = event.reason?.message || String(event.reason) || 'Unhandled promise rejection';
+      const message =
+        event.reason?.message ||
+        String(event.reason) ||
+        'Unhandled promise rejection';
 
       fetch('/api/observability/errors', {
         method: 'POST',
@@ -202,7 +209,7 @@ export function VitalsCollector() {
           browser,
           os,
           userAgent: navigator.userAgent,
-          deploymentId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7),
+          deploymentId: process.env.NEXT_PUBLIC_DEPLOYMENT_ID?.slice(0, 7),
         }),
         keepalive: true,
       }).catch(() => {});
@@ -210,19 +217,21 @@ export function VitalsCollector() {
     window.addEventListener('unhandledrejection', handleRejection);
 
     // Dynamic import of web-vitals
-    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
-      const reportVital = (metric: WebVitalMetric) => {
-        queueVital(metric, window.location.pathname);
-      };
+    import('web-vitals')
+      .then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+        const reportVital = (metric: WebVitalMetric) => {
+          queueVital(metric, window.location.pathname);
+        };
 
-      onCLS(reportVital);
-      onFCP(reportVital);
-      onLCP(reportVital);
-      onTTFB(reportVital);
-      onINP(reportVital);
-    }).catch(() => {
-      // web-vitals failed to load - gracefully degrade
-    });
+        onCLS(reportVital);
+        onFCP(reportVital);
+        onLCP(reportVital);
+        onTTFB(reportVital);
+        onINP(reportVital);
+      })
+      .catch(() => {
+        // web-vitals failed to load - gracefully degrade
+      });
 
     return () => {
       if (flushTimer) clearInterval(flushTimer);

@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Privacy Policy
           </h1>
-          <p className="text-gray-400">Last Updated: February 2, 2026</p>
+          <p className="text-gray-400">Last Updated: October 9, 2026</p>
         </div>
 
         {/* Content */}
@@ -30,10 +30,11 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">Introduction</h2>
             <p className="text-gray-300 leading-relaxed">
-              Paragon Global Investments (&quot;PGI,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is
-              committed to protecting your privacy. This Privacy Policy explains
-              how we collect, use, disclose, and safeguard your information when
-              you visit our website{' '}
+              Paragon Global Investments (&quot;PGI,&quot; &quot;we,&quot;
+              &quot;us,&quot; or &quot;our&quot;) is committed to protecting
+              your privacy. This Privacy Policy explains how we collect, use,
+              disclose, and safeguard your information when you visit our
+              website{' '}
               <Link
                 href="/"
                 className="text-pgi-light-blue hover:brightness-110"
@@ -156,11 +157,7 @@ export default function PrivacyPage() {
                 database storage and authentication
               </div>
               <div>
-                <strong className="text-white">PostHog:</strong> For analytics
-                and understanding user behavior
-              </div>
-              <div>
-                <strong className="text-white">Vercel:</strong> For website
+                <strong className="text-white">Cloudflare:</strong> For website
                 hosting and deployment
               </div>
             </div>
@@ -241,7 +238,9 @@ export default function PrivacyPage() {
 
           {/* Children's Privacy */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Children&apos;s Privacy</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              Children&apos;s Privacy
+            </h2>
             <p className="text-gray-300 leading-relaxed">
               Our services are intended for university students and
               professionals. We do not knowingly collect information from

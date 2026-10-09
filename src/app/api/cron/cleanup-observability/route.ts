@@ -3,13 +3,12 @@ import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Cron job endpoint to clean up old observability data.
- * Called by Vercel Cron (configured in vercel.json).
+ * Requires an external scheduler; no Cloudflare schedule is configured yet.
  *
- * Security: Vercel adds CRON_SECRET header automatically for cron requests.
- * Manual calls require the same secret in Authorization header.
+ * Security: callers must send CRON_SECRET in the Authorization bearer header.
  */
 export async function GET(request: Request) {
-  // Verify cron secret (Vercel sets this automatically for cron jobs)
+  // Verify the scheduler credential
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 

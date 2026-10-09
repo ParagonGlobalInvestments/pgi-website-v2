@@ -27,7 +27,7 @@ This is the web platform for Paragon Global Investments, serving both public vis
 - **UI Components**: shadcn/ui (built on Radix UI primitives)
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL with Row Level Security)
-- **Analytics**: Vercel Analytics + Speed Insights, PostHog (optional)
+- **Analytics**: Custom Supabase-backed pageviews, Web Vitals, and error collection
 - **State Management**: SWR for data fetching
 - **Form Handling**: React Hook Form
 - **Deployment**: Cloudflare Workers (OpenNext)
@@ -93,7 +93,7 @@ The application will be available at `http://localhost:3000`.
 
 **Portal Subdomain:**
 
-- `NEXT_PUBLIC_PORTAL_URL` - Full URL of the portal subdomain (e.g., `https://portal.paragoninvestments.org`). When set, auth callbacks redirect to this origin with clean URLs. Not needed for local dev or Vercel previews.
+- `NEXT_PUBLIC_PORTAL_URL` - Full URL of the portal subdomain (e.g., `https://portal.paragoninvestments.org`). When set, auth callbacks redirect to this origin with clean URLs. Not needed for local dev or Workers previews.
 
 **Feature Flags:**
 
@@ -101,11 +101,6 @@ The application will be available at `http://localhost:3000`.
 - `NEXT_PUBLIC_ENABLE_INTERNSHIPS` - Enable internships feature (default: `false`)
 - `NEXT_PUBLIC_ENABLE_DIRECTORY` - Enable member directory feature (default: `false`)
 - `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` - Enable admin features (default: `true`)
-
-**Analytics:**
-
-- `NEXT_PUBLIC_POSTHOG_KEY` - PostHog analytics key
-- `NEXT_PUBLIC_POSTHOG_HOST` - PostHog host URL (default: `https://us.i.posthog.com`)
 
 **Other:**
 
@@ -117,8 +112,6 @@ The application will be available at `http://localhost:3000`.
 **Missing Supabase variables:** The application will not function. Authentication and database operations will fail.
 
 **Missing feature flags:** Features are hidden in production but automatically enabled in development mode (`NODE_ENV=development`).
-
-**Missing analytics:** No analytics tracking, but the application works normally.
 
 See `.env.example` in the project root for a complete template with all variables listed.
 
@@ -174,7 +167,6 @@ pgi-website-v2/
 │   │   ├── login/          # Login page (Google OAuth)
 │   │   └── auth/           # OAuth callback handler
 │   ├── components/         # React components
-│   │   ├── analytics/      # PostHog trackers
 │   │   ├── cms/            # CMS admin components (forms, editors)
 │   │   ├── layout/         # Layout components (header, footer)
 │   │   ├── portal/         # Portal UI (sidebar, mobile nav, loading skeleton)
@@ -365,22 +357,22 @@ Subdomain routing (`portal.*`) only activates in production.
 
 **Important:** `NEXT_PUBLIC_PORTAL_ENABLED=true` must be in your `.env.local` for the portal to be accessible.
 
-### Vercel Preview Deployments
+### Workers Preview Deployments
 
-On preview deployments (`*.vercel.app`), subdomain routing does NOT activate — this is a Vercel platform limitation (preview URLs don't support custom subdomains). Access the portal via path-based routing:
+On the Worker’s `workers.dev` hostname, access the portal via path-based routing:
 
 ```
-your-branch-name.vercel.app/portal
+pgi-website-v2.paragon-national-group-account.workers.dev/portal
 ```
 
 ### How It Works
 
-| Environment    | URL Pattern                           | Mechanism                            |
-| -------------- | ------------------------------------- | ------------------------------------ |
-| Production     | `portal.paragoninvestments.org/home`  | Middleware rewrites to `/portal`     |
-| Local dev      | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
-| Local dev      | `localhost:3000/portal`               | Direct path, no rewrite needed       |
-| Vercel preview | `preview-url.vercel.app/portal`       | Direct path, no rewrite needed       |
+| Environment     | URL Pattern                           | Mechanism                            |
+| --------------- | ------------------------------------- | ------------------------------------ |
+| Production      | `portal.paragoninvestments.org/home`  | Middleware rewrites to `/portal`     |
+| Local dev       | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
+| Local dev       | `localhost:3000/portal`               | Direct path, no rewrite needed       |
+| Workers preview | `your-worker.workers.dev/portal`      | Direct path, no rewrite needed       |
 
 If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
 
@@ -393,6 +385,8 @@ Admins can view site performance at `/portal/observability` (labeled "Analytics"
 - **Error Tracking**: Client-side JavaScript errors
 
 Data is collected automatically via the `VitalsCollector` component and stored in Supabase. See `supabase/migrations/002_observability_tables.sql` for the schema.
+
+The cleanup handler remains at `/api/cron/cleanup-observability`; it requires `CRON_SECRET` and a replacement scheduler before production cutover. Set optional `NEXT_PUBLIC_DEPLOYMENT_ID` at build time to label collected metrics.
 
 ## CMS (Content Management)
 

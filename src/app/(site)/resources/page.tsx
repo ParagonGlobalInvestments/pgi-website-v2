@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/browser';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { trackEvent } from '@/lib/posthog';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import { toast } from 'sonner';
 import {
@@ -93,11 +92,6 @@ function ResourcesPageContent() {
   }, [supabase]);
 
   const handleLogin = () => {
-    trackEvent('resources_cta_clicked', {
-      page: '/resources',
-      action: 'google_signin_initiated',
-    });
-
     // OAuth callback must stay on the same origin where signInWithOAuth is called,
     // because Supabase stores the PKCE code_verifier in a cookie bound to this domain.
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/portal/resources')}`;
