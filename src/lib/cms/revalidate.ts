@@ -53,6 +53,7 @@ export function revalidateTimeline() {
 }
 
 export function revalidateSponsors() {
+  revalidatePath('/');
   revalidatePath('/sponsors');
 }
 

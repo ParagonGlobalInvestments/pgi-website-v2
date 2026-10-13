@@ -271,7 +271,9 @@ npm run deploy        # Build and deploy to Cloudflare
 
 Set public environment variables before building and server secrets in Cloudflare. For portal testing, use the preview URL as `NEXT_PUBLIC_APP_URL`, leave `NEXT_PUBLIC_PORTAL_URL` unset, and allow the callback URL in Supabase. The `IMAGES` binding needs availability/quota verification in Cloudflare.
 
-Preview limitations: prerendered content refreshes only on rebuild; writable ISR caching is required before production cutover. OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
+Before deploying, enable R2 in the Cloudflare account and create a private bucket named `pgi-website-v2-cache`. OpenNext uses it for writable page caching; Wrangler creates the SQLite Durable Objects for revalidation automatically. For GitHub Builds, use `npm run build` and `npx opennextjs-cloudflare deploy` so the deployment also populates the cache. Local previews use emulated storage. CMS saves invalidate affected pages; social preview artwork refreshes on deployment.
+
+OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
 
 The build process disables webpack persistent caching in production to prevent disk space issues during builds.
 
