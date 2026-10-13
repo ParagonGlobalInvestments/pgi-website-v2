@@ -7,7 +7,9 @@
   "workers_dev": true,
   "preview_urls": false,
   "vars": {
-    "NEXT_PUBLIC_APP_URL": "https://pgi-website-v2.paragon-national-group-account.workers.dev",
+    "NEXT_PUBLIC_APP_URL": "https://paragoninvestments.org",
+    "NEXT_PUBLIC_SITE_URL": "https://paragoninvestments.org",
+    "NEXT_PUBLIC_PORTAL_URL": "https://portal.paragoninvestments.org",
   },
   "assets": {
     "directory": ".open-next/assets",
