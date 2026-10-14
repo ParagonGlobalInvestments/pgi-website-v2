@@ -1,11 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "pgi-website-v2",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "compatibility_date": "2026-10-09",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
   "preview_urls": false,
+  "triggers": {
+    "crons": ["0 3 * * *"],
+  },
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://paragoninvestments.org",
     "NEXT_PUBLIC_SITE_URL": "https://paragoninvestments.org",

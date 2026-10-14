@@ -3,7 +3,7 @@ import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Cron job endpoint to clean up old observability data.
- * Requires an external scheduler; no Cloudflare schedule is configured yet.
+ * Invoked daily at 03:00 UTC by the Worker cron trigger in worker.ts.
  *
  * Security: callers must send CRON_SECRET in the Authorization bearer header.
  */
