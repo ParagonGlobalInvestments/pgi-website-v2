@@ -6,18 +6,18 @@ Single source of truth for AI coding agents working in the PGI Website codebase.
 
 ## Tech Stack
 
-| Layer     | Technology                                       |
-| --------- | ------------------------------------------------ |
-| Framework | Next.js 14 (App Router)                          |
-| Language  | TypeScript 5.5 (strict mode)                     |
-| Auth      | Supabase Auth (Google OAuth)                     |
-| Database  | Supabase (PostgreSQL + RLS)                      |
-| Storage   | Supabase Storage (resources)                     |
-| Styling   | Tailwind CSS 3 + shadcn/ui + Radix UI            |
-| Animation | Framer Motion, GSAP                              |
-| Analytics | PostHog, Vercel Analytics, Vercel Speed Insights |
-| Hosting   | Vercel                                           |
-| CI        | GitHub Actions                                   |
+| Layer     | Technology                                    |
+| --------- | --------------------------------------------- |
+| Framework | Next.js 14 (App Router)                       |
+| Language  | TypeScript 5.5 (strict mode)                  |
+| Auth      | Supabase Auth (Google OAuth)                  |
+| Database  | Supabase (PostgreSQL + RLS)                   |
+| Storage   | Supabase Storage (resources)                  |
+| Styling   | Tailwind CSS 3 + shadcn/ui + Radix UI         |
+| Animation | Framer Motion, GSAP                           |
+| Analytics | Custom collectors + Supabase (`obs_*` tables) |
+| Hosting   | Cloudflare Workers (OpenNext, Workers Builds) |
+| CI        | GitHub Actions                                |
 
 ---
 
@@ -29,6 +29,41 @@ npm run dev
 ```
 
 Dev server runs at `http://localhost:3000`. Portal is accessed via `/portal` path locally (subdomain routing only active in production).
+
+---
+
+## Hosting & Deployment
+
+The site runs on **Cloudflare Workers** via `@opennextjs/cloudflare`. Pushes to `main` deploy automatically through Cloudflare Workers Builds (Paragon National Group account, Worker `pgi-website-v2`). Preview URLs are disabled.
+
+| Host                            | Behavior                                 |
+| ------------------------------- | ---------------------------------------- |
+| `paragoninvestments.org`        | Canonical public site                    |
+| `portal.paragoninvestments.org` | Portal (subdomain routing in middleware) |
+| `www.paragoninvestments.org`    | 301 redirect to the bare domain          |
+
+```bash
+npm run build    # opennextjs-cloudflare build → .open-next/
+npm run preview  # Build + run locally in the Workers runtime
+npm run deploy   # Build + deploy manually (normally not needed)
+```
+
+### Key Files
+
+| File                  | Purpose                                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `wrangler.jsonc`      | Worker config: bindings, runtime `vars`, cron trigger. Runtime `vars` overwrite dashboard values on deploy |
+| `open-next.config.ts` | OpenNext caching: R2 incremental cache, Durable Object queue and tag cache                                 |
+| `worker.ts`           | Custom Worker entry: wraps `.open-next/worker.js` and adds the `scheduled` handler (excluded from `tsc`)   |
+
+### Environment Variables on Cloudflare
+
+- `NEXT_PUBLIC_*` values are inlined at build time, so they must be set as **build variables** in Workers Builds (and in `wrangler.jsonc` `vars` for runtime).
+- Secrets (`SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`) are Worker secrets, set via the dashboard or `wrangler secret put`.
+
+### Scheduled Jobs
+
+A cron trigger (`0 3 * * *`, daily 03:00 UTC) calls `/api/cron/cleanup-observability` with `Authorization: Bearer $CRON_SECRET`, which runs the `cleanup_observability_data()` database function.
 
 ---
 
@@ -68,11 +103,9 @@ src/
 │   ├── login/                   # Login page (Google OAuth)
 │   └── layout.tsx               # Root layout
 ├── components/
-│   ├── analytics/               # PostHog trackers (company, form, PDF, university)
 │   ├── cms/                     # CMS admin components (forms, editors)
 │   ├── layout/                  # Header, Footer, StandaloneLayout
 │   ├── portal/                  # Portal UI components (sidebar, mobile nav, loading)
-│   ├── providers/               # PostHogProvider
 │   ├── reactbits/               # Third-party animation components (CountUp, ShinyText, etc.)
 │   └── ui/                      # shadcn/ui + custom (detail-panel, button, dialog, etc.)
 ├── hooks/
@@ -83,11 +116,10 @@ src/
 │   ├── cms/                     # CMS data fetching utilities
 │   ├── constants/               # Static data (companies, universities, resources)
 │   ├── supabase/                # Supabase clients (browser, server, admin, database)
-│   ├── posthog.ts               # PostHog initialization
 │   └── runtime.ts               # Portal availability (portalEnabled)
 ├── types/
 │   └── index.ts                 # Core types: User, UserRole, UserProgram, ApiResponse
-├── middleware.ts                 # Edge middleware: portal gating + subdomain routing
+├── middleware.ts                 # Middleware: portal gating + subdomain routing
 ├── utils.ts                     # cn(), formatDate(), truncateText()
 └── tailwind.css                 # Tailwind entry point
 ```
@@ -284,8 +316,8 @@ Returns all users for the directory. Supports query params: `school`, `program`,
 | `NEXT_PUBLIC_PORTAL_URL`            | Subdomain URL (e.g., `https://portal.paragoninvestments.org`) |
 | `ADMIN_EMAILS`                      | Comma-separated admin email allowlist                         |
 | `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` | Default `true` — set `'false'` to hide admin UI               |
-| `NEXT_PUBLIC_POSTHOG_KEY`           | PostHog analytics key                                         |
-| `NEXT_PUBLIC_POSTHOG_HOST`          | PostHog host (default: `https://us.i.posthog.com`)            |
+| `NEXT_PUBLIC_SITE_URL`              | Public site URL used by portal links                          |
+| `CRON_SECRET`                       | Bearer token for `/api/cron/*` (Worker secret)                |
 
 ### Build Safety Rules
 
@@ -326,7 +358,7 @@ Steps (sequential):
 
 1. `npm ci` — Install dependencies
 2. `npm run lint` — ESLint (non-blocking, `continue-on-error: true`)
-3. `npm run build` — Next.js build (generates `.next/types` for App Router validation)
+3. `npm run build` — OpenNext Cloudflare build (runs `next build`, which generates `.next/types` for App Router validation)
 4. `npm run type-check` — `tsc --noEmit` (blocking — must pass)
 
 ### TypeScript Strictness
