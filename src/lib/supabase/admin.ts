@@ -5,7 +5,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  * Build-safe admin client factory.
  * Returns null if env vars are missing (prevents build-time crashes).
  */
-export function getSupabaseAdminClient(): SupabaseClient | null {
+export function getSupabaseAdminClient(
+  fetcher?: typeof fetch
+): SupabaseClient | null {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -15,6 +17,7 @@ export function getSupabaseAdminClient(): SupabaseClient | null {
   }
 
   return createClient(supabaseUrl, supabaseServiceKey, {
+    global: fetcher ? { fetch: fetcher } : undefined,
     auth: {
       autoRefreshToken: false,
       persistSession: false,

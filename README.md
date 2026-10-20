@@ -271,7 +271,7 @@ npm run deploy        # Build and deploy to Cloudflare
 
 Set public environment variables before building and server secrets in Cloudflare. For portal testing, use the preview URL as `NEXT_PUBLIC_APP_URL`, leave `NEXT_PUBLIC_PORTAL_URL` unset, and allow the callback URL in Supabase. The `IMAGES` binding needs availability/quota verification in Cloudflare.
 
-Before deploying, enable R2 in the Cloudflare account and create a private bucket named `pgi-website-v2-cache`. OpenNext uses it for writable page caching; Wrangler creates the SQLite Durable Objects for revalidation automatically. For GitHub Builds, use `npm run build` and `npx opennextjs-cloudflare deploy` so the deployment also populates the cache. Local previews use emulated storage. CMS saves invalidate affected pages; social preview artwork refreshes on deployment.
+Before deploying, enable R2 in the Cloudflare account and create a private bucket named `pgi-website-v2-cache`. OpenNext uses it for writable page caching; Wrangler creates the SQLite Durable Objects for revalidation automatically. For GitHub Builds, use `npm run build` and `npx opennextjs-cloudflare deploy` so the deployment also populates the cache. Local previews use emulated storage. CMS saves invalidate affected pages in their own environment; the database webhook described below also invalidates production when edits originate elsewhere. Social preview artwork refreshes on deployment.
 
 OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
 
@@ -400,4 +400,39 @@ Admins can manage dynamic site content via `/portal/content`. The CMS supports:
 - **Recruitment**: Key-value content for the application page
 - **Statistics**: Homepage statistics (member count, AUM, etc.)
 
-All content changes are saved to Supabase and reflected on the public site immediately.
+Content changes are saved to Supabase. CMS saves invalidate the current environment's page cache. Database notifications also invalidate production's cache, so edits made locally or directly in Supabase refresh the public site after notification delivery and the next page visit. Already-open browser tabs need a refresh.
+
+### Database-driven cache invalidation
+
+The database sends `POST /api/revalidate` after changes commit. This endpoint accepts only `INSERT`, `UPDATE`, and `DELETE` events from the supported public tables, authenticated with `Authorization: Bearer <CMS_REVALIDATION_SECRET>`. It does not depend on a portal login or on the portal feature flag. Notifications contain only schema, table, and event type; member records and email addresses are never sent.
+
+Production setup (once per Supabase project):
+
+1. Generate a random secret (at least 32 random bytes) in your password manager. Set it as the `CMS_REVALIDATION_SECRET` Worker secret in Cloudflare. Keep it out of `wrangler.jsonc`, public build variables, and source control.
+2. Deploy the application with `/api/revalidate` before enabling database notifications.
+3. In Supabase **Vault**, create `cms_revalidation_url` with value `https://paragoninvestments.org/api/revalidate` and `cms_revalidation_secret` with the same secret as Cloudflare. Use the Vault UI so the credential does not appear in SQL history.
+4. Apply `supabase/migrations/013_cms_cache_invalidation.sql` in the Supabase SQL Editor. This enables `pg_net` and Vault if necessary and installs statement-level triggers on the ten tables below. No additional Dashboard Database Webhooks are needed.
+
+| Database tables                                                                                            | Pages invalidated                                     |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `cms_people`, `users`, `alumni_people`, `user_public_group_memberships`, `alumni_public_group_memberships` | Officers, founders, value team, quant team, and apply |
+| `cms_recruitment`                                                                                          | Apply                                                 |
+| `cms_statistics`                                                                                           | Home                                                  |
+| `cms_timeline`                                                                                             | Who we are                                            |
+| `cms_sponsors`                                                                                             | Home and sponsors                                     |
+| `resources`                                                                                                | Resources API (already served dynamically)            |
+
+People changes invalidate all people pages because profiles can be shared across groups, and deletes or moves must also refresh the previous group. Statement-level triggers queue a notification per table event, including bulk imports, rather than per row. `pg_net` delivers asynchronously after commit, so rolled-back edits do not send a notification. Existing CMS API invalidation remains in place.
+
+Local `npm run dev` reads fresh data and invalidates its own cache on CMS saves. If it points at the production Supabase project, its edits automatically notify production through the same database triggers; it needs no production cache bindings or webhook secret. For local endpoint tests, set `CMS_REVALIDATION_SECRET` in `.env.local`. A separate staging database should configure its Vault URL to its own deployment.
+
+All eight CMS-backed public pages inherit a 300-second fallback from their Supabase data requests. The interval is defined once as `CMS_REVALIDATE_SECONDS` in `src/lib/cms/queries.ts`; no per-page `revalidate` exports are needed. Development requests bypass the persistent data cache. This is request-driven ISR: the first request after expiry can receive the old page while regeneration runs. Missing configuration or queue failures never roll back an edit; they produce a database warning and rely on the timed fallback. HTTP failures and timeouts do not retry automatically. Inspect recent deliveries without exposing the authorization header:
+
+```sql
+SELECT id, status_code, timed_out, error_msg, created
+FROM net._http_response
+ORDER BY created DESC
+LIMIT 20;
+```
+
+To verify setup, make a small CMS edit locally, wait for a `200` webhook response, and reload the affected production page. Use the production CMS or trigger another supported edit to invalidate content changed before the triggers were installed; deploying the new build also refreshes the page cache.

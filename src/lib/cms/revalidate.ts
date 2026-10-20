@@ -62,3 +62,36 @@ export function revalidateResources() {
   // but we invalidate the API route cache.
   revalidatePath('/api/resources');
 }
+
+const DATABASE_REVALIDATORS: Record<string, () => void> = {
+  // Shared profiles and memberships can affect more than one public group.
+  cms_people: revalidatePeople,
+  users: revalidatePeople,
+  alumni_people: revalidatePeople,
+  user_public_group_memberships: revalidatePeople,
+  alumni_public_group_memberships: revalidatePeople,
+  cms_recruitment: revalidateRecruitment,
+  cms_statistics: revalidateStatistics,
+  cms_timeline: revalidateTimeline,
+  cms_sponsors: revalidateSponsors,
+  resources: revalidateResources,
+};
+
+export function revalidateDatabaseChange(payload: unknown): boolean {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return false;
+  }
+
+  const { schema, table, type } = payload as Record<string, unknown>;
+  if (
+    schema !== 'public' ||
+    typeof table !== 'string' ||
+    !Object.prototype.hasOwnProperty.call(DATABASE_REVALIDATORS, table) ||
+    (type !== 'INSERT' && type !== 'UPDATE' && type !== 'DELETE')
+  ) {
+    return false;
+  }
+
+  DATABASE_REVALIDATORS[table]();
+  return true;
+}

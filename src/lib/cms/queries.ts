@@ -15,8 +15,19 @@ import type {
  * and returns empty arrays if Supabase is unavailable (build-safe).
  */
 
+// Fallback for missed webhooks; data request lifetimes also set the page lifetime.
+const CMS_REVALIDATE_SECONDS = 300;
+
 function getClient() {
-  return getSupabaseAdminClient();
+  const revalidate =
+    process.env.NODE_ENV === 'development' ? 0 : CMS_REVALIDATE_SECONDS;
+
+  return getSupabaseAdminClient((input, init) =>
+    fetch(input, {
+      ...init,
+      next: { ...init?.next, revalidate },
+    })
+  );
 }
 
 const SCHOOL_LABELS = new Map(

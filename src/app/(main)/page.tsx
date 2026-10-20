@@ -2,9 +2,6 @@ import dynamic from 'next/dynamic';
 import HeroSection from '@/components/home/HeroSection';
 import { getCmsStatistics, getCmsSponsors } from '@/lib/cms/queries';
 
-// Refresh direct Supabase edits as well as changes saved through the CMS.
-export const revalidate = 300;
-
 const AboutSection = dynamic(() => import('@/components/home/AboutSection'));
 const ChaptersSection = dynamic(
   () => import('@/components/home/ChaptersSection')
