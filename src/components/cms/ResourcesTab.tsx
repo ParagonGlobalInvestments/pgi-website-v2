@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
+import { deleteWithUndo } from '@/lib/cms/deleteWithUndo';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
@@ -378,8 +379,6 @@ export default function ResourcesTab() {
     useSensor(KeyboardSensor)
   );
 
-  const undoRef = useRef<{ id: string; undone: boolean } | null>(null);
-
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -479,37 +478,21 @@ export default function ResourcesTab() {
 
   const handleDelete = useCallback(
     (resource: CmsResource) => {
-      const snapshot = [...items];
+      const index = items.findIndex(r => r.id === resource.id);
       setItems(prev => prev.filter(r => r.id !== resource.id));
 
-      const undo = { id: resource.id, undone: false };
-      undoRef.current = undo;
-
-      const commitDelete = async () => {
-        if (undo.undone) return;
-        try {
-          const res = await fetch(`/api/admin/resources/${resource.id}`, {
-            method: 'DELETE',
+      deleteWithUndo(
+        `/api/admin/resources/${resource.id}`,
+        resource.title,
+        () => {
+          setItems(prev => {
+            if (prev.some(r => r.id === resource.id)) return prev;
+            const restored = [...prev];
+            restored.splice(Math.max(0, index), 0, resource);
+            return restored;
           });
-          if (!res.ok) throw new Error('Failed to delete');
-        } catch {
-          toast.error('Failed to delete — restoring');
-          setItems(snapshot);
         }
-      };
-
-      toast(`Deleted "${resource.title}"`, {
-        action: {
-          label: 'Undo',
-          onClick: () => {
-            undo.undone = true;
-            setItems(snapshot);
-          },
-        },
-        duration: 5000,
-        onAutoClose: commitDelete,
-        onDismiss: commitDelete,
-      });
+      );
     },
     [items]
   );

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { deleteWithUndo } from '@/lib/cms/deleteWithUndo';
 import {
   KeyboardSensor,
   PointerSensor,
@@ -97,46 +98,21 @@ export function useCmsData<T extends { id: string }>({
     [endpoint, refetch]
   );
 
-  const undoRef = useRef<{ id: string; undone: boolean } | null>(null);
-
   const handleDelete = useCallback(
     (item: T, displayName: string) => {
-      let snapshot: T[] = [];
-      setItems(prev => {
-        snapshot = prev;
-        return prev.filter(i => i.id !== item.id);
-      });
+      const index = items.findIndex(i => i.id === item.id);
+      setItems(prev => prev.filter(i => i.id !== item.id));
 
-      const undo = { id: item.id, undone: false };
-      undoRef.current = undo;
-
-      const commitDelete = async () => {
-        if (undo.undone) return;
-        try {
-          const res = await fetch(`${endpoint}/${item.id}`, {
-            method: 'DELETE',
-          });
-          if (!res.ok) throw new Error('Failed to delete');
-        } catch {
-          toast.error('Failed to delete \u2014 restoring');
-          setItems(snapshot);
-        }
-      };
-
-      toast(`Deleted "${displayName}"`, {
-        action: {
-          label: 'Undo',
-          onClick: () => {
-            undo.undone = true;
-            setItems(snapshot);
-          },
-        },
-        duration: 5000,
-        onAutoClose: commitDelete,
-        onDismiss: commitDelete,
+      deleteWithUndo(`${endpoint}/${item.id}`, displayName, () => {
+        setItems(prev => {
+          if (prev.some(i => i.id === item.id)) return prev;
+          const restored = [...prev];
+          restored.splice(Math.max(0, index), 0, item);
+          return restored;
+        });
       });
     },
-    [endpoint]
+    [endpoint, items]
   );
 
   return {

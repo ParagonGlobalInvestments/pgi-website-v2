@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import { deleteWithUndo } from '@/lib/cms/deleteWithUndo';
 import {
   KeyboardSensor,
   PointerSensor,
@@ -97,43 +98,25 @@ export default function SponsorsTab() {
       }
     };
 
-  const undoRef = useRef<{ id: string; undone: boolean } | null>(null);
-
   const handleDelete = useCallback(
     (item: CmsSponsor) => {
       const setList = item.type === 'sponsor' ? setSponsors : setPartners;
       const list = item.type === 'sponsor' ? sponsors : partners;
-      const snapshot = [...list];
+      const index = list.findIndex(s => s.id === item.id);
       setList(prev => prev.filter(s => s.id !== item.id));
 
-      const undo = { id: item.id, undone: false };
-      undoRef.current = undo;
-
-      const commitDelete = async () => {
-        if (undo.undone) return;
-        try {
-          const res = await fetch(`/api/admin/sponsors/${item.id}`, {
-            method: 'DELETE',
+      deleteWithUndo(
+        `/api/admin/sponsors/${item.id}`,
+        item.display_name,
+        () => {
+          setList(prev => {
+            if (prev.some(s => s.id === item.id)) return prev;
+            const restored = [...prev];
+            restored.splice(Math.max(0, index), 0, item);
+            return restored;
           });
-          if (!res.ok) throw new Error('Failed to delete');
-        } catch {
-          toast.error('Failed to delete \u2014 restoring');
-          setList(snapshot);
         }
-      };
-
-      toast(`Deleted "${item.display_name}"`, {
-        action: {
-          label: 'Undo',
-          onClick: () => {
-            undo.undone = true;
-            setList(snapshot);
-          },
-        },
-        duration: 5000,
-        onAutoClose: commitDelete,
-        onDismiss: commitDelete,
-      });
+      );
     },
     [sponsors, partners]
   );
