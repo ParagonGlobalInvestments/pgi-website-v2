@@ -116,6 +116,56 @@ describe('database cache invalidation', () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
+  it('invalidates from metadata headers when the POST body is empty', async () => {
+    const req = new Request('https://example.com/api/revalidate', {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer test-secret',
+        'X-PGI-Schema': 'public',
+        'X-PGI-Table': 'user_public_group_memberships',
+        'X-PGI-Event': 'UPDATE',
+      },
+    });
+    const json = jest.spyOn(req, 'json');
+
+    expect((await POST(req)).status).toBe(200);
+    expect(json).not.toHaveBeenCalled();
+    expect(jest.mocked(revalidatePath).mock.calls).toEqual(
+      PEOPLE_PATHS.map(path => [path])
+    );
+  });
+
+  it('requires authorization for metadata headers too', async () => {
+    const req = request();
+    req.headers.delete('authorization');
+    req.headers.set('x-pgi-schema', 'public');
+    req.headers.set('x-pgi-table', 'cms_people');
+    req.headers.set('x-pgi-event', 'DELETE');
+
+    expect((await POST(req)).status).toBe(401);
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['public', 'obs_pageviews', 'UPDATE'],
+    ['auth', 'users', 'UPDATE'],
+    ['public', 'cms_people', 'TRUNCATE'],
+    ['public', 'constructor', 'UPDATE'],
+    ['', 'cms_people', 'UPDATE'],
+    ['public', 'cms_people', ''],
+  ])(
+    'rejects unsupported metadata headers (%s, %s, %s)',
+    async (schema, table, type) => {
+      const req = request();
+      req.headers.set('x-pgi-schema', schema);
+      req.headers.set('x-pgi-table', table);
+      req.headers.set('x-pgi-event', type);
+
+      expect((await POST(req)).status).toBe(400);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    }
+  );
+
   it('returns a failure when cache invalidation fails so delivery can be monitored', async () => {
     jest.mocked(revalidatePath).mockImplementation(() => {
       throw new Error('Cache unavailable');

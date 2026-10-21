@@ -26,14 +26,25 @@ export async function POST(request: Request) {
     );
   }
 
+  const table = request.headers.get('x-pgi-table');
   let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json(
-      { success: false, error: 'Invalid JSON' },
-      { status: 400 }
-    );
+  if (table !== null) {
+    // Metadata headers avoid relying on the body surviving the webhook transport.
+    payload = {
+      schema: request.headers.get('x-pgi-schema'),
+      table,
+      type: request.headers.get('x-pgi-event'),
+    };
+  } else {
+    // Keep accepting JSON notifications from existing database webhooks.
+    try {
+      payload = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON' },
+        { status: 400 }
+      );
+    }
   }
 
   try {

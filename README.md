@@ -404,14 +404,14 @@ Content changes are saved to Supabase. CMS saves invalidate the current environm
 
 ### Database-driven cache invalidation
 
-The database sends `POST /api/revalidate` after changes commit. This endpoint accepts only `INSERT`, `UPDATE`, and `DELETE` events from the supported public tables, authenticated with `Authorization: Bearer <CMS_REVALIDATION_SECRET>`. It does not depend on a portal login or on the portal feature flag. Notifications contain only schema, table, and event type; member records and email addresses are never sent.
+The database sends `POST /api/revalidate` after changes commit. This endpoint accepts only `INSERT`, `UPDATE`, and `DELETE` events from the supported public tables, authenticated with `Authorization: Bearer <CMS_REVALIDATION_SECRET>`. Event metadata is sent in `X-PGI-Schema`, `X-PGI-Table`, and `X-PGI-Event` headers so invalidation also works when the HTTP transport loses the POST body. JSON-only notifications remain supported. The endpoint does not depend on a portal login or on the portal feature flag. Notifications contain only schema, table, and event type; member records and email addresses are never sent.
 
 Production setup (once per Supabase project):
 
 1. Generate a random secret (at least 32 random bytes) in your password manager. Set it as the `CMS_REVALIDATION_SECRET` Worker secret in Cloudflare. Keep it out of `wrangler.jsonc`, public build variables, and source control.
 2. Deploy the application with `/api/revalidate` before enabling database notifications.
 3. In Supabase **Vault**, create `cms_revalidation_url` with value `https://paragoninvestments.org/api/revalidate` and `cms_revalidation_secret` with the same secret as Cloudflare. Use the Vault UI so the credential does not appear in SQL history.
-4. Apply `supabase/migrations/013_cms_cache_invalidation.sql` in the Supabase SQL Editor. This enables `pg_net` and Vault if necessary and installs statement-level triggers on the ten tables below. No additional Dashboard Database Webhooks are needed.
+4. Apply `supabase/migrations/013_cms_cache_invalidation.sql`, then `014_cms_webhook_metadata_headers.sql`, in the Supabase SQL Editor. These enable `pg_net` and Vault if necessary, install statement-level triggers on the ten tables below, and configure metadata headers. If 013 is already installed, apply only 014. Existing Vault secrets and triggers are reused. No additional Dashboard Database Webhooks are needed.
 
 | Database tables                                                                                            | Pages invalidated                                     |
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
