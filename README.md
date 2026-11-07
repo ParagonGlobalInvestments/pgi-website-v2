@@ -146,7 +146,6 @@ Supabase Row Level Security policies enforce data access at the database layer. 
 ```
 pgi-website-v2/
 ├── .github/                # GitHub Actions workflows, issue/PR templates
-├── docs/                   # Documentation and environment examples
 ├── public/                 # Static assets (images, icons, PDFs, etc.)
 ├── scripts/                # Utility scripts (migrations, sync, etc.)
 ├── supabase/               # Supabase migrations
