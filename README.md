@@ -95,13 +95,6 @@ The application will be available at `http://localhost:3000`.
 
 - `NEXT_PUBLIC_PORTAL_URL` - Full URL of the portal subdomain (e.g., `https://portal.paragoninvestments.org`). When set, auth callbacks redirect to this origin with clean URLs. Not needed for local dev or Workers previews.
 
-**Feature Flags:**
-
-- `NEXT_PUBLIC_SHOW_STATS` - Show home page statistics (default: `false`)
-- `NEXT_PUBLIC_ENABLE_INTERNSHIPS` - Enable internships feature (default: `false`)
-- `NEXT_PUBLIC_ENABLE_DIRECTORY` - Enable member directory feature (default: `false`)
-- `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` - Enable admin features (default: `true`)
-
 **Other:**
 
 - `ADMIN_EMAILS` - Comma-separated list of admin emails for the allowlist
@@ -111,8 +104,6 @@ The application will be available at `http://localhost:3000`.
 
 **Missing Supabase variables:** The application will not function. Authentication and database operations will fail.
 
-**Missing feature flags:** Features are hidden in production but automatically enabled in development mode (`NODE_ENV=development`).
-
 See `.env.example` in the project root for a complete template with all variables listed.
 
 ## Authentication & Authorization
@@ -120,6 +111,11 @@ See `.env.example` in the project root for a complete template with all variable
 ### Supabase Auth
 
 All user authentication is handled by Supabase Auth. Users log in through Supabase (Google OAuth only â€” there is no self-service sign-up), and sessions are managed via cookies using `@supabase/ssr`. Only pre-existing PGI members in the database can access the portal.
+
+The Supabase dashboard (Authentication > URL Configuration > Redirect URLs) must allow both callback URLs:
+
+- `https://paragoninvestments.org/auth/callback`
+- `https://portal.paragoninvestments.org/auth/callback`
 
 ### Proxy
 
@@ -229,15 +225,7 @@ When contributing a new feature, follow this structure:
 
 1. **Create production components** in `src/components/` or `src/hooks/`
 2. **Add internal QA routes** under `src/app/__tests__/[feature-name]/` for testing (these routes are automatically disabled in production)
-3. **Add deployment documentation** in `docs/deploy/[feature-name].md` if needed
-4. **Add helper scripts** in `scripts/dev/[feature-name]/` for development tooling
-
-**Example:** The mobile document viewer feature demonstrates this pattern:
-
-- Production code: `src/components/portal/MobileDocumentViewer.tsx`, `src/hooks/useIsMobile.ts`
-- QA routes: `src/app/__tests__/mobile-document-viewer/*` (dev only)
-- Deployment guide: `docs/deploy/mobile-document-viewer.md`
-- Helper script: `scripts/dev/mobile-document-viewer/add-test-pitch-urls.ts`
+3. **Add helper scripts** in `scripts/dev/[feature-name]/` for development tooling
 
 ## Production Build
 
@@ -307,18 +295,6 @@ Copy the migration file contents and run in the Supabase SQL Editor (Dashboard â
 **Symptom:** Build succeeds but app crashes at runtime or features don't work.
 
 **Solution:** Check that all required Supabase variables are set. The build process won't fail if env vars are missing, but runtime will. Check browser console and server logs for specific errors.
-
-### Feature Flags Not Enabling Features
-
-**Symptom:** Set `NEXT_PUBLIC_ENABLE_INTERNSHIPS=true` but feature still hidden.
-
-**Solution:**
-
-- Feature flags only control production behavior
-- In development mode (`npm run dev`), features are automatically enabled regardless of flag values
-- Ensure the flag is set to the string `"true"` (not boolean `true`)
-- Redeploy after changing environment variables (they're baked into the build)
-- Clear browser cache if needed
 
 ### Build Fails with Disk Space Errors
 
