@@ -121,9 +121,9 @@ See `.env.example` in the project root for a complete template with all variable
 
 All user authentication is handled by Supabase Auth. Users log in through Supabase (Google OAuth only — there is no self-service sign-up), and sessions are managed via cookies using `@supabase/ssr`. Only pre-existing PGI members in the database can access the portal.
 
-### Middleware
+### Proxy
 
-Route protection and subdomain routing are handled by `src/middleware.ts`, which:
+Route protection and subdomain routing are handled by `src/proxy.ts` (Next.js's renamed middleware), which:
 
 - Gates portal routes (404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`)
 - Detects `portal.*` subdomain and rewrites requests to `/portal/*` transparently
@@ -178,7 +178,7 @@ pgi-website-v2/
 │   │   ├── cms/            # CMS data fetching utilities
 │   │   ├── supabase/       # Supabase clients and database layer
 │   │   └── constants/      # Static data (companies, universities, resources)
-│   ├── middleware.ts       # Next.js middleware for route protection
+│   ├── proxy.ts            # Next.js proxy for route protection
 │   ├── types/              # TypeScript type definitions
 │   └── utils.ts            # General utility functions
 ├── next.config.mjs         # Next.js configuration
@@ -369,14 +369,14 @@ pgi-website-v2.paragon-national-group-account.workers.dev/portal
 
 ### How It Works
 
-| Environment     | URL Pattern                           | Mechanism                            |
-| --------------- | ------------------------------------- | ------------------------------------ |
-| Production      | `portal.paragoninvestments.org/home`  | Middleware rewrites to `/portal`     |
-| Local dev       | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
-| Local dev       | `localhost:3000/portal`               | Direct path, no rewrite needed       |
-| Workers preview | `your-worker.workers.dev/portal`      | Direct path, no rewrite needed       |
+| Environment     | URL Pattern                           | Mechanism                       |
+| --------------- | ------------------------------------- | ------------------------------- |
+| Production      | `portal.paragoninvestments.org/home`  | Proxy rewrites to `/portal`     |
+| Local dev       | `portal.127.0.0.1.sslip.io:3000/home` | Same proxy rewrite via sslip.io |
+| Local dev       | `localhost:3000/portal`               | Direct path, no rewrite needed  |
+| Workers preview | `your-worker.workers.dev/portal`      | Direct path, no rewrite needed  |
 
-If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
+If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), the proxy issues a 307 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
 
 ## Analytics (Admin Only)
 

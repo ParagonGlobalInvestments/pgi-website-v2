@@ -29,11 +29,11 @@ npm test            # jest
 
 Pushes to `main` deploy automatically through Cloudflare Workers Builds. Preview URLs are disabled, so `main` is production.
 
-| Host                            | Behavior                                 |
-| ------------------------------- | ---------------------------------------- |
-| `paragoninvestments.org`        | Canonical public site                    |
-| `portal.paragoninvestments.org` | Portal (subdomain routing in middleware) |
-| `www.paragoninvestments.org`    | 301 redirect to the bare domain          |
+| Host                            | Behavior                                |
+| ------------------------------- | --------------------------------------- |
+| `paragoninvestments.org`        | Canonical public site                   |
+| `portal.paragoninvestments.org` | Portal (subdomain routing in the proxy) |
+| `www.paragoninvestments.org`    | 301 redirect to the bare domain         |
 
 | File                  | Purpose                                                                                                 |
 | --------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -58,7 +58,7 @@ Supabase Auth only (no NextAuth).
 
 Enforcement:
 
-- **Middleware** (`src/middleware.ts`): portal gating, subdomain rewriting, and Supabase session refresh.
+- **Proxy** (`src/proxy.ts`, Next.js's renamed middleware): portal gating, subdomain rewriting, and Supabase session refresh.
 - **Portal layout** (`src/app/portal/layout.tsx`): server-side auth check — the real security choke point.
 - **API routes**: each authenticates itself (`supabase.auth.getUser()`); admin routes use `requireAdmin()`.
 
@@ -87,7 +87,7 @@ Always use the factories — never construct clients directly.
 
 `portalEnabled` in `src/lib/runtime.ts` is the single source of truth (`NEXT_PUBLIC_PORTAL_ENABLED === 'true'`). Never read the env var directly.
 
-- Middleware returns 404 for portal routes when disabled.
+- The proxy returns 404 for portal routes when disabled.
 - Server pages/layouts: `assertPortalEnabledOrNotFound()`.
 - API routes: `requirePortalEnabledOr404()`.
 
@@ -156,7 +156,7 @@ Before finishing a change, run `npm run build`, `npm run type-check`, `npm run l
 
 ## Do Not
 
-- Modify the auth system (Supabase Auth setup, middleware logic, OAuth callback) without explicit approval.
+- Modify the auth system (Supabase Auth setup, proxy logic, OAuth callback) without explicit approval.
 - Change database schema or RLS policies without explicit approval.
 - Use the admin client in browser code.
 - Remove dependencies without confirming they're unused.
