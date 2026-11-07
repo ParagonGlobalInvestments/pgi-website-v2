@@ -21,7 +21,7 @@ This is the web platform for Paragon Global Investments, serving both public vis
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router), React 19
 - **Language**: TypeScript 5.5.x
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui (built on Radix UI primitives)
@@ -263,8 +263,6 @@ Before deploying, enable R2 in the Cloudflare account and create a private bucke
 
 OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
 
-The build process disables webpack persistent caching in production to prevent disk space issues during builds.
-
 ## Database Migrations
 
 SQL migrations are stored in `supabase/migrations/` with numbered prefixes (e.g., `001_`, `002_`).
@@ -295,12 +293,6 @@ Copy the migration file contents and run in the Supabase SQL Editor (Dashboard â
 **Symptom:** Build succeeds but app crashes at runtime or features don't work.
 
 **Solution:** Check that all required Supabase variables are set. The build process won't fail if env vars are missing, but runtime will. Check browser console and server logs for specific errors.
-
-### Build Fails with Disk Space Errors
-
-**Symptom:** `ENOSPC: no space left on device` during build.
-
-**Solution:** The build configuration disables webpack persistent cache in production to prevent this. If you still encounter issues, free up disk space or check your system's available storage.
 
 ### TypeScript/ESLint Parser Warnings
 
