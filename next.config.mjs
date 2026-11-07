@@ -40,6 +40,8 @@ const nextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   allowedDevOrigins: ['portal.127.0.0.1.sslip.io'],
+  // AGENTS.md is maintained by hand; stop `next dev` from appending its rules block.
+  agentRules: false,
 };
 
 export default nextConfig;
