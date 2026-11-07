@@ -389,7 +389,7 @@ async function main() {
                   const texts = Array.from(spans).map(s => s.textContent?.trim()).filter(Boolean);
                   // Typically: [role, date range, location]
                   const role = texts[0] || '';
-                  const dateStr = texts.find(t => /\d{4}/.test(t) && /[–\-]/.test(t)) || '';
+                  const dateStr = texts.find(t => /\d{4}/.test(t) && /[–-]/.test(t)) || '';
                   const empType = texts.find(t => /internship|full.time|part.time|contract/i.test(t)) || null;
                   const location = texts.find(t => t !== role && t !== dateStr && t !== empType && !t.includes('·') && /[A-Z]/.test(t) && !/\d{4}/.test(t)) || null;
 
@@ -404,7 +404,7 @@ async function main() {
                 const companyLine = texts[1] || '';
                 const company = companyLine.split('·')[0]?.trim() || companyLine;
                 const empType = texts.find(t => /internship|full.time|part.time|contract/i.test(t)) || null;
-                const dateStr = texts.find(t => /\d{4}/.test(t) && /[–\-]/.test(t)) || '';
+                const dateStr = texts.find(t => /\d{4}/.test(t) && /[–-]/.test(t)) || '';
                 const location = texts.find(t => t !== role && t !== companyLine && t !== dateStr && !t.includes('·') && /[A-Z]/.test(t) && !/\d{4}/.test(t)) || null;
 
                 if (role && company) {
@@ -419,7 +419,7 @@ async function main() {
           // Parse dates from dateStr on each entry
           experience = experience.map(e => {
             // dateStr looks like "Jun 2024 – Aug 2024" or "2024 – Present"
-            const parts = (e.dateStr || '').split(/\s*[–\-]\s*/);
+            const parts = (e.dateStr || '').split(/\s*[–-]\s*/);
             const start = parseLinkedInDate(parts[0]);
             const end = parseLinkedInDate(parts[1]);
 

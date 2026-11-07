@@ -21,7 +21,7 @@ export const portalEnabled = process.env.NEXT_PUBLIC_PORTAL_ENABLED === 'true';
 
 /**
  * Assert that the portal is enabled, or call notFound()
- * Use this in server components and route handlers (not middleware)
+ * Use this in server components and route handlers (not the proxy)
  *
  * @throws {never} - Calls notFound() which throws internally
  */

@@ -54,7 +54,7 @@ export default async function PortalLayout({
   // Assert portal is enabled (calls notFound() if disabled)
   assertPortalEnabledOrNotFound();
 
-  // Get pathname and search params from headers (set by middleware) to detect auth routes
+  // Get pathname and search params from headers (set by the proxy) to detect auth routes
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '';
   const searchParams = headersList.get('x-search-params') || '';

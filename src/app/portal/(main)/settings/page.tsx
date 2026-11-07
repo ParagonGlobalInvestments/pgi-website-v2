@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Linkedin, Github, Globe, X, Plus, Trash2, Pencil } from 'lucide-react';
+import { Globe, X, Plus, Trash2, Pencil } from 'lucide-react';
+import { Github, Linkedin } from '@/components/ui/brand-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Input, Label } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';

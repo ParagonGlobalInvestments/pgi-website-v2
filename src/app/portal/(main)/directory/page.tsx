@@ -1,15 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  Search,
-  Linkedin,
-  Mail,
-  Github,
-  Globe,
-  X,
-  Briefcase,
-} from 'lucide-react';
+import { Search, Mail, Globe, X, Briefcase } from 'lucide-react';
+import { Github, Linkedin } from '@/components/ui/brand-icons';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
 import {

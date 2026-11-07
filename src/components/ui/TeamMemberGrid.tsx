@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Linkedin } from 'lucide-react';
+import { Linkedin } from '@/components/ui/brand-icons';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { fadeIn, staggerContainer, memberItem } from '@/lib/animations';
 import type { CmsPerson } from '@/lib/cms/types';

@@ -21,7 +21,7 @@ This is the web platform for Paragon Global Investments, serving both public vis
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router), React 19
 - **Language**: TypeScript 5.5.x
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui (built on Radix UI primitives)
@@ -95,13 +95,6 @@ The application will be available at `http://localhost:3000`.
 
 - `NEXT_PUBLIC_PORTAL_URL` - Full URL of the portal subdomain (e.g., `https://portal.paragoninvestments.org`). When set, auth callbacks redirect to this origin with clean URLs. Not needed for local dev or Workers previews.
 
-**Feature Flags:**
-
-- `NEXT_PUBLIC_SHOW_STATS` - Show home page statistics (default: `false`)
-- `NEXT_PUBLIC_ENABLE_INTERNSHIPS` - Enable internships feature (default: `false`)
-- `NEXT_PUBLIC_ENABLE_DIRECTORY` - Enable member directory feature (default: `false`)
-- `NEXT_PUBLIC_ENABLE_ADMIN_FEATURES` - Enable admin features (default: `true`)
-
 **Other:**
 
 - `ADMIN_EMAILS` - Comma-separated list of admin emails for the allowlist
@@ -111,8 +104,6 @@ The application will be available at `http://localhost:3000`.
 
 **Missing Supabase variables:** The application will not function. Authentication and database operations will fail.
 
-**Missing feature flags:** Features are hidden in production but automatically enabled in development mode (`NODE_ENV=development`).
-
 See `.env.example` in the project root for a complete template with all variables listed.
 
 ## Authentication & Authorization
@@ -121,9 +112,14 @@ See `.env.example` in the project root for a complete template with all variable
 
 All user authentication is handled by Supabase Auth. Users log in through Supabase (Google OAuth only — there is no self-service sign-up), and sessions are managed via cookies using `@supabase/ssr`. Only pre-existing PGI members in the database can access the portal.
 
-### Middleware
+The Supabase dashboard (Authentication > URL Configuration > Redirect URLs) must allow both callback URLs:
 
-Route protection and subdomain routing are handled by `src/middleware.ts`, which:
+- `https://paragoninvestments.org/auth/callback`
+- `https://portal.paragoninvestments.org/auth/callback`
+
+### Proxy
+
+Route protection and subdomain routing are handled by `src/proxy.ts` (Next.js's renamed middleware), which:
 
 - Gates portal routes (404 when `NEXT_PUBLIC_PORTAL_ENABLED` is not `'true'`)
 - Detects `portal.*` subdomain and rewrites requests to `/portal/*` transparently
@@ -150,7 +146,6 @@ Supabase Row Level Security policies enforce data access at the database layer. 
 ```
 pgi-website-v2/
 ├── .github/                # GitHub Actions workflows, issue/PR templates
-├── docs/                   # Documentation and environment examples
 ├── public/                 # Static assets (images, icons, PDFs, etc.)
 ├── scripts/                # Utility scripts (migrations, sync, etc.)
 ├── supabase/               # Supabase migrations
@@ -178,7 +173,7 @@ pgi-website-v2/
 │   │   ├── cms/            # CMS data fetching utilities
 │   │   ├── supabase/       # Supabase clients and database layer
 │   │   └── constants/      # Static data (companies, universities, resources)
-│   ├── middleware.ts       # Next.js middleware for route protection
+│   ├── proxy.ts            # Next.js proxy for route protection
 │   ├── types/              # TypeScript type definitions
 │   └── utils.ts            # General utility functions
 ├── next.config.mjs         # Next.js configuration
@@ -229,15 +224,7 @@ When contributing a new feature, follow this structure:
 
 1. **Create production components** in `src/components/` or `src/hooks/`
 2. **Add internal QA routes** under `src/app/__tests__/[feature-name]/` for testing (these routes are automatically disabled in production)
-3. **Add deployment documentation** in `docs/deploy/[feature-name].md` if needed
-4. **Add helper scripts** in `scripts/dev/[feature-name]/` for development tooling
-
-**Example:** The mobile document viewer feature demonstrates this pattern:
-
-- Production code: `src/components/portal/MobileDocumentViewer.tsx`, `src/hooks/useIsMobile.ts`
-- QA routes: `src/app/__tests__/mobile-document-viewer/*` (dev only)
-- Deployment guide: `docs/deploy/mobile-document-viewer.md`
-- Helper script: `scripts/dev/mobile-document-viewer/add-test-pitch-urls.ts`
+3. **Add helper scripts** in `scripts/dev/[feature-name]/` for development tooling
 
 ## Production Build
 
@@ -275,8 +262,6 @@ Before deploying, enable R2 in the Cloudflare account and create a private bucke
 
 OpenNext embeds local `.env*` values in the server bundle, so deploy from a clean build environment and keep `.open-next` private.
 
-The build process disables webpack persistent caching in production to prevent disk space issues during builds.
-
 ## Database Migrations
 
 SQL migrations are stored in `supabase/migrations/` with numbered prefixes (e.g., `001_`, `002_`).
@@ -307,24 +292,6 @@ Copy the migration file contents and run in the Supabase SQL Editor (Dashboard �
 **Symptom:** Build succeeds but app crashes at runtime or features don't work.
 
 **Solution:** Check that all required Supabase variables are set. The build process won't fail if env vars are missing, but runtime will. Check browser console and server logs for specific errors.
-
-### Feature Flags Not Enabling Features
-
-**Symptom:** Set `NEXT_PUBLIC_ENABLE_INTERNSHIPS=true` but feature still hidden.
-
-**Solution:**
-
-- Feature flags only control production behavior
-- In development mode (`npm run dev`), features are automatically enabled regardless of flag values
-- Ensure the flag is set to the string `"true"` (not boolean `true`)
-- Redeploy after changing environment variables (they're baked into the build)
-- Clear browser cache if needed
-
-### Build Fails with Disk Space Errors
-
-**Symptom:** `ENOSPC: no space left on device` during build.
-
-**Solution:** The build configuration disables webpack persistent cache in production to prevent this. If you still encounter issues, free up disk space or check your system's available storage.
 
 ### TypeScript/ESLint Parser Warnings
 
@@ -369,14 +336,14 @@ pgi-website-v2.paragon-national-group-account.workers.dev/portal
 
 ### How It Works
 
-| Environment     | URL Pattern                           | Mechanism                            |
-| --------------- | ------------------------------------- | ------------------------------------ |
-| Production      | `portal.paragoninvestments.org/home`  | Middleware rewrites to `/portal`     |
-| Local dev       | `portal.127.0.0.1.sslip.io:3000/home` | Same middleware rewrite via sslip.io |
-| Local dev       | `localhost:3000/portal`               | Direct path, no rewrite needed       |
-| Workers preview | `your-worker.workers.dev/portal`      | Direct path, no rewrite needed       |
+| Environment     | URL Pattern                           | Mechanism                       |
+| --------------- | ------------------------------------- | ------------------------------- |
+| Production      | `portal.paragoninvestments.org/home`  | Proxy rewrites to `/portal`     |
+| Local dev       | `portal.127.0.0.1.sslip.io:3000/home` | Same proxy rewrite via sslip.io |
+| Local dev       | `localhost:3000/portal`               | Direct path, no rewrite needed  |
+| Workers preview | `your-worker.workers.dev/portal`      | Direct path, no rewrite needed  |
 
-If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), middleware issues a 301 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
+If a user visits `portal.paragoninvestments.org/portal` (redundant prefix), the proxy issues a 307 redirect to `portal.paragoninvestments.org/home` to enforce clean URLs.
 
 ## Analytics (Admin Only)
 

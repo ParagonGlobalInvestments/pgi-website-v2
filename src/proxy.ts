@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { portalEnabled } from '@/lib/runtime';
 
 /**
- * Refresh the Supabase session by creating a server client in middleware.
+ * Refresh the Supabase session by creating a server client in the proxy.
  * This is the only place that can reliably write updated auth cookies
  * (Server Components can't call setAll). Calling getUser() triggers
  * automatic token refresh if the access token is expired.
@@ -60,8 +60,7 @@ function createResponseWithHeaders(
 }
 
 /**
- * Edge-clean middleware - routing, path gating, and subdomain detection.
- * No Supabase imports or Node.js APIs - runs on Edge runtime.
+ * Proxy - routing, path gating, and subdomain detection.
  * Authentication enforcement happens server-side in portal layout.
  *
  * Order of operations:
@@ -70,7 +69,7 @@ function createResponseWithHeaders(
  * 3. Subdomain detection + routing (portal.* → /portal/*)
  * 4. Pass through with x-pathname header
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const searchParams = request.nextUrl.search;
 
@@ -115,7 +114,7 @@ export async function middleware(request: NextRequest) {
 
     if (portalUrl && isPortalRoute && !isSameHost) {
       // Redirect to portal subdomain, preserving path + query string
-      // /portal/* paths get cleaned (middleware on subdomain handles rewrite)
+      // /portal/* paths get cleaned (proxy on subdomain handles rewrite)
       // /login redirects to /login on subdomain (will be rewritten to /portal/login)
       const cleanPath = pathname.startsWith('/portal')
         ? pathname.replace(/^\/portal/, '') || '/'

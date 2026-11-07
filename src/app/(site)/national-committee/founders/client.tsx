@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Linkedin } from 'lucide-react';
+import { Linkedin } from '@/components/ui/brand-icons';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/TextAnimations/DecryptedText/DecryptedText';
 import { fadeIn, staggerContainer, cardAnimation } from '@/lib/animations';
