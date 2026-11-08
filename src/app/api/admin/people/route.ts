@@ -3,8 +3,8 @@ import { requireAdmin } from '@/lib/auth/requireAdmin';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { PeopleGroupSlug } from '@/lib/cms/types';
 import { revalidatePeople } from '@/lib/cms/revalidate';
+import { toSchoolSlug } from '@/lib/constants/universities';
 import {
-  createSyntheticLinkedinToken,
   getAdminPersonByExternalId,
   isMembershipSchemaError,
   isPeopleGroupSlug,
@@ -154,147 +154,42 @@ async function createOrUpdateUserMembership(params: {
   }
 }
 
-async function createOrUpdateAlumniMembership(params: {
-  groupSlug: PeopleGroupSlug;
-  sortOrder: number;
-  input: {
-    name: string;
-    title: string | null;
-    school: string | null;
-    company: string | null;
-    linkedin: string | null;
-    headshot_url: string | null;
-    banner_url: string | null;
-  };
+/** Reuses an alumni user with the same name and LinkedIn, or creates one with no login. */
+async function findOrCreateAlumniUser(input: {
+  name: string;
+  school: string | null;
+  linkedin: string | null;
 }) {
   const supabase = requireSupabaseAdminClient();
-  const normalizedLinkedin = trimNullable(params.input.linkedin);
-  let alumniPersonId: string | null = null;
-  let createdAlumniPersonId: string | null = null;
 
-  try {
-    if (normalizedLinkedin) {
-      const { data: existingAlumni, error: existingLookupError } =
-        await supabase
-          .from('alumni_people')
-          .select('id, school, title, company, headshot_url, banner_url')
-          .eq('name', params.input.name)
-          .eq('linkedin', normalizedLinkedin)
-          .maybeSingle();
+  if (input.linkedin) {
+    const { data: existingUsers, error: lookupError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('name', input.name)
+      .eq('linkedin_url', input.linkedin)
+      .limit(1);
 
-      if (existingLookupError) throw existingLookupError;
-
-      if (existingAlumni) {
-        const merged = {
-          school: params.input.school ?? existingAlumni.school,
-          title: params.input.title ?? existingAlumni.title,
-          company: params.input.company ?? existingAlumni.company,
-          headshot_url:
-            params.input.headshot_url ?? existingAlumni.headshot_url,
-          banner_url: params.input.banner_url ?? existingAlumni.banner_url,
-        };
-
-        const shouldUpdate =
-          merged.school !== existingAlumni.school ||
-          merged.title !== existingAlumni.title ||
-          merged.company !== existingAlumni.company ||
-          merged.headshot_url !== existingAlumni.headshot_url ||
-          merged.banner_url !== existingAlumni.banner_url;
-
-        if (shouldUpdate) {
-          const { error: alumniUpdateError } = await supabase
-            .from('alumni_people')
-            .update(merged)
-            .eq('id', existingAlumni.id);
-
-          if (alumniUpdateError) throw alumniUpdateError;
-        }
-
-        alumniPersonId = existingAlumni.id;
-      } else {
-        const { data: alumniPerson, error: alumniInsertError } = await supabase
-          .from('alumni_people')
-          .insert({
-            name: params.input.name,
-            school: params.input.school,
-            title: params.input.title,
-            company: params.input.company,
-            linkedin: normalizedLinkedin,
-            headshot_url: params.input.headshot_url,
-            banner_url: params.input.banner_url,
-          })
-          .select('id')
-          .single();
-
-        if (alumniInsertError) throw alumniInsertError;
-        alumniPersonId = alumniPerson.id;
-        createdAlumniPersonId = alumniPerson.id;
-      }
-    } else {
-      const { data: alumniPerson, error: alumniInsertError } = await supabase
-        .from('alumni_people')
-        .insert({
-          name: params.input.name,
-          school: params.input.school,
-          title: params.input.title,
-          company: params.input.company,
-          linkedin: createSyntheticLinkedinToken(),
-          headshot_url: params.input.headshot_url,
-          banner_url: params.input.banner_url,
-        })
-        .select('id')
-        .single();
-
-      if (alumniInsertError) throw alumniInsertError;
-      alumniPersonId = alumniPerson.id;
-      createdAlumniPersonId = alumniPerson.id;
+    if (lookupError) throw lookupError;
+    if (existingUsers?.[0]) {
+      return { userId: existingUsers[0].id as string, created: false };
     }
-
-    if (!alumniPersonId) throw new Error('Failed to create alumni person');
-
-    const { data: existingMembership, error: membershipLookupError } =
-      await supabase
-        .from('alumni_public_group_memberships')
-        .select('id')
-        .eq('alumni_person_id', alumniPersonId)
-        .eq('group_slug', params.groupSlug)
-        .maybeSingle();
-
-    if (membershipLookupError) throw membershipLookupError;
-
-    if (existingMembership) {
-      const { error: membershipUpdateError } = await supabase
-        .from('alumni_public_group_memberships')
-        .update({ sort_order: params.sortOrder })
-        .eq('id', existingMembership.id);
-
-      if (membershipUpdateError) throw membershipUpdateError;
-      return existingMembership.id;
-    }
-
-    const { data: createdMembership, error: membershipInsertError } =
-      await supabase
-        .from('alumni_public_group_memberships')
-        .insert({
-          alumni_person_id: alumniPersonId,
-          group_slug: params.groupSlug,
-          sort_order: params.sortOrder,
-        })
-        .select('id')
-        .single();
-
-    if (membershipInsertError) throw membershipInsertError;
-
-    return createdMembership.id;
-  } catch (error) {
-    if (createdAlumniPersonId) {
-      await supabase
-        .from('alumni_people')
-        .delete()
-        .eq('id', createdAlumniPersonId);
-    }
-    throw error;
   }
+
+  const { data: createdUser, error: insertError } = await supabase
+    .from('users')
+    .insert({
+      name: input.name,
+      email: null,
+      school: toSchoolSlug(input.school),
+      linkedin_url: input.linkedin,
+      status: 'alumni',
+    })
+    .select('id')
+    .single();
+
+  if (insertError) throw insertError;
+  return { userId: createdUser.id as string, created: true };
 }
 
 export async function GET(req: NextRequest) {
@@ -381,35 +276,43 @@ export async function POST(req: NextRequest) {
       membershipType = userId ? 'user' : 'alumni';
     }
 
-    let externalId: string;
+    let createdUserId: string | null = null;
 
-    if (membershipType === 'user') {
-      if (!userId) {
-        return NextResponse.json(
-          { error: 'user_id is required for person_type "user"' },
-          { status: 400 }
-        );
-      }
+    if (membershipType === 'alumni') {
+      const alumniUser = await findOrCreateAlumniUser(input);
+      userId = alumniUser.userId;
+      if (alumniUser.created) createdUserId = alumniUser.userId;
+    }
 
-      const membershipId = await createOrUpdateUserMembership({
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'user_id is required for person_type "user"' },
+        { status: 400 }
+      );
+    }
+
+    let membershipId: Awaited<ReturnType<typeof createOrUpdateUserMembership>>;
+
+    try {
+      membershipId = await createOrUpdateUserMembership({
         userId,
         groupSlug,
         sortOrder,
         input,
       });
-
-      if (membershipId instanceof NextResponse) return membershipId;
-
-      externalId = toExternalPersonId('user', membershipId);
-    } else {
-      const membershipId = await createOrUpdateAlumniMembership({
-        groupSlug,
-        sortOrder,
-        input,
-      });
-
-      externalId = toExternalPersonId('alumni', membershipId);
+    } catch (error) {
+      if (createdUserId) {
+        await requireSupabaseAdminClient()
+          .from('users')
+          .delete()
+          .eq('id', createdUserId);
+      }
+      throw error;
     }
+
+    if (membershipId instanceof NextResponse) return membershipId;
+
+    const externalId = toExternalPersonId(membershipId);
 
     const person = await getAdminPersonByExternalId(
       requireSupabaseAdminClient(),

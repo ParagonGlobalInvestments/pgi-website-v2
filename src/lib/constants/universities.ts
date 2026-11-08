@@ -55,3 +55,32 @@ export const UNIVERSITIES: University[] = [
     imagePath: '/images/universities/yale.png',
   },
 ];
+
+const SCHOOL_ALIASES: Record<string, string> = {
+  barnard: 'columbia',
+  'barnard college': 'columbia',
+  penn: 'upenn',
+  'the university of chicago': 'uchicago',
+  brown: 'brown',
+  columbia: 'columbia',
+  cornell: 'cornell',
+  nyu: 'nyu',
+  'new york university': 'nyu',
+  princeton: 'princeton',
+  uchicago: 'uchicago',
+  'university of chicago': 'uchicago',
+  upenn: 'upenn',
+  'university of pennsylvania': 'upenn',
+  yale: 'yale',
+};
+
+/** Maps a school name in any known form to its slug, or null if it isn't a chapter. */
+export function toSchoolSlug(value: string | null | undefined): string | null {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized) return null;
+  return (
+    SCHOOL_ALIASES[normalized] ??
+    UNIVERSITIES.find(u => u.displayName.toLowerCase() === normalized)?.name ??
+    null
+  );
+}

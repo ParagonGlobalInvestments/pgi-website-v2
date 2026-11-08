@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       if (!parsed) {
         return NextResponse.json(
           {
-            error: 'Each item id must be formatted as user:<id> or alumni:<id>',
+            error: 'Each item id must be formatted as user:<id>',
           },
           { status: 400 }
         );
@@ -50,15 +50,8 @@ export async function POST(req: NextRequest) {
         throw new Error(`Invalid id format: ${item.id}`);
       }
 
-      if (parsed.type === 'user') {
-        return supabase
-          .from('user_public_group_memberships')
-          .update({ sort_order: item.sort_order })
-          .eq('id', parsed.membershipId);
-      }
-
       return supabase
-        .from('alumni_public_group_memberships')
+        .from('user_public_group_memberships')
         .update({ sort_order: item.sort_order })
         .eq('id', parsed.membershipId);
     });
