@@ -111,7 +111,7 @@ const Footer = () => {
                 <Image
                   src="/logos/pgiLogoTransparent.png"
                   alt="Paragon Global Investments"
-                  width={200}
+                  width={36}
                   height={36}
                   className="h-9 w-auto rounded-lg"
                 />

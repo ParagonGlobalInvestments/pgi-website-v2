@@ -229,10 +229,10 @@ const Header = () => {
             <Image
               src="/logos/pgiLogoTransparent.png"
               alt="Paragon Global Investments"
-              width={200}
+              width={36}
               height={36}
               priority
-              sizes="200px"
+              sizes="36px"
               className="h-9 w-auto rounded-lg"
             />
           </Link>

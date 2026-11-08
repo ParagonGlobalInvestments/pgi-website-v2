@@ -53,19 +53,16 @@ const CompanyCard = ({ company }: { company: Company }) => (
     >
       <div className="bg-darkNavy rounded-lg p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-700 hover:border-pgi-light-blue">
         <div className="h-16 sm:h-20 w-full flex items-center justify-center">
-          <Image
-            src={company.imagePath}
-            alt={company.displayName}
-            width={120}
-            height={80}
-            className="object-contain max-w-full max-h-full group-hover:scale-110 transition-transform duration-300"
-            style={{
-              width: 'auto',
-              height: 'auto',
-              maxWidth: '160px',
-              maxHeight: '160px',
-            }}
-          />
+          {/* Logos vary in aspect ratio: contain each in the row's box */}
+          <div className="relative h-full w-full max-w-[160px]">
+            <Image
+              src={company.imagePath}
+              alt={company.displayName}
+              fill
+              sizes="160px"
+              className="object-contain group-hover:scale-110 transition-transform duration-300"
+            />
+          </div>
         </div>
       </div>
     </a>

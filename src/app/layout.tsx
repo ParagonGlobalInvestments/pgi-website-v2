@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Montserrat } from 'next/font/google';
 import { VitalsCollector } from '@/components/observability/VitalsCollector';
+import { ReactGrab } from '@/components/dev/ReactGrab';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from 'sonner';
 import {
@@ -86,13 +87,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={montserrat.variable}>
       <head>
-        {process.env.NODE_ENV === 'development' && (
-          <Script
-            src="//unpkg.com/react-grab/dist/index.global.js"
-            crossOrigin="anonymous"
-            strategy="beforeInteractive"
-          />
-        )}
         <meta name="theme-color" content="#0a1628" />
         <meta
           name="viewport"
@@ -123,6 +117,7 @@ export default function RootLayout({
           <Sonner position="top-center" richColors closeButton />
           <VitalsCollector />
         </PortalTransitionProvider>
+        <ReactGrab />
         <Script
           id="org-jsonld"
           type="application/ld+json"

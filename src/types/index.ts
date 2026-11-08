@@ -31,6 +31,11 @@ export interface User {
   updatedAt: string;
 }
 
+/** Alumni directory entry: a user plus their current company, if known */
+export interface AlumniUser extends User {
+  company: string | null;
+}
+
 export interface Experience {
   id: string;
   userId: string | null;

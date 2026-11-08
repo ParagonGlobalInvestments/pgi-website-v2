@@ -33,19 +33,16 @@ const EnhancedSponsorLogo = ({ company }: { company: SponsorLogoProps }) => (
   >
     <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 ">
       {company.imagePath && (
-        <Image
-          src={company.imagePath}
-          alt={company.displayName}
-          width={120}
-          height={120}
-          className="object-contain max-w-full max-h-full"
-          style={{
-            width: 'auto',
-            height: 'auto',
-            maxWidth: '120px',
-            maxHeight: '80px',
-          }}
-        />
+        // Logos vary in aspect ratio: contain each in a fixed box
+        <div className="relative h-20 w-[120px] max-w-full">
+          <Image
+            src={company.imagePath}
+            alt={company.displayName}
+            fill
+            sizes="120px"
+            className="object-contain"
+          />
+        </div>
       )}
     </div>
   </a>
@@ -63,13 +60,13 @@ export default function SponsorsPartnersSection({
   // Use CMS data if available, otherwise fall back to constants
   const displaySponsors: SponsorLogoProps[] =
     sponsors && sponsors.length > 0
-      ? sponsors.slice(0, 5).map((s) => ({
+      ? sponsors.slice(0, 5).map(s => ({
           name: s.name,
           displayName: s.display_name,
           website: s.website,
           imagePath: s.image_path,
         }))
-      : SPONSORS_COMPANIES.slice(0, 5).map((c) => ({
+      : SPONSORS_COMPANIES.slice(0, 5).map(c => ({
           name: c.name,
           displayName: c.displayName,
           website: c.website,
@@ -78,13 +75,13 @@ export default function SponsorsPartnersSection({
 
   const displayPartners: SponsorLogoProps[] =
     partners && partners.length > 0
-      ? partners.slice(0, 5).map((p) => ({
+      ? partners.slice(0, 5).map(p => ({
           name: p.name,
           displayName: p.display_name,
           website: p.website,
           imagePath: p.image_path,
         }))
-      : PARTNERS_COMPANIES.slice(0, 5).map((c) => ({
+      : PARTNERS_COMPANIES.slice(0, 5).map(c => ({
           name: c.name,
           displayName: c.displayName,
           website: c.website,

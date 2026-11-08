@@ -42,6 +42,13 @@ export const NAV_ITEMS: PortalNavItem[] = [
     adminOnly: false,
   },
   {
+    id: 'alumni',
+    href: '/portal/alumni',
+    label: 'Alumni',
+    icon: 'GraduationCap',
+    adminOnly: false,
+  },
+  {
     id: 'resources',
     href: '/portal/resources',
     label: 'Resources',

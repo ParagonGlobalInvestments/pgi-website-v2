@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   Home,
   Users,
+  GraduationCap,
   FolderOpen,
   PenSquare,
   BarChart3,
@@ -53,6 +54,7 @@ const navIndicatorTransition = {
 const NAV_ICONS: Record<string, React.ElementType> = {
   Home,
   Users,
+  GraduationCap,
   FolderOpen,
   PenSquare,
   BarChart3,
@@ -569,6 +571,7 @@ export function UnifiedPortalShell({
   useEffect(() => {
     if (!pathname) return;
     if (pathname.includes('/directory')) setActiveLink('directory');
+    else if (pathname.includes('/alumni')) setActiveLink('alumni');
     else if (pathname.includes('/resources')) setActiveLink('resources');
     else if (pathname.includes('/content')) setActiveLink('content');
     else if (pathname.includes('/observability'))
@@ -729,8 +732,8 @@ export function UnifiedPortalShell({
               <Image
                 src="/logos/pgiLogoTransparent.png"
                 alt="PGI"
-                width={100}
-                height={20}
+                width={24}
+                height={24}
                 className="h-6 w-auto"
               />
             </motion.div>
