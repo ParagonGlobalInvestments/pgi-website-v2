@@ -1,6 +1,6 @@
 /** @jest-environment node */
 
-import { getCmsStatistics } from './queries';
+import { getCmsPeople, getCmsStatistics } from './queries';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 
 describe('CMS cache policy', () => {
@@ -56,5 +56,54 @@ describe('CMS cache policy', () => {
     const options = fetchMock.mock.calls[0][1];
     expect(options?.method).toBe('PATCH');
     expect(options?.next).toBeUndefined();
+  });
+});
+
+describe('getCmsPeople', () => {
+  const fetchMock = jest.mocked(fetch);
+  const membership = (name: string, status: string) => ({
+    id: name,
+    group_slug: 'value-analysts',
+    sort_order: 0,
+    created_at: '',
+    updated_at: '',
+    user: { id: name, name, school: 'yale', linkedin_url: null, status },
+    source: null,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.replaceProperty(process, 'env', {
+      ...process.env,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
+    });
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify([
+          membership('Current', 'active'),
+          membership('Graduate', 'alumni'),
+        ]),
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('hides graduates from pages that exclude alumni', async () => {
+    const people = await getCmsPeople('value-analysts', {
+      includeAlumni: false,
+    });
+
+    expect(people.map(person => person.name)).toEqual(['Current']);
+  });
+
+  it('keeps alumni on pages that include them', async () => {
+    const people = await getCmsPeople('value-analysts');
+
+    expect(people.map(person => person.name)).toEqual(['Current', 'Graduate']);
   });
 });

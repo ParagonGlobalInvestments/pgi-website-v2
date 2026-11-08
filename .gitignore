@@ -94,3 +94,6 @@ jsrepo.json
 certificates
 
 src/components/layout/image
+
+# Supabase CLI
+supabase/.temp/

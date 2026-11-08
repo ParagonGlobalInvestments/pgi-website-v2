@@ -378,16 +378,16 @@ Production setup (once per Supabase project):
 1. Generate a random secret (at least 32 random bytes) in your password manager. Set it as the `CMS_REVALIDATION_SECRET` Worker secret in Cloudflare. Keep it out of `wrangler.jsonc`, public build variables, and source control.
 2. Deploy the application with `/api/revalidate` before enabling database notifications.
 3. In Supabase **Vault**, create `cms_revalidation_url` with value `https://paragoninvestments.org/api/revalidate` and `cms_revalidation_secret` with the same secret as Cloudflare. Use the Vault UI so the credential does not appear in SQL history.
-4. Apply `supabase/migrations/013_cms_cache_invalidation.sql`, then `014_cms_webhook_metadata_headers.sql`, in the Supabase SQL Editor. These enable `pg_net` and Vault if necessary, install statement-level triggers on the ten tables below, and configure metadata headers. If 013 is already installed, apply only 014. Existing Vault secrets and triggers are reused. No additional Dashboard Database Webhooks are needed.
+4. Apply `supabase/migrations/013_cms_cache_invalidation.sql`, then `014_cms_webhook_metadata_headers.sql`, in the Supabase SQL Editor. These enable `pg_net` and Vault if necessary, install statement-level triggers on the tables below, and configure metadata headers. If 013 is already installed, apply only 014. Existing Vault secrets and triggers are reused. No additional Dashboard Database Webhooks are needed.
 
-| Database tables                                                                                            | Pages invalidated                                     |
-| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `cms_people`, `users`, `alumni_people`, `user_public_group_memberships`, `alumni_public_group_memberships` | Officers, founders, value team, quant team, and apply |
-| `cms_recruitment`                                                                                          | Apply                                                 |
-| `cms_statistics`                                                                                           | Home                                                  |
-| `cms_timeline`                                                                                             | Who we are                                            |
-| `cms_sponsors`                                                                                             | Home and sponsors                                     |
-| `resources`                                                                                                | Resources API (already served dynamically)            |
+| Database tables                                        | Pages invalidated                                     |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| `cms_people`, `users`, `user_public_group_memberships` | Officers, founders, value team, quant team, and apply |
+| `cms_recruitment`                                      | Apply                                                 |
+| `cms_statistics`                                       | Home                                                  |
+| `cms_timeline`                                         | Who we are                                            |
+| `cms_sponsors`                                         | Home and sponsors                                     |
+| `resources`                                            | Resources API (already served dynamically)            |
 
 People changes invalidate all people pages because profiles can be shared across groups, and deletes or moves must also refresh the previous group. Statement-level triggers queue a notification per table event, including bulk imports, rather than per row. `pg_net` delivers asynchronously after commit, so rolled-back edits do not send a notification. Existing CMS API invalidation remains in place.
 

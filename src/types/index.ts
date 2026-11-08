@@ -16,10 +16,10 @@ export interface UserPreferences {
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email: string | null; // null for alumni with no contact on file
   role: UserRole;
   program: UserProgram | null;
-  school: string; // slug: 'columbia', 'nyu', etc.
+  school: string | null; // slug: 'columbia', 'nyu', etc. Null when unknown.
   graduationYear: number | null;
   linkedinUrl: string | null;
   githubUrl: string | null;
@@ -36,7 +36,7 @@ export interface Experience {
   userId: string | null;
   personId: string | null;
   company: string;
-  role: string;
+  role: string | null;
   startYear: number;
   startMonth: number | null;
   endYear: number | null;

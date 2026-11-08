@@ -78,9 +78,7 @@ describe('database cache invalidation', () => {
   it.each([
     ['cms_people', PEOPLE_PATHS],
     ['users', PEOPLE_PATHS],
-    ['alumni_people', PEOPLE_PATHS],
     ['user_public_group_memberships', PEOPLE_PATHS],
-    ['alumni_public_group_memberships', PEOPLE_PATHS],
     ['cms_recruitment', ['/apply']],
     ['cms_statistics', ['/']],
     ['cms_timeline', ['/who-we-are']],

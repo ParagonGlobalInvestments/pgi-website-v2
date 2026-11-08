@@ -138,6 +138,7 @@ function MemberDetail({ user }: { user: User }) {
   const [copied, setCopied] = useState(false);
 
   const copyEmail = () => {
+    if (!user.email) return;
     navigator.clipboard.writeText(user.email);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -147,11 +148,11 @@ function MemberDetail({ user }: { user: User }) {
     <div className="space-y-6">
       {/* Header with school logo */}
       <div className="flex items-start gap-4">
-        {SCHOOL_LOGOS[user.school] && (
+        {user.school && SCHOOL_LOGOS[user.school] && (
           <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
             <Image
               src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
-              alt={SCHOOL_LABELS[user.school] || user.school}
+              alt={(user.school && SCHOOL_LABELS[user.school]) || user.school}
               width={48}
               height={48}
               className="w-12 h-12 object-contain"
@@ -185,7 +186,7 @@ function MemberDetail({ user }: { user: User }) {
         <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
           <span className="text-gray-500">School</span>
           <span className="text-gray-900 font-medium">
-            {SCHOOL_LABELS[user.school] || user.school}
+            {(user.school && SCHOOL_LABELS[user.school]) || user.school}
           </span>
         </div>
         {user.graduationYear && (
@@ -325,7 +326,7 @@ export default function DirectoryPage() {
             const existing = map.get(entry.user_id) ?? '';
             map.set(
               entry.user_id,
-              `${existing} ${entry.company} ${entry.role}`
+              `${existing} ${entry.company} ${entry.role ?? ''}`
             );
           }
           setExperienceMap(map);
@@ -351,7 +352,7 @@ export default function DirectoryPage() {
           const term = debouncedSearch.toLowerCase();
           const experience = experienceMap.get(user.id) ?? '';
           const haystack =
-            `${user.name} ${user.email} ${experience}`.toLowerCase();
+            `${user.name} ${user.email ?? ''} ${experience}`.toLowerCase();
           if (!haystack.includes(term)) return false;
         }
         if (filter.school !== 'all' && user.school !== filter.school)
@@ -539,11 +540,14 @@ export default function DirectoryPage() {
               >
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-2">
-                    {SCHOOL_LOGOS[user.school] && (
+                    {user.school && SCHOOL_LOGOS[user.school] && (
                       <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
                         <Image
                           src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
-                          alt={SCHOOL_LABELS[user.school] || user.school}
+                          alt={
+                            (user.school && SCHOOL_LABELS[user.school]) ||
+                            user.school
+                          }
                           width={36}
                           height={36}
                           className="w-9 h-9 object-contain"
@@ -578,7 +582,8 @@ export default function DirectoryPage() {
 
                   <div className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
                     <span className="font-medium">
-                      {SCHOOL_LABELS[user.school] || user.school}
+                      {(user.school && SCHOOL_LABELS[user.school]) ||
+                        user.school}
                     </span>
                     {user.graduationYear && (
                       <>

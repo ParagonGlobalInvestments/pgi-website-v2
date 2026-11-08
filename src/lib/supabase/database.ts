@@ -8,11 +8,11 @@ import type { User } from '@/types';
 interface UserRow {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   alternate_emails: string[];
   role: string;
   program: string | null;
-  school: string;
+  school: string | null;
   graduation_year: number | null;
   linkedin_url: string | null;
   github_url: string | null;
