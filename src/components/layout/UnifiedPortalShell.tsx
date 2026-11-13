@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   Home,
   Users,
-  GraduationCap,
+  BookUser,
   FolderOpen,
   PenSquare,
   BarChart3,
@@ -56,7 +56,7 @@ const navIndicatorTransition = {
 const NAV_ICONS: Record<string, React.ElementType> = {
   Home,
   Users,
-  GraduationCap,
+  BookUser,
   FolderOpen,
   PenSquare,
   BarChart3,

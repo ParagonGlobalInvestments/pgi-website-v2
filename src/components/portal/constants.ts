@@ -45,7 +45,7 @@ export const NAV_ITEMS: PortalNavItem[] = [
     id: 'alumni',
     href: '/portal/alumni',
     label: 'Alumni',
-    icon: 'GraduationCap',
+    icon: 'BookUser',
     adminOnly: false,
   },
   {
