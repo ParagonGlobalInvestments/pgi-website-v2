@@ -9,7 +9,7 @@ import type { PeopleGroupSlug } from './types';
  */
 
 const PEOPLE_GROUP_PATHS: Record<PeopleGroupSlug, string[]> = {
-  officers: ['/national-committee/officers'],
+  officers: ['/national-committee/officers', '/portal/org-chart'],
   'alumni-board': ['/national-committee/officers'],
   founders: ['/national-committee/founders'],
   'chapter-founders': ['/national-committee/founders'],

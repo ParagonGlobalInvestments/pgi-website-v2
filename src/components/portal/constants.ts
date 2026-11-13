@@ -49,6 +49,13 @@ export const NAV_ITEMS: PortalNavItem[] = [
     adminOnly: false,
   },
   {
+    id: 'org-chart',
+    href: '/portal/org-chart',
+    label: 'Org Chart',
+    icon: 'Network',
+    adminOnly: false,
+  },
+  {
     id: 'resources',
     href: '/portal/resources',
     label: 'Resources',
