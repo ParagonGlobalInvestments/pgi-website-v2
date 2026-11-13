@@ -15,7 +15,8 @@ import {
 import { fadeIn, itemFadeIn, buttonHover } from './animations';
 
 const InfiniteScroll = dynamic(
-  () => import('@/components/reactbits/Components/InfiniteScroll/InfiniteScroll'),
+  () =>
+    import('@/components/reactbits/Components/InfiniteScroll/InfiniteScroll'),
   { ssr: false }
 );
 
@@ -28,19 +29,16 @@ const CompanyLogo = ({ company }: { company: Company }) => (
   >
     <div className="bg-transparent rounded-lg p-2 transition-all duration-300 group-hover:scale-105">
       <div className="h-12 w-full flex items-center justify-center">
-        <Image
-          src={company.imagePath}
-          alt={company.displayName}
-          width={100}
-          height={100}
-          className="object-contain max-w-full max-h-full"
-          style={{
-            width: 'auto',
-            height: 'auto',
-            maxWidth: '200px',
-            maxHeight: '200px',
-          }}
-        />
+        {/* Logos vary in aspect ratio: contain each in the row's box */}
+        <div className="relative h-full w-full max-w-[200px]">
+          <Image
+            src={company.imagePath}
+            alt={company.displayName}
+            fill
+            sizes="200px"
+            className="object-contain"
+          />
+        </div>
       </div>
     </div>
   </a>

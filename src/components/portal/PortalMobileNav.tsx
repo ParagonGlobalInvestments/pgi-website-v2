@@ -26,8 +26,8 @@ export function PortalMobileNav({
           <Image
             src="/logos/pgiLogoTransparent.png"
             alt="PGI"
-            width={120}
-            height={24}
+            width={32}
+            height={32}
             className="h-8 w-auto"
           />
           <button

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, Mail, Globe, X, Briefcase } from 'lucide-react';
-import { Github, Linkedin } from '@/components/ui/brand-icons';
+import { Search, Mail, X } from 'lucide-react';
 import { Input } from '@/components/ui';
 import { Button } from '@/components/ui';
 import {
@@ -20,115 +19,17 @@ import {
   ROLE_LABELS,
   PROGRAM_LABELS,
 } from '@/components/portal/constants';
+import {
+  DirectoryGridSkeleton,
+  ExperienceList,
+  ProfileLinks,
+  SchoolLogo,
+  fetchExperienceSearchMap,
+  gridContainerVariants,
+  gridItemVariants,
+} from '@/components/portal/directory-shared';
 import type { User } from '@/types';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const SCHOOL_LOGOS: Record<string, string> = {
-  brown: 'brown.png',
-  columbia: 'columbia.png',
-  cornell: 'cornell.png',
-  nyu: 'nyu.png',
-  princeton: 'princeton.png',
-  uchicago: 'uchicago.png',
-  upenn: 'upenn.png',
-  yale: 'yale.png',
-};
-
-const gridContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.03 },
-  },
-};
-
-const gridItemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 25 },
-  },
-};
-
-// ============================================================================
-// Experience display
-// ============================================================================
-
-interface ExperienceRow {
-  id: string;
-  company: string;
-  role: string;
-  start_year: number;
-  end_year: number | null;
-}
-
-function ExperienceList({ userId }: { userId: string }) {
-  const [entries, setEntries] = useState<ExperienceRow[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const fetchExperience = async () => {
-      try {
-        const res = await fetch(`/api/users/${userId}/experience`);
-        if (res.ok && !cancelled) {
-          const data = await res.json();
-          setEntries(data.experience ?? []);
-        }
-      } catch {
-        // silently fail
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    fetchExperience();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  if (loading) return null;
-  if (entries.length === 0) return null;
-
-  return (
-    <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-        Experience
-      </h3>
-      <div className="space-y-1.5">
-        {entries.map(intern => (
-          <div
-            key={intern.id}
-            className="flex items-start gap-2.5 py-2 text-sm"
-          >
-            <Briefcase
-              className="text-gray-400 flex-shrink-0 mt-0.5"
-              size={14}
-            />
-            <div className="min-w-0">
-              <p className="text-gray-900 font-medium">{intern.role}</p>
-              <p className="text-gray-500 text-xs">
-                {intern.company}
-                {intern.start_year && (
-                  <>
-                    {' '}
-                    · {intern.start_year}
-                    {intern.end_year ? `–${intern.end_year}` : '–Present'}
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ============================================================================
 // Member Detail Panel Content
@@ -148,17 +49,7 @@ function MemberDetail({ user }: { user: User }) {
     <div className="space-y-6">
       {/* Header with school logo */}
       <div className="flex items-start gap-4">
-        {user.school && SCHOOL_LOGOS[user.school] && (
-          <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-            <Image
-              src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
-              alt={(user.school && SCHOOL_LABELS[user.school]) || user.school}
-              width={48}
-              height={48}
-              className="w-12 h-12 object-contain"
-            />
-          </div>
-        )}
+        <SchoolLogo school={user.school} size={48} />
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
           <div className="flex items-center gap-1.5 mt-1 text-sm">
@@ -218,44 +109,7 @@ function MemberDetail({ user }: { user: User }) {
           </span>
         </button>
 
-        {user.linkedinUrl && (
-          <a
-            href={user.linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
-          >
-            <Linkedin className="text-[#0077B5] flex-shrink-0" />
-            <span className="flex-1">LinkedIn Profile</span>
-            <span className="text-xs text-gray-400">↗</span>
-          </a>
-        )}
-
-        {user.githubUrl && (
-          <a
-            href={user.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
-          >
-            <Github className="text-gray-700 flex-shrink-0" />
-            <span className="flex-1">GitHub Profile</span>
-            <span className="text-xs text-gray-400">↗</span>
-          </a>
-        )}
-
-        {user.websiteUrl && (
-          <a
-            href={user.websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full p-3 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
-          >
-            <Globe className="text-gray-700 flex-shrink-0" />
-            <span className="flex-1">Personal Website</span>
-            <span className="text-xs text-gray-400">↗</span>
-          </a>
-        )}
+        <ProfileLinks user={user} />
 
         {!user.linkedinUrl && !user.githubUrl && !user.websiteUrl && (
           <p className="text-gray-500 text-sm py-2">
@@ -270,12 +124,6 @@ function MemberDetail({ user }: { user: User }) {
 // ============================================================================
 // Directory Page
 // ============================================================================
-
-interface ExperienceEntry {
-  user_id: string;
-  company: string;
-  role: string;
-}
 
 export default function DirectoryPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -306,9 +154,9 @@ export default function DirectoryPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [usersRes, expRes] = await Promise.all([
+        const [usersRes, experience] = await Promise.all([
           fetch('/api/users'),
-          fetch('/api/users/experience'),
+          fetchExperienceSearchMap().catch(() => new Map<string, string>()),
         ]);
         if (!usersRes.ok) throw new Error(`API error: ${usersRes.status}`);
         const usersData = await usersRes.json();
@@ -316,21 +164,7 @@ export default function DirectoryPage() {
           throw new Error(usersData.error || 'Failed to fetch users');
         }
         setUsers(usersData.users);
-
-        // Build a map of userId -> concatenated experience text for search
-        if (expRes.ok) {
-          const expData = await expRes.json();
-          const entries: ExperienceEntry[] = expData.experience ?? [];
-          const map = new Map<string, string>();
-          for (const entry of entries) {
-            const existing = map.get(entry.user_id) ?? '';
-            map.set(
-              entry.user_id,
-              `${existing} ${entry.company} ${entry.role ?? ''}`
-            );
-          }
-          setExperienceMap(map);
-        }
+        setExperienceMap(experience);
 
         setError('');
       } catch (err: unknown) {
@@ -491,22 +325,7 @@ export default function DirectoryPage() {
 
       {/* Members Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-full bg-gray-200" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
-                  </div>
-                </div>
-                <div className="h-3 bg-gray-200 rounded w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <DirectoryGridSkeleton />
       ) : error ? (
         <div className="bg-red-50 border border-red-200 p-6 rounded-xl text-red-800">
           <h3 className="font-semibold mb-2">Error Loading Directory</h3>
@@ -540,20 +359,7 @@ export default function DirectoryPage() {
               >
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-2">
-                    {user.school && SCHOOL_LOGOS[user.school] && (
-                      <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                        <Image
-                          src={`/images/universities/${SCHOOL_LOGOS[user.school]}`}
-                          alt={
-                            (user.school && SCHOOL_LABELS[user.school]) ||
-                            user.school
-                          }
-                          width={36}
-                          height={36}
-                          className="w-9 h-9 object-contain"
-                        />
-                      </div>
-                    )}
+                    <SchoolLogo school={user.school} size={36} />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 truncate">
                         {user.name}
