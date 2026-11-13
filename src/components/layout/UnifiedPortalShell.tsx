@@ -12,6 +12,7 @@ import {
   FolderOpen,
   PenSquare,
   BarChart3,
+  GraduationCap,
   Settings,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
@@ -28,6 +29,7 @@ import {
 import { SmoothTransition } from '@/components/ui/SmoothTransition';
 import { PortalMobileNav } from '@/components/portal/PortalMobileNav';
 import { MockModeIndicator } from '@/components/portal/MockModeIndicator';
+import { GraduationPrompt } from '@/components/portal/GraduationPrompt';
 import { PortalLoadingSkeleton } from '@/components/portal/PortalLoadingSkeleton';
 import {
   NAV_ITEMS,
@@ -56,6 +58,7 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   FolderOpen,
   PenSquare,
   BarChart3,
+  GraduationCap,
   Settings,
 };
 
@@ -573,6 +576,7 @@ export function UnifiedPortalShell({
     else if (pathname.includes('/content')) setActiveLink('content');
     else if (pathname.includes('/observability'))
       setActiveLink('observability');
+    else if (pathname.includes('/graduation')) setActiveLink('graduation');
     else if (pathname.includes('/settings')) setActiveLink('settings');
     else setActiveLink('home');
   }, [pathname]);
@@ -745,6 +749,7 @@ export function UnifiedPortalShell({
         ) : (
           <div className="flex-1 min-w-0 text-gray-900">
             <MockModeIndicator />
+            <GraduationPrompt />
             <div className="lg:p-8 p-4 pt-24 lg:pt-8 pb-safe">{children}</div>
           </div>
         )}
