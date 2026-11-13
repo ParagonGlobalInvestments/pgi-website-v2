@@ -69,6 +69,13 @@ export const NAV_ITEMS: PortalNavItem[] = [
     icon: 'BarChart3',
     adminOnly: true,
   },
+  {
+    id: 'graduation',
+    href: '/portal/graduation',
+    label: 'Graduation',
+    icon: 'GraduationCap',
+    adminOnly: true,
+  },
 ];
 
 export const SETTINGS_NAV_ITEM: PortalNavItem = {
