@@ -174,7 +174,7 @@ export const QUANT_TECH_COMPANIES: Company[] = [
     displayName: 'Citadel Securities',
     website: 'https://www.citadel.com/',
     category: 'quant-tech',
-    imagePath: '/images/companies/CitSec.png',
+    imagePath: '/images/companies/Citadel.png',
   },
   {
     name: 'jane-street',
@@ -711,17 +711,10 @@ export const ASSET_MGMT_CONSULTING_COMPANIES: Company[] = [
 export const SPONSORS_COMPANIES: Company[] = [
   {
     name: 'citadel',
-    displayName: 'Citadel',
+    displayName: 'Citadel | Citadel Securities',
     website: 'https://www.citadel.com/',
     category: 'quant-tech',
     imagePath: '/images/companies/Citadel.png',
-  },
-  {
-    name: 'citadel-securities',
-    displayName: 'Citadel Securities',
-    website: 'https://www.citadel.com/',
-    category: 'quant-tech',
-    imagePath: '/images/companies/CitSec.png',
   },
   {
     name: 'de-shaw',
