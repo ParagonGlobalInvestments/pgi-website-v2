@@ -37,6 +37,21 @@ export async function GET(request: NextRequest) {
   if (next.startsWith('//')) {
     next = defaultNext;
   }
+  // `/\evil.com` also passes the checks above, but browsers resolve it off-site
+  if (new URL(next, origin).origin !== new URL(origin).origin) {
+    next = defaultNext;
+  }
+
+  // OAuth errors (e.g. linking a Google account that already has its own
+  // login, or cancelling) return without a code; hand them to the caller.
+  const oauthError =
+    requestUrl.searchParams.get('error_code') ||
+    requestUrl.searchParams.get('error');
+  if (!code && oauthError) {
+    const dest = new URL(next, origin);
+    dest.searchParams.set('auth_error', oauthError);
+    return NextResponse.redirect(dest);
+  }
 
   if (code) {
     const supabase = await requireSupabaseServerClient();

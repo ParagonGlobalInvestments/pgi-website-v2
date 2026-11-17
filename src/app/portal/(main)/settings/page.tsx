@@ -15,6 +15,8 @@ import {
   PROGRAM_LABELS,
 } from '@/components/portal/constants';
 import type { User, UserRole, UserProgram, UserPreferences } from '@/types';
+import type { UserIdentity } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/browser';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -700,6 +702,118 @@ function MockModeSection() {
 // Settings Page
 // ============================================================================
 
+// ============================================================================
+// Linked Google accounts — sign in with a personal account after proving
+// ownership of both (signed in with one, OAuth with the other). Requires
+// "Manual linking" in Supabase Auth settings.
+// ============================================================================
+
+const LINK_ERRORS: Record<string, string> = {
+  identity_already_exists:
+    'That Google account already has its own PGI login. Ask a PGI admin to remove it, then try again.',
+  access_denied: 'Linking was cancelled.',
+};
+
+function LinkedAccountsSection() {
+  const supabase = createClient();
+  const [identities, setIdentities] = useState<UserIdentity[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = useCallback(async () => {
+    const { data } = await supabase.auth.getUserIdentities();
+    setIdentities(data?.identities ?? []);
+  }, [supabase]);
+
+  useEffect(() => {
+    load();
+    // /auth/callback forwards OAuth errors from a failed link here
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('auth_error');
+    if (!code) return;
+    setError(
+      LINK_ERRORS[code] ?? 'Could not link that account. Please try again.'
+    );
+    url.searchParams.delete('auth_error');
+    window.history.replaceState({}, '', url.toString());
+  }, [load]);
+
+  const link = async () => {
+    setBusy(true);
+    setError('');
+    const next = encodeURIComponent(window.location.pathname);
+    const { error: linkError } = await supabase.auth.linkIdentity({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+        queryParams: { prompt: 'select_account' },
+      },
+    });
+    if (linkError) {
+      setError(linkError.message);
+      setBusy(false);
+    }
+  };
+
+  const unlink = async (identity: UserIdentity) => {
+    setBusy(true);
+    setError('');
+    const { error: unlinkError } = await supabase.auth.unlinkIdentity(identity);
+    if (unlinkError) setError(unlinkError.message);
+    await load();
+    setBusy(false);
+  };
+
+  return (
+    <Section title="Linked Google accounts">
+      <p className="text-xs text-gray-500 mb-3">
+        You can sign in to the portal with any of these accounts.
+      </p>
+      {identities === null ? (
+        <Skeleton className="h-5 w-48" />
+      ) : (
+        <ul className="divide-y divide-gray-100">
+          {identities.map(identity => (
+            <li
+              key={identity.identity_id}
+              className="flex items-center justify-between gap-3 py-2 first:pt-0"
+            >
+              <span className="text-sm text-gray-900 truncate">
+                {String(identity.identity_data?.email ?? identity.provider)}
+              </span>
+              {identities.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => unlink(identity)}
+                  disabled={busy}
+                  className="text-xs text-gray-500 hover:text-red-600 disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={link}
+        disabled={busy}
+        className="mt-4"
+      >
+        Link another Google account
+      </Button>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </Section>
+  );
+}
+
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -977,6 +1091,8 @@ export default function SettingsPage() {
               )}
             </dl>
           </Section>
+
+          <LinkedAccountsSection />
 
           {/* Profile */}
           {isAdmin ? (
