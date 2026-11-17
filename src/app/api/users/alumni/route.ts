@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
-import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import { requireMember } from '@/lib/auth/requireMember';
 import {
   pickCurrentCompanies,
   type CompanyExperience,
@@ -20,24 +19,11 @@ interface ListingRow {
 
 /** Members-only GET: alumni with their current company (alumni directory) */
 export async function GET() {
-  const portalCheck = requirePortalEnabledOr404();
-  if (portalCheck) return portalCheck;
-
   try {
-    const supabase = await requireSupabaseServerClient();
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const auth = await requireMember();
+    if (auth.error) return auth.error;
 
-    if (authError || !authUser) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const users = await createDatabase(supabase).getUsers({
+    const users = await createDatabase(requireSupabaseAdminClient()).getUsers({
       status: 'alumni',
     });
     const ids = users.map(user => user.id);
