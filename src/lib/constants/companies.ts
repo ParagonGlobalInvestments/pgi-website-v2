@@ -760,6 +760,13 @@ export const SPONSORS_COMPANIES: Company[] = [
     imagePath: '/images/companies/Kershner.png',
   },
   {
+    name: 'millennium',
+    displayName: 'Millennium',
+    website: 'https://www.mlp.com/',
+    category: 'quant-tech',
+    imagePath: '/images/companies/Millennium-white.png',
+  },
+  {
     name: 'adams-street',
     displayName: 'Adams Street Partners',
     website: 'https://www.adamsstreetpartners.com/',
