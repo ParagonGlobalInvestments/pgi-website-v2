@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireSupabaseServerClient } from '@/lib/supabase/server';
+import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
-import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import { requireMember } from '@/lib/auth/requireMember';
 
 export async function GET(req: NextRequest) {
-  const portalCheck = requirePortalEnabledOr404();
-  if (portalCheck) return portalCheck;
-
   try {
-    const supabase = await requireSupabaseServerClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const auth = await requireMember();
+    if (auth.error) return auth.error;
 
     const params = req.nextUrl.searchParams;
     const school = params.get('school') || undefined;
@@ -25,7 +15,7 @@ export async function GET(req: NextRequest) {
     const search = params.get('search') || undefined;
     const status = params.get('status') || undefined;
 
-    const db = createDatabase(supabase);
+    const db = createDatabase(requireSupabaseAdminClient());
     const users = await db.getUsers({ school, program, role, search, status });
 
     return NextResponse.json(

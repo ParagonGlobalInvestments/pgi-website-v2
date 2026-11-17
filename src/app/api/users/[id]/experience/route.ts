@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
-import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import { requireMember } from '@/lib/auth/requireMember';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,19 +8,9 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 /** Public GET — fetch experience for a given user (directory detail panel) */
 export async function GET(_req: NextRequest, context: RouteContext) {
-  const portalCheck = requirePortalEnabledOr404();
-  if (portalCheck) return portalCheck;
-
   try {
-    const supabase = await requireSupabaseServerClient();
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !authUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const auth = await requireMember();
+    if (auth.error) return auth.error;
 
     const { id } = await context.params;
     const admin = requireSupabaseAdminClient();

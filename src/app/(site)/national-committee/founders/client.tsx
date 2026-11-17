@@ -14,15 +14,10 @@ interface FoundersClientProps {
 
 // Group chapter founders by school for display
 function groupBySchool(people: CmsPerson[]): Record<string, CmsPerson[]> {
-  const grouped: Record<string, CmsPerson[]> = {};
-  for (const person of people) {
-    const school = person.school || 'Unknown';
-    if (!grouped[school]) {
-      grouped[school] = [];
-    }
-    grouped[school].push(person);
-  }
-  return grouped;
+  return Object.groupBy(people, person => person.school || 'Unknown') as Record<
+    string,
+    CmsPerson[]
+  >;
 }
 
 export default function FoundersClient({

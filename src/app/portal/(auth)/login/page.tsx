@@ -35,12 +35,6 @@ function PortalLoginContent() {
     const url = new URL(window.location.href);
     url.searchParams.delete('notMember');
     window.history.replaceState({}, '', url.toString());
-
-    const timer = setTimeout(() => {
-      setDisplayMode('welcome');
-      setDecryptKey(prev => prev + 1);
-    }, 10000);
-    return () => clearTimeout(timer);
   }, [notMember]);
 
   // Handle OAuth errors from hash fragment
@@ -63,12 +57,6 @@ function PortalLoginContent() {
     setDisplayMode('rejected');
     setDecryptKey(prev => prev + 1);
     window.history.replaceState({}, '', window.location.pathname);
-
-    const timer = setTimeout(() => {
-      setDisplayMode('welcome');
-      setDecryptKey(prev => prev + 1);
-    }, 10000);
-    return () => clearTimeout(timer);
   }, []);
 
   /**
@@ -201,6 +189,14 @@ function PortalLoginContent() {
                 encryptedClassName="text-lg sm:text-xl md:text-2xl font-semibold text-gray-400"
               />
             </h1>
+
+            {displayMode === 'rejected' && (
+              <p className="mt-3 text-sm text-gray-500">
+                Please sign in with your school email first. Once you&apos;re
+                in, you can link a personal Google account from your profile. If
+                you still can&apos;t get in, contact a PGI admin.
+              </p>
+            )}
 
             {searchParams?.get('error') === 'auth_failed' && (
               <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-left">
