@@ -406,11 +406,10 @@ export default function ResourcesTab() {
         const tabItems = items.filter(r => r.tab_id === tab.id);
         const sectionOrder = SECTION_ORDER[tab.id] || [];
 
-        const sectionMap: Record<string, CmsResource[]> = {};
-        for (const r of tabItems) {
-          if (!sectionMap[r.section]) sectionMap[r.section] = [];
-          sectionMap[r.section].push(r);
-        }
+        const sectionMap = Object.groupBy(tabItems, r => r.section) as Record<
+          string,
+          CmsResource[]
+        >;
 
         // Sort within each section
         for (const section of Object.keys(sectionMap)) {

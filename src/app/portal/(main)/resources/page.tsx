@@ -298,12 +298,10 @@ export default function ResourcesPage() {
   // Group resources by section within the active tab
   const sectionGroups = useMemo(() => {
     const tabResources = resources.filter(r => r.tab_id === activeTab);
-    const groups: Record<string, CmsResource[]> = {};
-
-    for (const r of tabResources) {
-      if (!groups[r.section]) groups[r.section] = [];
-      groups[r.section].push(r);
-    }
+    const groups = Object.groupBy(tabResources, r => r.section) as Record<
+      string,
+      CmsResource[]
+    >;
 
     // Sort within each section by sort_order
     for (const section of Object.keys(groups)) {

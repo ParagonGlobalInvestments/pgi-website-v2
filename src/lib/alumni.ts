@@ -43,7 +43,7 @@ export function pickCurrentCompanies(
   const result = new Map<string, string>();
 
   for (const [userId, entries] of Array.from(byUser)) {
-    const ordered = [...entries].sort(
+    const ordered = entries.toSorted(
       (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
     );
     const current =
@@ -54,7 +54,7 @@ export function pickCurrentCompanies(
     result.set(userId, clean(current.company)!);
   }
 
-  const latestListings = [...listings].sort((a, b) =>
+  const latestListings = listings.toSorted((a, b) =>
     (b.updated_at ?? '').localeCompare(a.updated_at ?? '')
   );
   for (const listing of latestListings) {
