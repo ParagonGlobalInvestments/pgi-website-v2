@@ -5,6 +5,7 @@ import { checkMembership } from '@/lib/auth/checkMembership';
 import { getOrgChart } from '@/lib/org-chart';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { cn } from '@/utils';
 import type {
   OrgChart,
   OrgOfficer,
@@ -20,7 +21,15 @@ import type {
 export const dynamic = 'force-dynamic';
 
 const PROGRAMS: UserProgram[] = ['value', 'quant'];
-const OFFICER_SLUGS: OrgSeatSlug[] = ['cio', 'vp-education', 'cto'];
+// Everyone reporting to the CEO, left to right. The COOs sit at the ends,
+// above their program's pods.
+const DIRECT_REPORTS: OrgSeatSlug[] = [
+  'coo-value',
+  'cio',
+  'vp-education',
+  'cto',
+  'coo-quant',
+];
 
 function seatLabel(seat: PodSeat, program: UserProgram): string {
   if (seat === 'committee') return program === 'value' ? 'ICOMM' : 'QCOMM';
@@ -52,12 +61,19 @@ function PersonName({ person }: { person: OrgPerson }) {
 function LeaderCard({
   title,
   people,
+  className,
 }: {
   title: string | null;
   people: OrgPerson[];
+  className?: string;
 }) {
   return (
-    <div className="min-w-[11rem] rounded-xl border border-gray-200 bg-white px-4 py-3 text-center shadow-sm">
+    <div
+      className={cn(
+        'min-w-[11rem] rounded-xl border border-gray-200 bg-white px-4 py-3 text-center shadow-sm',
+        className
+      )}
+    >
       <p className="text-xs font-semibold uppercase tracking-wide text-navy-accent">
         {title ?? 'Officer'}
       </p>
@@ -72,8 +88,10 @@ function LeaderCard({
   );
 }
 
-function SeatCard({ seat }: { seat: OrgSeat }) {
-  return <LeaderCard title={seat.title} people={seat.people} />;
+function SeatCard({ seat, className }: { seat: OrgSeat; className?: string }) {
+  return (
+    <LeaderCard title={seat.title} people={seat.people} className={className} />
+  );
 }
 
 function PodCard({ pod }: { pod: Pod }) {
@@ -146,6 +164,28 @@ function OtherOfficers({ officers }: { officers: OrgOfficer[] }) {
   );
 }
 
+/**
+ * The CEO's direct reports on one bracket. On narrow screens the cards
+ * wrap and the bracket lines are hidden.
+ */
+function DirectReports({ seats }: { seats: OrgSeat[] }) {
+  return (
+    <ul className="flex flex-wrap justify-center gap-4 xl:flex-nowrap xl:gap-0">
+      {seats.map(seat => (
+        <li
+          key={seat.slug}
+          className="relative flex justify-center xl:flex-1 xl:px-2 xl:pt-6 xl:before:absolute xl:before:inset-x-0 xl:before:top-0 xl:before:border-t xl:before:border-gray-300 xl:after:absolute xl:after:left-1/2 xl:after:top-0 xl:after:h-6 xl:after:border-l xl:after:border-gray-300 xl:first:before:left-1/2 xl:last:before:right-1/2"
+        >
+          <SeatCard
+            seat={seat}
+            className="xl:w-full xl:min-w-0 xl:max-w-[14rem]"
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function ProgramColumn({
   program,
   coo,
@@ -155,18 +195,17 @@ function ProgramColumn({
   coo: OrgSeat | undefined;
   pods: Pod[];
 }) {
+  const cooNames = coo?.people.map(p => p.name).join(', ');
   return (
-    <section aria-label={`${PROGRAM_LABELS[program]} program`}>
-      <div className="flex justify-center">
-        {coo ? (
-          <SeatCard seat={coo} />
-        ) : (
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            {PROGRAM_LABELS[program]}
-          </h2>
-        )}
+    <section aria-label={`${PROGRAM_LABELS[program]} pods`}>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 border-b border-gray-200 pb-2">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
+          {PROGRAM_LABELS[program]} pods
+        </h2>
+        <p className="text-xs text-gray-500">
+          {coo?.title ?? 'COO'}: {cooNames || 'Vacant'}
+        </p>
       </div>
-      <Connector />
       {pods.length === 0 ? (
         <p className="text-center text-sm text-gray-400">No pods yet</p>
       ) : (
@@ -210,7 +249,7 @@ export default async function OrgChartPage() {
 
   const bySlug = new Map(chart.seats.map(s => [s.slug, s]));
   const ceo = bySlug.get('ceo');
-  const officers = OFFICER_SLUGS.map(s => bySlug.get(s)).filter(
+  const directReports = DIRECT_REPORTS.map(s => bySlug.get(s)).filter(
     (s): s is OrgSeat => !!s
   );
 
@@ -228,23 +267,17 @@ export default async function OrgChartPage() {
             <div className="flex justify-center">
               <SeatCard seat={ceo} />
             </div>
-            {officers.length > 0 && <Connector />}
+            {directReports.length > 0 && <Connector />}
           </>
         )}
-        {officers.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-4">
-            {officers.map(s => (
-              <SeatCard key={s.slug} seat={s} />
-            ))}
-          </div>
-        )}
+        {directReports.length > 0 && <DirectReports seats={directReports} />}
         {chart.otherOfficers.length > 0 && (
           <OtherOfficers officers={chart.otherOfficers} />
         )}
       </section>
 
       {/* Programs */}
-      <div className="grid grid-cols-1 gap-10 pt-4 xl:grid-cols-2 xl:gap-8">
+      <div className="grid grid-cols-1 gap-10 pt-6 xl:grid-cols-2 xl:gap-8">
         {PROGRAMS.map(program => (
           <ProgramColumn
             key={program}
