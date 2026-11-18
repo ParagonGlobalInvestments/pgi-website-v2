@@ -7,6 +7,10 @@
  *   2. npx tsx scripts/import-pods.ts [path/to/pods.csv]           # dry run
  *   3. npx tsx scripts/import-pods.ts [path/to/pods.csv] --apply   # write
  *
+ * When the sheet spells a name differently from `users` (nicknames, middle
+ * names), map it in data/pod-aliases.json (optional, also gitignored):
+ *   { "Sheet Name": "Name In Users" }
+ *
  * The sheet is the source of truth: on --apply, pods and memberships are
  * replaced to match it, and pods missing from the sheet are deleted.
  * People are matched to `users` by name; unmatched names are skipped and
@@ -18,7 +22,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import { nameKey, parsePodSheet } from './pod-sheet';
 
@@ -30,6 +34,17 @@ const apply = args.includes('--apply');
 const csvPath = resolve(
   args.find(a => !a.startsWith('--')) ?? resolve(__dirname, '../data/pods.csv')
 );
+const aliasPath = resolve(__dirname, '../data/pod-aliases.json');
+
+/** Sheet name → `users` name, keyed by nameKey. */
+function loadAliases(): Map<string, string> {
+  if (!existsSync(aliasPath)) return new Map();
+  const raw = JSON.parse(readFileSync(aliasPath, 'utf-8')) as Record<
+    string,
+    string
+  >;
+  return new Map(Object.entries(raw).map(([from, to]) => [nameKey(from), to]));
+}
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -61,12 +76,17 @@ async function main() {
     byName.set(k, [...(byName.get(k) ?? []), u.id]);
   }
 
+  const aliases = loadAliases();
+  if (aliases.size)
+    console.log(`Using ${aliases.size} aliases from ${aliasPath}`);
+
   const unmatched: string[] = [];
   const ambiguous: string[] = [];
   const rows = pods.map(pod => ({
     pod,
     members: pod.members.flatMap((m, i) => {
-      const ids = byName.get(nameKey(m.name)) ?? [];
+      const lookup = aliases.get(nameKey(m.name)) ?? m.name;
+      const ids = byName.get(nameKey(lookup)) ?? [];
       if (ids.length === 0) unmatched.push(`${m.name} (pod ${pod.number})`);
       if (ids.length > 1) ambiguous.push(`${m.name} (pod ${pod.number})`);
       if (ids.length !== 1) return [];
