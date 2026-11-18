@@ -13,6 +13,7 @@ describe('matchOfficerSeat', () => {
     ['Vice President, Education', 'vp-education'],
     ['COO (Value)', 'coo-value'],
     ['Chief Operating Officer – Quant', 'coo-quant'],
+    ['Chief Operating Officer (Systematic)', 'coo-quant'],
   ])('maps %s → %s', (title, slug) => {
     expect(matchOfficerSeat(title)).toBe(slug);
   });

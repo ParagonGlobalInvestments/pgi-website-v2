@@ -37,7 +37,7 @@ export function matchOfficerSeat(title: string | null): OrgSeatSlug | null {
   const t = title.toLowerCase();
 
   if (/\bcoo\b|chief operating/.test(t)) {
-    if (/quant/.test(t)) return 'coo-quant';
+    if (/quant|systematic/.test(t)) return 'coo-quant';
     if (/value|fundamental/.test(t)) return 'coo-value';
     return null;
   }
