@@ -94,9 +94,18 @@ function SeatCard({ seat, className }: { seat: OrgSeat; className?: string }) {
   );
 }
 
+// Lead seats every pod should show, even when unfilled. Quant pods have no PM.
+const LEAD_SEATS: Record<UserProgram, PodSeat[]> = {
+  value: ['committee', 'pm'],
+  quant: ['committee'],
+};
+
 function PodCard({ pod }: { pod: Pod }) {
   const leads = pod.members.filter(m => m.seat !== 'analyst');
   const analysts = pod.members.filter(m => m.seat === 'analyst');
+  const emptySeats = LEAD_SEATS[pod.program].filter(
+    seat => !leads.some(m => m.seat === seat)
+  );
 
   return (
     <div className="flex flex-col rounded-xl border border-gray-200 bg-white">
@@ -105,7 +114,7 @@ function PodCard({ pod }: { pod: Pod }) {
         {pod.focus && <p className="text-xs text-gray-500">{pod.focus}</p>}
       </div>
 
-      {leads.length > 0 && (
+      {leads.length + emptySeats.length > 0 && (
         <dl className="space-y-1.5 border-b border-gray-100 px-4 py-3">
           {leads.map(m => (
             <div
@@ -120,6 +129,17 @@ function PodCard({ pod }: { pod: Pod }) {
               </dd>
             </div>
           ))}
+          {emptySeats.map(seat => (
+            <div
+              key={seat}
+              className="flex items-baseline justify-between gap-3"
+            >
+              <dt className="shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {seatLabel(seat, pod.program)}
+              </dt>
+              <dd className="text-sm italic text-gray-400">Unassigned</dd>
+            </div>
+          ))}
         </dl>
       )}
 
@@ -132,13 +152,8 @@ function PodCard({ pod }: { pod: Pod }) {
         ) : (
           <ul className="space-y-1">
             {analysts.map(m => (
-              <li key={m.id} className="flex items-center gap-2">
+              <li key={m.id}>
                 <PersonName person={m.person} />
-                {m.isNew && (
-                  <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-blue-700">
-                    New
-                  </span>
-                )}
               </li>
             ))}
           </ul>

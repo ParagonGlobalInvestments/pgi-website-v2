@@ -13,7 +13,7 @@
  *
  * Off to the side, "New Members - Value/Quant | Pod" lists give each new
  * member's pod. That list wins over the grid: a new member is moved to the
- * pod it names and flagged `isNew`.
+ * pod it names (added as an analyst if the grid doesn't list them).
  */
 
 export type Program = 'value' | 'quant';
@@ -22,7 +22,6 @@ export type Seat = 'committee' | 'pm' | 'analyst';
 export interface SheetMember {
   name: string;
   seat: Seat;
-  isNew: boolean;
 }
 
 export interface SheetPod {
@@ -160,7 +159,7 @@ export function parsePodSheet(csv: string): SheetParseResult {
           warnings.push(`Pod ${pod.number}: "${name}" listed twice, kept once`);
           return;
         }
-        pod.members.push({ name, seat, isNew: false });
+        pod.members.push({ name, seat });
       });
     }
 
@@ -202,7 +201,7 @@ export function parsePodSheet(csv: string): SheetParseResult {
           continue;
         }
 
-        // Remove from any other pod's analyst list; flag in the target pod
+        // Remove from any other pod's analyst list; add to the target pod
         for (const pod of Array.from(pods.values())) {
           const idx = pod.members.findIndex(
             m => m.seat === 'analyst' && nameKey(m.name) === nameKey(name)
@@ -213,11 +212,9 @@ export function parsePodSheet(csv: string): SheetParseResult {
             `New member "${name}": grid says pod ${pod.number}, list says pod ${number} — using pod ${number}`
           );
         }
-        const existing = target.members.find(
-          m => nameKey(m.name) === nameKey(name)
-        );
-        if (existing) existing.isNew = true;
-        else target.members.push({ name, seat: 'analyst', isNew: true });
+        if (!target.members.some(m => nameKey(m.name) === nameKey(name))) {
+          target.members.push({ name, seat: 'analyst' });
+        }
       }
     }
   }

@@ -10,7 +10,6 @@
 --     committee → ICOMM (value) / QCOMM (quant) member assigned to the pod
 --     pm        → pod leader (value pods)
 --     analyst   → pod member
---   `is_new` marks members who joined this term.
 --
 -- Rosters are loaded with `scripts/import-pods.ts` from the directory sheet,
 -- not seeded here (the repo is public; member names stay out of git).
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS pod_members (
   pod_id uuid NOT NULL REFERENCES pods(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   seat text NOT NULL CHECK (seat IN ('committee', 'pm', 'analyst')),
-  is_new boolean NOT NULL DEFAULT false,
   sort_order int NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),

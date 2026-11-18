@@ -94,7 +94,6 @@ interface PersonRow {
 interface PodMemberRow {
   id: string;
   seat: string;
-  is_new: boolean;
   sort_order: number;
   person: PersonRow | null;
 }
@@ -120,7 +119,6 @@ function toPod(row: PodRow): Pod {
     .map(m => ({
       id: m.id,
       seat: m.seat as PodSeat,
-      isNew: m.is_new,
       person: {
         id: m.person.id,
         name: m.person.name,
@@ -141,7 +139,7 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
   const { data, error } = await supabase
     .from('pods')
     .select(
-      'id, program, number, focus, members:pod_members(id, seat, is_new, sort_order, person:users(id, name, school))'
+      'id, program, number, focus, members:pod_members(id, seat, sort_order, person:users(id, name, school))'
     )
     .order('sort_order');
 

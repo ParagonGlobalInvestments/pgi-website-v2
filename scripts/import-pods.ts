@@ -90,9 +90,7 @@ async function main() {
       if (ids.length === 0) unmatched.push(`${m.name} (pod ${pod.number})`);
       if (ids.length > 1) ambiguous.push(`${m.name} (pod ${pod.number})`);
       if (ids.length !== 1) return [];
-      return [
-        { user_id: ids[0], seat: m.seat, is_new: m.isNew, sort_order: i },
-      ];
+      return [{ user_id: ids[0], seat: m.seat, sort_order: i }];
     }),
   }));
 

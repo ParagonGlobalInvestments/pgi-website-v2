@@ -95,7 +95,6 @@ export interface OrgOfficer extends OrgPerson {
 export interface PodMember {
   id: string;
   seat: PodSeat;
-  isNew: boolean;
   person: OrgPerson;
 }
 

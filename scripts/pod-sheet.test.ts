@@ -6,7 +6,7 @@ import { parseCsv, parsePodSheet } from './pod-sheet';
 const SHEET = [
   ',,,,,,New Members - Value,Pod',
   ',Pod Number,1,2,,,Nia New,2',
-  ',Sector,Tech,"Consumer, Retail",,,Moe Moved,1',
+  ',Sector,Tech,"Consumer, Retail",,,Moe Moved,2',
   ',ICOMM,Ada Comm,Ben Comm,,,,',
   ',PM,Cy Lead,Di Lead,,,New Members - Quant,Pod',
   ',Analysts,Eve One,Fay Two,,,Quinn Q,11',
@@ -47,13 +47,11 @@ describe('parsePodSheet', () => {
 
   it('assigns seats from row labels', () => {
     expect(pod(1).members.slice(0, 3)).toEqual([
-      { name: 'Ada Comm', seat: 'committee', isNew: false },
-      { name: 'Cy Lead', seat: 'pm', isNew: false },
-      { name: 'Eve One', seat: 'analyst', isNew: false },
+      { name: 'Ada Comm', seat: 'committee' },
+      { name: 'Cy Lead', seat: 'pm' },
+      { name: 'Eve One', seat: 'analyst' },
     ]);
-    expect(pod(12).members).toEqual([
-      { name: 'Jon Q', seat: 'committee', isNew: false },
-    ]);
+    expect(pod(12).members).toEqual([{ name: 'Jon Q', seat: 'committee' }]);
   });
 
   it('dedupes names within a pod', () => {
@@ -62,10 +60,19 @@ describe('parsePodSheet', () => {
   });
 
   it('lets the new-member list override the grid', () => {
-    expect(names(1)).toContain('Moe Moved');
-    expect(pod(1).members.find(m => m.name === 'Moe Moved')?.isNew).toBe(true);
-    expect(pod(2).members.find(m => m.name === 'Nia New')?.isNew).toBe(true);
-    expect(pod(11).members.find(m => m.name === 'Quinn Q')?.isNew).toBe(true);
+    expect(names(1)).not.toContain('Moe Moved');
+    expect(names(2)).toContain('Moe Moved');
+    expect(warnings).toContain(
+      'New member "Moe Moved": grid says pod 1, list says pod 2 — using pod 2'
+    );
+  });
+
+  it('adds new members missing from the grid as analysts', () => {
+    expect(pod(2).members).toContainEqual({ name: 'Nia New', seat: 'analyst' });
+    expect(pod(11).members).toContainEqual({
+      name: 'Quinn Q',
+      seat: 'analyst',
+    });
   });
 
   it('reports names outside any pod', () => {
