@@ -1,8 +1,12 @@
+import { notFound } from 'next/navigation';
 import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
 import { PROGRAM_LABELS } from '@/components/portal/constants';
+import { checkMembership } from '@/lib/auth/checkMembership';
 import { getOrgChart } from '@/lib/org-chart';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import type {
+  OrgChart,
   OrgOfficer,
   OrgPerson,
   OrgSeat,
@@ -180,11 +184,29 @@ function ProgramColumn({
 // Page
 // ============================================================================
 
-export default async function OrgChartPage() {
+const EMPTY_CHART: OrgChart = { seats: [], otherOfficers: [], pods: [] };
+
+/**
+ * A session is not membership (see requireMember), and pods/users are
+ * service-role only, so check membership and then read with the admin client.
+ */
+async function loadChart(): Promise<OrgChart> {
   const supabase = await getSupabaseServerClient();
-  const chart = supabase
-    ? await getOrgChart(supabase)
-    : { seats: [], otherOfficers: [], pods: [] };
+  const admin = getSupabaseAdminClient();
+  if (!supabase || !admin) return EMPTY_CHART;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return EMPTY_CHART; // portal layout redirects to login
+  const { isMember } = await checkMembership(user.email, user.id);
+  if (!isMember) notFound();
+
+  return getOrgChart(admin);
+}
+
+export default async function OrgChartPage() {
+  const chart = await loadChart();
 
   const bySlug = new Map(chart.seats.map(s => [s.slug, s]));
   const ceo = bySlug.get('ceo');

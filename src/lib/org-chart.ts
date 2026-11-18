@@ -146,7 +146,7 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
     .order('sort_order');
 
   if (error) {
-    // Expected until the pods migration is applied.
+    // Expected until migration 019_pods is applied.
     console.error('Org chart pods query failed:', error.message);
     return [];
   }
@@ -157,7 +157,11 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
 // Public API
 // ============================================================================
 
-/** Load leadership (CMS officers) and pods for the portal org chart. */
+/**
+ * Load leadership (CMS officers) and pods for the portal org chart.
+ * `supabase` must be the admin client (pods and users are service-role only);
+ * check membership first.
+ */
 export async function getOrgChart(supabase: SupabaseClient): Promise<OrgChart> {
   const [leadership, pods] = await Promise.all([
     getLeadership(),

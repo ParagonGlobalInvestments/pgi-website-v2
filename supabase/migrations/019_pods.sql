@@ -15,9 +15,9 @@
 -- Rosters are loaded with `scripts/import-pods.ts` from the directory sheet,
 -- not seeded here (the repo is public; member names stay out of git).
 --
--- Read access: any authenticated user (same as `users`). Writes go through
--- the service role (import script / future admin routes), so there are no
--- write policies.
+-- Access: service role only (RLS on, no policies), like `users` since 018.
+-- The portal reads pods with the admin client after checkMembership(); the
+-- import script writes with the service role.
 -- ============================================================================
 
 -- --------------------------------------------------------------------------
@@ -66,15 +66,3 @@ CREATE TRIGGER set_pod_members_updated_at
 -- --------------------------------------------------------------------------
 ALTER TABLE pods ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pod_members ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "pods_select_authenticated" ON pods;
-CREATE POLICY "pods_select_authenticated"
-  ON pods FOR SELECT
-  TO authenticated
-  USING (true);
-
-DROP POLICY IF EXISTS "pod_members_select_authenticated" ON pod_members;
-CREATE POLICY "pod_members_select_authenticated"
-  ON pod_members FOR SELECT
-  TO authenticated
-  USING (true);
