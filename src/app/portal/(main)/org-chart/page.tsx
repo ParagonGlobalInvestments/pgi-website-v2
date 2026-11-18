@@ -217,6 +217,33 @@ function SectionHeader({ title, detail }: { title: string; detail: string }) {
   );
 }
 
+/**
+ * Pods in two independent stacks (alternating left/right, so pods 1 and 2
+ * share the top row) with the same gap everywhere; a tall card doesn't push
+ * down the card beside it. Small screens get one stack in order.
+ */
+function PodStacks({ pods }: { pods: Pod[] }) {
+  const stacks = [0, 1].map(col => pods.filter((_, i) => i % 2 === col));
+  return (
+    <>
+      <div className="flex flex-col gap-4 sm:hidden">
+        {pods.map(pod => (
+          <PodCard key={pod.id} pod={pod} />
+        ))}
+      </div>
+      <div className="hidden grid-cols-2 gap-4 sm:grid">
+        {stacks.map((stack, col) => (
+          <div key={col} className="flex flex-col gap-4">
+            {stack.map(pod => (
+              <PodCard key={pod.id} pod={pod} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 function ProgramColumn({
   program,
   coo,
@@ -236,11 +263,7 @@ function ProgramColumn({
       {pods.length === 0 ? (
         <p className="text-center text-sm text-gray-400">No pods yet</p>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-          {pods.map(pod => (
-            <PodCard key={pod.id} pod={pod} />
-          ))}
-        </div>
+        <PodStacks pods={pods} />
       )}
     </section>
   );
