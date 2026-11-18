@@ -25,7 +25,7 @@ const SEATS: { slug: OrgSeatSlug; title: string }[] = [
   { slug: 'vp-education', title: 'VP Education' },
   { slug: 'cto', title: 'CTO' },
   { slug: 'coo-value', title: 'COO (Value)' },
-  { slug: 'coo-quant', title: 'COO (Quant)' },
+  { slug: 'coo-quant', title: 'COO (Systematic)' },
 ];
 
 /**
@@ -95,7 +95,24 @@ interface PodMemberRow {
   id: string;
   seat: string;
   sort_order: number;
+  /** Sheet name, set when there's no user record yet. */
+  name: string | null;
   person: PersonRow | null;
+}
+
+const MEMBER_COLUMNS =
+  'id, seat, sort_order, name, person:users(id, name, school)';
+
+/** The linked user, or the sheet name for people without a user record. */
+function toPerson(m: PodMemberRow): OrgPerson | null {
+  if (m.person) {
+    return {
+      id: m.person.id,
+      name: m.person.name,
+      school: shortSchool(m.person.school),
+    };
+  }
+  return m.name ? { id: m.id, name: m.name, school: null } : null;
 }
 
 interface PodRow {
@@ -110,21 +127,15 @@ const SEAT_ORDER: Record<PodSeat, number> = { committee: 0, pm: 1, analyst: 2 };
 
 function toPod(row: PodRow): Pod {
   const members: PodMember[] = (row.members ?? [])
-    .filter((m): m is PodMemberRow & { person: PersonRow } => !!m.person)
-    .sort(
+    .toSorted(
       (a, b) =>
         SEAT_ORDER[a.seat as PodSeat] - SEAT_ORDER[b.seat as PodSeat] ||
         a.sort_order - b.sort_order
     )
-    .map(m => ({
-      id: m.id,
-      seat: m.seat as PodSeat,
-      person: {
-        id: m.person.id,
-        name: m.person.name,
-        school: shortSchool(m.person.school),
-      },
-    }));
+    .flatMap(m => {
+      const person = toPerson(m);
+      return person ? [{ id: m.id, seat: m.seat as PodSeat, person }] : [];
+    });
 
   return {
     id: row.id,
@@ -139,7 +150,7 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
   const { data, error } = await supabase
     .from('pods')
     .select(
-      'id, program, number, focus, members:pod_members(id, seat, sort_order, person:users(id, name, school))'
+      `id, program, number, focus, members:pod_members(${MEMBER_COLUMNS})`
     )
     .order('sort_order');
 
@@ -149,6 +160,23 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
     return [];
   }
   return (data as unknown as PodRow[]).map(toPod);
+}
+
+async function getUnassigned(supabase: SupabaseClient): Promise<OrgPerson[]> {
+  const { data, error } = await supabase
+    .from('pod_members')
+    .select(MEMBER_COLUMNS)
+    .is('pod_id', null)
+    .order('sort_order');
+
+  if (error) {
+    console.error('Org chart unassigned query failed:', error.message);
+    return [];
+  }
+  return (data as unknown as PodMemberRow[]).flatMap(m => {
+    const person = toPerson(m);
+    return person ? [person] : [];
+  });
 }
 
 // ============================================================================
@@ -161,9 +189,10 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
  * check membership first.
  */
 export async function getOrgChart(supabase: SupabaseClient): Promise<OrgChart> {
-  const [leadership, pods] = await Promise.all([
+  const [leadership, pods, unassigned] = await Promise.all([
     getLeadership(),
     getPods(supabase),
+    getUnassigned(supabase),
   ]);
-  return { ...leadership, pods };
+  return { ...leadership, pods, unassigned };
 }

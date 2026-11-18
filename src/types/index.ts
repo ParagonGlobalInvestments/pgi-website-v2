@@ -110,4 +110,6 @@ export interface OrgChart {
   seats: OrgSeat[];
   otherOfficers: OrgOfficer[];
   pods: Pod[];
+  /** On the roster but not in a pod yet. */
+  unassigned: OrgPerson[];
 }

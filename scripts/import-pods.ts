@@ -13,8 +13,9 @@
  *
  * The sheet is the source of truth: on --apply, pods and memberships are
  * replaced to match it, and pods missing from the sheet are deleted.
- * People are matched to `users` by name; unmatched names are skipped and
- * reported so they can be fixed (add/rename the user, then re-run).
+ * People are matched to `users` by name. Names with no (or several) matching
+ * users are stored by name only and reported; once the user exists, re-run
+ * to link them. Names outside any pod are stored with no pod ("unassigned").
  *
  * Requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
  * (.env.local or the environment).
@@ -24,7 +25,14 @@ import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import { nameKey, parsePodSheet } from './pod-sheet';
+import { nameKey, parsePodSheet, type Seat } from './pod-sheet';
+
+interface MemberRow {
+  user_id: string | null;
+  name: string | null;
+  seat: Seat;
+  sort_order: number;
+}
 
 dotenv.config({ path: resolve(__dirname, '../.env.local') });
 dotenv.config({ path: resolve(__dirname, '../.env') });
@@ -60,7 +68,9 @@ async function main() {
 
   // ---- Parse ---------------------------------------------------------------
   console.log(`Reading ${csvPath}`);
-  const { pods, warnings } = parsePodSheet(readFileSync(csvPath, 'utf-8'));
+  const { pods, unassigned, warnings } = parsePodSheet(
+    readFileSync(csvPath, 'utf-8')
+  );
   if (pods.length === 0) throw new Error('No pods found in the sheet');
 
   // ---- Match names to users -----------------------------------------------
@@ -82,17 +92,41 @@ async function main() {
 
   const unmatched: string[] = [];
   const ambiguous: string[] = [];
-  const rows = pods.map(pod => ({
-    pod,
-    members: pod.members.flatMap((m, i) => {
+
+  /** Link to a user when exactly one matches; otherwise keep the name. */
+  function toRows(
+    people: { name: string; seat: Seat }[],
+    where: string
+  ): MemberRow[] {
+    const seen = new Set<string>();
+    return people.flatMap((m, i) => {
       const lookup = aliases.get(nameKey(m.name)) ?? m.name;
       const ids = byName.get(nameKey(lookup)) ?? [];
-      if (ids.length === 0) unmatched.push(`${m.name} (pod ${pod.number})`);
-      if (ids.length > 1) ambiguous.push(`${m.name} (pod ${pod.number})`);
-      if (ids.length !== 1) return [];
-      return [{ user_id: ids[0], seat: m.seat, sort_order: i }];
-    }),
+      if (ids.length === 0) unmatched.push(`${m.name} (${where})`);
+      if (ids.length > 1) ambiguous.push(`${m.name} (${where})`);
+      const userId = ids.length === 1 ? ids[0] : null;
+      const key = userId ?? `name:${nameKey(m.name)}`;
+      if (seen.has(key)) return []; // two sheet names → same user
+      seen.add(key);
+      return [
+        {
+          user_id: userId,
+          name: userId ? null : m.name,
+          seat: m.seat,
+          sort_order: i,
+        },
+      ];
+    });
+  }
+
+  const rows = pods.map(pod => ({
+    pod,
+    members: toRows(pod.members, `pod ${pod.number}`),
   }));
+  const unassignedRows = toRows(
+    unassigned.map(name => ({ name, seat: 'analyst' as const })),
+    'no pod'
+  );
 
   // ---- Report --------------------------------------------------------------
   const { data: existingPods, error: podsError } = await supabase
@@ -104,12 +138,15 @@ async function main() {
     p => !sheetNumbers.has(p.number)
   );
 
+  const linked = (members: MemberRow[]) =>
+    `${members.length} people, ${members.filter(m => m.user_id).length} linked to users`;
   for (const { pod, members } of rows) {
     console.log(
       `Pod ${pod.number} (${pod.program}${pod.focus ? `, ${pod.focus}` : ''}): ` +
-        `${members.length}/${pod.members.length} matched`
+        linked(members)
     );
   }
+  console.log(`Not in a pod: ${linked(unassignedRows)}`);
   if (stalePods.length) {
     console.log(
       `Pods not in sheet (will be deleted): ${stalePods.map(p => p.number).join(', ')}`
@@ -121,8 +158,8 @@ async function main() {
     for (const item of items) console.log(`  - ${item}`);
   };
   section('Sheet notes', warnings);
-  section('No user with this name — skipped', unmatched);
-  section('Several users share this name — skipped', ambiguous);
+  section('No user with this name — shown by name only', unmatched);
+  section('Several users share this name — shown by name only', ambiguous);
 
   if (!apply) {
     console.log('\nDry run. Re-run with --apply to write.');
@@ -157,16 +194,19 @@ async function main() {
     if (error) throw error;
   }
 
-  const ids = Array.from(podIds.values());
+  // Replace every membership, including people with no pod.
   const { error: clearError } = await supabase
     .from('pod_members')
     .delete()
-    .in('pod_id', ids);
+    .not('id', 'is', null);
   if (clearError) throw clearError;
 
-  const memberRows = rows.flatMap(({ pod, members }) =>
-    members.map(m => ({ ...m, pod_id: podIds.get(pod.number)! }))
-  );
+  const memberRows = [
+    ...rows.flatMap(({ pod, members }) =>
+      members.map(m => ({ ...m, pod_id: podIds.get(pod.number)! }))
+    ),
+    ...unassignedRows.map(m => ({ ...m, pod_id: null })),
+  ];
   const { error: insertError } = await supabase
     .from('pod_members')
     .insert(memberRows);

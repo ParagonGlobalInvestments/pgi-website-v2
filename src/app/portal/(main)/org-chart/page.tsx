@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
-import { PROGRAM_LABELS } from '@/components/portal/constants';
 import { checkMembership } from '@/lib/auth/checkMembership';
 import { getOrgChart } from '@/lib/org-chart';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -201,6 +200,23 @@ function DirectReports({ seats }: { seats: OrgSeat[] }) {
   );
 }
 
+// The quant program is "Systematic" in officer titles; match it here.
+const PROGRAM_HEADINGS: Record<UserProgram, string> = {
+  value: 'Value pods',
+  quant: 'Systematic pods',
+};
+
+function SectionHeader({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 border-b border-gray-200 pb-2">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
+        {title}
+      </h2>
+      <p className="text-xs text-gray-500">{detail}</p>
+    </div>
+  );
+}
+
 function ProgramColumn({
   program,
   coo,
@@ -212,19 +228,15 @@ function ProgramColumn({
 }) {
   const cooNames = coo?.people.map(p => p.name).join(', ');
   return (
-    <section aria-label={`${PROGRAM_LABELS[program]} pods`}>
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 border-b border-gray-200 pb-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
-          {PROGRAM_LABELS[program]} pods
-        </h2>
-        <p className="text-xs text-gray-500">
-          {coo?.title ?? 'COO'}: {cooNames || 'Vacant'}
-        </p>
-      </div>
+    <section aria-label={PROGRAM_HEADINGS[program]}>
+      <SectionHeader
+        title={PROGRAM_HEADINGS[program]}
+        detail={`${coo?.title ?? 'COO'}: ${cooNames || 'Vacant'}`}
+      />
       {pods.length === 0 ? (
         <p className="text-center text-sm text-gray-400">No pods yet</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
           {pods.map(pod => (
             <PodCard key={pod.id} pod={pod} />
           ))}
@@ -238,7 +250,12 @@ function ProgramColumn({
 // Page
 // ============================================================================
 
-const EMPTY_CHART: OrgChart = { seats: [], otherOfficers: [], pods: [] };
+const EMPTY_CHART: OrgChart = {
+  seats: [],
+  otherOfficers: [],
+  pods: [],
+  unassigned: [],
+};
 
 /**
  * A session is not membership (see requireMember), and pods/users are
@@ -302,6 +319,22 @@ export default async function OrgChartPage() {
           />
         ))}
       </div>
+
+      {chart.unassigned.length > 0 && (
+        <section aria-label="Not in a pod yet">
+          <SectionHeader
+            title="Not in a pod yet"
+            detail={`${chart.unassigned.length} ${chart.unassigned.length === 1 ? 'person' : 'people'}`}
+          />
+          <ul className="flex flex-wrap gap-x-6 gap-y-1">
+            {chart.unassigned.map(p => (
+              <li key={p.id}>
+                <PersonName person={p} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

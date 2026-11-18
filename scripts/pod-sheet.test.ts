@@ -32,7 +32,7 @@ describe('parseCsv', () => {
 });
 
 describe('parsePodSheet', () => {
-  const { pods, warnings } = parsePodSheet(SHEET);
+  const { pods, unassigned, warnings } = parsePodSheet(SHEET);
   const pod = (n: number) => pods.find(p => p.number === n)!;
   const names = (n: number) => pod(n).members.map(m => m.name);
 
@@ -75,9 +75,10 @@ describe('parsePodSheet', () => {
     });
   });
 
-  it('reports names outside any pod', () => {
+  it('lists names outside any pod as unassigned', () => {
+    expect(unassigned).toEqual(['Stray Person']);
     expect(warnings).toContain(
-      'Row 16: "Stray Person" is not in any pod, ignored'
+      'Row 16: "Stray Person" is not in any pod, listed as unassigned'
     );
   });
 });

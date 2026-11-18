@@ -10,6 +10,9 @@
 --     committee → ICOMM (value) / QCOMM (quant) member assigned to the pod
 --     pm        → pod leader (value pods)
 --     analyst   → pod member
+--   `pod_id` is null for people on the roster who aren't in a pod yet.
+--   `user_id` is null for people without a user record yet; `name` then
+--   holds the name from the sheet.
 --
 -- Rosters are loaded with `scripts/import-pods.ts` from the directory sheet,
 -- not seeded here (the repo is public; member names stay out of git).
@@ -34,13 +37,15 @@ CREATE TABLE IF NOT EXISTS pods (
 
 CREATE TABLE IF NOT EXISTS pod_members (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  pod_id uuid NOT NULL REFERENCES pods(id) ON DELETE CASCADE,
-  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  pod_id uuid REFERENCES pods(id) ON DELETE CASCADE,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+  name text,
   seat text NOT NULL CHECK (seat IN ('committee', 'pm', 'analyst')),
   sort_order int NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (pod_id, user_id)
+  UNIQUE (pod_id, user_id),
+  CONSTRAINT pod_members_person_check CHECK (user_id IS NOT NULL OR name IS NOT NULL)
 );
 
 CREATE INDEX IF NOT EXISTS idx_pod_members_pod_id ON pod_members(pod_id);

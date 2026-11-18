@@ -14,6 +14,9 @@
  * Off to the side, "New Members - Value/Quant | Pod" lists give each new
  * member's pod. That list wins over the grid: a new member is moved to the
  * pod it names (added as an analyst if the grid doesn't list them).
+ *
+ * Names anywhere else on the sheet (e.g. below the grids) are returned as
+ * `unassigned`: on the roster, not in a pod yet.
  */
 
 export type Program = 'value' | 'quant';
@@ -33,6 +36,8 @@ export interface SheetPod {
 
 export interface SheetParseResult {
   pods: SheetPod[];
+  /** Names outside any pod block or new-member list, in sheet order. */
+  unassigned: string[];
   /** Human-readable notes about conflicts and skipped cells. */
   warnings: string[];
 }
@@ -220,6 +225,10 @@ export function parsePodSheet(csv: string): SheetParseResult {
   }
 
   // ---- Anything left over ------------------------------------------------
+  const inPod = new Set(
+    Array.from(pods.values()).flatMap(p => p.members.map(m => nameKey(m.name)))
+  );
+  const unassigned: string[] = [];
   for (let r = 0; r < rows.length; r++) {
     for (let c = LABEL_COL; c < rows[r].length; c++) {
       const value = cleanName(rows[r][c]);
@@ -227,12 +236,22 @@ export function parsePodSheet(csv: string): SheetParseResult {
       if (c === LABEL_COL && seatForLabel(value) !== null) continue;
       if (/^(Pod Number|Pod|Sector)$/.test(value)) continue;
       if (value.startsWith('New Members')) continue;
-      warnings.push(`Row ${r + 1}: "${value}" is not in any pod, ignored`);
+      if (c === LABEL_COL) {
+        warnings.push(`Row ${r + 1}: unknown label "${value}", ignored`);
+        continue;
+      }
+      const key = nameKey(value);
+      if (inPod.has(key) || unassigned.some(n => nameKey(n) === key)) continue;
+      unassigned.push(value);
+      warnings.push(
+        `Row ${r + 1}: "${value}" is not in any pod, listed as unassigned`
+      );
     }
   }
 
   return {
     pods: Array.from(pods.values()).sort((a, b) => a.number - b.number),
+    unassigned,
     warnings,
   };
 }
