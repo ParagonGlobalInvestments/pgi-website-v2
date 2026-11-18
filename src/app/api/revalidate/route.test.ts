@@ -7,6 +7,7 @@ jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 
 const PEOPLE_PATHS = [
   '/national-committee/officers',
+  '/portal/org-chart',
   '/national-committee/founders',
   '/members/value-team',
   '/members/quant-team',

@@ -11,6 +11,7 @@ import {
   Users,
   BookUser,
   FolderOpen,
+  Network,
   PenSquare,
   BarChart3,
   GraduationCap,
@@ -57,6 +58,7 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   Home,
   Users,
   BookUser,
+  Network,
   FolderOpen,
   PenSquare,
   BarChart3,
@@ -575,6 +577,7 @@ export function UnifiedPortalShell({
     if (!pathname) return;
     if (pathname.includes('/directory')) setActiveLink('directory');
     else if (pathname.includes('/alumni')) setActiveLink('alumni');
+    else if (pathname.includes('/org-chart')) setActiveLink('org-chart');
     else if (pathname.includes('/resources')) setActiveLink('resources');
     else if (pathname.includes('/content')) setActiveLink('content');
     else if (pathname.includes('/observability'))
