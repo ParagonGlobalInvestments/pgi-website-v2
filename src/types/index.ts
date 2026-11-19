@@ -92,8 +92,16 @@ export interface OrgOfficer extends OrgPerson {
   title: string | null;
 }
 
+/**
+ * One placement on the roster (a `pod_members` row). A person can hold
+ * several, e.g. an ICOMM member who sits on more than one pod.
+ */
 export interface PodMember {
   id: string;
+  /** Null when on the roster but not in a pod. */
+  podId: string | null;
+  /** Null for people without a user record (stored by sheet name). */
+  userId: string | null;
   seat: PodSeat;
   person: OrgPerson;
 }
@@ -106,10 +114,30 @@ export interface Pod {
   members: PodMember[];
 }
 
-export interface OrgChart {
-  seats: OrgSeat[];
-  otherOfficers: OrgOfficer[];
+/** The editable part of the org chart. */
+export interface PodRoster {
   pods: Pod[];
   /** On the roster but not in a pod yet. */
-  unassigned: OrgPerson[];
+  unassigned: PodMember[];
+}
+
+export interface OrgChart extends PodRoster {
+  seats: OrgSeat[];
+  otherOfficers: OrgOfficer[];
+}
+
+/** Who is viewing the org chart and what they may edit. */
+export interface OrgChartViewer {
+  /** The viewer's `users.id`; null for allowlist admins without a record. */
+  userId: string | null;
+  isAdmin: boolean;
+}
+
+/** A row of the admin-visible org chart change log. */
+export interface PodChange {
+  id: string;
+  actorName: string;
+  action: string;
+  summary: string;
+  createdAt: string;
 }

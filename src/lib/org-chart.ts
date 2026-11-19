@@ -10,6 +10,7 @@ import type {
   OrgSeatSlug,
   Pod,
   PodMember,
+  PodRoster,
   PodSeat,
   UserProgram,
 } from '@/types';
@@ -93,6 +94,8 @@ interface PersonRow {
 
 interface PodMemberRow {
   id: string;
+  pod_id: string | null;
+  user_id: string | null;
   seat: string;
   sort_order: number;
   /** Sheet name, set when there's no user record yet. */
@@ -101,7 +104,7 @@ interface PodMemberRow {
 }
 
 const MEMBER_COLUMNS =
-  'id, seat, sort_order, name, person:users(id, name, school)';
+  'id, pod_id, user_id, seat, sort_order, name, person:users(id, name, school)';
 
 /** The linked user, or the sheet name for people without a user record. */
 function toPerson(m: PodMemberRow): OrgPerson | null {
@@ -115,6 +118,21 @@ function toPerson(m: PodMemberRow): OrgPerson | null {
   return m.name ? { id: m.id, name: m.name, school: null } : null;
 }
 
+function toMember(m: PodMemberRow): PodMember[] {
+  const person = toPerson(m);
+  return person
+    ? [
+        {
+          id: m.id,
+          podId: m.pod_id,
+          userId: m.user_id,
+          seat: m.seat as PodSeat,
+          person,
+        },
+      ]
+    : [];
+}
+
 interface PodRow {
   id: string;
   program: string;
@@ -125,17 +143,24 @@ interface PodRow {
 
 const SEAT_ORDER: Record<PodSeat, number> = { committee: 0, pm: 1, analyst: 2 };
 
+/**
+ * Ties on sort_order break by id, matching `.order('sort_order').order('id')`
+ * in the edit API (Postgres orders lowercase uuids like plain strings), so a
+ * drop position means the same row on both sides.
+ */
+function compareIds(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function toPod(row: PodRow): Pod {
   const members: PodMember[] = (row.members ?? [])
     .toSorted(
       (a, b) =>
         SEAT_ORDER[a.seat as PodSeat] - SEAT_ORDER[b.seat as PodSeat] ||
-        a.sort_order - b.sort_order
+        a.sort_order - b.sort_order ||
+        compareIds(a.id, b.id)
     )
-    .flatMap(m => {
-      const person = toPerson(m);
-      return person ? [{ id: m.id, seat: m.seat as PodSeat, person }] : [];
-    });
+    .flatMap(toMember);
 
   return {
     id: row.id,
@@ -162,21 +187,22 @@ async function getPods(supabase: SupabaseClient): Promise<Pod[]> {
   return (data as unknown as PodRow[]).map(toPod);
 }
 
-async function getUnassigned(supabase: SupabaseClient): Promise<OrgPerson[]> {
+async function getUnassigned(supabase: SupabaseClient): Promise<PodMember[]> {
   const { data, error } = await supabase
     .from('pod_members')
     .select(MEMBER_COLUMNS)
     .is('pod_id', null)
-    .order('sort_order');
+    .order('sort_order')
+    .order('id');
 
   if (error) {
     console.error('Org chart unassigned query failed:', error.message);
     return [];
   }
-  return (data as unknown as PodMemberRow[]).flatMap(m => {
-    const person = toPerson(m);
-    return person ? [person] : [];
-  });
+  // Show unassigned people as analysts, whatever seat the row last held.
+  return (data as unknown as PodMemberRow[])
+    .flatMap(toMember)
+    .map(m => ({ ...m, seat: 'analyst' as const }));
 }
 
 // ============================================================================
@@ -184,15 +210,27 @@ async function getUnassigned(supabase: SupabaseClient): Promise<OrgPerson[]> {
 // ============================================================================
 
 /**
- * Load leadership (CMS officers) and pods for the portal org chart.
- * `supabase` must be the admin client (pods and users are service-role only);
- * check membership first.
+ * Load pods and people not in a pod. `supabase` must be the admin client
+ * (pods and users are service-role only); check membership first.
  */
-export async function getOrgChart(supabase: SupabaseClient): Promise<OrgChart> {
-  const [leadership, pods, unassigned] = await Promise.all([
-    getLeadership(),
+export async function getPodRoster(
+  supabase: SupabaseClient
+): Promise<PodRoster> {
+  const [pods, unassigned] = await Promise.all([
     getPods(supabase),
     getUnassigned(supabase),
   ]);
-  return { ...leadership, pods, unassigned };
+  return { pods, unassigned };
+}
+
+/**
+ * Load leadership (CMS officers) and pods for the portal org chart.
+ * `supabase` must be the admin client; check membership first.
+ */
+export async function getOrgChart(supabase: SupabaseClient): Promise<OrgChart> {
+  const [leadership, roster] = await Promise.all([
+    getLeadership(),
+    getPodRoster(supabase),
+  ]);
+  return { ...leadership, ...roster };
 }
