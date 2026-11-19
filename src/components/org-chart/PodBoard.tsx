@@ -360,8 +360,12 @@ export function PodBoard({
               </div>
             </div>
           ) : (
-            <div className="hidden justify-end lg:flex">
+            <div className="flex justify-end">
+              <p className="text-xs text-gray-500 lg:hidden">
+                Widen the window to edit the org chart.
+              </p>
               <Button
+                className="hidden lg:inline-flex"
                 size="sm"
                 variant="outline"
                 onClick={() => setEditing(true)}

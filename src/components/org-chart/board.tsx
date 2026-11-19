@@ -99,12 +99,23 @@ export function MemberChip({
     disabled: !draggable,
   });
 
+  // In edit mode, say why a name can't be picked up instead of letting the
+  // drag attempt turn into a text selection.
+  const locked = board.editing && !draggable;
+  const lockedReason =
+    member.podId && member.seat !== 'analyst'
+      ? 'Only admins can move pod leads'
+      : 'You can only move people in your own pod';
+
   return (
     <div
       ref={setNodeRef}
       {...(draggable ? { ...attributes, ...listeners } : {})}
       aria-roledescription={draggable ? 'draggable person' : undefined}
+      title={locked ? lockedReason : undefined}
       className={cn(
+        board.editing && 'select-none',
+        locked && 'cursor-not-allowed opacity-60',
         draggable &&
           '-mx-1.5 cursor-grab touch-none rounded-md px-1.5 py-0.5 ring-1 ring-transparent hover:bg-gray-50 hover:ring-gray-200 focus-visible:outline-none focus-visible:ring-navy/50 active:cursor-grabbing',
         isDragging && 'opacity-30',
