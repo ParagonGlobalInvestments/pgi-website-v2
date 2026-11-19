@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import ShinyText from '@/components/reactbits/TextAnimations/ShinyText/ShinyText';
@@ -24,8 +24,20 @@ type FormData = {
   isChapterRequest: boolean;
 };
 
+/**
+ * `submitted` shows the thank-you note, then returns to `idle` after 5s.
+ * `submittedAt` distinguishes resubmissions so each one restarts the timer.
+ */
+type SubmitState =
+  | { status: 'idle' }
+  | { status: 'submitted'; submittedAt: number };
+
+const SUBMITTED_NOTICE_MS = 5000;
+
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>({
+    status: 'idle',
+  });
   const [isChapterRequest, setIsChapterRequest] = useState(false);
 
   const {
@@ -40,14 +52,23 @@ export default function Contact() {
     // Form data submitted
 
     // For now, just simulate a successful submission
-    setSubmitted(true);
+    // Runs in the submit handler, not during render.
+    // eslint-disable-next-line react-hooks/purity
+    setSubmitState({ status: 'submitted', submittedAt: Date.now() });
     reset();
-
-    // Reset form after 5 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 5000);
   };
+
+  // Hide the notice after 5 seconds; cleared on unmount or resubmit
+  const submittedAt =
+    submitState.status === 'submitted' ? submitState.submittedAt : null;
+  useEffect(() => {
+    if (submittedAt === null) return;
+    const timer = setTimeout(
+      () => setSubmitState({ status: 'idle' }),
+      SUBMITTED_NOTICE_MS
+    );
+    return () => clearTimeout(timer);
+  }, [submittedAt]);
 
   return (
     <div className="bg-navy text-white min-h-screen">
@@ -115,7 +136,7 @@ export default function Contact() {
               </div>
 
               {/* Form success message */}
-              {submitted && (
+              {submitState.status === 'submitted' && (
                 <motion.div
                   className="mb-6 p-4 bg-green-900 bg-opacity-30 border border-green-700 rounded-md"
                   initial={{ opacity: 0, scale: 0.95 }}
