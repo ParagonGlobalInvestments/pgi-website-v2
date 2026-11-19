@@ -212,7 +212,7 @@ export function PodBoard({
 }) {
   // Admins in "View As" mode see only what the mocked role could edit.
   const { mock } = useMockUser();
-  const mockRole = mock.isActive ? mock.role : null;
+  const mockRole = mock.status === 'active' ? mock.role : null;
   const viewer = useMemo(
     () => mockedViewer(realViewer, mockRole),
     [realViewer, mockRole]

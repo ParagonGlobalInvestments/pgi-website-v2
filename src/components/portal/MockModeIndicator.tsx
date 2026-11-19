@@ -13,7 +13,7 @@ export function MockModeIndicator() {
   const { realUser } = usePortalUser();
 
   // Only render for real admins with active mock
-  if (!mock.isActive || realUser?.role !== 'admin') return null;
+  if (mock.status !== 'active' || realUser?.role !== 'admin') return null;
 
   const roleLabel = ROLE_LABELS[mock.role] || mock.role;
   const programLabel = mock.program

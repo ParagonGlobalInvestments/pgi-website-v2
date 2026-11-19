@@ -585,21 +585,23 @@ function MockModeSection() {
   const { realUser } = usePortalUser();
   const { mock, startMock, updateMock, stopMock } = useMockUser();
 
-  // Local state for pre-start selections
+  // Selection for the next start. Only shown while mock mode is inactive;
+  // once active, the selects edit the live mock instead.
   const [pendingRole, setPendingRole] = useState<UserRole>('analyst');
   const [pendingProgram, setPendingProgram] = useState<UserProgram | ''>('');
 
   if (realUser?.role !== 'admin') return null;
 
-  const currentRole = mock.isActive ? mock.role : pendingRole;
-  const currentProgram = mock.isActive ? (mock.program ?? '') : pendingProgram;
+  const isActive = mock.status === 'active';
+  const currentRole = isActive ? mock.role : pendingRole;
+  const currentProgram = isActive ? (mock.program ?? '') : pendingProgram;
 
   const handleStart = () => {
     startMock(pendingRole, pendingProgram || null);
   };
 
   const handleRoleChange = (role: UserRole) => {
-    if (mock.isActive) {
+    if (isActive) {
       updateMock({ role });
     } else {
       setPendingRole(role);
@@ -607,7 +609,7 @@ function MockModeSection() {
   };
 
   const handleProgramChange = (program: UserProgram | '') => {
-    if (mock.isActive) {
+    if (isActive) {
       updateMock({ program: program || null });
     } else {
       setPendingProgram(program);
@@ -667,7 +669,7 @@ function MockModeSection() {
           </div>
         </div>
 
-        {mock.isActive ? (
+        {isActive ? (
           <Button
             type="button"
             variant="outline"
