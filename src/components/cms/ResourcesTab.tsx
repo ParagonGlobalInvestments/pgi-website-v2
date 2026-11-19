@@ -565,9 +565,11 @@ export default function ResourcesTab() {
       <ResourceForm
         open={formOpen}
         onOpenChange={setFormOpen}
-        resource={editingResource}
-        defaultTabId={defaultTabId}
-        defaultSection={defaultSection}
+        mode={
+          editingResource
+            ? { kind: 'edit', resource: editingResource }
+            : { kind: 'create', tabId: defaultTabId, section: defaultSection }
+        }
         onSaved={() => {
           setFormOpen(false);
           fetchAll();
