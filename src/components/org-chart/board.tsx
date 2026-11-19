@@ -39,24 +39,46 @@ export function useBoard(): BoardApi {
   return board;
 }
 
+/**
+ * False inside <StaticCopy>. dnd-kit keeps one registry entry per id, so a
+ * second rendering of the same people (the phone layout, which the board
+ * renders alongside the desktop one when not editing) must not register
+ * draggables or drop targets: unmounting it would remove the entries the
+ * visible desktop layout depends on, and dragging would stop working.
+ */
+const InteractiveContext = createContext(true);
+
+/** Render children without drag-and-drop (see InteractiveContext). */
+export function StaticCopy({ children }: { children: ReactNode }) {
+  return (
+    <InteractiveContext.Provider value={false}>
+      {children}
+    </InteractiveContext.Provider>
+  );
+}
+
 /** The placement being dragged, if any. */
 export function useDraggedMember(): PodMember | null {
   const { active } = useDndContext();
   return (active?.data.current?.member as PodMember | undefined) ?? null;
 }
 
-/** A drop target that moves the dropped placement to `target`. */
-export function DropZone({
-  id,
-  target,
-  className,
-  children,
-}: {
+interface DropZoneProps {
   id: string;
   target: MoveTarget;
   className?: string;
   children: ReactNode;
-}) {
+}
+
+/** A drop target that moves the dropped placement to `target`. */
+export function DropZone(props: DropZoneProps) {
+  if (useContext(InteractiveContext)) return <ActiveDropZone {...props} />;
+  return (
+    <div className={cn('rounded-lg', props.className)}>{props.children}</div>
+  );
+}
+
+function ActiveDropZone({ id, target, className, children }: DropZoneProps) {
   const board = useBoard();
   const dragged = useDraggedMember();
   const allowed = !!dragged && board.allows(dragged, target);
@@ -81,16 +103,19 @@ export function DropZone({
   );
 }
 
-/** A placement that can be picked up when the viewer may move it. */
-export function MemberChip({
-  member,
-  className,
-  children,
-}: {
+interface MemberChipProps {
   member: PodMember;
   className?: string;
   children: ReactNode;
-}) {
+}
+
+/** A placement that can be picked up when the viewer may move it. */
+export function MemberChip(props: MemberChipProps) {
+  if (useContext(InteractiveContext)) return <ActiveMemberChip {...props} />;
+  return <div className={props.className}>{props.children}</div>;
+}
+
+function ActiveMemberChip({ member, className, children }: MemberChipProps) {
   const board = useBoard();
   const draggable = board.editing && board.canDrag(member);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({

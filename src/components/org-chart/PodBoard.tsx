@@ -34,7 +34,13 @@ import type {
   UserProgram,
 } from '@/types';
 import { AddPersonDialog } from './AddPersonDialog';
-import { BoardProvider, DropZone, MemberChip, type BoardApi } from './board';
+import {
+  BoardProvider,
+  DropZone,
+  MemberChip,
+  StaticCopy,
+  type BoardApi,
+} from './board';
 import { ChangeLogDialog } from './ChangeLogDialog';
 import { PersonName } from './PersonName';
 import { PodCard } from './PodCard';
@@ -89,11 +95,13 @@ function PodStacks({ pods, editing }: { pods: Pod[]; editing: boolean }) {
   return (
     <>
       {!editing && (
-        <div className="flex flex-col gap-4 sm:hidden">
-          {pods.map(pod => (
-            <PodCard key={pod.id} pod={pod} />
-          ))}
-        </div>
+        <StaticCopy>
+          <div className="flex flex-col gap-4 sm:hidden">
+            {pods.map(pod => (
+              <PodCard key={pod.id} pod={pod} />
+            ))}
+          </div>
+        </StaticCopy>
       )}
       <div
         className={
