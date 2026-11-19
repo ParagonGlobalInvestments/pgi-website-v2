@@ -10,7 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { LOADING, failed, ready, type AsyncState } from '@/lib/async-state';
 import type { PodChange } from '@/types';
+
+const LOAD_ERROR = 'Could not load the change log';
 
 const WHEN = new Intl.DateTimeFormat(undefined, {
   month: 'short',
@@ -22,8 +25,7 @@ const WHEN = new Intl.DateTimeFormat(undefined, {
 /** Admins: recent org chart edits. */
 export function ChangeLogDialog() {
   const [open, setOpen] = useState(false);
-  const [changes, setChanges] = useState<PodChange[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [log, setLog] = useState<AsyncState<PodChange[]>>(LOADING);
 
   useEffect(() => {
     if (!open) return;
@@ -32,10 +34,11 @@ export function ChangeLogDialog() {
       .then(res => res.json())
       .then(json => {
         if (cancelled) return;
-        if (json.success) setChanges(json.data);
-        else setError(json.error ?? 'Could not load the change log');
+        setLog(
+          json.success ? ready(json.data) : failed(json.error ?? LOAD_ERROR)
+        );
       })
-      .catch(() => !cancelled && setError('Could not load the change log'));
+      .catch(() => !cancelled && setLog(failed(LOAD_ERROR)));
     return () => {
       cancelled = true;
     };
@@ -47,8 +50,9 @@ export function ChangeLogDialog() {
         size="sm"
         variant="outline"
         onClick={() => {
-          setChanges(null);
-          setError(null);
+          // This button is the only way to open the dialog, so resetting here
+          // means every open shows a fresh log.
+          setLog(LOADING);
           setOpen(true);
         }}
       >
@@ -64,15 +68,15 @@ export function ChangeLogDialog() {
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto">
-            {error ? (
-              <p className="text-sm text-red-600">{error}</p>
-            ) : changes === null ? (
+            {log.status === 'error' ? (
+              <p className="text-sm text-red-600">{log.message}</p>
+            ) : log.status === 'loading' ? (
               <p className="text-sm text-gray-400">Loading…</p>
-            ) : changes.length === 0 ? (
+            ) : log.data.length === 0 ? (
               <p className="text-sm text-gray-400">No changes yet</p>
             ) : (
               <ol className="divide-y divide-gray-100">
-                {changes.map(c => (
+                {log.data.map(c => (
                   <li key={c.id} className="py-2">
                     <p className="text-sm text-gray-900">{c.summary}</p>
                     <p className="text-xs text-gray-500">
