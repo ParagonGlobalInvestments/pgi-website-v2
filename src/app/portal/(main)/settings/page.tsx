@@ -30,6 +30,7 @@ import {
   type ProfileFormState,
   type ProfileValues,
 } from '@/lib/settings/profileAutosave';
+import { linkedAccountsReducer } from '@/lib/settings/linkedAccounts';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -710,31 +711,36 @@ const LINK_ERRORS: Record<string, string> = {
 
 function LinkedAccountsSection() {
   const supabase = createClient();
-  const [identities, setIdentities] = useState<UserIdentity[] | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [state, dispatch] = useReducer(linkedAccountsReducer<UserIdentity>, {
+    status: 'loading',
+    error: null,
+  });
 
-  const load = useCallback(async () => {
+  const fetchIdentities = useCallback(async () => {
     const { data } = await supabase.auth.getUserIdentities();
-    setIdentities(data?.identities ?? []);
+    return data?.identities ?? [];
   }, [supabase]);
 
   useEffect(() => {
-    load();
+    fetchIdentities().then(identities =>
+      dispatch({ type: 'LOADED', identities })
+    );
     // /auth/callback forwards OAuth errors from a failed link here
     const url = new URL(window.location.href);
     const code = url.searchParams.get('auth_error');
     if (!code) return;
-    setError(
-      LINK_ERRORS[code] ?? 'Could not link that account. Please try again.'
-    );
+    dispatch({
+      type: 'SHOW_ERROR',
+      message:
+        LINK_ERRORS[code] ?? 'Could not link that account. Please try again.',
+    });
     url.searchParams.delete('auth_error');
     window.history.replaceState({}, '', url.toString());
-  }, [load]);
+  }, [fetchIdentities]);
 
   const link = async () => {
-    setBusy(true);
-    setError('');
+    if (state.status !== 'ready') return;
+    dispatch({ type: 'LINK_START' });
     const next = encodeURIComponent(window.location.pathname);
     const { error: linkError } = await supabase.auth.linkIdentity({
       provider: 'google',
@@ -743,31 +749,37 @@ function LinkedAccountsSection() {
         queryParams: { prompt: 'select_account' },
       },
     });
-    if (linkError) {
-      setError(linkError.message);
-      setBusy(false);
-    }
+    // On success the browser is already leaving for Google
+    if (linkError)
+      dispatch({ type: 'LINK_FAILED', message: linkError.message });
   };
 
   const unlink = async (identity: UserIdentity) => {
-    setBusy(true);
-    setError('');
+    if (state.status !== 'ready') return;
+    dispatch({ type: 'UNLINK_START', identityId: identity.identity_id });
     const { error: unlinkError } = await supabase.auth.unlinkIdentity(identity);
-    if (unlinkError) setError(unlinkError.message);
-    await load();
-    setBusy(false);
+    const identities = await fetchIdentities();
+    dispatch({
+      type: 'UNLINK_DONE',
+      identities,
+      error: unlinkError?.message ?? null,
+    });
   };
+
+  const busy = state.status !== 'ready';
+  const error =
+    state.status === 'ready' || state.status === 'loading' ? state.error : null;
 
   return (
     <Section title="Linked Google accounts">
       <p className="text-xs text-gray-500 mb-3">
         You can sign in to the portal with any of these accounts.
       </p>
-      {identities === null ? (
+      {state.status === 'loading' ? (
         <Skeleton className="h-5 w-48" />
       ) : (
         <ul className="divide-y divide-gray-100">
-          {identities.map(identity => (
+          {state.identities.map(identity => (
             <li
               key={identity.identity_id}
               className="flex items-center justify-between gap-3 py-2 first:pt-0"
@@ -775,7 +787,7 @@ function LinkedAccountsSection() {
               <span className="text-sm text-gray-900 truncate">
                 {String(identity.identity_data?.email ?? identity.provider)}
               </span>
-              {identities.length > 1 && (
+              {state.identities.length > 1 && (
                 <button
                   type="button"
                   onClick={() => unlink(identity)}
