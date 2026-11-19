@@ -14,7 +14,7 @@ function PortalLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const { tag, userName, start } = usePortalTransition();
+  const { tag, flow, userName, start } = usePortalTransition();
   const { handleExit } = usePortalExit();
 
   const [loading, setLoading] = useState(false);
@@ -101,14 +101,15 @@ function PortalLoginContent() {
     }
   }, [supabase.auth, start]);
 
-  // Navigate when login:morph completes
+  // Navigate when login:morph completes (an entrance:login flow also ends in
+  // `complete` here, until the route change settles it)
   useEffect(() => {
-    if (tag !== 'complete') return;
+    if (tag !== 'complete' || flow !== 'login:morph') return;
     const cleanRedirectTo = redirectTo.startsWith('/portal')
       ? redirectTo
       : '/portal';
     router.push(cleanRedirectTo);
-  }, [tag, router, redirectTo]);
+  }, [tag, flow, router, redirectTo]);
 
   // Run post-auth flow when returning from OAuth (ref guards against StrictMode double-invoke)
   const postAuthStarted = useRef(false);

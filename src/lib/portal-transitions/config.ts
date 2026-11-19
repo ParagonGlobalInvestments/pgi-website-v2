@@ -23,7 +23,9 @@ export const TIMING = {
     desktopTotal: 1400,
     mobileTotal: 800,
     navyFill: { d: 600, m: 200 },
-    panelSlide: { d: 600, m: 300 },
+    /** Desktop: 600ms slide + 200ms settle before navigating */
+    panelSlide: { d: 800, m: 300 },
+    /** 0 = phase skipped on that device */
     hold: { d: 0, m: 300 },
   },
   greeting: 1200,

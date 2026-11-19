@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/browser';
 import { usePortalUser } from '@/hooks/usePortalUser';
@@ -98,7 +98,8 @@ const Header = () => {
     usePortalUser(!!user);
   const loading = authLoading || (!!user && memberLoading);
 
-  // Use the unified transition system — no local transition state needed
+  // Login/portal entrance animations run in the portal transition machine;
+  // the root-level NavyOverlay draws them
   const { start } = usePortalTransition();
   const isMobile = useIsMobile();
 
