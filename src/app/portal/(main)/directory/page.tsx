@@ -62,9 +62,7 @@ function MemberDetail({ user }: { user: User }) {
                 {PROGRAM_LABELS[user.program]}
               </span>
             )}
-            {user.program && user.role && (
-              <span className="text-gray-400">·</span>
-            )}
+            {user.program && <span className="text-gray-400">·</span>}
             <span className="text-gray-700 font-medium">
               {ROLE_LABELS[user.role] || user.role}
             </span>
@@ -376,7 +374,7 @@ export default function DirectoryPage() {
                             {PROGRAM_LABELS[user.program]}
                           </span>
                         )}
-                        {user.program && user.role && (
+                        {user.program && (
                           <span className="mx-1.5 text-gray-400">/</span>
                         )}
                         <span className="font-medium text-gray-700">
