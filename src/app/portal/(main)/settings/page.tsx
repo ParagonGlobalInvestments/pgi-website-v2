@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useReducer } from 'react';
 import { Globe, X, Plus, Trash2, Pencil } from 'lucide-react';
 import { Github, Linkedin } from '@/components/ui/brand-icons';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,12 @@ import {
 import type { User, UserRole, UserProgram, UserPreferences } from '@/types';
 import type { UserIdentity } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/browser';
+import {
+  experienceEditorReducer,
+  initialExperienceEditorState,
+  isDraftValid,
+  type ExperienceDraft,
+} from '@/lib/settings/experienceEditor';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -209,20 +215,6 @@ interface ExperienceRow {
   sort_order: number;
 }
 
-interface ExperienceDraft {
-  company: string;
-  role: string;
-  startYear: string;
-  endYear: string;
-}
-
-const emptyDraft: ExperienceDraft = {
-  company: '',
-  role: '',
-  startYear: '',
-  endYear: '',
-};
-
 function draftFromRow(row: ExperienceRow): ExperienceDraft {
   return {
     company: row.company,
@@ -238,13 +230,17 @@ function ExperienceForm({
   onSave,
   onCancel,
   saving,
+  busy,
   saveLabel,
 }: {
   draft: ExperienceDraft;
   onChange: (d: ExperienceDraft) => void;
   onSave: () => void;
   onCancel: () => void;
+  /** This form's save is in flight */
   saving: boolean;
+  /** Any experience request is in flight */
+  busy: boolean;
   saveLabel: string;
 }) {
   const valid = draft.company.trim() && draft.role.trim();
@@ -345,7 +341,7 @@ function ExperienceForm({
           type="button"
           variant="navy"
           size="sm"
-          disabled={saving || !valid}
+          disabled={busy || !valid}
           onClick={onSave}
         >
           {saving ? 'Saving...' : saveLabel}
@@ -358,12 +354,11 @@ function ExperienceForm({
 function ExperienceSection({ userId }: { userId: string }) {
   const [entries, setEntries] = useState<ExperienceRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [addDraft, setAddDraft] = useState<ExperienceDraft>(emptyDraft);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<ExperienceDraft>(emptyDraft);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [editor, dispatch] = useReducer(
+    experienceEditorReducer,
+    initialExperienceEditorState
+  );
+  const { mode, pending } = editor;
 
   const fetchExperience = useCallback(async () => {
     try {
@@ -384,79 +379,72 @@ function ExperienceSection({ userId }: { userId: string }) {
     else setLoading(false);
   }, [userId, fetchExperience]);
 
-  const handleAdd = async () => {
-    if (!addDraft.company.trim() || !addDraft.role.trim()) return;
-    setSaving(true);
+  const handleSave = async () => {
+    if (mode.kind === 'list' || pending.kind !== 'idle') return;
+    if (!isDraftValid(mode.draft)) return;
+    const { draft } = mode;
+    dispatch({ type: 'SAVE_START' });
     try {
-      const res = await fetch('/api/users/me/experience', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company: addDraft.company.trim(),
-          role: addDraft.role.trim(),
-          startYear: addDraft.startYear ? Number(addDraft.startYear) : null,
-          endYear: addDraft.endYear ? Number(addDraft.endYear) : null,
-        }),
-      });
-      if (res.ok) {
-        setAddDraft(emptyDraft);
-        setShowAddForm(false);
-        await fetchExperience();
+      const res = await fetch(
+        mode.kind === 'adding'
+          ? '/api/users/me/experience'
+          : `/api/users/me/experience/${mode.id}`,
+        {
+          method: mode.kind === 'adding' ? 'POST' : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company: draft.company.trim(),
+            role: draft.role.trim(),
+            startYear: draft.startYear ? Number(draft.startYear) : null,
+            endYear: draft.endYear ? Number(draft.endYear) : null,
+          }),
+        }
+      );
+      if (!res.ok) {
+        dispatch({ type: 'SAVE_FAILURE' });
+        return;
       }
+      dispatch({ type: 'SAVE_SUCCESS' });
+      await fetchExperience();
     } catch {
       // silently fail
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdate = async (id: string) => {
-    if (!editDraft.company.trim() || !editDraft.role.trim()) return;
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/users/me/experience/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company: editDraft.company.trim(),
-          role: editDraft.role.trim(),
-          startYear: editDraft.startYear ? Number(editDraft.startYear) : null,
-          endYear: editDraft.endYear ? Number(editDraft.endYear) : null,
-        }),
-      });
-      if (res.ok) {
-        setEditingId(null);
-        await fetchExperience();
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setSaving(false);
+      dispatch({ type: 'SAVE_FAILURE' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    setDeleting(id);
+    if (pending.kind !== 'idle') return;
+    dispatch({ type: 'DELETE_START', id });
     try {
       const res = await fetch(`/api/users/me/experience/${id}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setEntries(prev => prev.filter(i => i.id !== id));
-        if (editingId === id) setEditingId(null);
+      if (!res.ok) {
+        dispatch({ type: 'DELETE_FAILURE' });
+        return;
       }
+      setEntries(prev => prev.filter(i => i.id !== id));
+      dispatch({ type: 'DELETE_SUCCESS', id });
     } catch {
       // silently fail
-    } finally {
-      setDeleting(null);
+      dispatch({ type: 'DELETE_FAILURE' });
     }
   };
 
-  const startEditing = (entry: ExperienceRow) => {
-    setEditingId(entry.id);
-    setEditDraft(draftFromRow(entry));
-    setShowAddForm(false);
-  };
+  const startEditing = (entry: ExperienceRow) =>
+    dispatch({ type: 'START_EDIT', id: entry.id, draft: draftFromRow(entry) });
+
+  const updateDraft = (draft: ExperienceDraft) =>
+    dispatch({ type: 'UPDATE_DRAFT', draft });
+
+  const cancel = () => dispatch({ type: 'CANCEL' });
+
+  // "Saving..." only on the form whose save is in flight
+  const saving =
+    pending.kind === 'saving' &&
+    mode.kind !== 'list' &&
+    pending.formId === mode.formId;
+  const busy = pending.kind !== 'idle';
 
   if (loading) {
     return (
@@ -470,10 +458,10 @@ function ExperienceSection({ userId }: { userId: string }) {
   }
 
   const addButton =
-    !showAddForm && !editingId ? (
+    mode.kind === 'list' ? (
       <button
         type="button"
-        onClick={() => setShowAddForm(true)}
+        onClick={() => dispatch({ type: 'START_ADD' })}
         className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
         aria-label="Add experience"
       >
@@ -487,14 +475,15 @@ function ExperienceSection({ userId }: { userId: string }) {
       <div className="space-y-2">
         <AnimatePresence mode="popLayout">
           {entries.map(entry =>
-            editingId === entry.id ? (
+            mode.kind === 'editing' && mode.id === entry.id ? (
               <ExperienceForm
                 key={entry.id}
-                draft={editDraft}
-                onChange={setEditDraft}
-                onSave={() => handleUpdate(entry.id)}
-                onCancel={() => setEditingId(null)}
+                draft={mode.draft}
+                onChange={updateDraft}
+                onSave={handleSave}
+                onCancel={cancel}
                 saving={saving}
+                busy={busy}
                 saveLabel="Save"
               />
             ) : (
@@ -533,7 +522,7 @@ function ExperienceSection({ userId }: { userId: string }) {
                   <button
                     type="button"
                     onClick={() => handleDelete(entry.id)}
-                    disabled={deleting === entry.id}
+                    disabled={busy}
                     aria-label={`Delete ${entry.role} at ${entry.company}`}
                     className="p-2 text-gray-400 hover:text-red-500 rounded transition-colors"
                   >
@@ -545,21 +534,19 @@ function ExperienceSection({ userId }: { userId: string }) {
           )}
         </AnimatePresence>
 
-        {entries.length === 0 && !showAddForm && (
+        {entries.length === 0 && mode.kind !== 'adding' && (
           <p className="text-sm text-gray-400 py-2">No experience added yet.</p>
         )}
 
         <AnimatePresence>
-          {showAddForm && (
+          {mode.kind === 'adding' && (
             <ExperienceForm
-              draft={addDraft}
-              onChange={setAddDraft}
-              onSave={handleAdd}
-              onCancel={() => {
-                setShowAddForm(false);
-                setAddDraft(emptyDraft);
-              }}
+              draft={mode.draft}
+              onChange={updateDraft}
+              onSave={handleSave}
+              onCancel={cancel}
               saving={saving}
+              busy={busy}
               saveLabel="Add"
             />
           )}
