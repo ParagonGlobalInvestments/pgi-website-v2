@@ -5,7 +5,7 @@ import {
   requireOrgChartEditor,
 } from '@/lib/auth/requireOrgChartEditor';
 import { getPodRoster } from '@/lib/org-chart';
-import type { Editor, UndoSnapshot } from '@/lib/org-chart-edit';
+import type { Editor, UndoRef } from '@/lib/org-chart-edit';
 import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 
 /** The request's JSON body, or {} when it has none. */
@@ -24,10 +24,7 @@ export async function readBody(
  * `{ success: true, data: { roster, undo } }`.
  */
 export async function runEdit(
-  edit: (
-    db: SupabaseClient,
-    editor: Editor
-  ) => Promise<UndoSnapshot | null | void>
+  edit: (db: SupabaseClient, editor: Editor) => Promise<UndoRef | null | void>
 ): Promise<NextResponse> {
   const auth = await requireOrgChartEditor();
   if (auth.error) return auth.error;

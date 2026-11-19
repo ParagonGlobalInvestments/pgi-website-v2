@@ -28,7 +28,7 @@ import {
 import { Pencil, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import type { UndoSnapshot } from '@/lib/org-chart-edit';
+import type { UndoRef } from '@/lib/org-chart-edit';
 import {
   canMove,
   isLeadSeat,
@@ -75,7 +75,7 @@ const EDIT_MEDIA_QUERY = '(min-width: 1024px)';
 
 interface EditResult {
   roster: PodRoster;
-  undo: UndoSnapshot | null;
+  undo: UndoRef | null;
 }
 
 /** Container id → ids of the people in it, in display order. */
@@ -241,46 +241,51 @@ export function PodBoard({
     }
   }, []);
 
+  // Edits are sent one at a time, in the order they were made, so the
+  // server applies them in that order. Each answer carries the whole roster;
+  // only the latest one is applied, so a later edit's on-screen state isn't
+  // briefly replaced by an earlier answer.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const send = useCallback(
-    async (
-      url: string,
-      method: string,
-      body?: unknown
-    ): Promise<EditResult | null> => {
+    (url: string, method: string, body?: unknown) => {
       const mine = ++latest.current;
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: body ? { 'Content-Type': 'application/json' } : undefined,
-          body: body ? JSON.stringify(body) : undefined,
-        });
-        const json = await res.json().catch(() => null);
-        if (!res.ok || !json?.success) {
-          throw new Error(json?.error ?? 'Could not save the change');
+      const run = queue.current.then(async (): Promise<EditResult | null> => {
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: body ? { 'Content-Type': 'application/json' } : undefined,
+            body: body ? JSON.stringify(body) : undefined,
+          });
+          const json = await res.json().catch(() => null);
+          if (!res.ok || !json?.success) {
+            throw new Error(json?.error ?? 'Could not save the change');
+          }
+          if (mine === latest.current) setRoster(json.data.roster);
+          return json.data as EditResult;
+        } catch (err) {
+          toast.error(
+            err instanceof Error ? err.message : 'Could not save the change'
+          );
+          if (mine === latest.current) void refresh();
+          return null;
         }
-        if (mine === latest.current) setRoster(json.data.roster);
-        return json.data as EditResult;
-      } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : 'Could not save the change'
-        );
-        if (mine === latest.current) void refresh();
-        return null;
-      }
+      });
+      queue.current = run;
+      return run;
     },
     [refresh]
   );
 
   const offerUndo = useCallback(
-    (undo: UndoSnapshot) => {
+    (undo: UndoRef) => {
       toast.success(undo.summary, {
         duration: 8000,
         action: {
           label: 'Undo',
           onClick: () => {
-            void send('/api/org-chart/undo', 'POST', undo).then(
-              done => done && toast.success('Change undone')
-            );
+            void send('/api/org-chart/undo', 'POST', {
+              changeId: undo.changeId,
+            }).then(done => done && toast.success('Change undone'));
           },
         },
       });

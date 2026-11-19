@@ -195,6 +195,20 @@ describe('moveLocally', () => {
     expect(end.unassigned.map(m => m.id)).toEqual(['b', 'c', 'a']);
   });
 
+  it('drops a placement instead of unassigning someone with another', () => {
+    const r: PodRoster = {
+      pods: [
+        pod('p1', 1, [member('c1', 'p1', 'committee', 'cole')]),
+        pod('p2', 2, [member('c2', 'p2', 'committee', 'cole')]),
+      ],
+      unassigned: [],
+    };
+    const next = moveLocally(r, 'c1', { podId: null, seat: 'analyst' });
+    expect(next.pods[0].members).toEqual([]);
+    expect(next.unassigned).toEqual([]);
+    expect(next.pods[1].members.map(m => m.id)).toEqual(['c2']);
+  });
+
   it('demotes the current holder when a lead seat is filled', () => {
     const next = moveLocally(roster, 'b', { podId: 'p1', seat: 'pm' });
     const p1 = next.pods[0].members;

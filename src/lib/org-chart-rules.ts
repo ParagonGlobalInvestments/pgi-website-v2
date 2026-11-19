@@ -184,7 +184,12 @@ export function moveLocally(
     return { ...pod, members };
   });
   const rest = roster.unassigned.filter(m => m.id !== memberId);
-  const unassigned = target.podId === null ? insert(rest) : rest;
+  // Like the server: someone with another placement just leaves the pod
+  // instead of also showing as "Not in a pod yet".
+  const elsewhere = rosterPlacements(roster).some(
+    m => m.id !== memberId && samePerson(m, member)
+  );
+  const unassigned = target.podId === null && !elsewhere ? insert(rest) : rest;
 
   return { pods, unassigned };
 }
@@ -196,6 +201,16 @@ export interface SeatCandidate {
   copy: boolean;
   /** Where the person is now, e.g. "Analyst · Pod 2". */
   where: string;
+}
+
+/** Same person: same user, or (no user record) same sheet name. */
+export function samePerson(
+  a: Pick<PodMember, 'userId' | 'person'>,
+  b: Pick<PodMember, 'userId' | 'person'>
+): boolean {
+  return b.userId
+    ? a.userId === b.userId
+    : !a.userId && a.person.name === b.person.name;
 }
 
 /** Placements grouped by person: by user, or by sheet name. */
