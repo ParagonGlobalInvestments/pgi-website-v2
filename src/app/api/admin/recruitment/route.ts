@@ -20,7 +20,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data ?? []);
+    return NextResponse.json(data);
   } catch (err) {
     const msg =
       err instanceof Error ? err.message : 'Failed to fetch recruitment config';
@@ -89,7 +89,7 @@ export async function PUT(req: NextRequest) {
         );
       }
 
-      const keysToDelete = (existing || [])
+      const keysToDelete = existing
         .map(row => row.key)
         .filter(key => !incomingKeys.includes(key));
 
@@ -132,7 +132,7 @@ export async function PUT(req: NextRequest) {
     }
 
     revalidateRecruitment();
-    return NextResponse.json(data ?? []);
+    return NextResponse.json(data);
   } catch (err) {
     const msg =
       err instanceof Error

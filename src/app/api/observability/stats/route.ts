@@ -167,7 +167,7 @@ export async function GET(req: NextRequest) {
         uniqueSessions,
         deviceBreakdown,
         dailyTrends: dailyPageviewArray,
-        topPages: pageAnalytics || [],
+        topPages: pageAnalytics,
       },
       errors: {
         recent: recentErrors || [],

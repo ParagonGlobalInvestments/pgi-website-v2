@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data ?? []);
+    return NextResponse.json(data);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch sponsors';
     return NextResponse.json({ error: msg }, { status: 500 });

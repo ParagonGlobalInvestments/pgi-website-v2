@@ -22,7 +22,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { success: true, experience: data ?? [] },
+      { success: true, experience: data },
       {
         headers: {
           'Cache-Control': 'private, max-age=120, stale-while-revalidate=300',

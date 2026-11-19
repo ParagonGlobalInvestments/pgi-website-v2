@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, experience: data ?? [] });
+    return NextResponse.json({ success: true, experience: data });
   } catch (error) {
     const msg =
       error instanceof Error ? error.message : 'Failed to fetch experience';
