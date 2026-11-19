@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import useSWR from 'swr';
 import { toast } from 'sonner';
 import { GraduationCap, Loader2 } from 'lucide-react';
@@ -48,6 +48,12 @@ function GraduationSkeleton() {
   );
 }
 
+/**
+ * selecting → confirming (dialog open) → submitting → selecting on success,
+ * or back to confirming on failure so the admin can retry.
+ */
+type GraduationFlow = 'selecting' | 'confirming' | 'submitting';
+
 function plural(count: number, word: string) {
   return `${count} ${count === 1 ? word : `${word}s`}`;
 }
@@ -64,8 +70,11 @@ export default function GraduationPage() {
 
   // Track deselections so every candidate starts selected.
   const [deselected, setDeselected] = useState<Set<string>>(() => new Set());
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [flow, setFlow] = useState<GraduationFlow>('selecting');
+  const submitting = flow === 'submitting';
+  // State updates are async, so a same-tick double click could pass the
+  // `flow` check twice; the ref closes that gap.
+  const submittingRef = useRef(false);
 
   const candidates = useMemo(() => data?.candidates ?? [], [data]);
   const selectedIds = useMemo(
@@ -98,7 +107,9 @@ export default function GraduationPage() {
     setDeselected(allSelected ? new Set(candidates.map(c => c.id)) : new Set());
 
   const handleConfirm = async () => {
-    setSubmitting(true);
+    if (flow !== 'confirming' || submittingRef.current) return;
+    submittingRef.current = true;
+    setFlow('submitting');
     try {
       const res = await fetch(GRADUATION_API_PATH, {
         method: 'POST',
@@ -119,15 +130,26 @@ export default function GraduationPage() {
             ? `${plural(skipped, 'member')} skipped (already alumni or not eligible).`
             : undefined,
       });
-      setConfirmOpen(false);
-      setDeselected(new Set());
-      await mutate();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Failed to graduate members'
       );
+      submittingRef.current = false;
+      setFlow('confirming');
+      return;
+    }
+
+    // Graduated. Stay in `submitting` until the list is fresh so the admin
+    // can't reconfirm against stale candidates. A revalidation failure must
+    // not reopen the dialog; SWR surfaces it through `error`.
+    try {
+      await mutate();
+    } catch {
+      // handled by SWR's error state
     } finally {
-      setSubmitting(false);
+      setDeselected(new Set());
+      submittingRef.current = false;
+      setFlow('selecting');
     }
   };
 
@@ -182,7 +204,7 @@ export default function GraduationPage() {
               </p>
             </div>
             <Button
-              onClick={() => setConfirmOpen(true)}
+              onClick={() => setFlow('confirming')}
               disabled={selectedIds.length === 0}
             >
               <GraduationCap className="h-4 w-4 mr-2" />
@@ -255,8 +277,11 @@ export default function GraduationPage() {
       )}
 
       <Dialog
-        open={confirmOpen}
-        onOpenChange={open => !submitting && setConfirmOpen(open)}
+        open={flow !== 'selecting'}
+        onOpenChange={open => {
+          if (submitting) return;
+          setFlow(open ? 'confirming' : 'selecting');
+        }}
       >
         <DialogContent>
           <DialogHeader>
@@ -272,7 +297,7 @@ export default function GraduationPage() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setConfirmOpen(false)}
+              onClick={() => setFlow('selecting')}
               disabled={submitting}
             >
               Cancel

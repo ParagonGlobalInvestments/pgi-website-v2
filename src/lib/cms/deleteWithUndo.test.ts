@@ -1,5 +1,5 @@
 import { toast, type ExternalToast } from 'sonner';
-import { deleteWithUndo } from './deleteWithUndo';
+import { deleteWithUndo, nextUndoDeleteStatus } from './deleteWithUndo';
 
 jest.mock('sonner', () => ({
   toast: Object.assign(
@@ -102,6 +102,30 @@ describe('deleteWithUndo', () => {
     );
   });
 
+  it('ignores Undo once the delete is committing', async () => {
+    deleteWithUndo(url, 'Officer', restore);
+    const options = toastOptions();
+    const commit = options.onDismiss?.({ id: 'delete-toast' });
+    undo(options);
+    await commit;
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(restore).not.toHaveBeenCalled();
+  });
+
+  it('restores only once when a failed delete is followed by more events', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: false } as Response);
+    deleteWithUndo(url, 'Officer', restore);
+    const options = toastOptions();
+    await options.onDismiss?.({ id: 'delete-toast' });
+    undo(options);
+    await options.onAutoClose?.({ id: 'delete-toast' });
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(restore).toHaveBeenCalledTimes(1);
+  });
+
   it.each(['server', 'network'])('restores on a %s failure', async failure => {
     if (failure === 'server') {
       fetchMock.mockResolvedValueOnce({ ok: false } as Response);
@@ -115,4 +139,29 @@ describe('deleteWithUndo', () => {
     expect(restore).toHaveBeenCalledTimes(1);
     expect(toast.error).toHaveBeenCalledWith('Failed to delete — restoring');
   });
+});
+
+describe('nextUndoDeleteStatus', () => {
+  it('follows pending → committing → committed | failed, or pending → undone', () => {
+    expect(nextUndoDeleteStatus('pending', 'undo')).toBe('undone');
+    expect(nextUndoDeleteStatus('pending', 'commit')).toBe('committing');
+    expect(nextUndoDeleteStatus('committing', 'succeed')).toBe('committed');
+    expect(nextUndoDeleteStatus('committing', 'fail')).toBe('failed');
+  });
+
+  it('rejects events that do not apply', () => {
+    expect(nextUndoDeleteStatus('pending', 'succeed')).toBeNull();
+    expect(nextUndoDeleteStatus('pending', 'fail')).toBeNull();
+    expect(nextUndoDeleteStatus('committing', 'undo')).toBeNull();
+    expect(nextUndoDeleteStatus('committing', 'commit')).toBeNull();
+  });
+
+  it.each(['undone', 'committed', 'failed'] as const)(
+    'treats %s as terminal',
+    status => {
+      for (const event of ['undo', 'commit', 'succeed', 'fail'] as const) {
+        expect(nextUndoDeleteStatus(status, event)).toBeNull();
+      }
+    }
+  );
 });

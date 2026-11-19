@@ -189,6 +189,17 @@ interface ExperienceEntry {
 }
 
 /** userId → every company and role they have listed, for free-text search. */
+/** What the member and alumni directories load: people plus experience search text. */
+export interface DirectoryData<T> {
+  users: T[];
+  experienceMap: Map<string, string>;
+}
+
+export const NO_DIRECTORY: DirectoryData<never> = {
+  users: [],
+  experienceMap: new Map(),
+};
+
 export async function fetchExperienceSearchMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   const res = await fetch('/api/users/experience');

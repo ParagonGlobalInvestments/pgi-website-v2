@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useState, useEffect, useMemo, useReducer, memo } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
 import { usePortalTransition, usePortalExit } from '@/lib/portal-transitions';
-import { EASING, NAVY, LAYOUT } from '@/lib/portal-transitions/config';
+import { EASING, NAVY, LAYOUT, TIMING } from '@/lib/portal-transitions/config';
 import { usePortalUser } from '@/hooks/usePortalUser';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,7 +41,13 @@ import {
   SITE_URL,
 } from '@/components/portal/constants';
 import type { PortalUserInfo } from '@/components/portal/types';
-import type { User as AuthUser } from '@supabase/supabase-js';
+import {
+  initialShellState,
+  needsSignOut,
+  shellAuthFrom,
+  shellReducer,
+  type ShellAuth,
+} from './portalShellState';
 
 /** Easing shorthand */
 const easing = EASING.smooth;
@@ -480,8 +486,16 @@ export function UnifiedPortalShell({
   const { tag, flow } = usePortalTransition();
   const { handleExit } = usePortalExit();
 
-  // Shell mode: 'login' | 'dashboard' — replaces old PortalShellContext mode
-  const [mode, setMode] = useState<'login' | 'dashboard'>(initialMode);
+  // Shell mode (login ↔ dashboard). The shell outlives /portal/login →
+  // /portal navigations, so it remembers a finished morph itself.
+  const [shell, dispatchShell] = useReducer(
+    shellReducer,
+    initialMode,
+    initialShellState
+  );
+  const mode = shell.mode;
+  const shouldAnimateSidebar =
+    shell.mode === 'dashboard' && shell.entrance === 'morph';
 
   // UI state
   const [activeLink, setActiveLink] = useState('home');
@@ -489,10 +503,10 @@ export function UnifiedPortalShell({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  // Auth state
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [authLoaded, setAuthLoaded] = useState(false);
-  const { user: portalUser } = usePortalUser(!!authUser);
+  // Client-side session: loading → signedIn | signedOut
+  const [auth, setAuth] = useState<ShellAuth>({ status: 'loading' });
+  const authUser = auth.status === 'signedIn' ? auth.user : null;
+  const { user: portalUser } = usePortalUser(auth.status === 'signedIn');
 
   // Entrance animation flag (from Header portal button)
   const [showEntranceAnimation] = useState(() => {
@@ -508,17 +522,24 @@ export function UnifiedPortalShell({
   const showLoginView = mode === 'login' && !isMorphing;
   const showDashboardView = isMorphing || mode === 'dashboard';
 
-  // Sidebar entrance animation after morph
-  const [shouldAnimateSidebar, setShouldAnimateSidebar] = useState(false);
-
   useEffect(() => setIsClient(true), []);
 
-  // Transition mode from login→dashboard when morph completes
+  // login → dashboard when the login morph completes
   useEffect(() => {
     if (tag === 'complete' && flow === 'login:morph') {
-      setMode('dashboard');
+      dispatchShell({ type: 'MORPH_COMPLETED' });
     }
   }, [tag, flow]);
+
+  // The sidebar's post-morph entrance plays once, then settles
+  useEffect(() => {
+    if (!shouldAnimateSidebar) return;
+    const timer = setTimeout(
+      () => dispatchShell({ type: 'ENTRANCE_SETTLED' }),
+      TIMING.sidebarEntrance
+    );
+    return () => clearTimeout(timer);
+  }, [shouldAnimateSidebar]);
 
   // Clear entrance param from URL
   useEffect(() => {
@@ -551,26 +572,24 @@ export function UnifiedPortalShell({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setAuthUser(user);
-      setAuthLoaded(true);
+      setAuth(shellAuthFrom(user));
     };
     checkAuth();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user || null);
-      setAuthLoaded(true);
+      setAuth(shellAuthFrom(session?.user));
     });
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  // Reset to login when user signs out (only after auth has loaded at least once)
+  // dashboard → login whenever the dashboard shows without a session (only
+  // once auth has loaded; re-checked when the mode changes, too)
+  const signOutNeeded = needsSignOut(shell, auth);
   useEffect(() => {
-    if (authLoaded && !authUser && mode === 'dashboard') {
-      setMode('login');
-    }
-  }, [authLoaded, authUser, mode]);
+    if (signOutNeeded) dispatchShell({ type: 'SIGNED_OUT' });
+  }, [signOutNeeded]);
 
   // Sync active link with pathname
   useEffect(() => {
@@ -594,14 +613,6 @@ export function UnifiedPortalShell({
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
-
-  // Trigger sidebar animation after morph completes
-  useEffect(() => {
-    if (tag !== 'complete' || flow !== 'login:morph') return;
-    setShouldAnimateSidebar(true);
-    const timer = setTimeout(() => setShouldAnimateSidebar(false), 1000);
-    return () => clearTimeout(timer);
-  }, [tag, flow]);
 
   // Filter nav items by role
   const visibleNavItems = useMemo(

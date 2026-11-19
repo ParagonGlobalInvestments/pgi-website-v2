@@ -3,6 +3,7 @@ import type { User as AuthUser } from '@supabase/supabase-js';
 import { requireSupabaseServerClient } from '@/lib/supabase/server';
 import { checkMembership } from '@/lib/auth/checkMembership';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import { ADMIN_ALLOWLIST_USER_ID } from '@/lib/members/lifecycle';
 import type { User } from '@/types';
 
 /**
@@ -48,7 +49,7 @@ export async function requireAdmin(): Promise<
       return {
         user: authUser,
         portalUser: {
-          id: 'admin-allowlist',
+          id: ADMIN_ALLOWLIST_USER_ID,
           email: authUser.email ?? '',
           name:
             authUser.user_metadata.full_name ||

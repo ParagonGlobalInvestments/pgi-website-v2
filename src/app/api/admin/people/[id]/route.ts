@@ -5,6 +5,10 @@ import type { PeopleGroupSlug } from '@/lib/cms/types';
 import { revalidatePeople } from '@/lib/cms/revalidate';
 import { toSchoolSlug } from '@/lib/constants/universities';
 import {
+  parseMemberStatus,
+  requiresChapterSchool,
+} from '@/lib/members/lifecycle';
+import {
   getAdminPersonByExternalId,
   isMembershipSchemaError,
   isPeopleGroupSlug,
@@ -126,7 +130,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
         );
       }
 
-      if (currentUser.status === 'alumni') {
+      if (!requiresChapterSchool(parseMemberStatus(currentUser.status))) {
         // Alumni may have no school, or one outside the chapters. Only chapter
         // slugs go on the user; the source row keeps what the public pages show.
         userUpdates.school = toSchoolSlug(school);

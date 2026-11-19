@@ -3,7 +3,7 @@
  */
 
 // Config
-export { EASING, TIMING, LAYOUT, NAVY, NAVY_COLORS } from './config';
+export { EASING, TIMING, LAYOUT, NAVY } from './config';
 
 // Types
 export type {

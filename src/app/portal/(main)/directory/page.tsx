@@ -24,11 +24,27 @@ import {
   ExperienceList,
   ProfileLinks,
   SchoolLogo,
+  NO_DIRECTORY,
   fetchExperienceSearchMap,
+  type DirectoryData,
   gridContainerVariants,
   gridItemVariants,
 } from '@/components/portal/directory-shared';
 import type { User } from '@/types';
+import {
+  LOADING,
+  dataOr,
+  failed,
+  ready,
+  type AsyncState,
+} from '@/lib/async-state';
+import {
+  EMPTY_PANEL,
+  closePanel,
+  openPanel,
+  panelItem,
+  type PanelState,
+} from '@/lib/panel-state';
 import { motion } from 'framer-motion';
 
 // ============================================================================
@@ -124,16 +140,13 @@ function MemberDetail({ user }: { user: User }) {
 // ============================================================================
 
 export default function DirectoryPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [experienceMap, setExperienceMap] = useState<Map<string, string>>(
-    new Map()
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [directory, setDirectory] =
+    useState<AsyncState<DirectoryData<User>>>(LOADING);
+  const { users, experienceMap } = dataOr(directory, NO_DIRECTORY);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [panel, setPanel] = useState<PanelState<User>>(EMPTY_PANEL);
+  const selectedUser = panelItem(panel);
 
   const [filter, setFilter] = useState({
     school: 'all',
@@ -151,7 +164,6 @@ export default function DirectoryPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const [usersRes, experience] = await Promise.all([
           fetch('/api/users'),
           fetchExperienceSearchMap().catch(() => new Map<string, string>()),
@@ -161,16 +173,15 @@ export default function DirectoryPage() {
         if (!usersData.success || !Array.isArray(usersData.users)) {
           throw new Error(usersData.error || 'Failed to fetch users');
         }
-        setUsers(usersData.users);
-        setExperienceMap(experience);
-
-        setError('');
-      } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load directory'
+        setDirectory(
+          ready({ users: usersData.users, experienceMap: experience })
         );
-      } finally {
-        setLoading(false);
+      } catch (err: unknown) {
+        setDirectory(
+          failed(
+            err instanceof Error ? err.message : 'Failed to load directory'
+          )
+        );
       }
     };
     fetchData();
@@ -208,14 +219,7 @@ export default function DirectoryPage() {
     filter.role !== 'all' ||
     searchTerm !== '';
 
-  const openPanel = (user: User) => {
-    setSelectedUser(user);
-    setIsPanelOpen(true);
-  };
-
-  const closePanel = useCallback(() => {
-    setIsPanelOpen(false);
-  }, []);
+  const closeMemberPanel = useCallback(() => setPanel(closePanel), []);
 
   return (
     <div className="space-y-6">
@@ -322,12 +326,12 @@ export default function DirectoryPage() {
       </div>
 
       {/* Members Grid */}
-      {loading ? (
+      {directory.status === 'loading' ? (
         <DirectoryGridSkeleton />
-      ) : error ? (
+      ) : directory.status === 'error' ? (
         <div className="bg-red-50 border border-red-200 p-6 rounded-xl text-red-800">
           <h3 className="font-semibold mb-2">Error Loading Directory</h3>
-          <p className="text-sm">{error}</p>
+          <p className="text-sm">{directory.message}</p>
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="bg-gray-50 p-12 rounded-xl text-center text-gray-500">
@@ -349,11 +353,11 @@ export default function DirectoryPage() {
             <motion.div key={user.id} variants={gridItemVariants}>
               <Card
                 className={`border transition-all duration-200 ease-smooth cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
-                  selectedUser?.id === user.id && isPanelOpen
+                  panel.status === 'open' && panel.item.id === user.id
                     ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => openPanel(user)}
+                onClick={() => setPanel(openPanel(user))}
               >
                 <CardContent className="p-5">
                   <div className="flex items-center gap-3 mb-2">
@@ -413,8 +417,8 @@ export default function DirectoryPage() {
 
       {/* Member Detail Panel */}
       <DetailPanel
-        isOpen={isPanelOpen}
-        onClose={closePanel}
+        isOpen={panel.status === 'open'}
+        onClose={closeMemberPanel}
         aria-label="Member details"
       >
         {selectedUser && <MemberDetail user={selectedUser} />}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useReducer, useRef } from 'react';
 import { Globe, X, Plus, Trash2, Pencil } from 'lucide-react';
 import { Github, Linkedin } from '@/components/ui/brand-icons';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,21 @@ import {
 import type { User, UserRole, UserProgram, UserPreferences } from '@/types';
 import type { UserIdentity } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/browser';
+import {
+  experienceEditorReducer,
+  initialExperienceEditorState,
+  isDraftValid,
+  type ExperienceDraft,
+} from '@/lib/settings/experienceEditor';
+import {
+  profileFormReducer,
+  shouldSave,
+  type ProfileField,
+  type ProfileFormState,
+  type ProfileValues,
+} from '@/lib/settings/profileAutosave';
+import { linkedAccountsReducer } from '@/lib/settings/linkedAccounts';
+import { isAdminAllowlistUserId } from '@/lib/members/lifecycle';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -209,20 +224,6 @@ interface ExperienceRow {
   sort_order: number;
 }
 
-interface ExperienceDraft {
-  company: string;
-  role: string;
-  startYear: string;
-  endYear: string;
-}
-
-const emptyDraft: ExperienceDraft = {
-  company: '',
-  role: '',
-  startYear: '',
-  endYear: '',
-};
-
 function draftFromRow(row: ExperienceRow): ExperienceDraft {
   return {
     company: row.company,
@@ -238,13 +239,17 @@ function ExperienceForm({
   onSave,
   onCancel,
   saving,
+  busy,
   saveLabel,
 }: {
   draft: ExperienceDraft;
   onChange: (d: ExperienceDraft) => void;
   onSave: () => void;
   onCancel: () => void;
+  /** This form's save is in flight */
   saving: boolean;
+  /** Any experience request is in flight */
+  busy: boolean;
   saveLabel: string;
 }) {
   const valid = draft.company.trim() && draft.role.trim();
@@ -345,7 +350,7 @@ function ExperienceForm({
           type="button"
           variant="navy"
           size="sm"
-          disabled={saving || !valid}
+          disabled={busy || !valid}
           onClick={onSave}
         >
           {saving ? 'Saving...' : saveLabel}
@@ -358,12 +363,11 @@ function ExperienceForm({
 function ExperienceSection({ userId }: { userId: string }) {
   const [entries, setEntries] = useState<ExperienceRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [addDraft, setAddDraft] = useState<ExperienceDraft>(emptyDraft);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<ExperienceDraft>(emptyDraft);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [editor, dispatch] = useReducer(
+    experienceEditorReducer,
+    initialExperienceEditorState
+  );
+  const { mode, pending } = editor;
 
   const fetchExperience = useCallback(async () => {
     try {
@@ -380,83 +384,76 @@ function ExperienceSection({ userId }: { userId: string }) {
   }, []);
 
   useEffect(() => {
-    if (userId !== 'admin-allowlist') fetchExperience();
+    if (!isAdminAllowlistUserId(userId)) fetchExperience();
     else setLoading(false);
   }, [userId, fetchExperience]);
 
-  const handleAdd = async () => {
-    if (!addDraft.company.trim() || !addDraft.role.trim()) return;
-    setSaving(true);
+  const handleSave = async () => {
+    if (mode.kind === 'list' || pending.kind !== 'idle') return;
+    if (!isDraftValid(mode.draft)) return;
+    const { draft } = mode;
+    dispatch({ type: 'SAVE_START' });
     try {
-      const res = await fetch('/api/users/me/experience', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company: addDraft.company.trim(),
-          role: addDraft.role.trim(),
-          startYear: addDraft.startYear ? Number(addDraft.startYear) : null,
-          endYear: addDraft.endYear ? Number(addDraft.endYear) : null,
-        }),
-      });
-      if (res.ok) {
-        setAddDraft(emptyDraft);
-        setShowAddForm(false);
-        await fetchExperience();
+      const res = await fetch(
+        mode.kind === 'adding'
+          ? '/api/users/me/experience'
+          : `/api/users/me/experience/${mode.id}`,
+        {
+          method: mode.kind === 'adding' ? 'POST' : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company: draft.company.trim(),
+            role: draft.role.trim(),
+            startYear: draft.startYear ? Number(draft.startYear) : null,
+            endYear: draft.endYear ? Number(draft.endYear) : null,
+          }),
+        }
+      );
+      if (!res.ok) {
+        dispatch({ type: 'SAVE_FAILURE' });
+        return;
       }
+      dispatch({ type: 'SAVE_SUCCESS' });
+      await fetchExperience();
     } catch {
       // silently fail
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdate = async (id: string) => {
-    if (!editDraft.company.trim() || !editDraft.role.trim()) return;
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/users/me/experience/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company: editDraft.company.trim(),
-          role: editDraft.role.trim(),
-          startYear: editDraft.startYear ? Number(editDraft.startYear) : null,
-          endYear: editDraft.endYear ? Number(editDraft.endYear) : null,
-        }),
-      });
-      if (res.ok) {
-        setEditingId(null);
-        await fetchExperience();
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setSaving(false);
+      dispatch({ type: 'SAVE_FAILURE' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    setDeleting(id);
+    if (pending.kind !== 'idle') return;
+    dispatch({ type: 'DELETE_START', id });
     try {
       const res = await fetch(`/api/users/me/experience/${id}`, {
         method: 'DELETE',
       });
-      if (res.ok) {
-        setEntries(prev => prev.filter(i => i.id !== id));
-        if (editingId === id) setEditingId(null);
+      if (!res.ok) {
+        dispatch({ type: 'DELETE_FAILURE' });
+        return;
       }
+      setEntries(prev => prev.filter(i => i.id !== id));
+      dispatch({ type: 'DELETE_SUCCESS', id });
     } catch {
       // silently fail
-    } finally {
-      setDeleting(null);
+      dispatch({ type: 'DELETE_FAILURE' });
     }
   };
 
-  const startEditing = (entry: ExperienceRow) => {
-    setEditingId(entry.id);
-    setEditDraft(draftFromRow(entry));
-    setShowAddForm(false);
-  };
+  const startEditing = (entry: ExperienceRow) =>
+    dispatch({ type: 'START_EDIT', id: entry.id, draft: draftFromRow(entry) });
+
+  const updateDraft = (draft: ExperienceDraft) =>
+    dispatch({ type: 'UPDATE_DRAFT', draft });
+
+  const cancel = () => dispatch({ type: 'CANCEL' });
+
+  // "Saving..." only on the form whose save is in flight
+  const saving =
+    pending.kind === 'saving' &&
+    mode.kind !== 'list' &&
+    pending.formId === mode.formId;
+  const busy = pending.kind !== 'idle';
 
   if (loading) {
     return (
@@ -470,10 +467,10 @@ function ExperienceSection({ userId }: { userId: string }) {
   }
 
   const addButton =
-    !showAddForm && !editingId ? (
+    mode.kind === 'list' ? (
       <button
         type="button"
-        onClick={() => setShowAddForm(true)}
+        onClick={() => dispatch({ type: 'START_ADD' })}
         className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
         aria-label="Add experience"
       >
@@ -487,14 +484,15 @@ function ExperienceSection({ userId }: { userId: string }) {
       <div className="space-y-2">
         <AnimatePresence mode="popLayout">
           {entries.map(entry =>
-            editingId === entry.id ? (
+            mode.kind === 'editing' && mode.id === entry.id ? (
               <ExperienceForm
                 key={entry.id}
-                draft={editDraft}
-                onChange={setEditDraft}
-                onSave={() => handleUpdate(entry.id)}
-                onCancel={() => setEditingId(null)}
+                draft={mode.draft}
+                onChange={updateDraft}
+                onSave={handleSave}
+                onCancel={cancel}
                 saving={saving}
+                busy={busy}
                 saveLabel="Save"
               />
             ) : (
@@ -533,7 +531,7 @@ function ExperienceSection({ userId }: { userId: string }) {
                   <button
                     type="button"
                     onClick={() => handleDelete(entry.id)}
-                    disabled={deleting === entry.id}
+                    disabled={busy}
                     aria-label={`Delete ${entry.role} at ${entry.company}`}
                     className="p-2 text-gray-400 hover:text-red-500 rounded transition-colors"
                   >
@@ -545,21 +543,19 @@ function ExperienceSection({ userId }: { userId: string }) {
           )}
         </AnimatePresence>
 
-        {entries.length === 0 && !showAddForm && (
+        {entries.length === 0 && mode.kind !== 'adding' && (
           <p className="text-sm text-gray-400 py-2">No experience added yet.</p>
         )}
 
         <AnimatePresence>
-          {showAddForm && (
+          {mode.kind === 'adding' && (
             <ExperienceForm
-              draft={addDraft}
-              onChange={setAddDraft}
-              onSave={handleAdd}
-              onCancel={() => {
-                setShowAddForm(false);
-                setAddDraft(emptyDraft);
-              }}
+              draft={mode.draft}
+              onChange={updateDraft}
+              onSave={handleSave}
+              onCancel={cancel}
               saving={saving}
+              busy={busy}
               saveLabel="Add"
             />
           )}
@@ -590,21 +586,23 @@ function MockModeSection() {
   const { realUser } = usePortalUser();
   const { mock, startMock, updateMock, stopMock } = useMockUser();
 
-  // Local state for pre-start selections
+  // Selection for the next start. Only shown while mock mode is inactive;
+  // once active, the selects edit the live mock instead.
   const [pendingRole, setPendingRole] = useState<UserRole>('analyst');
   const [pendingProgram, setPendingProgram] = useState<UserProgram | ''>('');
 
   if (realUser?.role !== 'admin') return null;
 
-  const currentRole = mock.isActive ? mock.role : pendingRole;
-  const currentProgram = mock.isActive ? (mock.program ?? '') : pendingProgram;
+  const isActive = mock.status === 'active';
+  const currentRole = isActive ? mock.role : pendingRole;
+  const currentProgram = isActive ? (mock.program ?? '') : pendingProgram;
 
   const handleStart = () => {
     startMock(pendingRole, pendingProgram || null);
   };
 
   const handleRoleChange = (role: UserRole) => {
-    if (mock.isActive) {
+    if (isActive) {
       updateMock({ role });
     } else {
       setPendingRole(role);
@@ -612,7 +610,7 @@ function MockModeSection() {
   };
 
   const handleProgramChange = (program: UserProgram | '') => {
-    if (mock.isActive) {
+    if (isActive) {
       updateMock({ program: program || null });
     } else {
       setPendingProgram(program);
@@ -672,7 +670,7 @@ function MockModeSection() {
           </div>
         </div>
 
-        {mock.isActive ? (
+        {isActive ? (
           <Button
             type="button"
             variant="outline"
@@ -716,31 +714,36 @@ const LINK_ERRORS: Record<string, string> = {
 
 function LinkedAccountsSection() {
   const supabase = createClient();
-  const [identities, setIdentities] = useState<UserIdentity[] | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [state, dispatch] = useReducer(linkedAccountsReducer<UserIdentity>, {
+    status: 'loading',
+    error: null,
+  });
 
-  const load = useCallback(async () => {
+  const fetchIdentities = useCallback(async () => {
     const { data } = await supabase.auth.getUserIdentities();
-    setIdentities(data?.identities ?? []);
+    return data?.identities ?? [];
   }, [supabase]);
 
   useEffect(() => {
-    load();
+    fetchIdentities().then(identities =>
+      dispatch({ type: 'LOADED', identities })
+    );
     // /auth/callback forwards OAuth errors from a failed link here
     const url = new URL(window.location.href);
     const code = url.searchParams.get('auth_error');
     if (!code) return;
-    setError(
-      LINK_ERRORS[code] ?? 'Could not link that account. Please try again.'
-    );
+    dispatch({
+      type: 'SHOW_ERROR',
+      message:
+        LINK_ERRORS[code] ?? 'Could not link that account. Please try again.',
+    });
     url.searchParams.delete('auth_error');
     window.history.replaceState({}, '', url.toString());
-  }, [load]);
+  }, [fetchIdentities]);
 
   const link = async () => {
-    setBusy(true);
-    setError('');
+    if (state.status !== 'ready') return;
+    dispatch({ type: 'LINK_START' });
     const next = encodeURIComponent(window.location.pathname);
     const { error: linkError } = await supabase.auth.linkIdentity({
       provider: 'google',
@@ -749,31 +752,37 @@ function LinkedAccountsSection() {
         queryParams: { prompt: 'select_account' },
       },
     });
-    if (linkError) {
-      setError(linkError.message);
-      setBusy(false);
-    }
+    // On success the browser is already leaving for Google
+    if (linkError)
+      dispatch({ type: 'LINK_FAILED', message: linkError.message });
   };
 
   const unlink = async (identity: UserIdentity) => {
-    setBusy(true);
-    setError('');
+    if (state.status !== 'ready') return;
+    dispatch({ type: 'UNLINK_START', identityId: identity.identity_id });
     const { error: unlinkError } = await supabase.auth.unlinkIdentity(identity);
-    if (unlinkError) setError(unlinkError.message);
-    await load();
-    setBusy(false);
+    const identities = await fetchIdentities();
+    dispatch({
+      type: 'UNLINK_DONE',
+      identities,
+      error: unlinkError?.message ?? null,
+    });
   };
+
+  const busy = state.status !== 'ready';
+  const error =
+    state.status === 'ready' || state.status === 'loading' ? state.error : null;
 
   return (
     <Section title="Linked Google accounts">
       <p className="text-xs text-gray-500 mb-3">
         You can sign in to the portal with any of these accounts.
       </p>
-      {identities === null ? (
+      {state.status === 'loading' ? (
         <Skeleton className="h-5 w-48" />
       ) : (
         <ul className="divide-y divide-gray-100">
-          {identities.map(identity => (
+          {state.identities.map(identity => (
             <li
               key={identity.identity_id}
               className="flex items-center justify-between gap-3 py-2 first:pt-0"
@@ -781,7 +790,7 @@ function LinkedAccountsSection() {
               <span className="text-sm text-gray-900 truncate">
                 {String(identity.identity_data?.email ?? identity.provider)}
               </span>
-              {identities.length > 1 && (
+              {state.identities.length > 1 && (
                 <button
                   type="button"
                   onClick={() => unlink(identity)}
@@ -814,139 +823,135 @@ function LinkedAccountsSection() {
   );
 }
 
+function profileValuesFromUser(u: User): ProfileValues {
+  return {
+    name: u.name,
+    website: u.websiteUrl || '',
+    linkedin: extractLinkedInUsername(u.linkedinUrl || ''),
+    github: extractGitHubUsername(u.githubUrl || ''),
+  };
+}
+
+function profilePayload(
+  field: ProfileField,
+  value: string
+): Record<string, string> {
+  switch (field) {
+    case 'name':
+      return { name: value };
+    case 'linkedin':
+      return { linkedinUrl: buildLinkedInUrl(value) };
+    case 'github':
+      return { githubUrl: buildGitHubUrl(value) };
+    case 'website':
+      return { websiteUrl: value };
+  }
+}
+
 export default function SettingsPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [savingField, setSavingField] = useState<string | null>(null);
+  const {
+    user: portalUser,
+    isLoading: portalLoading,
+    mutate: mutatePortalUser,
+  } = usePortalUser();
+
+  // A failed revalidation reports a null user; keep showing the last one so
+  // the form (and any unsaved edits) stays mounted.
+  const [lastUser, setLastUser] = useState(portalUser);
+  if (portalUser && portalUser !== lastUser) setLastUser(portalUser);
+  const user = portalUser ?? lastUser;
+
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [message, setMessage] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const [preferences, setPreferences] = useState<UserPreferences>(
+    () => user?.preferences || {}
+  );
 
-  const [name, setName] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [linkedinUsername, setLinkedinUsername] = useState('');
-  const [githubUsername, setGithubUsername] = useState('');
-  const [preferences, setPreferences] = useState<UserPreferences>({});
+  // Seeded synchronously when the user is already cached, so inputs never
+  // render empty before the first sync.
+  const [profile, dispatchProfile] = useReducer(
+    profileFormReducer,
+    user,
+    (u): ProfileFormState =>
+      u
+        ? profileFormReducer(
+            { status: 'unloaded' },
+            { type: 'LOAD', values: profileValuesFromUser(u) }
+          )
+        : { status: 'unloaded' }
+  );
+  const requestSeq = useRef(0);
+  // Newest request per field, so superseded failures stay quiet
+  const latestRequest = useRef<Partial<Record<ProfileField, number>>>({});
 
-  // Track server-confirmed values so we only save on actual changes
-  const [serverName, setServerName] = useState('');
-  const [serverWebsite, setServerWebsite] = useState('');
-  const [serverLinkedin, setServerLinkedin] = useState('');
-  const [serverGithub, setServerGithub] = useState('');
-  const {
-    user: portalUserData,
-    isLoading: portalLoading,
-    mutate: mutatePortalUser,
-  } = usePortalUser();
-
-  // Sync local form state when portalUser data arrives or changes
+  // Merge fresh server data into the form; unsaved edits are kept
   useEffect(() => {
-    if (portalLoading) return;
-    if (portalUserData) {
-      const u = portalUserData;
-      setUser(u);
-      setName(u.name);
-      setWebsiteUrl(u.websiteUrl || '');
-      setLinkedinUsername(extractLinkedInUsername(u.linkedinUrl || ''));
-      setGithubUsername(extractGitHubUsername(u.githubUrl || ''));
-      setPreferences(u.preferences || {});
-      // Track server values
-      setServerName(u.name);
-      setServerWebsite(u.websiteUrl || '');
-      setServerLinkedin(extractLinkedInUsername(u.linkedinUrl || ''));
-      setServerGithub(extractGitHubUsername(u.githubUrl || ''));
-    }
-    setLoading(false);
-  }, [portalUserData, portalLoading]);
-
-  const handleLinkedInChange = (value: string) => {
-    setLinkedinUsername(extractLinkedInUsername(value));
-  };
-
-  const handleGitHubChange = (value: string) => {
-    setGithubUsername(extractGitHubUsername(value));
-  };
+    if (!user) return;
+    dispatchProfile({ type: 'LOAD', values: profileValuesFromUser(user) });
+    setPreferences(user.preferences || {});
+  }, [user]);
 
   const showToast = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 4000);
   };
 
-  const handleFieldSave = async (field: string, overrideValue?: string) => {
-    // Determine the API payload and check if value actually changed
-    let payload: Record<string, string> = {};
-    let changed = false;
+  const fields = profile.status === 'loaded' ? profile.fields : null;
 
-    switch (field) {
-      case 'name': {
-        const val = overrideValue ?? name;
-        if (val === serverName) return;
-        if (!val.trim()) {
-          showToast('error', 'Name cannot be empty.');
-          setName(serverName);
-          return;
-        }
-        payload = { name: val };
-        changed = true;
-        break;
-      }
-      case 'linkedin': {
-        const val = overrideValue ?? linkedinUsername;
-        if (val === serverLinkedin) return;
-        payload = { linkedinUrl: buildLinkedInUrl(val) };
-        changed = true;
-        break;
-      }
-      case 'github': {
-        const val = overrideValue ?? githubUsername;
-        if (val === serverGithub) return;
-        payload = { githubUrl: buildGitHubUrl(val) };
-        changed = true;
-        break;
-      }
-      case 'website': {
-        const val = overrideValue ?? websiteUrl;
-        if (val === serverWebsite) return;
-        payload = { websiteUrl: val };
-        changed = true;
-        break;
-      }
+  const editField = (field: ProfileField, value: string) =>
+    dispatchProfile({ type: 'EDIT', field, value });
+
+  const handleFieldSave = async (
+    field: ProfileField,
+    overrideValue?: string
+  ) => {
+    if (!fields) return;
+    const current = fields[field];
+    const value = overrideValue ?? current.value;
+    if (!shouldSave({ ...current, value })) return;
+
+    if (field === 'name' && !value.trim()) {
+      showToast('error', 'Name cannot be empty.');
+      dispatchProfile({
+        type: 'REJECT',
+        field,
+        message: 'Name cannot be empty.',
+      });
+      return;
     }
 
-    if (!changed) return;
-    setSavingField(field);
+    const requestId = ++requestSeq.current;
+    latestRequest.current[field] = requestId;
+    dispatchProfile({ type: 'SAVE_START', field, value, requestId });
 
     try {
       const res = await fetch('/api/users/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(profilePayload(field, value)),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save');
 
-      setUser(data.user);
+      dispatchProfile({
+        type: 'SAVE_SUCCESS',
+        field,
+        requestId,
+        values: profileValuesFromUser(data.user as User),
+      });
       mutatePortalUser();
-      // Update server values from response
-      const u = data.user as User;
-      setServerName(u.name);
-      setServerLinkedin(extractLinkedInUsername(u.linkedinUrl || ''));
-      setServerGithub(extractGitHubUsername(u.githubUrl || ''));
-      setServerWebsite(u.websiteUrl || '');
     } catch (err: unknown) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : 'Failed to save.'
-      );
-      // Revert to server value
-      if (field === 'name') setName(serverName);
-      if (field === 'linkedin') setLinkedinUsername(serverLinkedin);
-      if (field === 'github') setGithubUsername(serverGithub);
-      if (field === 'website') setWebsiteUrl(serverWebsite);
-    } finally {
-      setSavingField(null);
+      const text = err instanceof Error ? err.message : 'Failed to save.';
+      if (latestRequest.current[field] === requestId) showToast('error', text);
+      dispatchProfile({
+        type: 'SAVE_FAILURE',
+        field,
+        requestId,
+        message: text,
+      });
     }
   };
 
@@ -961,7 +966,8 @@ export default function SettingsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save');
-      setUser(data.user);
+      // Keep the cache current so a later failure reverts to this value
+      mutatePortalUser(data.user as User, { revalidate: false });
     } catch {
       // Revert on failure
       setPreferences(user?.preferences || {});
@@ -971,7 +977,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading) {
+  if (portalLoading || (user && !fields)) {
     return (
       <div className="space-y-6 max-w-5xl">
         <div>
@@ -1000,7 +1006,7 @@ export default function SettingsPage() {
     );
   }
 
-  if (!user) {
+  if (!user || !fields) {
     return (
       <div className="text-center py-12 text-gray-500">
         Unable to load your profile. Please try refreshing.
@@ -1008,7 +1014,7 @@ export default function SettingsPage() {
     );
   }
 
-  const isAdmin = user.id === 'admin-allowlist';
+  const isAdmin = isAdminAllowlistUserId(user.id);
 
   return (
     <div className="space-y-6">
@@ -1114,10 +1120,10 @@ export default function SettingsPage() {
                   </Label>
                   <Input
                     id="name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
+                    value={fields.name.value}
+                    onChange={e => editField('name', e.target.value)}
                     onBlur={() => handleFieldSave('name')}
-                    className={`mt-1.5 ${savingField === 'name' ? 'opacity-60' : ''}`}
+                    className={`mt-1.5 ${fields.name.status === 'saving' ? 'opacity-60' : ''}`}
                   />
                 </div>
 
@@ -1138,17 +1144,22 @@ export default function SettingsPage() {
                       <input
                         id="linkedin"
                         type="text"
-                        value={linkedinUsername}
-                        onChange={e => handleLinkedInChange(e.target.value)}
+                        value={fields.linkedin.value}
+                        onChange={e =>
+                          editField(
+                            'linkedin',
+                            extractLinkedInUsername(e.target.value)
+                          )
+                        }
                         onBlur={() => handleFieldSave('linkedin')}
                         placeholder="your-profile"
-                        className={`w-full h-10 px-3 rounded-r-md border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00172B] focus-visible:border-transparent ${savingField === 'linkedin' ? 'opacity-60' : ''}`}
+                        className={`w-full h-10 px-3 rounded-r-md border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00172B] focus-visible:border-transparent ${fields.linkedin.status === 'saving' ? 'opacity-60' : ''}`}
                       />
-                      {linkedinUsername && (
+                      {fields.linkedin.value && (
                         <button
                           type="button"
                           onClick={() => {
-                            setLinkedinUsername('');
+                            editField('linkedin', '');
                             handleFieldSave('linkedin', '');
                           }}
                           aria-label="Clear LinkedIn"
@@ -1178,17 +1189,22 @@ export default function SettingsPage() {
                       <input
                         id="github"
                         type="text"
-                        value={githubUsername}
-                        onChange={e => handleGitHubChange(e.target.value)}
+                        value={fields.github.value}
+                        onChange={e =>
+                          editField(
+                            'github',
+                            extractGitHubUsername(e.target.value)
+                          )
+                        }
                         onBlur={() => handleFieldSave('github')}
                         placeholder="your-username"
-                        className={`w-full h-10 px-3 rounded-r-md border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00172B] focus-visible:border-transparent ${savingField === 'github' ? 'opacity-60' : ''}`}
+                        className={`w-full h-10 px-3 rounded-r-md border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00172B] focus-visible:border-transparent ${fields.github.status === 'saving' ? 'opacity-60' : ''}`}
                       />
-                      {githubUsername && (
+                      {fields.github.value && (
                         <button
                           type="button"
                           onClick={() => {
-                            setGithubUsername('');
+                            editField('github', '');
                             handleFieldSave('github', '');
                           }}
                           aria-label="Clear GitHub"
@@ -1214,17 +1230,19 @@ export default function SettingsPage() {
                     <Input
                       id="website"
                       type="url"
-                      value={websiteUrl}
-                      onChange={e => setWebsiteUrl(e.target.value)}
+                      value={fields.website.value}
+                      onChange={e => editField('website', e.target.value)}
                       onBlur={() => handleFieldSave('website')}
                       placeholder="https://yoursite.com"
-                      className={savingField === 'website' ? 'opacity-60' : ''}
+                      className={
+                        fields.website.status === 'saving' ? 'opacity-60' : ''
+                      }
                     />
-                    {websiteUrl && (
+                    {fields.website.value && (
                       <button
                         type="button"
                         onClick={() => {
-                          setWebsiteUrl('');
+                          editField('website', '');
                           handleFieldSave('website', '');
                         }}
                         aria-label="Clear website"

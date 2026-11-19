@@ -5,12 +5,15 @@ import { Loader2, Save } from 'lucide-react';
 
 interface CmsFormFooterProps {
   saving: boolean;
+  /** Disables submit without the saving spinner (e.g. while uploading). */
+  disabled?: boolean;
   isEditing: boolean;
   onCancel: () => void;
 }
 
 export default function CmsFormFooter({
   saving,
+  disabled = false,
   isEditing,
   onCancel,
 }: CmsFormFooterProps) {
@@ -19,7 +22,7 @@ export default function CmsFormFooter({
       <Button type="button" variant="outline" onClick={onCancel}>
         Cancel
       </Button>
-      <Button type="submit" disabled={saving}>
+      <Button type="submit" disabled={saving || disabled}>
         {saving ? (
           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
         ) : (

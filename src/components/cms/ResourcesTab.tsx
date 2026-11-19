@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { deleteWithUndo } from '@/lib/cms/deleteWithUndo';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,7 +34,24 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
-import ResourceForm from './ResourceForm';
+import ResourceForm, { type ResourceFormMode } from './ResourceForm';
+import {
+  LOADING,
+  dataOr,
+  fetchFailed,
+  isFetching,
+  mapReady,
+  ready,
+  startFetch,
+  type AsyncState,
+} from '@/lib/async-state';
+import {
+  EMPTY_PANEL,
+  closePanel,
+  openPanel,
+  panelItem,
+  type PanelState,
+} from '@/lib/panel-state';
 import type { CmsResource, ResourceTabId } from '@/lib/cms/types';
 
 // ============================================================================
@@ -360,44 +377,46 @@ function TabNode({
 // ResourcesTab — main component
 // ============================================================================
 
+const NO_RESOURCES: CmsResource[] = [];
+const NEW_RESOURCE: ResourceFormMode = { kind: 'create' };
+
 export default function ResourcesTab() {
-  const [items, setItems] = useState<CmsResource[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingResource, setEditingResource] = useState<
-    CmsResource | undefined
-  >(undefined);
-  const [defaultTabId, setDefaultTabId] = useState<ResourceTabId | undefined>(
-    undefined
+  const [state, setState] = useState<AsyncState<CmsResource[]>>(LOADING);
+  const items = dataOr(state, NO_RESOURCES);
+  const setItems = useCallback(
+    (update: (prev: CmsResource[]) => CmsResource[]) =>
+      setState(s => mapReady(s, update)),
+    []
   );
-  const [defaultSection, setDefaultSection] = useState<string | undefined>(
-    undefined
-  );
+  const [form, setForm] = useState<PanelState<ResourceFormMode>>(EMPTY_PANEL);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
+  // Only the latest request may settle the state; older responses are dropped.
+  const latestRequest = useRef(0);
   const fetchAll = useCallback(async () => {
-    setLoading(true);
+    const request = ++latestRequest.current;
+    setState(startFetch);
     try {
       const res = await fetch('/api/admin/resources');
       if (!res.ok) throw new Error('Failed to fetch');
       const data: CmsResource[] = await res.json();
       data.sort((a, b) => a.sort_order - b.sort_order);
-      setItems(data);
+      if (request !== latestRequest.current) return;
+      setState(ready(data));
     } catch {
+      if (request !== latestRequest.current) return;
       toast.error('Failed to load resources');
-    } finally {
-      setLoading(false);
+      setState(s => fetchFailed(s, 'Failed to load resources'));
     }
   }, []);
 
-  // Initial fetch
-  useState(() => {
+  useEffect(() => {
     fetchAll();
-  });
+  }, [fetchAll]);
 
   // Build tree structure
   const tree: TreeTab[] = useMemo(
@@ -472,7 +491,7 @@ export default function ResourcesTab() {
         fetchAll();
       }
     },
-    [fetchAll]
+    [fetchAll, setItems]
   );
 
   const handleDelete = useCallback(
@@ -493,24 +512,18 @@ export default function ResourcesTab() {
         }
       );
     },
-    [items]
+    [items, setItems]
   );
 
   const handleAdd = useCallback((tabId: ResourceTabId, section: string) => {
-    setEditingResource(undefined);
-    setDefaultTabId(tabId);
-    setDefaultSection(section);
-    setFormOpen(true);
+    setForm(openPanel({ kind: 'create', tabId, section }));
   }, []);
 
   const handleEdit = useCallback((resource: CmsResource) => {
-    setEditingResource(resource);
-    setDefaultTabId(undefined);
-    setDefaultSection(undefined);
-    setFormOpen(true);
+    setForm(openPanel({ kind: 'edit', resource }));
   }, []);
 
-  if (loading) {
+  if (isFetching(state)) {
     return (
       <div className="mt-4 flex items-center gap-2 py-8 text-gray-500">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -529,12 +542,7 @@ export default function ResourcesTab() {
         <Button
           size="sm"
           className="h-8 text-sm flex-shrink-0"
-          onClick={() => {
-            setEditingResource(undefined);
-            setDefaultTabId(undefined);
-            setDefaultSection(undefined);
-            setFormOpen(true);
-          }}
+          onClick={() => setForm(openPanel({ kind: 'create' }))}
         >
           <Plus className="h-3.5 w-3.5 mr-1" />
           Add
@@ -563,13 +571,13 @@ export default function ResourcesTab() {
       )}
 
       <ResourceForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        resource={editingResource}
-        defaultTabId={defaultTabId}
-        defaultSection={defaultSection}
+        open={form.status === 'open'}
+        onOpenChange={open => {
+          if (!open) setForm(closePanel);
+        }}
+        mode={panelItem(form) ?? NEW_RESOURCE}
         onSaved={() => {
-          setFormOpen(false);
+          setForm(closePanel);
           fetchAll();
         }}
       />

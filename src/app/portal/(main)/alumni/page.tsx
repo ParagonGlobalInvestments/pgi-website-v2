@@ -20,13 +20,29 @@ import {
   ExperienceList,
   ProfileLinks,
   SchoolLogo,
+  NO_DIRECTORY,
   fetchExperienceSearchMap,
+  type DirectoryData,
   gridContainerVariants,
   gridItemVariants,
   schoolLabel,
 } from '@/components/portal/directory-shared';
 import { presentParts } from '@/lib/alumni';
 import type { AlumniUser } from '@/types';
+import {
+  LOADING,
+  dataOr,
+  failed,
+  ready,
+  type AsyncState,
+} from '@/lib/async-state';
+import {
+  EMPTY_PANEL,
+  closePanel,
+  openPanel,
+  panelItem,
+  type PanelState,
+} from '@/lib/panel-state';
 import { motion } from 'framer-motion';
 
 // ============================================================================
@@ -155,16 +171,13 @@ function AlumniDetail({ user }: { user: AlumniUser }) {
 const DEFAULT_FILTER = { school: 'all', program: 'all', company: 'all' };
 
 export default function AlumniDirectoryPage() {
-  const [users, setUsers] = useState<AlumniUser[]>([]);
-  const [experienceMap, setExperienceMap] = useState<Map<string, string>>(
-    new Map()
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [directory, setDirectory] =
+    useState<AsyncState<DirectoryData<AlumniUser>>>(LOADING);
+  const { users, experienceMap } = dataOr(directory, NO_DIRECTORY);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedUser, setSelectedUser] = useState<AlumniUser | null>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [panel, setPanel] = useState<PanelState<AlumniUser>>(EMPTY_PANEL);
+  const selectedUser = panelItem(panel);
   const [filter, setFilter] = useState(DEFAULT_FILTER);
 
   // Debounce search
@@ -177,7 +190,6 @@ export default function AlumniDirectoryPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const [usersRes, experience] = await Promise.all([
           fetch('/api/users/alumni'),
           fetchExperienceSearchMap().catch(() => new Map<string, string>()),
@@ -187,15 +199,17 @@ export default function AlumniDirectoryPage() {
         if (!usersData.success || !Array.isArray(usersData.users)) {
           throw new Error(usersData.error || 'Failed to fetch alumni');
         }
-        setUsers(usersData.users);
-        setExperienceMap(experience);
-        setError('');
-      } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load alumni directory'
+        setDirectory(
+          ready({ users: usersData.users, experienceMap: experience })
         );
-      } finally {
-        setLoading(false);
+      } catch (err: unknown) {
+        setDirectory(
+          failed(
+            err instanceof Error
+              ? err.message
+              : 'Failed to load alumni directory'
+          )
+        );
       }
     };
     fetchData();
@@ -246,14 +260,7 @@ export default function AlumniDirectoryPage() {
     filter.company !== 'all' ||
     searchTerm !== '';
 
-  const openPanel = (user: AlumniUser) => {
-    setSelectedUser(user);
-    setIsPanelOpen(true);
-  };
-
-  const closePanel = useCallback(() => {
-    setIsPanelOpen(false);
-  }, []);
+  const closeMemberPanel = useCallback(() => setPanel(closePanel), []);
 
   return (
     <div className="space-y-6">
@@ -356,12 +363,12 @@ export default function AlumniDirectoryPage() {
       </div>
 
       {/* Alumni Grid */}
-      {loading ? (
+      {directory.status === 'loading' ? (
         <DirectoryGridSkeleton />
-      ) : error ? (
+      ) : directory.status === 'error' ? (
         <div className="bg-red-50 border border-red-200 p-6 rounded-xl text-red-800">
           <h3 className="font-semibold mb-2">Error Loading Alumni Directory</h3>
-          <p className="text-sm">{error}</p>
+          <p className="text-sm">{directory.message}</p>
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="bg-gray-50 p-12 rounded-xl text-center text-gray-500">
@@ -385,11 +392,11 @@ export default function AlumniDirectoryPage() {
               <motion.div key={user.id} variants={gridItemVariants}>
                 <Card
                   className={`border transition-all duration-200 ease-smooth cursor-pointer group hover:shadow-md hover:-translate-y-0.5 ${
-                    selectedUser?.id === user.id && isPanelOpen
+                    panel.status === 'open' && panel.item.id === user.id
                       ? 'border-blue-400 shadow-md ring-1 ring-blue-200'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  onClick={() => openPanel(user)}
+                  onClick={() => setPanel(openPanel(user))}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-3">
@@ -431,8 +438,8 @@ export default function AlumniDirectoryPage() {
 
       {/* Alumni Detail Panel */}
       <DetailPanel
-        isOpen={isPanelOpen}
-        onClose={closePanel}
+        isOpen={panel.status === 'open'}
+        onClose={closeMemberPanel}
         aria-label="Alumni details"
       >
         {selectedUser && <AlumniDetail user={selectedUser} />}

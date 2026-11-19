@@ -23,11 +23,15 @@ export const TIMING = {
     desktopTotal: 1400,
     mobileTotal: 800,
     navyFill: { d: 600, m: 200 },
-    panelSlide: { d: 600, m: 300 },
+    /** Desktop: 600ms slide + 200ms settle before navigating */
+    panelSlide: { d: 800, m: 300 },
+    /** 0 = phase skipped on that device */
     hold: { d: 0, m: 300 },
   },
   greeting: 1200,
   morph: 500,
+  /** How long the dashboard sidebar plays its post-morph entrance */
+  sidebarEntrance: 1000,
   exit: { desktop: 500, mobile: 300 },
   portalEntry: { desktop: 500, mobile: 300 },
 } as const;
@@ -46,11 +50,3 @@ export const NAVY = {
   primary: '#0a1628',
   alternate: '#0a192f',
 } as const;
-
-/**
- * Backwards-compatible re-exports.
- * Files outside the portal animation system (home page sections, etc.)
- * import EASING and NAVY_COLORS from @/lib/transitions. After that
- * barrel is deleted, they'll import from here instead.
- */
-export const NAVY_COLORS = NAVY;

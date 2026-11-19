@@ -3,7 +3,18 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+
+/**
+ * Upload lifecycle. While uploading, a local blob preview is shown; otherwise
+ * the preview is `value` (empty or the uploaded URL). Only the latest upload
+ * may settle the state, so a superseded or cleared upload is ignored.
+ */
+type UploadState =
+  | { status: 'idle' }
+  | { status: 'uploading'; localUrl: string };
+
+const IDLE: UploadState = { status: 'idle' };
 
 interface CmsImageUploadProps {
   folder: string;
@@ -24,14 +35,17 @@ export default function CmsImageUpload({
   shape = 'circle',
   label,
 }: CmsImageUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
+  const [state, setState] = useState<UploadState>(IDLE);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Id of the latest upload; bumping it orphans any upload still in flight.
+  const latestUpload = useRef(0);
 
-  // Sync preview when value changes externally (form reset, auto-save, etc.)
+  // Release the local blob preview once the upload settles, or on unmount.
+  const localUrl = state.status === 'uploading' ? state.localUrl : null;
   useEffect(() => {
-    setPreviewUrl(value || null);
-  }, [value]);
+    if (!localUrl) return;
+    return () => URL.revokeObjectURL(localUrl);
+  }, [localUrl]);
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
@@ -52,10 +66,9 @@ export default function CmsImageUpload({
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    const id = ++latestUpload.current;
+    setState({ status: 'uploading', localUrl: URL.createObjectURL(file) });
 
-    setUploading(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -71,8 +84,9 @@ export default function CmsImageUpload({
       }
 
       const { url } = await res.json();
+      if (id !== latestUpload.current) return;
       onChange(url);
-      setPreviewUrl(url);
+      setState(IDLE);
 
       if (onAutoSave) {
         onAutoSave(url);
@@ -80,10 +94,9 @@ export default function CmsImageUpload({
         toast.success(`${label} uploaded — click Create to save`);
       }
     } catch (err: unknown) {
+      if (id !== latestUpload.current) return;
       toast.error(err instanceof Error ? err.message : 'Upload failed');
-      setPreviewUrl(value || null);
-    } finally {
-      setUploading(false);
+      setState(IDLE);
     }
   };
 
@@ -98,8 +111,9 @@ export default function CmsImageUpload({
   };
 
   const clearImage = () => {
+    latestUpload.current++;
     onChange('');
-    setPreviewUrl(null);
+    setState(IDLE);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -107,11 +121,13 @@ export default function CmsImageUpload({
   };
 
   const isCircle = shape === 'circle';
+  const previewUrl =
+    state.status === 'uploading' ? state.localUrl : value || null;
 
   return (
     <div
       className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
-        uploading
+        state.status === 'uploading'
           ? 'border-blue-400 bg-blue-50'
           : 'border-gray-300 hover:border-gray-400'
       }`}
@@ -142,32 +158,26 @@ export default function CmsImageUpload({
         </div>
       ) : (
         <div className={isCircle ? 'text-center py-2' : 'text-center py-4'}>
-          {uploading ? (
-            <Loader2 className="h-8 w-8 mx-auto text-blue-500 animate-spin" />
-          ) : (
-            <>
-              <Upload
-                className={
-                  isCircle
-                    ? 'h-6 w-6 mx-auto text-gray-400 mb-1'
-                    : 'h-8 w-8 mx-auto text-gray-400 mb-2'
-                }
-              />
-              <p className="text-sm text-gray-500">
-                Drag & drop or{' '}
-                <button
-                  type="button"
-                  className="text-blue-500 hover:underline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  browse
-                </button>
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                PNG, JPEG, WebP, SVG (max 5MB)
-              </p>
-            </>
-          )}
+          <Upload
+            className={
+              isCircle
+                ? 'h-6 w-6 mx-auto text-gray-400 mb-1'
+                : 'h-8 w-8 mx-auto text-gray-400 mb-2'
+            }
+          />
+          <p className="text-sm text-gray-500">
+            Drag & drop or{' '}
+            <button
+              type="button"
+              className="text-blue-500 hover:underline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              browse
+            </button>
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            PNG, JPEG, WebP, SVG (max 5MB)
+          </p>
         </div>
       )}
       <input

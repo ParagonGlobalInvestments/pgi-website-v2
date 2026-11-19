@@ -16,12 +16,13 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { useRouter } from 'next/navigation';
-import { portalTransitionReducer } from './reducer';
+import { usePathname, useRouter } from 'next/navigation';
+import { canStart, portalTransitionReducer } from './reducer';
 import type {
   MachineState,
   MachineTag,
   MachineEffect,
+  MachineEvent,
   TransitionFlow,
 } from './types';
 
@@ -52,13 +53,15 @@ export function PortalTransitionProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // We use a ref to execute effects after dispatch
-  const pendingEffectRef = useRef<MachineEffect | null>(null);
+  // Effects produced by the reducer, keyed by the event that produced them
+  // (StrictMode runs reducers twice per event; the Map keeps one effect each)
+  const pendingEffectsRef = useRef(new Map<MachineEvent, MachineEffect>());
   const [state, rawDispatch] = useReducer(
-    (s: MachineState, e: Parameters<typeof portalTransitionReducer>[1]) => {
+    (s: MachineState, e: MachineEvent) => {
       const [newState, effect] = portalTransitionReducer(s, e);
-      pendingEffectRef.current = effect;
+      if (effect.type !== 'NONE') pendingEffectsRef.current.set(e, effect);
       return newState;
     },
     INITIAL_STATE
@@ -70,35 +73,58 @@ export function PortalTransitionProvider({
 
   // Execute side effects after state update
   useEffect(() => {
-    const effect = pendingEffectRef.current;
-    if (!effect || effect.type === 'NONE') return;
-    pendingEffectRef.current = null;
+    const effects = Array.from(pendingEffectsRef.current.values());
+    if (effects.length === 0) return;
+    pendingEffectsRef.current.clear();
 
-    if (effect.type === 'SCHEDULE_ADVANCE') {
-      // Clear any pending timer first
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        rawDispatch({ type: 'ADVANCE' });
-      }, effect.delayMs);
-    } else if (effect.type === 'NAVIGATE') {
-      if (effect.mode === 'push') {
-        router.push(effect.path);
-      } else {
-        window.location.href = effect.path;
+    for (const effect of effects) {
+      if (effect.type === 'SCHEDULE_ADVANCE') {
+        // Only one phase timer runs at a time
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+          timerRef.current = null;
+          rawDispatch({ type: 'ADVANCE' });
+        }, effect.delayMs);
+      } else if (effect.type === 'NAVIGATE') {
+        if (effect.mode === 'push') {
+          router.push(effect.path);
+        } else {
+          window.location.href = effect.path;
+        }
       }
     }
   });
 
-  // Cleanup on unmount
-  useEffect(() => () => {
+  // Route changes let a router.push flow settle back to idle
+  useEffect(() => {
+    rawDispatch({ type: 'ROUTE_CHANGED' });
+  }, [pathname]);
+
+  // A page restored from the back/forward cache must not keep a frozen overlay
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return;
       if (timerRef.current) clearTimeout(timerRef.current);
-    }, []);
+      timerRef.current = null;
+      rawDispatch({ type: 'CANCEL' });
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    []
+  );
 
   const start = useCallback(
     (flow: TransitionFlow, opts?: { mobile?: boolean; userName?: string }) => {
-      // Only clear timers if we're idle — otherwise the reducer rejects START
-      // and we'd kill an in-flight timer (StrictMode double-invoke bug)
-      if (stateRef.current._tag !== 'idle') return;
+      // Check before clearing timers: if the reducer would reject START we
+      // must not kill an in-flight timer (StrictMode double-invoke bug)
+      if (!canStart(stateRef.current)) return;
       if (timerRef.current) clearTimeout(timerRef.current);
       rawDispatch({
         type: 'START',

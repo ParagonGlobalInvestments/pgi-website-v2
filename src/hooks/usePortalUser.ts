@@ -65,9 +65,9 @@ export function usePortalUser(enabled = true) {
   // Overlay mock role/program when active (admin only, client-side only)
   const user = useMemo(() => {
     if (!data) return null;
-    if (!mock.isActive || data.role !== 'admin') return data;
+    if (mock.status !== 'active' || data.role !== 'admin') return data;
     return { ...data, role: mock.role, program: mock.program } as User;
-  }, [data, mock.isActive, mock.role, mock.program]);
+  }, [data, mock]);
 
   return {
     /** User with mock overlay applied (if active) */

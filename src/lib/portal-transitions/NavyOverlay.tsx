@@ -3,13 +3,9 @@
 /**
  * Unified Navy Overlay — renders all entrance/exit overlays.
  *
- * Mounted once in app/layout.tsx. Reads phase from context.
- * Renders nothing when idle. Uses clip-path: inset() for
- * compositor-accelerated (GPU) expansion — no layout thrashing.
- *
- * Replaces:
- * - NavyExpansionOverlay (exit flows)
- * - Header's 3 inline overlay blocks (entrance flows)
+ * Mounted once in app/layout.tsx. Reads phase from context and renders
+ * nothing when idle; entrance flows keep their final frame at `complete`
+ * until the destination takes over.
  */
 
 import Image from 'next/image';
@@ -20,11 +16,12 @@ import { NAVY, LAYOUT, EASING, TIMING } from './config';
 export function NavyOverlay() {
   const { tag, flow, mobile } = usePortalTransition();
 
-  // Only render during active transitions
-  if (tag === 'idle' || tag === 'complete') return null;
+  if (tag === 'idle') return null;
 
   // --- EXIT FLOWS: navy expands from sidebar/header width to fill screen ---
+  // At `complete` the shell renders solid navy itself, so the overlay unmounts.
   if (flow === 'exit:back' || flow === 'exit:logout') {
+    if (tag === 'complete') return null;
     const duration = mobile
       ? TIMING.exit.mobile / 1000
       : TIMING.exit.desktop / 1000;
@@ -52,11 +49,14 @@ export function NavyOverlay() {
     );
   }
 
+  // --- ENTRANCE flows hold their final frame at `complete` until the
+  // destination renders (router.push → ROUTE_CHANGED) or the page unloads.
+
   // --- ENTRANCE:LOGIN flow ---
   if (flow === 'entrance:login') {
     if (mobile) {
       // Mobile: navy fills → hold with logo → compress to header height
-      const isCompressing = tag === 'panel-slide';
+      const isCompressing = tag === 'panel-slide' || tag === 'complete';
       const isHolding = tag === 'navy-hold';
       return (
         <motion.div
@@ -100,7 +100,7 @@ export function NavyOverlay() {
     }
 
     // Desktop: navy fills → white panel slides in from right
-    const showPanel = tag === 'panel-slide';
+    const showPanel = tag === 'panel-slide' || tag === 'complete';
     return (
       <motion.div
         key="login-desktop-overlay"

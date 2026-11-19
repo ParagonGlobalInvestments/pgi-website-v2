@@ -1,10 +1,8 @@
 /**
  * Portal Transition System — Type Definitions
  *
- * Single discriminated-union state machine replacing:
- * - PortalShellContext (ShellMode + TransitionPhase)
- * - lib/transitions/types.ts (7-phase TransitionPhase)
- * - Header's 5 local boolean states
+ * Single discriminated-union state machine for every navy transition
+ * between the public site and the portal.
  */
 
 /** Which transition flow is running */
@@ -35,10 +33,18 @@ export type MachineState =
 /** Shorthand for the _tag field */
 export type MachineTag = MachineState['_tag'];
 
-/** Events that drive the state machine */
+/**
+ * Events that drive the state machine.
+ * - START: begin a flow (accepted from idle or complete)
+ * - ADVANCE: the current phase's timer elapsed
+ * - ROUTE_CHANGED: the client-side route changed; a flow that navigated with
+ *   router.push settles back to idle once its destination renders
+ * - CANCEL: abort (e.g. page restored from the back/forward cache)
+ */
 export type MachineEvent =
   | { type: 'START'; flow: TransitionFlow; mobile: boolean; userName?: string }
   | { type: 'ADVANCE' }
+  | { type: 'ROUTE_CHANGED' }
   | { type: 'CANCEL' };
 
 /** Side effects produced by the reducer (executed by context) */

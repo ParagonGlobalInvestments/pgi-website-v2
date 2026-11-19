@@ -1,30 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { createRateLimiter } from '@/lib/observability/rateLimit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Rate limiting
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 20;
-const RATE_WINDOW = 60 * 1000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip);
-
-  if (!entry || now > entry.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
-}
+// Per-IP fixed window (in memory; per isolate on Workers)
+const checkRateLimit = createRateLimiter({
+  limit: 20,
+  windowMs: 60 * 1000,
+});
 
 interface ErrorPayload {
   errorType: string;

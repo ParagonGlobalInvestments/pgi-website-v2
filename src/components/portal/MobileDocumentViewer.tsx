@@ -17,6 +17,7 @@ import {
   AlertCircle,
   X,
 } from 'lucide-react';
+import { LOADING, failed, ready, type AsyncState } from '@/lib/async-state';
 
 interface MobileDocumentViewerProps {
   isOpen: boolean;
@@ -30,6 +31,12 @@ interface ExcelData {
   sheets: string[];
   data: Record<string, unknown[][]>;
 }
+
+/**
+ * Document load state. Spreadsheets are fetched and parsed here (ready with
+ * the parsed workbook); PDFs are rendered by the browser (ready with null).
+ */
+type DocumentState = AsyncState<ExcelData | null>;
 
 /**
  * Mobile-optimized document viewer for Supabase Storage files.
@@ -46,15 +53,12 @@ export default function MobileDocumentViewer({
   title,
   type,
 }: MobileDocumentViewerProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [excelData, setExcelData] = useState<ExcelData | null>(null);
+  const [doc, setDoc] = useState<DocumentState>(LOADING);
   const [selectedSheet, setSelectedSheet] = useState(0);
 
   const loadExcelFile = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setDoc(LOADING);
 
       const XLSX = await import('xlsx');
       const response = await fetch(url);
@@ -71,25 +75,22 @@ export default function MobileDocumentViewer({
         });
       });
 
-      setExcelData({ sheets, data });
+      setDoc(ready({ sheets, data }));
       setSelectedSheet(0);
     } catch (err) {
       console.error('Error loading spreadsheet:', err);
-      setError('Failed to load spreadsheet. You can still download it.');
-    } finally {
-      setIsLoading(false);
+      setDoc(failed('Failed to load spreadsheet. You can still download it.'));
     }
   }, [url]);
 
   useEffect(() => {
     if (!isOpen) return;
-    setError(null);
 
     if (type === 'sheet') {
       loadExcelFile();
     } else {
-      // PDF — loading handled by <object> onLoad
-      setIsLoading(false);
+      // PDF — the browser renders it; <object> onLoad also marks it ready
+      setDoc(ready(null));
     }
   }, [isOpen, type, loadExcelFile]);
 
@@ -112,7 +113,7 @@ export default function MobileDocumentViewer({
           type="application/pdf"
           className="w-full h-full border-0"
           aria-label={title}
-          onLoad={() => setIsLoading(false)}
+          onLoad={() => setDoc(ready(null))}
         >
           {/* Fallback for browsers that can't render PDFs inline */}
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -126,7 +127,7 @@ export default function MobileDocumentViewer({
             </Button>
           </div>
         </object>
-        {isLoading && (
+        {doc.status === 'loading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-white z-10 pointer-events-none">
             <div className="flex flex-col items-center gap-3">
               <Skeleton className="w-[300px] h-[400px]" />
@@ -138,7 +139,7 @@ export default function MobileDocumentViewer({
     </div>
   );
 
-  const renderExcelViewer = () => {
+  const renderExcelViewer = (excelData: ExcelData | null) => {
     if (!excelData) {
       return (
         <div className="flex items-center justify-center h-full">
@@ -205,7 +206,7 @@ export default function MobileDocumentViewer({
     );
   };
 
-  const renderError = () => (
+  const renderError = (error: string) => (
     <div className="flex flex-col items-center justify-center h-full p-8 text-center">
       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
         <AlertCircle className="w-8 h-8 text-red-600" />
@@ -264,13 +265,13 @@ export default function MobileDocumentViewer({
 
         {/* Document content area */}
         <div className="flex-1 overflow-hidden min-h-0">
-          {error
-            ? renderError()
-            : isLoading && type === 'sheet'
-              ? renderLoading()
-              : type === 'pdf'
-                ? renderPDFViewer()
-                : renderExcelViewer()}
+          {doc.status === 'error'
+            ? renderError(doc.message)
+            : type === 'pdf'
+              ? renderPDFViewer()
+              : doc.status === 'loading'
+                ? renderLoading()
+                : renderExcelViewer(doc.data)}
         </div>
       </DialogContent>
     </Dialog>

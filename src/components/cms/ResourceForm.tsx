@@ -42,23 +42,33 @@ const TYPE_OPTIONS: { id: ResourceType; label: string }[] = [
   { id: 'link', label: 'External Link' },
 ];
 
+/** What the form is for: a new resource (optionally placed) or an existing one. */
+export type ResourceFormMode =
+  | { kind: 'create'; tabId?: ResourceTabId; section?: string }
+  | { kind: 'edit'; resource: CmsResource };
+
+/** At most one request runs at a time: a file upload or the save itself. */
+type PendingOperation = 'idle' | 'uploading' | 'saving';
+
 interface ResourceFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  resource?: CmsResource;
-  defaultTabId?: ResourceTabId;
-  defaultSection?: string;
+  mode: ResourceFormMode;
   onSaved: () => void;
 }
 
 export default function ResourceForm({
   open,
   onOpenChange,
-  resource,
-  defaultTabId,
-  defaultSection,
+  mode,
   onSaved,
 }: ResourceFormProps) {
+  // Primitive deps so a new mode object with the same contents doesn't reset
+  // the fields mid-edit.
+  const resource = mode.kind === 'edit' ? mode.resource : undefined;
+  const defaultTabId = mode.kind === 'create' ? mode.tabId : undefined;
+  const defaultSection = mode.kind === 'create' ? mode.section : undefined;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
@@ -66,11 +76,10 @@ export default function ResourceForm({
   const [type, setType] = useState<ResourceType>('pdf');
   const [tabId, setTabId] = useState<ResourceTabId>(defaultTabId || 'general');
   const [section, setSection] = useState(defaultSection || '');
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState<PendingOperation>('idle');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isEditing = Boolean(resource);
+  const isEditing = mode.kind === 'edit';
 
   useEffect(() => {
     if (open) {
@@ -98,13 +107,21 @@ export default function ResourceForm({
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
+    if (pending !== 'idle') {
+      toast.error(
+        pending === 'uploading'
+          ? 'Wait for the current upload to finish'
+          : 'Wait for the save to finish'
+      );
+      return;
+    }
 
     if (file.size > 25 * 1024 * 1024) {
       toast.error('File too large. Maximum size is 25MB.');
       return;
     }
 
-    setUploading(true);
+    setPending('uploading');
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -125,7 +142,7 @@ export default function ResourceForm({
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Upload failed');
     } finally {
-      setUploading(false);
+      setPending('idle');
     }
   };
 
@@ -137,6 +154,11 @@ export default function ResourceForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending === 'saving') return;
+    if (pending === 'uploading') {
+      toast.error('Wait for the file upload to finish');
+      return;
+    }
     if (!title.trim()) {
       toast.error('Title is required');
       return;
@@ -146,7 +168,7 @@ export default function ResourceForm({
       return;
     }
 
-    setSaving(true);
+    setPending('saving');
     const payload = {
       title: title.trim(),
       description: description.trim(),
@@ -158,10 +180,11 @@ export default function ResourceForm({
     };
 
     try {
-      const endpoint = isEditing
-        ? `/api/admin/resources/${resource!.id}`
-        : '/api/admin/resources';
-      const method = isEditing ? 'PUT' : 'POST';
+      const endpoint =
+        mode.kind === 'edit'
+          ? `/api/admin/resources/${mode.resource.id}`
+          : '/api/admin/resources';
+      const method = mode.kind === 'edit' ? 'PUT' : 'POST';
       const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -176,7 +199,7 @@ export default function ResourceForm({
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to save');
     } finally {
-      setSaving(false);
+      setPending('idle');
     }
   };
 
@@ -216,7 +239,7 @@ export default function ResourceForm({
           <Label>File Upload</Label>
           <div
             className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
-              uploading
+              pending === 'uploading'
                 ? 'border-blue-400 bg-blue-50'
                 : 'border-gray-300 hover:border-gray-400'
             }`}
@@ -240,7 +263,7 @@ export default function ResourceForm({
               </div>
             ) : (
               <div className="text-center py-2">
-                {uploading ? (
+                {pending === 'uploading' ? (
                   <Loader2 className="h-6 w-6 mx-auto text-blue-500 animate-spin" />
                 ) : (
                   <>
@@ -347,7 +370,8 @@ export default function ResourceForm({
         </div>
 
         <CmsFormFooter
-          saving={saving}
+          saving={pending === 'saving'}
+          disabled={pending === 'uploading'}
           isEditing={isEditing}
           onCancel={() => onOpenChange(false)}
         />
