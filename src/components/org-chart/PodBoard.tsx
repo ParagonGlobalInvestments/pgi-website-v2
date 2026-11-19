@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext,
   DragOverlay,
@@ -645,13 +646,21 @@ export function PodBoard({
           </section>
         )}
 
-        <DragOverlay dropAnimation={null}>
-          {drag && (
-            <div className="cursor-grabbing rounded-md border border-gray-200 bg-white px-2.5 py-1 shadow-lg">
-              <PersonName person={drag.member.person} />
-            </div>
+        {/*
+          The card under the pointer. It renders into <body>: inside the page
+          it inherited layout spacing (space-y-6 gave it a 24px top margin),
+          which put it below the pointer. Same padding as the name it lifts,
+          so the text doesn't shift when picked up.
+        */}
+        {drag &&
+          createPortal(
+            <DragOverlay dropAnimation={null}>
+              <div className="cursor-grabbing rounded-md bg-white px-1.5 py-0.5 shadow-lg ring-1 ring-gray-200">
+                <PersonName person={drag.member.person} />
+              </div>
+            </DragOverlay>,
+            document.body
           )}
-        </DragOverlay>
       </DndContext>
     </BoardProvider>
   );
