@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { deleteWithUndo } from '@/lib/cms/deleteWithUndo';
 import {
@@ -11,6 +11,18 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import {
+  LOADING,
+  dataOr,
+  fetchFailed,
+  isFetching,
+  mapReady,
+  ready,
+  startFetch,
+  type AsyncState,
+} from '@/lib/async-state';
+
+const EMPTY: never[] = [];
 
 interface UseCmsDataOptions<T> {
   endpoint: string;
@@ -19,8 +31,8 @@ interface UseCmsDataOptions<T> {
 }
 
 interface UseCmsDataReturn<T extends { id: string }> {
+  /** Loaded items; empty while loading or after a failed load. */
   items: T[];
-  setItems: React.Dispatch<React.SetStateAction<T[]>>;
   loading: boolean;
   refetch: () => Promise<void>;
   handleDragEnd: (event: DragEndEvent) => Promise<void>;
@@ -33,31 +45,47 @@ export function useCmsData<T extends { id: string }>({
   sortBy,
   query,
 }: UseCmsDataOptions<T>): UseCmsDataReturn<T> {
-  const [items, setItems] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AsyncState<T[]>>(LOADING);
+  // Loaded data belongs to one endpoint+query. When the source changes (e.g.
+  // switching People groups), drop it during render so the old group's items
+  // are never shown, or edited, under the new group.
+  const source = query ? `${endpoint}?${query}` : endpoint;
+  const [stateSource, setStateSource] = useState(source);
+  if (stateSource !== source) {
+    setStateSource(source);
+    setState(LOADING);
+  }
+  const items = dataOr(state, EMPTY);
+  const setItems = useCallback(
+    (update: (prev: T[]) => T[]) => setState(s => mapReady(s, update)),
+    []
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
+  // Only the latest request may settle the state; older responses are dropped.
+  const latestRequest = useRef(0);
   const refetch = useCallback(async () => {
-    setLoading(true);
+    const request = ++latestRequest.current;
+    setState(startFetch);
     try {
-      const url = query ? `${endpoint}?${query}` : endpoint;
-      const res = await fetch(url);
+      const res = await fetch(source);
       if (!res.ok) throw new Error('Failed to fetch');
       const data: T[] = await res.json();
       if (sortBy) {
         data.sort((a, b) => (a[sortBy] as number) - (b[sortBy] as number));
       }
-      setItems(data);
+      if (request !== latestRequest.current) return;
+      setState(ready(data));
     } catch {
+      if (request !== latestRequest.current) return;
       toast.error('Failed to load data');
-    } finally {
-      setLoading(false);
+      setState(s => fetchFailed(s, 'Failed to load data'));
     }
-  }, [endpoint, sortBy, query]);
+  }, [source, sortBy]);
 
   useEffect(() => {
     refetch();
@@ -95,7 +123,7 @@ export function useCmsData<T extends { id: string }>({
         return reordered;
       });
     },
-    [endpoint, refetch]
+    [endpoint, refetch, setItems]
   );
 
   const handleDelete = useCallback(
@@ -112,13 +140,12 @@ export function useCmsData<T extends { id: string }>({
         });
       });
     },
-    [endpoint, items]
+    [endpoint, items, setItems]
   );
 
   return {
     items,
-    setItems,
-    loading,
+    loading: isFetching(state),
     refetch,
     handleDragEnd,
     handleDelete,
