@@ -3,13 +3,9 @@
 /**
  * Unified Navy Overlay — renders all entrance/exit overlays.
  *
- * Mounted once in app/layout.tsx. Reads phase from context.
- * Renders nothing when idle. Uses clip-path: inset() for
- * compositor-accelerated (GPU) expansion — no layout thrashing.
- *
- * Replaces:
- * - NavyExpansionOverlay (exit flows)
- * - Header's 3 inline overlay blocks (entrance flows)
+ * Mounted once in app/layout.tsx. Reads phase from context and renders
+ * nothing when idle; entrance flows keep their final frame at `complete`
+ * until the destination takes over.
  */
 
 import Image from 'next/image';

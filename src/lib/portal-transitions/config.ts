@@ -50,11 +50,3 @@ export const NAVY = {
   primary: '#0a1628',
   alternate: '#0a192f',
 } as const;
-
-/**
- * Backwards-compatible re-exports.
- * Files outside the portal animation system (home page sections, etc.)
- * import EASING and NAVY_COLORS from @/lib/transitions. After that
- * barrel is deleted, they'll import from here instead.
- */
-export const NAVY_COLORS = NAVY;

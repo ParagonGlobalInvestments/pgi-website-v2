@@ -1,10 +1,8 @@
 /**
  * Portal Transition System — Type Definitions
  *
- * Single discriminated-union state machine replacing:
- * - PortalShellContext (ShellMode + TransitionPhase)
- * - lib/transitions/types.ts (7-phase TransitionPhase)
- * - Header's 5 local boolean states
+ * Single discriminated-union state machine for every navy transition
+ * between the public site and the portal.
  */
 
 /** Which transition flow is running */
