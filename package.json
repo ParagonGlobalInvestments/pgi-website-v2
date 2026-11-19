@@ -10,6 +10,7 @@
     "typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "start": "opennextjs-cloudflare preview",
     "lint": "eslint .",
+    "lint:tautologies": "eslint -c eslint.tautologies.config.mjs src",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "test": "jest",

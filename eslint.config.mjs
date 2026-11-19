@@ -37,6 +37,9 @@ const config = [
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'warn',
+      // Catch comparisons and ternaries that can only go one way.
+      'no-self-compare': 'error',
+      'no-unneeded-ternary': 'error',
       'arrow-body-style': ['warn', 'as-needed'],
       'no-unused-expressions': 'warn',
       'import/no-anonymous-default-export': 'off',

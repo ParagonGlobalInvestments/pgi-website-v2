@@ -19,6 +19,7 @@ npm run dev         # next dev on http://localhost:3000 (portal at /portal local
 npm run build       # opennextjs-cloudflare build → .open-next/
 npm run preview     # build + run in the local Workers runtime
 npm run lint        # eslint .
+npm run lint:tautologies  # opt-in type-aware audit for always-true/false conditions; review findings, not a gate
 npm run type-check  # tsc --noEmit
 npm test            # jest
 ```
