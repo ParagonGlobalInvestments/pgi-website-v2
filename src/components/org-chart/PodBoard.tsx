@@ -6,23 +6,35 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   pointerWithin,
   rectIntersection,
   useSensor,
   useSensors,
+  type Active,
+  type ClientRect,
   type CollisionDetection,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
+  type UniqueIdentifier,
 } from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 import { Pencil, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import type { UndoSnapshot } from '@/lib/org-chart-edit';
 import {
   canMove,
+  isLeadSeat,
   ledPodIds,
   moveLocally,
   podHasSeat,
+  podLeadSeats,
   rosterPlacements,
   type MoveTarget,
 } from '@/lib/org-chart-rules';
@@ -34,7 +46,17 @@ import type {
   UserProgram,
 } from '@/types';
 import { AddPersonDialog } from './AddPersonDialog';
-import { BoardProvider, DropZone, MemberChip, type BoardApi } from './board';
+import {
+  BoardProvider,
+  MemberChip,
+  UNASSIGNED,
+  Zone,
+  containerId,
+  containerTarget,
+  isSeatContainer,
+  type BoardApi,
+  type ZoneData,
+} from './board';
 import { ChangeLogDialog } from './ChangeLogDialog';
 import { PersonName } from './PersonName';
 import { PodCard } from './PodCard';
@@ -55,11 +77,59 @@ interface EditResult {
   undo: UndoSnapshot | null;
 }
 
-// Pointer position for mouse drags; rectangles for keyboard drags.
-const collisionDetection: CollisionDetection = args => {
-  const hits = pointerWithin(args);
-  return hits.length ? hits : rectIntersection(args);
-};
+/** Container id → ids of the people in it, in display order. */
+type Containers = Record<string, string[]>;
+
+function containersOf(roster: PodRoster): Containers {
+  const out: Containers = { [UNASSIGNED]: roster.unassigned.map(m => m.id) };
+  for (const pod of roster.pods) {
+    for (const seat of [...podLeadSeats(pod), 'analyst' as const]) {
+      out[containerId(pod.id, seat)] = pod.members
+        .filter(m => m.seat === seat)
+        .map(m => m.id);
+    }
+  }
+  return out;
+}
+
+function findContainer(containers: Containers, id: UniqueIdentifier) {
+  return Object.keys(containers).find(c => containers[c].includes(String(id)));
+}
+
+/** Move `id` into container `to` at `index` (removing it from wherever). */
+function placeIn(
+  containers: Containers,
+  id: string,
+  to: string,
+  index: number
+): Containers {
+  const next: Containers = {};
+  for (const [c, ids] of Object.entries(containers)) {
+    next[c] = ids.filter(x => x !== id);
+  }
+  const list = next[to] ?? [];
+  const at = Math.max(0, Math.min(index, list.length));
+  next[to] = [...list.slice(0, at), id, ...list.slice(at)];
+  return next;
+}
+
+/** Whether the dragged item's centre is past the middle of `over`. */
+function isAfter(active: Active, over: ClientRect): boolean {
+  const rect = active.rect.current.translated;
+  if (!rect) return false;
+  const dy = rect.top + rect.height / 2 - (over.top + over.height / 2);
+  const dx = rect.left + rect.width / 2 - (over.left + over.width / 2);
+  // Below the item, or level with it and to its right (wrapping grids).
+  return dy > over.height / 2 || (Math.abs(dy) <= over.height / 2 && dx > 0);
+}
+
+interface DragState {
+  member: PodMember;
+  origin: string;
+  originIndex: number;
+  /** Where everyone would be if the drag ended now. */
+  containers: Containers;
+}
 
 export function SectionHeader({
   title,
@@ -110,8 +180,8 @@ function EditHint({
   if (viewer.isAdmin) {
     return (
       <>
-        Drag people between pods, onto a seat, or out to &ldquo;Not in a pod
-        yet&rdquo;. Changes save as soon as you drop.
+        Drag people between pods, onto a seat, out to &ldquo;Not in a pod
+        yet&rdquo;, or up and down to reorder. Changes save as soon as you drop.
       </>
     );
   }
@@ -121,8 +191,8 @@ function EditHint({
     .join(', ');
   return (
     <>
-      You can move analysts between {names} and &ldquo;Not in a pod yet&rdquo;.
-      Changes save as soon as you drop.
+      You can move analysts between {names} and &ldquo;Not in a pod yet&rdquo;,
+      and reorder {names}. Changes save as soon as you drop.
     </>
   );
 }
@@ -139,7 +209,7 @@ export function PodBoard({
 }) {
   const [roster, setRoster] = useState(initialRoster);
   const [editing, setEditing] = useState(false);
-  const [dragged, setDragged] = useState<PodMember | null>(null);
+  const [drag, setDrag] = useState<DragState | null>(null);
   // Only the latest request's answer is applied, so quick successive drops
   // can't be overwritten by an older response arriving late.
   const latest = useRef(0);
@@ -217,22 +287,40 @@ export function PodBoard({
     [send]
   );
 
+  const baseContainers = useMemo(() => containersOf(roster), [roster]);
+  const byId = useMemo(
+    () => new Map(rosterPlacements(roster).map(m => [m.id, m])),
+    [roster]
+  );
+
   const api: BoardApi = useMemo(() => {
     const allows = (member: PodMember, target: MoveTarget) => {
       const pod = roster.pods.find(p => p.id === target.podId);
       if (target.podId && (!pod || !podHasSeat(pod.program, target.seat))) {
         return false;
       }
-      const unchanged =
+      // Already in that seat. (Within a list, moving means reordering.)
+      if (
+        isLeadSeat(target.seat) &&
         member.podId === target.podId &&
-        (target.podId === null || member.seat === target.seat);
-      return !unchanged && canMove(viewer, led, member, target);
+        member.seat === target.seat
+      ) {
+        return false;
+      }
+      return canMove(viewer, led, member, target);
     };
+    const containers = drag?.containers ?? baseContainers;
 
     return {
       editing,
       viewer,
       roster,
+      dragging: drag?.member ?? null,
+      items: id =>
+        (containers[id] ?? []).flatMap(m => {
+          const member = byId.get(m);
+          return member ? [member] : [];
+        }),
       allows,
       canDrag: member =>
         viewer.isAdmin ||
@@ -243,13 +331,14 @@ export function PodBoard({
       move: async (member, target, opts = {}) => {
         if (!opts.copy) {
           if (!allows(member, target)) return;
-          setRoster(r => moveLocally(r, member.id, target));
+          setRoster(r => moveLocally(r, member.id, target, opts.index));
         }
         const done = await send('/api/org-chart/members/move', 'POST', {
           memberId: member.id,
           podId: target.podId,
           seat: target.seat,
           copy: opts.copy ?? false,
+          index: opts.index,
         });
         if (done?.undo) offerUndo(done.undo);
       },
@@ -293,24 +382,156 @@ export function PodBoard({
         return !!done;
       },
     };
-  }, [editing, viewer, roster, led, send, offerUndo]);
+  }, [
+    editing,
+    viewer,
+    roster,
+    led,
+    send,
+    offerUndo,
+    drag,
+    baseContainers,
+    byId,
+  ]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
-  const onDragStart = (e: DragStartEvent) =>
-    setDragged((e.active.data.current?.member as PodMember) ?? null);
+  // Moving the dragged item into another container re-renders the lists
+  // under the pointer; for a frame, keep the last target so the preview
+  // doesn't flicker between containers.
+  const lastOver = useRef<UniqueIdentifier | null>(null);
+  const justMoved = useRef(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      justMoved.current = false;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [drag?.containers]);
 
-  const onDragEnd = (e: DragEndEvent) => {
-    setDragged(null);
-    const member = e.active.data.current?.member as PodMember | undefined;
-    const target = e.over?.data.current?.target as MoveTarget | undefined;
-    if (member && target) void api.move(member, target);
+  /**
+   * Lead seats win when the pointer is over one. Otherwise find the list
+   * under the pointer and the closest person in it, so the dragged item
+   * slots in between people.
+   */
+  const collisionDetection: CollisionDetection = useCallback(args => {
+    const pointer = pointerWithin(args);
+    const hits = pointer.length ? pointer : rectIntersection(args);
+    const zone = (id: UniqueIdentifier) =>
+      args.droppableContainers.find(c => c.id === id)?.data.current as
+        | ZoneData
+        | undefined;
+
+    const seat = hits.find(h => {
+      const z = zone(h.id);
+      return z?.type === 'container' && isSeatContainer(z.containerId);
+    });
+    if (seat) {
+      lastOver.current = seat.id;
+      return [seat];
+    }
+
+    const list = hits.find(h => zone(h.id)?.type === 'container') ?? hits[0];
+    if (!list) {
+      return justMoved.current && lastOver.current
+        ? [{ id: lastOver.current }]
+        : [];
+    }
+    const listId = zone(list.id)?.containerId;
+    const people = args.droppableContainers.filter(c => {
+      const z = c.data.current as ZoneData | undefined;
+      return z?.type === 'item' && z.containerId === listId;
+    });
+    const [closest] = people.length
+      ? closestCenter({ ...args, droppableContainers: people })
+      : [];
+    lastOver.current = (closest ?? list).id;
+    return [closest ?? list];
+  }, []);
+
+  const onDragStart = (e: DragStartEvent) => {
+    const member = (e.active.data.current as ZoneData | undefined)?.member;
+    const origin = findContainer(baseContainers, e.active.id);
+    if (!member || !origin) return;
+    setDrag({
+      member,
+      origin,
+      originIndex: baseContainers[origin].indexOf(member.id),
+      containers: baseContainers,
+    });
   };
 
-  const showUnassigned = roster.unassigned.length > 0 || editing;
+  /** Preview the drop: put the dragged person where they'd land. */
+  const onDragOver = ({ active, over }: DragOverEvent) => {
+    const overZone = over?.data.current as ZoneData | undefined;
+    setDrag(d => {
+      if (!d || !over || !overZone) return d;
+      const id = String(active.id);
+      const current = findContainer(d.containers, id);
+      const to = overZone.containerId;
+      const valid =
+        to === d.origin || api.allows(d.member, containerTarget(to));
+
+      // Not allowed here: show them back where they started.
+      if (!valid) {
+        if (current === d.origin) return d;
+        justMoved.current = true;
+        return {
+          ...d,
+          containers: placeIn(d.containers, id, d.origin, d.originIndex),
+        };
+      }
+      // Within a list the sortable strategy shifts people visually.
+      if (current === to) return d;
+
+      const list = d.containers[to] ?? [];
+      let index = list.length;
+      if (isSeatContainer(to)) index = 0;
+      else if (overZone.type === 'item') {
+        const at = list.indexOf(String(over.id));
+        if (at >= 0) index = at + (isAfter(active, over.rect) ? 1 : 0);
+      }
+      justMoved.current = true;
+      return { ...d, containers: placeIn(d.containers, id, to, index) };
+    });
+  };
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    const d = drag;
+    setDrag(null);
+    if (!d || !over) return;
+
+    const id = String(active.id);
+    const to = findContainer(d.containers, id);
+    if (!to) return;
+    let list = d.containers[to];
+    // A move within the list the sortable strategy has been previewing.
+    const overZone = over.data.current as ZoneData | undefined;
+    if (
+      overZone?.type === 'item' &&
+      overZone.containerId === to &&
+      !isSeatContainer(to)
+    ) {
+      list = arrayMove(list, list.indexOf(id), list.indexOf(String(over.id)));
+    }
+    const index = list.indexOf(id);
+    if (to === d.origin && index === d.originIndex) return;
+
+    const target = containerTarget(to);
+    if (!api.allows(d.member, target)) return;
+    void api.move(d.member, target, {
+      index: isSeatContainer(to) ? undefined : index,
+    });
+  };
+
+  const unassigned = (drag?.containers ?? baseContainers)[UNASSIGNED].flatMap(
+    id => byId.get(id) ?? []
+  );
+  const showUnassigned = unassigned.length > 0 || editing;
 
   return (
     <BoardProvider value={api}>
@@ -318,8 +539,9 @@ export function PodBoard({
         sensors={sensors}
         collisionDetection={collisionDetection}
         onDragStart={onDragStart}
+        onDragOver={onDragOver}
         onDragEnd={onDragEnd}
-        onDragCancel={() => setDragged(null)}
+        onDragCancel={() => setDrag(null)}
       >
         {canEdit &&
           (editing ? (
@@ -395,36 +617,38 @@ export function PodBoard({
           <section aria-label="Not in a pod yet">
             <SectionHeader
               title="Not in a pod yet"
-              detail={`${roster.unassigned.length} ${roster.unassigned.length === 1 ? 'person' : 'people'}`}
+              detail={`${unassigned.length} ${unassigned.length === 1 ? 'person' : 'people'}`}
             />
-            <DropZone
-              id="unassigned"
-              target={{ podId: null, seat: 'analyst' }}
+            <Zone
+              id={UNASSIGNED}
+              strategy={rectSortingStrategy}
+              // Leaders can drop people here but only admins reorder it.
+              sortable={viewer.isAdmin}
               className={editing ? 'min-h-[3rem] p-2' : undefined}
             >
-              {roster.unassigned.length === 0 ? (
+              {unassigned.length === 0 ? (
                 <p className="text-sm italic text-gray-400">
                   Drag people here to take them out of a pod
                 </p>
               ) : (
-                <ul className="flex flex-wrap gap-x-6 gap-y-1">
-                  {roster.unassigned.map(m => (
-                    <li key={m.id}>
-                      <MemberChip member={m}>
+                <ul className="grid grid-cols-4 gap-x-6 gap-y-1 2xl:grid-cols-5">
+                  {unassigned.map(m => (
+                    <li key={m.id} className="min-w-0">
+                      <MemberChip member={m} containerId={UNASSIGNED}>
                         <PersonName person={m.person} />
                       </MemberChip>
                     </li>
                   ))}
                 </ul>
               )}
-            </DropZone>
+            </Zone>
           </section>
         )}
 
         <DragOverlay dropAnimation={null}>
-          {dragged && (
+          {drag && (
             <div className="cursor-grabbing rounded-md border border-gray-200 bg-white px-2.5 py-1 shadow-lg">
-              <PersonName person={dragged.person} />
+              <PersonName person={drag.member.person} />
             </div>
           )}
         </DragOverlay>

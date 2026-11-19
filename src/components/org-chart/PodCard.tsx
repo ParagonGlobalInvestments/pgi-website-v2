@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
+import { verticalListSortingStrategy } from '@dnd-kit/sortable';
 import {
-  LEAD_SEATS,
   POD_FOCUS_MAX_LENGTH,
-  isLeadSeat,
+  podLeadSeats,
   seatLabel,
-  type LeadSeat,
 } from '@/lib/org-chart-rules';
 import type { Pod } from '@/types';
-import { DropZone, MemberChip, useBoard } from './board';
+import { MemberChip, Zone, containerId, useBoard } from './board';
 import { PersonName } from './PersonName';
 import { SeatPicker } from './SeatPicker';
 
@@ -59,15 +58,8 @@ function FocusEditor({ pod }: { pod: Pod }) {
 export function PodCard({ pod }: { pod: Pod }) {
   const board = useBoard();
   const adminEditing = board.editing && board.viewer.isAdmin;
-
-  const analysts = pod.members.filter(m => m.seat === 'analyst');
-  // Every seat the program has, plus any odd lead seat already filled.
-  const seats: LeadSeat[] = Array.from(
-    new Set([
-      ...LEAD_SEATS[pod.program],
-      ...pod.members.map(m => m.seat).filter(isLeadSeat),
-    ])
-  );
+  const analystsId = containerId(pod.id, 'analyst');
+  const analysts = board.items(analystsId);
 
   return (
     <div className="flex flex-col rounded-xl border border-gray-200 bg-white">
@@ -93,23 +85,24 @@ export function PodCard({ pod }: { pod: Pod }) {
       </div>
 
       <dl className="space-y-1 border-b border-gray-100 px-4 py-3">
-        {seats.map(seat => {
-          const holder = pod.members.find(m => m.seat === seat);
+        {podLeadSeats(pod).map(seat => {
+          const id = containerId(pod.id, seat);
+          // While a drag hovers over a seat, the seat holds the dragged
+          // person (shown as an empty box) and whoever they'd replace.
+          const people = board.items(id);
+          const incoming = people.find(m => m.id === board.dragging?.id);
+          const holder = people.find(m => m.id !== board.dragging?.id);
+          const shown = incoming ?? holder;
           return (
-            <DropZone
-              key={seat}
-              id={`${pod.id}:${seat}`}
-              target={{ podId: pod.id, seat }}
-              className="-mx-1.5 px-1.5 py-0.5"
-            >
+            <Zone key={seat} id={id} className="-mx-1.5 px-1.5 py-0.5">
               <div className="flex items-center justify-between gap-3">
                 <dt className="shrink-0 text-xs font-semibold uppercase tracking-wide text-gray-500">
                   {seatLabel(seat, pod.program)}
                 </dt>
                 <dd className="flex min-w-0 items-center justify-end gap-1 text-right">
-                  {holder ? (
-                    <MemberChip member={holder}>
-                      <PersonName person={holder.person} />
+                  {shown ? (
+                    <MemberChip member={shown} containerId={id}>
+                      <PersonName person={shown.person} />
                     </MemberChip>
                   ) : (
                     <span className="text-sm italic text-gray-400">
@@ -117,18 +110,28 @@ export function PodCard({ pod }: { pod: Pod }) {
                     </span>
                   )}
                   {adminEditing && (
-                    <SeatPicker pod={pod} seat={seat} holder={holder} />
+                    <SeatPicker
+                      pod={pod}
+                      seat={seat}
+                      holder={pod.members.find(m => m.seat === seat)}
+                    />
                   )}
                 </dd>
               </div>
-            </DropZone>
+              {incoming && holder && (
+                <p className="text-right text-xs text-gray-500">
+                  Replaces{' '}
+                  <span className="line-through">{holder.person.name}</span>
+                </p>
+              )}
+            </Zone>
           );
         })}
       </dl>
 
-      <DropZone
-        id={`${pod.id}:analyst`}
-        target={{ podId: pod.id, seat: 'analyst' }}
+      <Zone
+        id={analystsId}
+        strategy={verticalListSortingStrategy}
         className="m-1 px-3 py-2"
       >
         <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -142,14 +145,14 @@ export function PodCard({ pod }: { pod: Pod }) {
           <ul className="space-y-1">
             {analysts.map(m => (
               <li key={m.id}>
-                <MemberChip member={m}>
+                <MemberChip member={m} containerId={analystsId}>
                   <PersonName person={m.person} />
                 </MemberChip>
               </li>
             ))}
           </ul>
         )}
-      </DropZone>
+      </Zone>
     </div>
   );
 }

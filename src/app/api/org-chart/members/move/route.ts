@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       podId: (body.podId ?? null) as string | null,
       seat: body.seat as PodSeat,
       copy: body.copy === true,
+      index: typeof body.index === 'number' ? body.index : undefined,
     })
   );
 }

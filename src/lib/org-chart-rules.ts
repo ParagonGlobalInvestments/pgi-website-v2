@@ -4,7 +4,8 @@
  *
  * - Admins can move anyone anywhere, fill lead seats, and manage pods.
  * - Pod leaders (the PM, or the ICOMM/QCOMM member) can move analysts between
- *   the pods they lead and "Not in a pod yet". They can't touch lead seats.
+ *   the pods they lead and "Not in a pod yet", and reorder their pods'
+ *   analysts. They can't touch lead seats.
  */
 import type {
   OrgChartViewer,
@@ -92,7 +93,10 @@ export function canMove(
   // A row without a pod counts as an analyst, whatever seat it last held.
   const fromSeat = member.podId === null ? 'analyst' : member.seat;
   if (fromSeat !== 'analyst' || target.seat !== 'analyst') return false;
-  if (member.podId === target.podId) return false;
+  // Reordering within a list: leaders can reorder their own pods.
+  if (member.podId === target.podId) {
+    return target.podId !== null && led.has(target.podId);
+  }
 
   const mine = (podId: string | null) => podId === null || led.has(podId);
   return mine(member.podId) && mine(target.podId);
@@ -118,15 +122,29 @@ export function nextPodNumber(
   return n;
 }
 
+/** A pod's lead seats: the program's, plus any odd one already filled. */
+export function podLeadSeats(
+  pod: Pick<Pod, 'program' | 'members'>
+): LeadSeat[] {
+  return Array.from(
+    new Set([
+      ...LEAD_SEATS[pod.program],
+      ...pod.members.map(m => m.seat).filter(isLeadSeat),
+    ])
+  );
+}
+
 /**
  * Apply a move to a local copy of the roster, for an instant response to a
- * drop. The API's answer replaces it, so displaced lead-seat holders are
- * simply shown as analysts here.
+ * drop. `index` is the position among the target pod's analysts (or the
+ * people not in a pod); it defaults to the end. The API's answer replaces
+ * this, so a displaced lead-seat holder is simply shown as an analyst here.
  */
 export function moveLocally(
   roster: PodRoster,
   memberId: string,
-  target: MoveTarget
+  target: MoveTarget,
+  index?: number
 ): PodRoster {
   const member = rosterPlacements(roster).find(m => m.id === memberId);
   if (!member) return roster;
@@ -136,6 +154,13 @@ export function moveLocally(
     podId: target.podId,
     seat: target.podId === null ? 'analyst' : target.seat,
   };
+  const insert = (list: PodMember[]) => {
+    const at =
+      index === undefined
+        ? list.length
+        : Math.max(0, Math.min(index, list.length));
+    return [...list.slice(0, at), moved, ...list.slice(at)];
+  };
   const demote = (m: PodMember): PodMember =>
     isLeadSeat(moved.seat) && m.seat === moved.seat
       ? { ...m, seat: 'analyst' }
@@ -144,15 +169,22 @@ export function moveLocally(
   const pods = roster.pods.map(pod => {
     const rest = pod.members.filter(m => m.id !== memberId);
     if (pod.id !== target.podId) return { ...pod, members: rest };
-    const members = [...rest.map(demote), moved];
-    const order: Record<PodSeat, number> = { committee: 0, pm: 1, analyst: 2 };
-    return {
-      ...pod,
-      members: members.toSorted((a, b) => order[a.seat] - order[b.seat]),
-    };
+    const others = rest.map(demote);
+    const leads = others.filter(m => isLeadSeat(m.seat));
+    const analysts = others.filter(m => m.seat === 'analyst');
+    const members = isLeadSeat(moved.seat)
+      ? [...leads, moved]
+          .toSorted(
+            (a, b) =>
+              (a.seat === 'committee' ? 0 : 1) -
+              (b.seat === 'committee' ? 0 : 1)
+          )
+          .concat(analysts)
+      : [...leads, ...insert(analysts)];
+    return { ...pod, members };
   });
-  const unassigned = roster.unassigned.filter(m => m.id !== memberId);
-  if (target.podId === null) unassigned.push(moved);
+  const rest = roster.unassigned.filter(m => m.id !== memberId);
+  const unassigned = target.podId === null ? insert(rest) : rest;
 
   return { pods, unassigned };
 }

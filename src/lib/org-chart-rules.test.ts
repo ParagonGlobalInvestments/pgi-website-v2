@@ -112,11 +112,27 @@ describe('canMove', () => {
       [member('x', null, 'analyst'), { podId: 'other', seat: 'analyst' }],
       [member('x', 'mine', 'analyst'), { podId: 'mine', seat: 'pm' }],
       [member('x', 'mine', 'pm'), { podId: null, seat: 'analyst' }],
-      [member('x', 'mine', 'analyst'), { podId: 'mine', seat: 'analyst' }],
+      [member('x', 'other', 'analyst'), { podId: 'other', seat: 'analyst' }],
+      [member('x', null, 'analyst'), { podId: null, seat: 'analyst' }],
     ];
     for (const [m, target] of cases) {
       expect(canMove(leader, led, m, target)).toBe(false);
     }
+  });
+});
+
+describe('canMove reordering', () => {
+  it('lets leaders reorder their own pod, and admins any list', () => {
+    const led = new Set(['mine']);
+    const inMine = member('x', 'mine', 'analyst');
+    const same = { podId: 'mine', seat: 'analyst' as const };
+    expect(canMove(leader, led, inMine, same)).toBe(true);
+    expect(
+      canMove(admin, new Set(), member('x', null, 'analyst'), {
+        podId: null,
+        seat: 'analyst',
+      })
+    ).toBe(true);
   });
 });
 
@@ -157,6 +173,26 @@ describe('moveLocally', () => {
     const out = moveLocally(roster, 'a', { podId: null, seat: 'analyst' });
     expect(out.pods[0].members.map(m => m.id)).toEqual(['lead']);
     expect(out.unassigned.map(m => m.id)).toEqual(['c', 'a']);
+  });
+
+  it('inserts at a position, and reorders within a list', () => {
+    const into = moveLocally(roster, 'c', { podId: 'p1', seat: 'analyst' }, 0);
+    expect(into.pods[0].members.map(m => m.id)).toEqual(['lead', 'c', 'a']);
+
+    const two: PodRoster = {
+      pods: [],
+      unassigned: ['a', 'b', 'c'].map(id => member(id, null, 'analyst')),
+    };
+    const reordered = moveLocally(
+      two,
+      'c',
+      { podId: null, seat: 'analyst' },
+      0
+    );
+    expect(reordered.unassigned.map(m => m.id)).toEqual(['c', 'a', 'b']);
+    // Out-of-range positions clamp to the end.
+    const end = moveLocally(two, 'a', { podId: null, seat: 'analyst' }, 99);
+    expect(end.unassigned.map(m => m.id)).toEqual(['b', 'c', 'a']);
   });
 
   it('demotes the current holder when a lead seat is filled', () => {

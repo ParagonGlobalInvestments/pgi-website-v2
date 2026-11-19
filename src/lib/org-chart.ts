@@ -143,12 +143,22 @@ interface PodRow {
 
 const SEAT_ORDER: Record<PodSeat, number> = { committee: 0, pm: 1, analyst: 2 };
 
+/**
+ * Ties on sort_order break by id, matching `.order('sort_order').order('id')`
+ * in the edit API (Postgres orders lowercase uuids like plain strings), so a
+ * drop position means the same row on both sides.
+ */
+function compareIds(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function toPod(row: PodRow): Pod {
   const members: PodMember[] = (row.members ?? [])
     .toSorted(
       (a, b) =>
         SEAT_ORDER[a.seat as PodSeat] - SEAT_ORDER[b.seat as PodSeat] ||
-        a.sort_order - b.sort_order
+        a.sort_order - b.sort_order ||
+        compareIds(a.id, b.id)
     )
     .flatMap(toMember);
 
@@ -182,7 +192,8 @@ async function getUnassigned(supabase: SupabaseClient): Promise<PodMember[]> {
     .from('pod_members')
     .select(MEMBER_COLUMNS)
     .is('pod_id', null)
-    .order('sort_order');
+    .order('sort_order')
+    .order('id');
 
   if (error) {
     console.error('Org chart unassigned query failed:', error.message);

@@ -1,28 +1,76 @@
 'use client';
 
 import { createContext, useContext, type ReactNode } from 'react';
-import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  type SortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { MoveTarget } from '@/lib/org-chart-rules';
 import type {
   OrgChartViewer,
   Pod,
   PodMember,
   PodRoster,
+  PodSeat,
   UserProgram,
 } from '@/types';
 import { cn } from '@/utils';
 
-/** What the pod board offers its cards while editing. */
+// ============================================================================
+// Containers
+//
+// Every place a person can be is a container: each pod's lead seats, each
+// pod's analyst list, and "Not in a pod yet". While dragging, the board keeps
+// a preview of which people are in which container, in order, so the dragged
+// person shows as an empty box where they'd land and everyone else shifts.
+// ============================================================================
+
+export const UNASSIGNED = 'unassigned';
+
+export function containerId(podId: string | null, seat: PodSeat): string {
+  return podId ? `${podId}:${seat}` : UNASSIGNED;
+}
+
+export function containerTarget(id: string): MoveTarget {
+  if (id === UNASSIGNED) return { podId: null, seat: 'analyst' };
+  const [podId, seat] = id.split(':');
+  return { podId, seat: seat as PodSeat };
+}
+
+/** Lead seats hold one person; lists are ordered. */
+export function isSeatContainer(id: string): boolean {
+  return id !== UNASSIGNED && !id.endsWith(':analyst');
+}
+
+/** Data attached to drop targets, read by the board's collision detection. */
+export interface ZoneData {
+  type: 'container' | 'item';
+  containerId: string;
+  member?: PodMember;
+}
+
+// ============================================================================
+// Board context
+// ============================================================================
+
+/** What the pod board offers its cards. */
 export interface BoardApi {
   editing: boolean;
   viewer: OrgChartViewer;
   roster: PodRoster;
+  /** The person being dragged, if any. */
+  dragging: PodMember | null;
+  /** Who is in a container right now (the drag preview while dragging). */
+  items(containerId: string): PodMember[];
   canDrag(member: PodMember): boolean;
   allows(member: PodMember, target: MoveTarget): boolean;
   move(
     member: PodMember,
     target: MoveTarget,
-    opts?: { copy?: boolean }
+    opts?: { copy?: boolean; index?: number }
   ): Promise<void>;
   updateFocus(pod: Pod, focus: string): Promise<boolean>;
   deletePod(pod: Pod): Promise<void>;
@@ -39,54 +87,42 @@ export function useBoard(): BoardApi {
   return board;
 }
 
+// ============================================================================
+// Components
+// ============================================================================
+
+/** Lead seats don't shift their contents. */
+const noShift: SortingStrategy = () => null;
+
 /**
- * False inside <StaticCopy>. dnd-kit keeps one registry entry per id, so a
- * second rendering of the same people (the phone layout, which the board
- * renders alongside the desktop one when not editing) must not register
- * draggables or drop targets: unmounting it would remove the entries the
- * visible desktop layout depends on, and dragging would stop working.
+ * A container's drop area. Valid drop areas get a dashed outline while
+ * dragging; the one the dragged person would land in is filled.
  */
-const InteractiveContext = createContext(true);
-
-/** Render children without drag-and-drop (see InteractiveContext). */
-export function StaticCopy({ children }: { children: ReactNode }) {
-  return (
-    <InteractiveContext.Provider value={false}>
-      {children}
-    </InteractiveContext.Provider>
-  );
-}
-
-/** The placement being dragged, if any. */
-export function useDraggedMember(): PodMember | null {
-  const { active } = useDndContext();
-  return (active?.data.current?.member as PodMember | undefined) ?? null;
-}
-
-interface DropZoneProps {
+export function Zone({
+  id,
+  strategy,
+  sortable = true,
+  className,
+  children,
+}: {
   id: string;
-  target: MoveTarget;
+  strategy?: SortingStrategy;
+  /** False: people dropped here go to the end, with no reordering. */
+  sortable?: boolean;
   className?: string;
   children: ReactNode;
-}
-
-/** A drop target that moves the dropped placement to `target`. */
-export function DropZone(props: DropZoneProps) {
-  if (useContext(InteractiveContext)) return <ActiveDropZone {...props} />;
-  return (
-    <div className={cn('rounded-lg', props.className)}>{props.children}</div>
-  );
-}
-
-function ActiveDropZone({ id, target, className, children }: DropZoneProps) {
+}) {
   const board = useBoard();
-  const dragged = useDraggedMember();
-  const allowed = !!dragged && board.allows(dragged, target);
-  const { setNodeRef, isOver } = useDroppable({
+  const ids = board.items(id).map(m => m.id);
+  const { setNodeRef } = useDroppable({
     id,
-    data: { target },
+    data: { type: 'container', containerId: id } satisfies ZoneData,
     disabled: !board.editing,
   });
+
+  const dragging = board.dragging;
+  const allowed = !!dragging && board.allows(dragging, containerTarget(id));
+  const landing = allowed && ids.includes(dragging.id);
 
   return (
     <div
@@ -94,34 +130,56 @@ function ActiveDropZone({ id, target, className, children }: DropZoneProps) {
       className={cn(
         'rounded-lg transition-colors',
         allowed && 'outline-dashed outline-1 outline-offset-2 outline-navy/30',
-        allowed && isOver && 'bg-blue-50 outline-2 outline-navy/60',
+        landing && 'bg-blue-50/60 outline-navy/60',
         className
       )}
     >
-      {children}
+      <SortableContext
+        id={id}
+        items={ids}
+        strategy={isSeatContainer(id) ? noShift : strategy}
+        // Items here are drop targets (for positions) only when sortable.
+        disabled={{ draggable: false, droppable: !sortable || !board.editing }}
+      >
+        {children}
+      </SortableContext>
     </div>
   );
 }
 
-interface MemberChipProps {
+/**
+ * A person in a container. The dragged person renders as an empty dashed box
+ * of the same size, wherever the preview puts them.
+ */
+export function MemberChip({
+  member,
+  containerId: inContainer,
+  className,
+  children,
+}: {
   member: PodMember;
+  containerId: string;
   className?: string;
   children: ReactNode;
-}
-
-/** A placement that can be picked up when the viewer may move it. */
-export function MemberChip(props: MemberChipProps) {
-  if (useContext(InteractiveContext)) return <ActiveMemberChip {...props} />;
-  return <div className={props.className}>{props.children}</div>;
-}
-
-function ActiveMemberChip({ member, className, children }: MemberChipProps) {
+}) {
   const board = useBoard();
   const draggable = board.editing && board.canDrag(member);
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: member.id,
-    data: { member },
-    disabled: !draggable,
+    data: {
+      type: 'item',
+      containerId: inContainer,
+      member,
+    } satisfies ZoneData,
+    // Whether this item is a drop target comes from its Zone.
+    disabled: { draggable: !draggable },
   });
 
   // In edit mode, say why a name can't be picked up instead of letting the
@@ -135,19 +193,21 @@ function ActiveMemberChip({ member, className, children }: MemberChipProps) {
   return (
     <div
       ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       {...(draggable ? { ...attributes, ...listeners } : {})}
       aria-roledescription={draggable ? 'draggable person' : undefined}
       title={locked ? lockedReason : undefined}
       className={cn(
         board.editing && 'select-none',
-        locked && 'cursor-not-allowed opacity-60',
+        locked && !isDragging && 'cursor-not-allowed opacity-60',
         draggable &&
           '-mx-1.5 cursor-grab touch-none rounded-md px-1.5 py-0.5 ring-1 ring-transparent hover:bg-gray-50 hover:ring-gray-200 focus-visible:outline-none focus-visible:ring-navy/50 active:cursor-grabbing',
-        isDragging && 'opacity-30',
+        isDragging &&
+          'rounded-md bg-white outline-dashed outline-1 outline-navy/50 hover:bg-white',
         className
       )}
     >
-      {children}
+      <div className={cn(isDragging && 'invisible')}>{children}</div>
     </div>
   );
 }

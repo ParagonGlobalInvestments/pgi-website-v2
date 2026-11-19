@@ -233,16 +233,57 @@ async function vacate(
   db: SupabaseClient,
   row: MemberRow,
   others: MemberRow[]
-): Promise<void> {
+): Promise<'deleted' | 'unassigned'> {
   if (others.some(o => o.id !== row.id)) {
     await deleteRows(db, [row.id]);
-  } else {
-    await updateRow(db, row.id, {
-      pod_id: null,
-      seat: 'analyst',
-      sort_order: await nextSortOrder(db, null),
-    });
+    return 'deleted';
   }
+  await updateRow(db, row.id, {
+    pod_id: null,
+    seat: 'analyst',
+    sort_order: await nextSortOrder(db, null),
+  });
+  return 'unassigned';
+}
+
+/**
+ * Put `rowId` at `index` in its list (a pod's analysts, or the people not in
+ * a pod) and renumber the list 0..n-1. Rows whose sort_order changes are
+ * added to `undo` as they were, unless already there. Returns whether
+ * anything changed.
+ */
+async function placeInList(
+  db: SupabaseClient,
+  podId: string | null,
+  rowId: string,
+  index: number,
+  undo: UndoSnapshot
+): Promise<boolean> {
+  const query = db.from('pod_members').select(ROW_COLUMNS);
+  const scoped = podId
+    ? query.eq('pod_id', podId).eq('seat', 'analyst')
+    : query.is('pod_id', null);
+  const rows = check(
+    await scoped.order('sort_order').order('id')
+  ) as MemberRow[];
+
+  const moving = rows.find(r => r.id === rowId);
+  if (!moving) return false;
+  const others = rows.filter(r => r.id !== rowId);
+  const at = Math.max(0, Math.min(index, others.length));
+  const ordered = [...others.slice(0, at), moving, ...others.slice(at)];
+
+  const changed = ordered.flatMap((r, i) =>
+    r.sort_order === i ? [] : [{ ...toRow(r), sort_order: i }]
+  );
+  if (!changed.length) return false;
+  for (const r of changed) {
+    if (!undo.restore.some(u => u.id === r.id)) {
+      undo.restore.push(toRow(rows.find(x => x.id === r.id)!));
+    }
+  }
+  check(await db.from('pod_members').upsert(changed, { onConflict: 'id' }));
+  return true;
 }
 
 // ============================================================================
@@ -258,6 +299,12 @@ export interface MoveInput {
    * instead of moving this one (ICOMM/QCOMM members sit on several pods).
    */
   copy?: boolean;
+  /**
+   * Position among the target pod's analysts (or the people not in a pod),
+   * counted without the moved person. Defaults to the end. Moving within the
+   * same list reorders it.
+   */
+  index?: number;
 }
 
 /**
@@ -273,6 +320,12 @@ export async function moveMember(
   if (!isUuid(input.memberId)) fail('Invalid member', 400);
   if (input.podId !== null && !isUuid(input.podId)) fail('Invalid pod', 400);
   if (!POD_SEATS.includes(input.seat)) fail('Invalid seat', 400);
+  if (
+    input.index !== undefined &&
+    !(Number.isInteger(input.index) && input.index >= 0)
+  ) {
+    fail('Invalid position', 400);
+  }
 
   const podId = input.podId;
   const seat: PodSeat = podId === null ? 'analyst' : input.seat;
@@ -312,12 +365,33 @@ export async function moveMember(
     fail('Only ICOMM/QCOMM seats can be shared across pods', 400);
   }
 
-  // Nothing to do.
-  if (!copy && row.pod_id === podId && (podId === null || row.seat === seat)) {
-    return null;
+  const name = displayName(row);
+
+  // Reordering within one list.
+  const sameList =
+    !copy &&
+    row.pod_id === podId &&
+    (podId === null || (row.seat === 'analyst' && seat === 'analyst'));
+  if (sameList) {
+    if (input.index === undefined) return null;
+    const undo: UndoSnapshot = { restore: [], remove: [], summary: '' };
+    if (!(await placeInList(db, podId, row.id, input.index, undo))) {
+      return null;
+    }
+    const where = toPod ? podLabel(toPod) : '"Not in a pod yet"';
+    undo.summary = `Moved ${name} to #${input.index + 1} in ${where}`;
+    await logChange(db, editor, 'move', undo.summary, {
+      memberId: row.id,
+      podId,
+      index: input.index,
+      reorder: true,
+    });
+    return undo;
   }
 
-  const name = displayName(row);
+  // Already in that lead seat.
+  if (!copy && row.pod_id === podId && row.seat === seat) return null;
+
   const placements = await samePerson(db, row);
   if (podId && placements.some(p => p.id !== row.id && p.pod_id === podId)) {
     fail(`${name} is already in ${podLabel(toPod)}`, 409);
@@ -357,8 +431,9 @@ export async function moveMember(
     undo.remove.push(created.id);
   } else {
     undo.restore.push(toRow(row));
+    let inList = !isLeadSeat(seat);
     if (podId === null) {
-      await vacate(db, row, placements);
+      inList = (await vacate(db, row, placements)) === 'unassigned';
     } else {
       await updateRow(db, row.id, {
         pod_id: podId,
@@ -368,6 +443,9 @@ export async function moveMember(
             ? row.sort_order
             : await nextSortOrder(db, podId),
       });
+    }
+    if (inList && input.index !== undefined) {
+      await placeInList(db, podId, row.id, input.index, undo);
     }
   }
 
