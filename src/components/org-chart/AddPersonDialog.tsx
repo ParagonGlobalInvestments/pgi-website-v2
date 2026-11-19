@@ -11,24 +11,27 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useBoard } from './board';
-
-interface Candidate {
-  id: string;
-  name: string;
-  school: string | null;
-}
+import {
+  searchQuery,
+  searchView,
+  withoutCandidate,
+  type Candidate,
+  type SearchResults,
+} from './addPersonSearch';
 
 /** Admins: add an active member who isn't on the org chart yet. */
 export function AddPersonDialog() {
   const board = useBoard();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Candidate[] | null>(null);
+  const [results, setResults] = useState<SearchResults>(null);
+  /** The candidate whose add request is in flight, if any. */
   const [adding, setAdding] = useState<string | null>(null);
+  const view = searchView(query, results);
 
   useEffect(() => {
-    const q = query.trim();
-    if (!open || q.length < 2) return;
+    const q = searchQuery(query);
+    if (!open || q === null) return;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -37,9 +40,15 @@ export function AddPersonDialog() {
           { signal: controller.signal }
         );
         const json = await res.json();
-        setResults(json.success ? json.data : []);
+        setResults(
+          json.success
+            ? { query: q, status: 'found', candidates: json.data }
+            : { query: q, status: 'failed' }
+        );
       } catch {
-        if (!controller.signal.aborted) setResults([]);
+        if (!controller.signal.aborted) {
+          setResults({ query: q, status: 'failed' });
+        }
       }
     }, 200);
     return () => {
@@ -52,7 +61,7 @@ export function AddPersonDialog() {
     setAdding(c.id);
     const ok = await board.addMember(c.id);
     setAdding(null);
-    if (ok) setResults(r => r?.filter(x => x.id !== c.id) ?? null);
+    if (ok) setResults(r => withoutCandidate(r, c.id));
   };
 
   return (
@@ -87,15 +96,29 @@ export function AddPersonDialog() {
             aria-label="Search members"
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-navy-accent"
           />
-          <ul className="max-h-72 overflow-y-auto">
-            {results === null || query.trim().length < 2 ? (
+          <ul
+            aria-busy={
+              view.kind === 'searching' ||
+              (view.kind === 'results' && view.stale)
+            }
+            className={`max-h-72 overflow-y-auto transition-opacity ${
+              view.kind === 'results' && view.stale ? 'opacity-60' : ''
+            }`}
+          >
+            {view.kind === 'hint' ? (
               <li className="py-2 text-sm text-gray-400">
                 Type at least two letters
               </li>
-            ) : results.length === 0 ? (
+            ) : view.kind === 'searching' ? (
+              <li className="py-2 text-sm text-gray-400">Searching…</li>
+            ) : view.kind === 'error' ? (
+              <li className="py-2 text-sm text-red-600">
+                Search failed. Try again.
+              </li>
+            ) : view.candidates.length === 0 ? (
               <li className="py-2 text-sm text-gray-400">No one found</li>
             ) : (
-              results.map(c => (
+              view.candidates.map(c => (
                 <li
                   key={c.id}
                   className="flex items-center justify-between gap-3 border-b border-gray-50 py-2 last:border-0"
@@ -111,7 +134,7 @@ export function AddPersonDialog() {
                   <Button
                     size="sm"
                     variant="navy"
-                    disabled={adding !== null}
+                    disabled={adding !== null || view.stale}
                     onClick={() => void add(c)}
                   >
                     {adding === c.id ? 'Adding…' : 'Add'}
