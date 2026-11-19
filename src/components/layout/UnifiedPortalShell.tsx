@@ -614,7 +614,7 @@ export function UnifiedPortalShell({
   const userInfo: PortalUserInfo | null = useMemo(() => {
     if (!portalUser && !authUser) return null;
     return {
-      name: portalUser?.name || authUser?.user_metadata?.full_name || '',
+      name: portalUser?.name || authUser?.user_metadata.full_name || '',
       school: portalUser?.school
         ? SCHOOL_LABELS[portalUser.school] || portalUser.school
         : '',

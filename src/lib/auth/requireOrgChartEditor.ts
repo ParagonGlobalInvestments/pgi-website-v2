@@ -35,7 +35,7 @@ export async function requireOrgChartEditor(): Promise<
       userId: membership.user?.id ?? null,
       name:
         membership.user?.name ||
-        user.user_metadata?.full_name ||
+        user.user_metadata.full_name ||
         user.email?.split('@')[0] ||
         'Admin',
       isAdmin: isAdminMembership(membership),

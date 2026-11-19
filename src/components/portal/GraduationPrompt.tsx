@@ -32,7 +32,7 @@ export function GraduationPrompt() {
   useEffect(() => {
     if (shown.current || !data || data.candidates.length === 0) return;
     // Already on the graduation page — nothing to prompt.
-    if (pathname?.endsWith('/graduation')) return;
+    if (pathname.endsWith('/graduation')) return;
 
     const key = graduationPromptKey(data.classYear);
     try {

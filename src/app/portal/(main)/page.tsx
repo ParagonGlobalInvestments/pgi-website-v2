@@ -112,7 +112,7 @@ export default function Home() {
   const headerDelay = isFromTransition ? 0.15 : 0;
   const cardVariants = makeCardVariants(isFromTransition ? 0.25 : 0);
 
-  const firstName = user?.name?.split(' ')[0] || '';
+  const firstName = user?.name.split(' ')[0] || '';
   const metaParts = [
     user?.role ? ROLE_LABELS[user.role] : null,
     user?.program ? PROGRAM_LABELS[user.program] : null,
