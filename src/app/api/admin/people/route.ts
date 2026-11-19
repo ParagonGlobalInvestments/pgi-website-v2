@@ -33,7 +33,7 @@ async function findUserByName(name: string) {
 
   if (error) throw error;
 
-  if (!data || data.length !== 1) return null;
+  if (data.length !== 1) return null;
   return data[0].id as string;
 }
 
@@ -171,7 +171,7 @@ async function findOrCreateAlumniUser(input: {
       .limit(1);
 
     if (lookupError) throw lookupError;
-    if (existingUsers?.[0]) {
+    if (existingUsers[0]) {
       return { userId: existingUsers[0].id as string, created: false };
     }
   }

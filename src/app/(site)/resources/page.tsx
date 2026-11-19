@@ -49,7 +49,7 @@ function ResourcesPageContent() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (searchParams?.get('notMember') === 'true') {
+    if (searchParams.get('notMember') === 'true') {
       toast.error('Not a PGI Member', {
         description: 'Submit your email to stay updated or apply to join PGI.',
         duration: 6000,

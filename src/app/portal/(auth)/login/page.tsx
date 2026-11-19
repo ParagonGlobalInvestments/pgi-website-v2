@@ -22,9 +22,9 @@ function PortalLoginContent() {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('welcome');
   const [decryptKey, setDecryptKey] = useState(0);
 
-  const justAuthenticated = searchParams?.get('authenticated') === 'true';
-  const notMember = searchParams?.get('notMember') === 'true';
-  const redirectTo = searchParams?.get('redirectTo') || '/portal';
+  const justAuthenticated = searchParams.get('authenticated') === 'true';
+  const notMember = searchParams.get('notMember') === 'true';
+  const redirectTo = searchParams.get('redirectTo') || '/portal';
 
   // Handle non-member rejection
   useEffect(() => {
@@ -69,8 +69,8 @@ function PortalLoginContent() {
       } = await supabase.auth.getUser();
 
       const firstName =
-        user?.user_metadata?.full_name?.split(' ')[0] ||
-        user?.user_metadata?.name?.split(' ')[0] ||
+        user?.user_metadata.full_name?.split(' ')[0] ||
+        user?.user_metadata.name?.split(' ')[0] ||
         '';
 
       // Pre-warm SWR cache BEFORE animation — avoids mid-animation re-render
@@ -124,7 +124,7 @@ function PortalLoginContent() {
     setError('');
 
     const defaultDest = '/portal';
-    const next = searchParams?.get('redirectTo') || defaultDest;
+    const next = searchParams.get('redirectTo') || defaultDest;
     const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
@@ -198,14 +198,14 @@ function PortalLoginContent() {
               </p>
             )}
 
-            {searchParams?.get('error') === 'auth_failed' && (
+            {searchParams.get('error') === 'auth_failed' && (
               <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-left">
                 <p className="text-sm text-red-600">
                   Authentication failed. Please try again.
                 </p>
               </div>
             )}
-            {searchParams?.get('error') === 'no_user' && (
+            {searchParams.get('error') === 'no_user' && (
               <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-left">
                 <p className="text-sm text-red-600">
                   Could not retrieve your account. Please try again.

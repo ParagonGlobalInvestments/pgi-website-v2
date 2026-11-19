@@ -78,7 +78,7 @@ export class SupabaseDatabase {
 
     const { data, error } = await query;
     if (error) throw error;
-    return (data || []).map(formatUser);
+    return data.map(formatUser);
   }
 
   /** Lookup by Supabase auth ID */

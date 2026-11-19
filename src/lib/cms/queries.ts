@@ -198,7 +198,7 @@ export async function getCmsPeople(
     console.error(`getCmsPeople(${group}):`, error.message);
     return [];
   }
-  return data ?? [];
+  return data;
 }
 
 export async function getCmsRecruitment(): Promise<Record<string, string>> {
@@ -212,7 +212,7 @@ export async function getCmsRecruitment(): Promise<Record<string, string>> {
     return {};
   }
   const map: Record<string, string> = {};
-  for (const row of data ?? []) {
+  for (const row of data) {
     map[row.key] = row.value;
   }
   return map;
@@ -229,7 +229,7 @@ export async function getCmsStatistics(): Promise<CmsStatistic[]> {
     console.error('getCmsStatistics:', error.message);
     return [];
   }
-  return data ?? [];
+  return data;
 }
 
 export async function getCmsTimeline(): Promise<CmsTimelineEvent[]> {
@@ -243,7 +243,7 @@ export async function getCmsTimeline(): Promise<CmsTimelineEvent[]> {
     console.error('getCmsTimeline:', error.message);
     return [];
   }
-  return data ?? [];
+  return data;
 }
 
 export async function getCmsSponsors(type: SponsorType): Promise<CmsSponsor[]> {
@@ -258,5 +258,5 @@ export async function getCmsSponsors(type: SponsorType): Promise<CmsSponsor[]> {
     console.error(`getCmsSponsors(${type}):`, error.message);
     return [];
   }
-  return data ?? [];
+  return data;
 }

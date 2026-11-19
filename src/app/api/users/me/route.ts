@@ -44,7 +44,7 @@ export async function GET() {
             id: 'admin-allowlist',
             email: authUser.email,
             name:
-              authUser.user_metadata?.full_name ||
+              authUser.user_metadata.full_name ||
               authUser.email?.split('@')[0] ||
               'Admin',
             role: 'admin',

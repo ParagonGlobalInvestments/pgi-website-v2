@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
         .select('id');
 
       if (error) throw error;
-      for (const row of data ?? []) graduatedIds.push(row.id as string);
+      for (const row of data) graduatedIds.push(row.id as string);
     }
 
     if (graduatedIds.length > 0) revalidatePeople();

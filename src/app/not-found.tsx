@@ -22,7 +22,7 @@ export default function NotFound() {
   }, [pathname, router]);
 
   // Check if current path is a legacy route for immediate redirect
-  const isLegacyRoute = pathname?.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
+  const isLegacyRoute = pathname.match(/\.(html?|php|asp|aspx|jsp|cfm)$/i);
 
   // If it's a legacy route, show a redirecting message and meta refresh
   if (isLegacyRoute) {
@@ -73,7 +73,8 @@ export default function NotFound() {
             Page Not Found
           </h2>
           <p className="text-gray-600 mb-6">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been
+            moved.
           </p>
         </div>
 

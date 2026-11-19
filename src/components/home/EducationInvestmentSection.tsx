@@ -109,7 +109,7 @@ export default function EducationInvestmentSection() {
             >
               {activeTab === 'education' ? (
                 // Education Content
-                <div className={`${activeTab === 'education' ? '' : 'bg-navy'}`}>
+                <div>
                   <motion.div
                     variants={staggerContainer}
                     className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 max-w-6xl mx-auto"

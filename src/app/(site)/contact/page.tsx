@@ -214,9 +214,7 @@ export default function Contact() {
                           className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                           placeholder="Your school name"
                           {...register('school', {
-                            required: isChapterRequest
-                              ? 'School name is required'
-                              : false,
+                            required: 'School name is required',
                           })}
                         />
                         {errors.school && (
@@ -239,9 +237,7 @@ export default function Contact() {
                           className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-pgi-light-blue focus:border-transparent text-white text-sm md:text-base transition-colors"
                           placeholder="Expected graduation year"
                           {...register('graduationYear', {
-                            required: isChapterRequest
-                              ? 'Graduation year is required'
-                              : false,
+                            required: 'Graduation year is required',
                           })}
                         />
                         {errors.graduationYear && (
