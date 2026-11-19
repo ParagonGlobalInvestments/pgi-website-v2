@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PortalPageHeader } from '@/components/portal/PortalPageHeader';
+import { usePortalUser } from '@/hooks/usePortalUser';
 import { CollapsibleSection } from '@/components/ui/collapsible-section';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -434,9 +435,13 @@ function SiteHealthSummary({
 // Main analytics page
 export default function AnalyticsPage() {
   const [days, setDays] = useState(7);
+  // Mocked role in "View As" mode, so admins previewing another role are
+  // turned away like that role would be.
+  const { user: portalUser, isLoading: userLoading } = usePortalUser();
+  const isAdmin = portalUser?.role === 'admin';
 
   const { data, error, isLoading, mutate } = useSWR(
-    `/api/observability/stats?days=${days}`,
+    isAdmin ? `/api/observability/stats?days=${days}` : null,
     fetcher,
     { refreshInterval: 60000, revalidateOnFocus: true }
   );
@@ -465,6 +470,14 @@ export default function AnalyticsPage() {
     );
     return trends;
   }, [data?.vitals?.trends]);
+
+  if (!userLoading && !isAdmin) {
+    return (
+      <div className="p-8 text-red-600 font-medium">
+        Not authorized. Admin access required.
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -516,7 +529,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading || userLoading ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
