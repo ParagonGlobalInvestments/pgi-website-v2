@@ -8,6 +8,7 @@ import {
   type GraduationCandidate,
   type GraduationOverview,
 } from '@/lib/graduation';
+import { GRADUATION_TRANSITION } from '@/lib/members/lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ async function listCandidates(
   const { data, error } = await supabase
     .from('users')
     .select('id, name, email, school, graduation_year, role, program')
-    .eq('status', 'active')
+    .eq('status', GRADUATION_TRANSITION.from)
     .not('graduation_year', 'is', null)
     .lte('graduation_year', classYear)
     .order('graduation_year', { ascending: true })
@@ -117,9 +118,10 @@ export async function POST(req: NextRequest) {
       const chunk = userIds.slice(i, i + UPDATE_CHUNK_SIZE);
       const { data, error } = await supabase
         .from('users')
-        .update({ status: 'alumni' })
+        .update({ status: GRADUATION_TRANSITION.to })
         .in('id', chunk)
-        .eq('status', 'active')
+        // Atomic guard: only rows still in the `from` state move.
+        .eq('status', GRADUATION_TRANSITION.from)
         .lte('graduation_year', classYear)
         .select('id');
 

@@ -4,6 +4,7 @@ import { requireSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createDatabase } from '@/lib/supabase/database';
 import { checkMembership } from '@/lib/auth/checkMembership';
 import { requirePortalEnabledOr404 } from '@/lib/runtime';
+import { ADMIN_ALLOWLIST_USER_ID } from '@/lib/members/lifecycle';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ export async function GET() {
         {
           success: true,
           user: {
-            id: 'admin-allowlist',
+            id: ADMIN_ALLOWLIST_USER_ID,
             email: authUser.email,
             name:
               authUser.user_metadata.full_name ||

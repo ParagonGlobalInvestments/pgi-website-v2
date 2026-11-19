@@ -31,6 +31,7 @@ import {
   type ProfileValues,
 } from '@/lib/settings/profileAutosave';
 import { linkedAccountsReducer } from '@/lib/settings/linkedAccounts';
+import { isAdminAllowlistUserId } from '@/lib/members/lifecycle';
 
 function extractLinkedInUsername(input: string): string {
   if (!input) return '';
@@ -383,7 +384,7 @@ function ExperienceSection({ userId }: { userId: string }) {
   }, []);
 
   useEffect(() => {
-    if (userId !== 'admin-allowlist') fetchExperience();
+    if (!isAdminAllowlistUserId(userId)) fetchExperience();
     else setLoading(false);
   }, [userId, fetchExperience]);
 
@@ -1013,7 +1014,7 @@ export default function SettingsPage() {
     );
   }
 
-  const isAdmin = user.id === 'admin-allowlist';
+  const isAdmin = isAdminAllowlistUserId(user.id);
 
   return (
     <div className="space-y-6">
