@@ -30,6 +30,8 @@ export const TIMING = {
   },
   greeting: 1200,
   morph: 500,
+  /** How long the dashboard sidebar plays its post-morph entrance */
+  sidebarEntrance: 1000,
   exit: { desktop: 500, mobile: 300 },
   portalEntry: { desktop: 500, mobile: 300 },
 } as const;
