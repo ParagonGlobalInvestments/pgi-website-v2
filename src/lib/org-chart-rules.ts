@@ -55,6 +55,22 @@ export function isAdminMembership(m: {
   return (m.isAdminAllowlist && !m.user) || m.user?.role === 'admin';
 }
 
+/**
+ * The viewer as an admin previewing the portal as `mockRole` ("View As")
+ * would be: a non-admin role drops admin powers, and an analyst leads no
+ * pods. Display only; the API still checks the real session.
+ */
+export function mockedViewer(
+  viewer: OrgChartViewer,
+  mockRole: UserRole | null
+): OrgChartViewer {
+  if (!viewer.isAdmin || !mockRole || mockRole === 'admin') return viewer;
+  return {
+    isAdmin: false,
+    userId: mockRole === 'analyst' ? null : viewer.userId,
+  };
+}
+
 /** Ids of the pods `userId` leads, as PM or ICOMM/QCOMM. */
 export function ledPodIds(
   placements: Pick<PodMember, 'podId' | 'userId' | 'seat'>[],

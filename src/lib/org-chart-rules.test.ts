@@ -2,6 +2,7 @@ import {
   canMove,
   isAdminMembership,
   ledPodIds,
+  mockedViewer,
   moveLocally,
   nextPodNumber,
   rosterPlacements,
@@ -264,5 +265,37 @@ describe('seatCandidates', () => {
     };
     expect(rosterPlacements(r)).toHaveLength(1);
     expect(seatCandidates(r, { id: 'p1' }, 'committee')).toEqual([]);
+  });
+});
+
+describe('mockedViewer', () => {
+  const realAdmin = { userId: 'u-me', isAdmin: true };
+
+  it('leaves the viewer alone without mock mode or as admin', () => {
+    expect(mockedViewer(realAdmin, null)).toBe(realAdmin);
+    expect(mockedViewer(realAdmin, 'admin')).toBe(realAdmin);
+  });
+
+  it('drops admin powers for leader roles but keeps their pods', () => {
+    expect(mockedViewer(realAdmin, 'pm')).toEqual({
+      userId: 'u-me',
+      isAdmin: false,
+    });
+    expect(mockedViewer(realAdmin, 'committee')).toEqual({
+      userId: 'u-me',
+      isAdmin: false,
+    });
+  });
+
+  it('gives an analyst nothing to edit', () => {
+    expect(mockedViewer(realAdmin, 'analyst')).toEqual({
+      userId: null,
+      isAdmin: false,
+    });
+  });
+
+  it('never applies to non-admins', () => {
+    const leader = { userId: 'u-x', isAdmin: false };
+    expect(mockedViewer(leader, 'analyst')).toBe(leader);
   });
 });

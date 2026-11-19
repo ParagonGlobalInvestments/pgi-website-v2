@@ -28,11 +28,13 @@ import {
 import { Pencil, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useMockUser } from '@/contexts/MockUserContext';
 import type { UndoRef } from '@/lib/org-chart-edit';
 import {
   canMove,
   isLeadSeat,
   ledPodIds,
+  mockedViewer,
   moveLocally,
   podHasSeat,
   podLeadSeats,
@@ -200,7 +202,7 @@ function EditHint({
 
 export function PodBoard({
   initialRoster,
-  viewer,
+  viewer: realViewer,
   programDetails,
 }: {
   initialRoster: PodRoster;
@@ -208,8 +210,15 @@ export function PodBoard({
   /** Header detail per program, e.g. "COO (Value): Jane Doe". */
   programDetails: Record<UserProgram, string>;
 }) {
+  // Admins in "View As" mode see only what the mocked role could edit.
+  const { mock } = useMockUser();
+  const mockRole = mock.isActive ? mock.role : null;
+  const viewer = useMemo(
+    () => mockedViewer(realViewer, mockRole),
+    [realViewer, mockRole]
+  );
   const [roster, setRoster] = useState(initialRoster);
-  const [editing, setEditing] = useState(false);
+  const [editRequested, setEditing] = useState(false);
   const [drag, setDrag] = useState<DragState | null>(null);
   // Only the latest request's answer is applied, so quick successive drops
   // can't be overwritten by an older response arriving late.
@@ -220,6 +229,8 @@ export function PodBoard({
     [roster, viewer.userId]
   );
   const canEdit = viewer.isAdmin || led.size > 0;
+  // Switching "View As" to a role that can't edit leaves edit mode.
+  const editing = editRequested && canEdit;
 
   // Leave edit mode if the window narrows past the desktop breakpoint.
   useEffect(() => {
