@@ -34,13 +34,7 @@ import type {
   UserProgram,
 } from '@/types';
 import { AddPersonDialog } from './AddPersonDialog';
-import {
-  BoardProvider,
-  DropZone,
-  MemberChip,
-  StaticCopy,
-  type BoardApi,
-} from './board';
+import { BoardProvider, DropZone, MemberChip, type BoardApi } from './board';
 import { ChangeLogDialog } from './ChangeLogDialog';
 import { PersonName } from './PersonName';
 import { PodCard } from './PodCard';
@@ -87,38 +81,20 @@ export function SectionHeader({
 /**
  * Pods in two independent stacks (alternating left/right, so pods 1 and 2
  * share the top row) with the same gap everywhere; a tall card doesn't push
- * down the card beside it. Small screens get one stack in order. Editing
- * (desktop only) renders just the two stacks, so each drop target exists once.
+ * down the card beside it.
  */
-function PodStacks({ pods, editing }: { pods: Pod[]; editing: boolean }) {
+function PodStacks({ pods }: { pods: Pod[] }) {
   const stacks = [0, 1].map(col => pods.filter((_, i) => i % 2 === col));
   return (
-    <>
-      {!editing && (
-        <StaticCopy>
-          <div className="flex flex-col gap-4 sm:hidden">
-            {pods.map(pod => (
-              <PodCard key={pod.id} pod={pod} />
-            ))}
-          </div>
-        </StaticCopy>
-      )}
-      <div
-        className={
-          editing
-            ? 'grid grid-cols-2 gap-4'
-            : 'hidden grid-cols-2 gap-4 sm:grid'
-        }
-      >
-        {stacks.map((stack, col) => (
-          <div key={col} className="flex flex-col gap-4">
-            {stack.map(pod => (
-              <PodCard key={pod.id} pod={pod} />
-            ))}
-          </div>
-        ))}
-      </div>
-    </>
+    <div className="grid grid-cols-2 gap-4">
+      {stacks.map((stack, col) => (
+        <div key={col} className="flex flex-col gap-4">
+          {stack.map(pod => (
+            <PodCard key={pod.id} pod={pod} />
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -398,7 +374,7 @@ export function PodBoard({
                     No pods yet
                   </p>
                 ) : (
-                  <PodStacks pods={pods} editing={editing} />
+                  <PodStacks pods={pods} />
                 )}
                 {editing && viewer.isAdmin && (
                   <button
